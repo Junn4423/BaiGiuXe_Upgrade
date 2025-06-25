@@ -222,9 +222,9 @@ export async function themThe(uidThe, loaiThe, trangThai = "1") {
 
 // -------------------- Pricing Policy Functions --------------------
 export async function layALLChinhSachGia() {
-  console.log("layALLChinhSachGia called")
-  const payload = { table: "pm_nc0008", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0008", func: "getAllPolicies" }
+  const res = await callApiWithAuth(payload)
+  return res.data || []
 }
 
 export async function themChinhSachGia(chinhSach) {

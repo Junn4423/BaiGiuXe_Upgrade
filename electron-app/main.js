@@ -10,6 +10,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
+    fullscreen: true, // Mở mặc định full màn hình
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

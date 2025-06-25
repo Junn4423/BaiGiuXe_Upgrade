@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import "../assets/styles/VehicleListComponent.css"
+import { layALLPhienGuiXe } from "../api/api"
 
 const VehicleListComponent = ({ onVehicleSelect }) => {
   const [vehicles, setVehicles] = useState([])
@@ -15,54 +16,45 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
   const [filterType, setFilterType] = useState("all")
   const [sortBy, setSortBy] = useState("time_in")
   const [sortOrder, setSortOrder] = useState("desc")
+  const [now, setNow] = useState(Date.now())
 
-  // Mock data for demonstration
+  // Load vehicle data from API
   useEffect(() => {
-    const mockVehicles = [
-      {
-        id: 1,
-        licensePlate: "29A-12345",
-        cardId: "CARD001",
-        vehicleType: "xe_may",
-        timeIn: "2024-01-15 08:30:00",
-        timeOut: null,
-        duration: "2h 30m",
-        fee: 15000,
-        status: "Trong bãi",
-        zone: "Khu A",
-      },
-      {
-        id: 2,
-        licensePlate: "30B-67890",
-        cardId: "CARD002",
-        vehicleType: "oto",
-        timeIn: "2024-01-15 09:15:00",
-        timeOut: null,
-        duration: "1h 45m",
-        fee: 25000,
-        status: "Trong bãi",
-        zone: "Khu B",
-      },
-      {
-        id: 3,
-        licensePlate: "51C-11111",
-        cardId: "CARD003",
-        vehicleType: "xe_may",
-        timeIn: "2024-01-15 07:00:00",
-        timeOut: "2024-01-15 10:30:00",
-        duration: "3h 30m",
-        fee: 20000,
-        status: "Đã ra",
-        zone: "Khu A",
-      },
-    ]
-    setVehicles(mockVehicles)
-    setStatistics({
-      totalVehicles: 2,
-      motorcycles: 1,
-      cars: 1,
-      totalRevenue: 40000,
-    })
+    async function fetchVehicles() {
+      try {
+        const apiData = await layALLPhienGuiXe()
+        // Map API data to component format
+        const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => ({
+          id: item.maPhien || idx,
+          licensePlate: item.bienSo || "",
+          cardId: item.uidThe || "",
+          vehicleType: item.chinhSach && item.chinhSach.toLowerCase().includes("oto") ? "oto" : "xe_may",
+          timeIn: item.gioVao || null,
+          timeOut: item.gioRa || null,
+          duration: item.phutGui ? `${Math.floor(item.phutGui/60)}h ${item.phutGui%60}m` : "---",
+          fee: item.phi || 0,
+          status: item.trangThai === "DANG_GUI" ? "Trong bãi" : "Đã ra",
+          zone: item.viTriGui || "",
+        }))
+        setVehicles(mappedVehicles)
+        // Update statistics
+        const motorcycles = mappedVehicles.filter(v => v.vehicleType === "xe_may" && v.status === "Trong bãi").length
+        const cars = mappedVehicles.filter(v => v.vehicleType === "oto" && v.status === "Trong bãi").length
+        const totalVehicles = motorcycles + cars
+        const totalRevenue = mappedVehicles.reduce((sum, v) => sum + (v.fee || 0), 0)
+        setStatistics({ totalVehicles, motorcycles, cars, totalRevenue })
+      } catch (error) {
+        setVehicles([])
+        setStatistics({ totalVehicles: 0, motorcycles: 0, cars: 0, totalRevenue: 0 })
+      }
+    }
+    fetchVehicles()
+  }, [])
+
+  // Update 'now' every second for realtime duration
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
   }, [])
 
   // Update vehicle list
@@ -126,6 +118,33 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ"
+  }
+
+  // Format duration (realtime for xe chưa ra, có cả giây)
+  const getDuration = (vehicle) => {
+    if (!vehicle.timeIn) return "---"
+    if (!vehicle.timeOut) {
+      // Xe chưa ra, tính realtime
+      const start = new Date(vehicle.timeIn).getTime()
+      const diffMs = now - start
+      if (isNaN(diffMs) || diffMs < 0) return "---"
+      const totalSeconds = Math.floor(diffMs / 1000)
+      const hours = Math.floor(totalSeconds / 3600)
+      const minutes = Math.floor((totalSeconds % 3600) / 60)
+      const seconds = totalSeconds % 60
+      return `${hours}h ${minutes}m ${seconds}s`
+    } else {
+      // Xe đã ra, lấy duration từ API hoặc tính từ timeIn/timeOut
+      if (vehicle.duration && vehicle.duration !== "---") return vehicle.duration
+      const start = new Date(vehicle.timeIn).getTime()
+      const end = new Date(vehicle.timeOut).getTime()
+      if (isNaN(start) || isNaN(end) || end < start) return "---"
+      const totalSeconds = Math.floor((end - start) / 1000)
+      const hours = Math.floor(totalSeconds / 3600)
+      const minutes = Math.floor((totalSeconds % 3600) / 60)
+      const seconds = totalSeconds % 60
+      return `${hours}h ${minutes}m ${seconds}s`
+    }
   }
 
   // Expose methods to parent component
@@ -223,11 +242,9 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
                     <td className="vehicle-type">{vehicle.vehicleType === "xe_may" ? "Xe máy" : "Ô tô"}</td>
                     <td className="time-in">{formatTime(vehicle.timeIn)}</td>
                     <td className="time-out">{formatTime(vehicle.timeOut)}</td>
-                    <td className="duration">{vehicle.duration}</td>
+                    <td className="duration">{getDuration(vehicle)}</td>
                     <td className="fee">{formatCurrency(vehicle.fee)}</td>
-                    <td className={`status ${vehicle.status === "Trong bãi" ? "active" : "completed"}`}>
-                      {vehicle.status}
-                    </td>
+                    <td className={`status ${vehicle.status === "Trong bãi" ? "active" : "completed"}`}>{vehicle.status}</td>
                     <td className="zone">{vehicle.zone}</td>
                   </tr>
                 ))
