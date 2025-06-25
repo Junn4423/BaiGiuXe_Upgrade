@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useMemo } from "react"
+import RTSPPlayer from "./RTSPPlayer"
 import "../assets/styles/CameraComponent.css"
 
 const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
@@ -15,10 +16,6 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
   })
 
   const [cameraFeeds, setCameraFeeds] = useState({
-    cameraInPlate: "/placeholder.svg?height=240&width=320&text=Camera+Vào+Biển+Số",
-    cameraInFace: "/placeholder.svg?height=240&width=320&text=Camera+Vào+Khuôn+Mặt",
-    cameraOutPlate: "/placeholder.svg?height=240&width=320&text=Camera+Ra+Biển+Số",
-    cameraOutFace: "/placeholder.svg?height=240&width=320&text=Camera+Ra+Khuôn+Mặt",
     capturePanel1: "/placeholder.svg?height=240&width=320&text=Ảnh+Chụp+Biển+Số",
     capturePanel2: "/placeholder.svg?height=240&width=320&text=Ảnh+Chụp+Khuôn+Mặt",
   })
@@ -31,6 +28,40 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
   })
 
   const restoreTimer = useRef(null)
+
+  // Memoize camera data để tránh re-render không cần thiết
+  const cameraData = useMemo(() => {
+    if (!zoneInfo) return {}
+
+    console.log(`🎯 Memoizing camera data for zone:`, zoneInfo.maKhuVuc)
+
+    return {
+      cameraInPlate: {
+        camera: zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "BIENSO"),
+        rtspUrl: zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "BIENSO")?.linkRTSP || null,
+        cameraId: zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "BIENSO")?.maCamera || "unknown",
+        name: zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "BIENSO")?.tenCamera || "Camera Vào Biển Số",
+      },
+      cameraInFace: {
+        camera: zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "KHUONMAT"),
+        rtspUrl: zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "KHUONMAT")?.linkRTSP || null,
+        cameraId: zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "KHUONMAT")?.maCamera || "unknown",
+        name: zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "KHUONMAT")?.tenCamera || "Camera Vào Khuôn Mặt",
+      },
+      cameraOutPlate: {
+        camera: zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "BIENSO"),
+        rtspUrl: zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "BIENSO")?.linkRTSP || null,
+        cameraId: zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "BIENSO")?.maCamera || "unknown",
+        name: zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "BIENSO")?.tenCamera || "Camera Ra Biển Số",
+      },
+      cameraOutFace: {
+        camera: zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "KHUONMAT"),
+        rtspUrl: zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "KHUONMAT")?.linkRTSP || null,
+        cameraId: zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "KHUONMAT")?.maCamera || "unknown",
+        name: zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "KHUONMAT")?.tenCamera || "Camera Ra Khuôn Mặt",
+      },
+    }
+  }, [zoneInfo]) // Chỉ re-memoize khi zone thực sự thay đổi
 
   // Restore capture panels
   const restoreCaptureFeeds = () => {
@@ -100,33 +131,27 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
     }))
   }
 
-  // Get camera info from zone
-  const getCameraInfo = (type) => {
-    if (!zoneInfo) return "Chưa cấu hình"
-
-    switch (type) {
-      case "cameraInPlate":
-        return zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "BIENSO")?.tenCamera || "Camera Vào Biển Số"
-      case "cameraInFace":
-        return zoneInfo.cameraVao?.find((c) => c.chucNangCamera === "KHUONMAT")?.tenCamera || "Camera Vào Khuôn Mặt"
-      case "cameraOutPlate":
-        return zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "BIENSO")?.tenCamera || "Camera Ra Biển Số"
-      case "cameraOutFace":
-        return zoneInfo.cameraRa?.find((c) => c.chucNangCamera === "KHUONMAT")?.tenCamera || "Camera Ra Khuôn Mặt"
-      default:
-        return "Chưa có"
-    }
-  }
-
   // Update camera frame with live feed
   const updateCameraFrame = (cameraType, imageData) => {
-    setCameraFeeds((prev) => ({ ...prev, [cameraType]: imageData }))
+    // This method is kept for compatibility but live feeds are handled by RTSPPlayer
+    console.log(`updateCameraFrame called for ${cameraType}`)
   }
 
   // Set camera status
   const setCameraStatusState = (cameraType, status) => {
     setCameraStatus((prev) => ({ ...prev, [cameraType]: status }))
   }
+
+  // Handle camera connection events - memoize để tránh re-render
+  const handleCameraConnected = React.useCallback((cameraType) => {
+    console.log(`Camera ${cameraType} connected`)
+    setCameraStatusState(cameraType, "online")
+  }, [])
+
+  const handleCameraError = React.useCallback((cameraType, error) => {
+    console.error(`Camera ${cameraType} error:`, error)
+    setCameraStatusState(cameraType, "offline")
+  }, [])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -151,30 +176,66 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
     }),
   )
 
-  const renderCameraFrame = (cameraKey, title, isActive, showLicensePlate = false, direction = null) => (
-    <div className={`camera-panel ${isActive ? "active-mode" : ""}`}>
-      <div className="panel-header">
-        <div className="panel-title">{title}</div>
-        <div className={`panel-status ${cameraStatus[cameraKey] || "online"}`}>
-          <div className="status-dot"></div>
-          <span>{(cameraStatus[cameraKey] || "online") === "online" ? "LIVE" : "OFF"}</span>
+  const renderCameraFrame = (cameraKey, title, isActive, showLicensePlate = false, direction = null) => {
+    const data = cameraData[cameraKey]
+    const status = cameraStatus[cameraKey] || "online"
+
+    if (!data) {
+      return (
+        <div className={`camera-panel ${isActive ? "active-mode" : ""}`}>
+          <div className="panel-header">
+            <div className="panel-title">{title}</div>
+            <div className="panel-status offline">
+              <div className="status-dot"></div>
+              <span>OFF</span>
+            </div>
+          </div>
+          <div className="panel-display">
+            <img src="/placeholder.svg?height=240&width=320&text=No+Camera+Data" alt={title} className="live-feed" />
+          </div>
+          <div className="panel-info">Chưa cấu hình</div>
         </div>
-      </div>
-      <div className="panel-display">
-        <img src={cameraFeeds[cameraKey] || "/placeholder.svg"} alt={title} className="live-feed" />
-      </div>
-      <div className="panel-info">{getCameraInfo(cameraKey)}</div>
-      {showLicensePlate && (
-        <div className="license-plate-overlay">
-          {licensePlateTexts[direction] ? (
-            <div className="plate-text">{licensePlateTexts[direction]}</div>
+      )
+    }
+
+    return (
+      <div className={`camera-panel ${isActive ? "active-mode" : ""}`}>
+        <div className="panel-header">
+          <div className="panel-title">{title}</div>
+          <div className={`panel-status ${status}`}>
+            <div className="status-dot"></div>
+            <span>{status === "online" ? "LIVE" : "OFF"}</span>
+          </div>
+        </div>
+        <div className="panel-display">
+          {data.rtspUrl && data.rtspUrl.startsWith("rtsp://") ? (
+            <RTSPPlayer
+              key={`${data.cameraId}-${data.rtspUrl}`} // Key để tránh re-mount không cần thiết
+              rtspUrl={data.rtspUrl}
+              cameraId={data.cameraId}
+              width={320}
+              height={240}
+              onConnected={() => handleCameraConnected(cameraKey)}
+              onError={(error) => handleCameraError(cameraKey, error)}
+              className="live-feed"
+            />
           ) : (
-            <div className="plate-placeholder">Chờ nhận diện...</div>
+            <img src="/placeholder.svg?height=240&width=320&text=No+Valid+RTSP+URL" alt={title} className="live-feed" />
           )}
         </div>
-      )}
-    </div>
-  )
+        <div className="panel-info">{data.name}</div>
+        {showLicensePlate && (
+          <div className="license-plate-overlay">
+            {licensePlateTexts[direction] ? (
+              <div className="plate-text">{licensePlateTexts[direction]}</div>
+            ) : (
+              <div className="plate-placeholder">Chờ nhận diện...</div>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
 
   const renderCapturePanel = (panelKey, title, isStatic) => (
     <div className={`camera-panel ${isStatic ? "has-image" : ""}`}>
@@ -195,6 +256,9 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
     </div>
   )
 
+  // Debug log để kiểm tra re-render
+  console.log(`🔄 CameraComponent render - Zone: ${zoneInfo?.maKhuVuc}, Mode: ${currentMode}`)
+
   return (
     <div className="camera-container">
       {/* Camera Grid - 3x2 layout */}
@@ -213,4 +277,4 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
   )
 }
 
-export default CameraComponent
+export default React.memo(CameraComponent) // Memo để tránh re-render không cần thiết

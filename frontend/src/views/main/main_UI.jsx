@@ -14,6 +14,7 @@ import ParkingZoneDialog from "../dialogs/ParkingZoneDialog"
 import PricingPolicyDialog from "../dialogs/PricingPolicyDialog"
 import ThemTheDialog from "../dialogs/ThemTheDialog"
 import WorkConfigDialog from "../dialogs/WorkConfigDialog"
+import { layDanhSachCamera, layDanhSachKhu } from "../../api/api"
 
 const MainUI = () => {
   // State management
@@ -22,6 +23,7 @@ const MainUI = () => {
   const [currentVehicleType, setCurrentVehicleType] = useState("xe_may")
   const [currentZone, setCurrentZone] = useState(null)
   const [workConfig, setWorkConfig] = useState(null)
+  const [zoneInfo, setZoneInfo] = useState(null)
 
   // Component refs
   const cameraManagerRef = useRef()
@@ -51,6 +53,13 @@ const MainUI = () => {
     }
   }, [])
 
+  // Load zone info when work config changes
+  useEffect(() => {
+    if (workConfig && workConfig.ma_khu_vuc) {
+      loadZoneInfo(workConfig.ma_khu_vuc)
+    }
+  }, [workConfig])
+
   // Load work configuration
   const loadWorkConfig = () => {
     try {
@@ -59,14 +68,65 @@ const MainUI = () => {
         const config = JSON.parse(savedConfig)
         setWorkConfig(config)
         setCurrentVehicleType(config.loai_xe || "xe_may")
-        console.log("Loaded work config:", config)
+        console.log("✅ Loaded work config:", config)
       } else {
         // Show work config dialog if no config exists
+        console.log("⚠️ No work config found, showing dialog")
         setShowWorkConfig(true)
       }
     } catch (error) {
-      console.error("Error loading work config:", error)
+      console.error("❌ Error loading work config:", error)
       setShowWorkConfig(true)
+    }
+  }
+
+  // Load zone information with cameras
+  const loadZoneInfo = async (zoneCode) => {
+    try {
+      console.log(`🏢 Loading zone info for: ${zoneCode}`)
+
+      // Load all cameras
+      const camerasResponse = await layDanhSachCamera()
+      console.log("📹 All cameras:", camerasResponse)
+
+      // Load zone details
+      const zonesResponse = await layDanhSachKhu()
+      console.log("🏢 All zones:", zonesResponse)
+
+      // Find current zone - use ma_khu_vuc from work config instead of zone name
+      const actualZoneCode = workConfig?.ma_khu_vuc || zoneCode
+      const zone = zonesResponse.find((z) => z.maKhuVuc === actualZoneCode)
+      if (!zone) {
+        console.error(`❌ Zone not found: ${actualZoneCode}`)
+        console.log(
+          "Available zones:",
+          zonesResponse.map((z) => ({ maKhuVuc: z.maKhuVuc, tenKhuVuc: z.tenKhuVuc })),
+        )
+        return
+      }
+
+      console.log(`✅ Found zone: ${zone.tenKhuVuc} (${zone.maKhuVuc})`)
+
+      // Filter cameras for this zone using the actual zone code
+      const zoneCameras = camerasResponse.filter((camera) => camera.maKhuVuc === actualZoneCode)
+      console.log(`📹 Cameras for zone ${actualZoneCode}:`, zoneCameras)
+
+      // Group cameras by type
+      const cameraVao = zoneCameras.filter((camera) => camera.loaiCamera === "VAO")
+      const cameraRa = zoneCameras.filter((camera) => camera.loaiCamera === "RA")
+
+      const zoneInfoData = {
+        ...zone,
+        cameraVao,
+        cameraRa,
+        allCameras: zoneCameras,
+      }
+
+      console.log("🏢 Zone info loaded:", zoneInfoData)
+      setZoneInfo(zoneInfoData)
+      setCurrentZone(zoneInfoData)
+    } catch (error) {
+      console.error("❌ Error loading zone info:", error)
     }
   }
 
@@ -150,10 +210,10 @@ const MainUI = () => {
 
       // Utility methods
       showNotification: (title, message) => {
-        console.log(`Notification: ${title} - ${message}`)
+        console.log(`📢 Notification: ${title} - ${message}`)
       },
       showError: (title, message) => {
-        console.error(`Error: ${title} - ${message}`)
+        console.error(`❌ Error: ${title} - ${message}`)
       },
     }
 
@@ -257,7 +317,7 @@ const MainUI = () => {
         cardReaderRef.current.stopCardReader()
       }
     } catch (error) {
-      console.error("Error during cleanup:", error)
+      console.error("❌ Error during cleanup:", error)
     }
   }
 
@@ -266,7 +326,7 @@ const MainUI = () => {
     setWorkConfig(config)
     setCurrentVehicleType(config.loai_xe || "xe_may")
     setShowWorkConfig(false)
-    console.log("Work config updated:", config)
+    console.log("✅ Work config updated:", config)
   }
 
   return (
@@ -321,7 +381,7 @@ const MainUI = () => {
         {activeTab === "management" && (
           <div className="management-layout">
             <div className="camera-section">
-              <CameraComponent ref={cameraComponentRef} currentMode={currentMode} zoneInfo={currentZone} />
+              <CameraComponent ref={cameraComponentRef} currentMode={currentMode} zoneInfo={zoneInfo} />
             </div>
             <div className="vehicle-info-section">
               <VehicleInfoComponent
@@ -365,6 +425,10 @@ const MainUI = () => {
           onSave={(config) => {
             console.log("Camera config saved:", config)
             setShowCameraConfig(false)
+            // Reload zone info to get updated cameras
+            if (workConfig && workConfig.zone) {
+              loadZoneInfo(workConfig.zone)
+            }
           }}
         />
       )}

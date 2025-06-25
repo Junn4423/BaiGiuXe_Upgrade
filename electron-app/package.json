@@ -41,7 +41,7 @@
     },
     "files": [
       "main.js",
-      "rtsp-server.js",
+      "rtsp-streaming-server.js",
       "../frontend/build/**/*"
     ],
     "win": {

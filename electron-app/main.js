@@ -1,6 +1,6 @@
 const { app, BrowserWindow } = require("electron")
 const path = require("path")
-const { spawn } = require("child_process")
+const RTSPStreamingServer = require("./rtsp-streaming-server")
 
 let mainWindow
 let rtspServer
@@ -29,24 +29,20 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, "../frontend/build/index.html"))
   }
 
-  // Start RTSP server
-  startRTSPServer()
+  // Start RTSP streaming server
+  startRTSPStreamingServer()
 }
 
-function startRTSPServer() {
-  console.log("Starting RTSP WebSocket server...")
+function startRTSPStreamingServer() {
+  console.log("Starting RTSP streaming server...")
 
-  rtspServer = spawn("node", [path.join(__dirname, "rtsp-server.js")], {
-    stdio: "inherit",
-  })
-
-  rtspServer.on("error", (err) => {
-    console.error("Failed to start RTSP server:", err)
-  })
-
-  rtspServer.on("exit", (code, signal) => {
-    console.log(`RTSP server exited with code ${code}, signal ${signal}`)
-  })
+  try {
+    rtspServer = new RTSPStreamingServer(9999)
+    rtspServer.start()
+    console.log("RTSP streaming server started successfully")
+  } catch (err) {
+    console.error("Failed to start RTSP streaming server:", err)
+  }
 }
 
 // This method will be called when Electron has finished initialization
@@ -60,19 +56,19 @@ app.whenReady().then(() => {
 
 // Quit when all windows are closed
 app.on("window-all-closed", () => {
-  // Kill RTSP server
-  if (rtspServer && !rtspServer.killed) {
-    console.log("Killing RTSP server...")
-    rtspServer.kill("SIGKILL")
+  // Stop RTSP streaming server
+  if (rtspServer) {
+    console.log("Stopping RTSP streaming server...")
+    rtspServer.stop()
   }
 
   if (process.platform !== "darwin") app.quit()
 })
 
 app.on("before-quit", () => {
-  // Kill RTSP server before quitting
-  if (rtspServer && !rtspServer.killed) {
-    console.log("Killing RTSP server before quit...")
-    rtspServer.kill("SIGKILL")
+  // Stop RTSP streaming server before quitting
+  if (rtspServer) {
+    console.log("Stopping RTSP streaming server before quit...")
+    rtspServer.stop()
   }
 })
