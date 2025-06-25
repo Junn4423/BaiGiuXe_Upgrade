@@ -16,8 +16,10 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
   })
 
   const [cameraFeeds, setCameraFeeds] = useState({
-    capturePanel1: "/placeholder.svg?height=240&width=320&text=Ảnh+Chụp+Biển+Số",
-    capturePanel2: "/placeholder.svg?height=240&width=320&text=Ảnh+Chụp+Khuôn+Mặt",
+    capturePanel1:
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPsOCbmggQ2jhu6VwIEJpZW4gU+G7kTwvdGV4dD48L3N2Zz4=",
+    capturePanel2:
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPsOCbmggQ2jhu6VwIEtodcO0biBN4bq3dDwvdGV4dD48L3N2Zz4=",
   })
 
   const [cameraStatus, setCameraStatus] = useState({
@@ -191,7 +193,20 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
             </div>
           </div>
           <div className="panel-display">
-            <img src="/placeholder.svg?height=240&width=320&text=No+Camera+Data" alt={title} className="live-feed" />
+            <div
+              style={{
+                width: "320px",
+                height: "240px",
+                background: "#333",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999",
+                fontSize: "12px",
+              }}
+            >
+              No Camera Data
+            </div>
           </div>
           <div className="panel-info">Chưa cấu hình</div>
         </div>
@@ -220,7 +235,20 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
               className="live-feed"
             />
           ) : (
-            <img src="/placeholder.svg?height=240&width=320&text=No+Valid+RTSP+URL" alt={title} className="live-feed" />
+            <div
+              style={{
+                width: "320px",
+                height: "240px",
+                background: "#333",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999",
+                fontSize: "12px",
+              }}
+            >
+              No Valid RTSP URL
+            </div>
           )}
         </div>
         <div className="panel-info">{data.name}</div>
@@ -250,6 +278,7 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
           src={cameraFeeds[panelKey] || "/placeholder.svg"}
           alt={title}
           className={isStatic ? "captured-image" : "placeholder"}
+          style={{ width: "320px", height: "240px", objectFit: "cover" }}
         />
       </div>
       <div className="panel-info">{isStatic ? "Ảnh đã chụp" : "Chờ chụp ảnh"}</div>
