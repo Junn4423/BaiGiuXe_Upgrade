@@ -4,114 +4,151 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease;
 }
 
 .camera-config-dialog {
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 24px;
   width: 90%;
-  max-width: 1000px;
-  max-height: 80vh;
+  max-width: 1200px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  animation: slideUp 0.4s ease;
 }
 
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
-  border-radius: 12px 12px 0 0;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  position: relative;
+}
+
+.dialog-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
 .dialog-header h2 {
   margin: 0;
-  color: #1e3a8a;
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 .close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  color: #6b7280;
-  padding: 5px;
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 .dialog-content {
   flex: 1;
-  padding: 20px;
+  padding: 28px;
   overflow-y: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .filter-section {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #f0f9ff;
-  border-radius: 8px;
-  border: 1px solid #e0f2fe;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.05);
 }
 
 .filter-section label {
   font-weight: 600;
-  color: #1e3a8a;
+  color: #1e40af;
+  font-size: 15px;
 }
 
 .filter-section select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
   font-size: 14px;
-  min-width: 150px;
+  min-width: 180px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.filter-section select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .add-button {
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 20px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
-  transition: background 0.3s ease;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .add-button:hover {
-  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
 .camera-list {
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .loading {
   text-align: center;
-  padding: 40px;
+  padding: 60px;
   color: #6b7280;
   font-size: 16px;
+  background: linear-gradient(145deg, #f9fafb, #f3f4f6);
+  border-radius: 12px;
 }
 
 .camera-table {
@@ -120,22 +157,27 @@
 }
 
 .camera-table th {
-  background: #f8fafc;
-  padding: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 16px 12px;
   text-align: left;
   font-weight: 600;
   color: #374151;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
+  font-size: 14px;
+  letter-spacing: -0.025em;
 }
 
 .camera-table td {
-  padding: 12px;
+  padding: 16px 12px;
   border-bottom: 1px solid #f3f4f6;
   color: #374151;
+  font-size: 14px;
 }
 
 .camera-table tr:hover {
-  background: #f9fafb;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  transform: scale(1.001);
+  transition: all 0.2s ease;
 }
 
 .rtsp-link {
@@ -143,83 +185,97 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: monospace;
+  font-family: "Courier New", monospace;
   font-size: 12px;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
 .edit-button,
 .delete-button {
-  padding: 6px 12px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
   font-weight: 600;
-  margin-right: 5px;
-  transition: all 0.2s ease;
+  margin-right: 8px;
+  transition: all 0.3s ease;
 }
 
 .edit-button {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .edit-button:hover {
-  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .delete-button {
-  background: #ef4444;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .delete-button:hover {
-  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .no-data {
   text-align: center;
   color: #6b7280;
   font-style: italic;
-  padding: 40px;
+  padding: 60px;
+  background: linear-gradient(145deg, #f9fafb, #f3f4f6);
+  font-size: 16px;
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 20px;
-  border-top: 1px solid #e5e7eb;
-  background: #f8fafc;
-  border-radius: 0 0 12px 12px;
+  gap: 12px;
+  padding: 24px 28px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .save-button,
 .cancel-button {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 15px;
   transition: all 0.3s ease;
 }
 
 .save-button {
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .save-button:hover {
-  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
 .cancel-button {
-  background: #6b7280;
-  color: white;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 
 .cancel-button:hover {
-  background: #4b5563;
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive design */
@@ -227,11 +283,13 @@
   .camera-config-dialog {
     width: 95%;
     max-height: 90vh;
+    border-radius: 20px;
   }
 
   .filter-section {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
   .camera-table {
@@ -240,10 +298,23 @@
 
   .camera-table th,
   .camera-table td {
-    padding: 8px;
+    padding: 12px 8px;
   }
 
   .rtsp-link {
     max-width: 100px;
+  }
+
+  .dialog-content {
+    padding: 20px;
+  }
+
+  .dialog-footer {
+    flex-direction: column;
+  }
+
+  .save-button,
+  .cancel-button {
+    width: 100%;
   }
 }

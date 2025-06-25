@@ -1,194 +1,93 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useEffect } from "react"
 
-const QuanLyCamera = () => {
-  const [currentCamera, setCurrentCamera] = useState("vao")
-  const [rtspUrls, setRtspUrls] = useState({
-    cameraIn: null,
-    cameraOut: null,
-    cameraInFace: null,
-    cameraOutFace: null,
-  })
-  const [lastFrames, setLastFrames] = useState({
-    cameraIn: null,
-    cameraOut: null,
-    cameraInFace: null,
-    cameraOutFace: null,
-  })
-  const [capturedImage, setCapturedImage] = useState(null)
-  const [cameraRunning, setCameraRunning] = useState(false)
-  const [licensePlateApi, setLicensePlateApi] = useState(null)
+const QuanLyCamera = React.forwardRef((props, ref) => {
+  const [isRunning, setIsRunning] = useState(false)
+  const [cameraList, setCameraList] = useState([])
+  const [currentZone, setCurrentZone] = useState(null)
+  const [ui, setUi] = useState(null)
 
-  const cameraThreads = useRef({})
+  // Set UI reference
+  const setUIReference = (uiRef) => {
+    setUi(uiRef)
+  }
 
-  // Start cameras
+  // Start camera system
   const startCamera = () => {
-    setCameraRunning(true)
-    console.log("Starting cameras")
-
-    // Simulate camera feeds
-    const simulateCamera = (cameraType) => {
-      const interval = setInterval(() => {
-        if (!cameraRunning) {
-          clearInterval(interval)
-          return
-        }
-
-        // Generate mock frame data
-        const mockFrame = {
-          timestamp: Date.now(),
-          data: `/placeholder.svg?height=240&width=320&text=${cameraType}`,
-        }
-
-        setLastFrames((prev) => ({
-          ...prev,
-          [cameraType]: mockFrame,
-        }))
-
-        console.log(`Frame captured from ${cameraType}`)
-      }, 1000 / 30) // 30 FPS
-
-      return interval
-    }
-
-    // Start all camera feeds
-    cameraThreads.current.cameraIn = simulateCamera("cameraIn")
-    cameraThreads.current.cameraOut = simulateCamera("cameraOut")
-    cameraThreads.current.cameraInFace = simulateCamera("cameraInFace")
-    cameraThreads.current.cameraOutFace = simulateCamera("cameraOutFace")
+    setIsRunning(true)
+    console.log("Camera system started")
   }
 
-  // Stop cameras
+  // Stop camera system
   const stopCamera = () => {
-    setCameraRunning(false)
-    console.log("Stopping cameras")
-
-    // Clear all intervals
-    Object.values(cameraThreads.current).forEach((interval) => {
-      if (interval) clearInterval(interval)
-    })
-
-    cameraThreads.current = {}
+    setIsRunning(false)
+    console.log("Camera system stopped")
   }
 
-  // Switch current camera
+  // Switch camera mode
   const switchCamera = (mode) => {
-    setCurrentCamera(mode)
-    console.log(`Switched current camera to: ${mode}`)
+    console.log(`Switching camera to ${mode} mode`)
+    // Implementation for camera switching
+  }
+
+  // Load camera list for zone
+  const loadCameraList = (zoneId) => {
+    console.log(`Loading cameras for zone: ${zoneId}`)
+    // Implementation for loading cameras
   }
 
   // Capture image
-  const captureImage = (cardId = null, mode = "vao") => {
-    let imagePath = null
-    let facePath = null
-    let licensePlate = null
-
-    if (cardId) {
-      imagePath = `server/images/${cardId}_${Date.now()}.jpg`
-      facePath = `server/images/${cardId}_face_${Date.now()}.jpg`
-      licensePlate = `XX1234${Math.floor(Math.random() * 1000)}`
-    }
-
-    // Log values for testing
-    console.log("Capture image:", { cardId, mode, imagePath, licensePlate, facePath })
-
-    setCapturedImage(imagePath)
-
-    return [imagePath, licensePlate, facePath]
-  }
-
-  // Load camera list
-  const loadCameraList = (zoneCode = null) => {
+  const captureImage = async (cardId, mode = "vao") => {
     try {
-      // Mock camera data - replace with actual API call
-      const mockCameras = [
-        {
-          maCamera: "CAM001",
-          tenCamera: "Camera Vào 1",
-          loaiCamera: "VAO",
-          chucNangCamera: "BIENSO",
-          maKhuVuc: "KV001",
-          linkRTSP: "rtsp://192.168.1.100:554/stream1",
-        },
-        {
-          maCamera: "CAM002",
-          tenCamera: "Camera Ra 1",
-          loaiCamera: "RA",
-          chucNangCamera: "BIENSO",
-          maKhuVuc: "KV001",
-          linkRTSP: "rtsp://192.168.1.101:554/stream1",
-        },
-        {
-          maCamera: "CAM003",
-          tenCamera: "Camera Face Vào",
-          loaiCamera: "VAO",
-          chucNangCamera: "KHUONMAT",
-          maKhuVuc: "KV001",
-          linkRTSP: "rtsp://192.168.1.102:554/stream1",
-        },
-        {
-          maCamera: "CAM004",
-          tenCamera: "Camera Face Ra",
-          loaiCamera: "RA",
-          chucNangCamera: "KHUONMAT",
-          maKhuVuc: "KV001",
-          linkRTSP: "rtsp://192.168.1.103:554/stream1",
-        },
-      ]
+      console.log(`Capturing image for card ${cardId} in ${mode} mode`)
+      
+      // Simulate image capture
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const imagePath = `/placeholder.svg?height=480&width=640&text=Captured+${mode}+${cardId}`
+      const licensePlate = `29A-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`
+      const faceImagePath = `/placeholder.svg?height=480&width=640&text=Face+${mode}+${cardId}`
 
-      // Filter by zone if specified
-      const filteredCameras = zoneCode ? mockCameras.filter((cam) => cam.maKhuVuc === zoneCode) : mockCameras
-
-      // Reset URLs
-      const newUrls = {
-        cameraIn: null,
-        cameraOut: null,
-        cameraInFace: null,
-        cameraOutFace: null,
+      // Display captured image on UI
+      if (ui && ui.displayCapturedImage) {
+        ui.displayCapturedImage(imagePath, 1)
+      }
+      if (ui && ui.displayCapturedFaceImage) {
+        ui.displayCapturedFaceImage(faceImagePath)
       }
 
-      // Assign URLs based on camera type and function
-      filteredCameras.forEach((cam) => {
-        const { loaiCamera, chucNangCamera, linkRTSP } = cam
-
-        if (loaiCamera === "VAO" && chucNangCamera === "BIENSO" && linkRTSP && !newUrls.cameraIn) {
-          newUrls.cameraIn = linkRTSP
-        } else if (loaiCamera === "RA" && chucNangCamera === "BIENSO" && linkRTSP && !newUrls.cameraOut) {
-          newUrls.cameraOut = linkRTSP
-        } else if (loaiCamera === "VAO" && chucNangCamera === "KHUONMAT" && linkRTSP && !newUrls.cameraInFace) {
-          newUrls.cameraInFace = linkRTSP
-        } else if (loaiCamera === "RA" && chucNangCamera === "KHUONMAT" && linkRTSP && !newUrls.cameraOutFace) {
-          newUrls.cameraOutFace = linkRTSP
-        }
-      })
-
-      setRtspUrls(newUrls)
-
-      console.log(`Selected camera URLs for zone ${zoneCode}:`, newUrls)
+      return [imagePath, licensePlate, faceImagePath]
     } catch (error) {
-      console.error("Error loading camera list from API:", error)
+      console.error("Error capturing image:", error)
+      return [null, null, null]
     }
+  }
+
+  // Update camera configuration
+  const updateConfiguration = () => {
+    console.log("Updating camera configuration")
   }
 
   // Expose methods to parent component
-  React.useImperativeHandle(
-    React.forwardRef(() => null),
-    () => ({
-      startCamera,
-      stopCamera,
-      switchCamera,
-      captureImage,
-      loadCameraList,
-    }),
-  )
+  React.useImperativeHandle(ref, () => ({
+    startCamera,
+    stopCamera,
+    switchCamera,
+    loadCameraList,
+    captureImage,
+    updateConfiguration,
+    setUIReference,
+    isRunning,
+  }))
 
   return (
-    <div>
-      <h3>QuanLyCamera Logic (No UI)</h3>
-      {/* Camera management logic only */}
+    <div style={{ display: "none" }}>
+      {/* Camera Manager Logic - No visible UI */}
+      <div>Camera Manager Status: {isRunning ? "Running" : "Stopped"}</div>
     </div>
   )
-}
+})
+
+QuanLyCamera.displayName = "QuanLyCamera"
 
 export default QuanLyCamera

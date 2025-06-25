@@ -1,114 +1,168 @@
 .add-camera-dialog {
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
   width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
+  max-width: 520px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
 }
 
 .add-camera-dialog .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f0f9ff;
-  border-radius: 12px 12px 0 0;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: relative;
+}
+
+.add-camera-dialog .dialog-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
 .add-camera-dialog .dialog-header h3 {
   margin: 0;
-  color: #1e3a8a;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.add-camera-dialog .close-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   font-size: 18px;
-  font-weight: bold;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.add-camera-dialog .close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 .add-camera-dialog .dialog-content {
   flex: 1;
-  padding: 20px;
+  padding: 28px;
   overflow-y: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  position: relative;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-weight: 600;
-  color: #374151;
-  font-size: 14px;
+  color: #1f2937;
+  font-size: 15px;
+  letter-spacing: -0.025em;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s ease;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.3s ease;
   box-sizing: border-box;
+  background: white;
+  color: #1f2937;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.form-group input:hover,
+.form-group select:hover {
+  border-color: #d1d5db;
 }
 
 .disabled-input {
-  background: #f9fafb;
-  color: #6b7280;
-  cursor: not-allowed;
+  background: linear-gradient(145deg, #f9fafb, #f3f4f6) !important;
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
+  border-color: #e5e7eb !important;
 }
 
 .add-camera-dialog .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 20px;
-  border-top: 1px solid #e5e7eb;
-  background: #f8fafc;
-  border-radius: 0 0 12px 12px;
+  gap: 12px;
+  padding: 24px 28px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .add-camera-dialog .save-button,
 .add-camera-dialog .cancel-button {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 15px;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .add-camera-dialog .save-button {
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .add-camera-dialog .save-button:hover:not(:disabled) {
-  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
 .add-camera-dialog .save-button:disabled {
-  background: #9ca3af;
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .add-camera-dialog .cancel-button {
-  background: #6b7280;
-  color: white;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 
 .add-camera-dialog .cancel-button:hover {
-  background: #4b5563;
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive design */
@@ -116,13 +170,24 @@
   .add-camera-dialog {
     width: 95%;
     margin: 10px;
+    border-radius: 16px;
   }
 
   .add-camera-dialog .dialog-content {
-    padding: 15px;
+    padding: 20px;
+  }
+
+  .add-camera-dialog .dialog-footer {
+    padding: 20px;
+    flex-direction: column;
+  }
+
+  .add-camera-dialog .save-button,
+  .add-camera-dialog .cancel-button {
+    width: 100%;
   }
 
   .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
   }
 }

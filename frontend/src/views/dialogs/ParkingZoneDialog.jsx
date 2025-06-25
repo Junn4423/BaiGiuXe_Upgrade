@@ -9,6 +9,7 @@ const ParkingZoneDialog = ({ onClose }) => {
   const [zones, setZones] = useState([])
   const [selectedZone, setSelectedZone] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [showAddCamera, setShowAddCamera] = useState(false)
   const [formData, setFormData] = useState({
     maKhuVuc: "",
@@ -17,21 +18,28 @@ const ParkingZoneDialog = ({ onClose }) => {
   })
 
   useEffect(() => {
+    console.log("ParkingZoneDialog mounted, loading zones...")
     loadZones()
   }, [])
 
   const loadZones = async () => {
     try {
+      setIsLoading(true)
+      console.log("Loading zones from API...")
       const zoneList = await layDanhSachKhuVuc()
       console.log("Loaded zones:", zoneList)
       setZones(Array.isArray(zoneList) ? zoneList : [])
     } catch (error) {
       console.error("Error loading zones:", error)
       alert("Lỗi tải danh sách khu vực: " + error.message)
+      setZones([])
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleSelectZone = (zone) => {
+    console.log("Selected zone:", zone)
     setSelectedZone(zone)
     setFormData({
       maKhuVuc: zone.maKhuVuc || "",
@@ -45,7 +53,6 @@ const ParkingZoneDialog = ({ onClose }) => {
     console.log("Creating new zone")
     setSelectedZone(null)
     setIsEditing(true)
-    // Clear form completely
     setFormData({
       maKhuVuc: "",
       tenKhuVuc: "",
@@ -58,58 +65,61 @@ const ParkingZoneDialog = ({ onClose }) => {
       alert("Vui lòng chọn khu vực cần sửa")
       return
     }
+    console.log("Editing zone:", selectedZone)
     setIsEditing(true)
   }
 
-  const handleSave = async () => {
-    try {
-      if (!formData.maKhuVuc.trim() || !formData.tenKhuVuc.trim()) {
-        alert("Vui lòng nhập đầy đủ mã khu vực và tên khu vực")
-        return
-      }
+  const validateInput = () => {
+    if (!formData.maKhuVuc.trim()) {
+      alert("Vui lòng nhập mã khu vực")
+      return false
+    }
+    if (!formData.tenKhuVuc.trim()) {
+      alert("Vui lòng nhập tên khu vực")
+      return false
+    }
+    return true
+  }
 
+  const handleSave = async () => {
+    console.log("Saving zone...")
+    if (!validateInput()) return
+
+    try {
+      setIsLoading(true)
       const zoneData = {
         maKhuVuc: formData.maKhuVuc.trim(),
         tenKhuVuc: formData.tenKhuVuc.trim(),
         moTa: formData.moTa.trim() || "",
       }
 
-      console.log("Saving zone data:", zoneData)
+      console.log("Zone data to save:", zoneData)
 
+      let result
       if (selectedZone) {
         // Update existing zone
-        const result = await capNhatKhuVuc(zoneData)
-        console.log("Update result:", result)
-        if (result && result.success) {
-          alert("Cập nhật khu vực thành công!")
-        } else {
-          alert(result?.message || "Cập nhật khu vực thất bại!")
-          return
-        }
+        console.log("Updating existing zone:", selectedZone.maKhuVuc)
+        result = await capNhatKhuVuc(zoneData)
       } else {
         // Add new zone
-        const result = await themKhuVuc(zoneData)
-        console.log("Add result:", result)
-        if (result && result.success) {
-          alert("Thêm khu vực thành công!")
-        } else {
-          alert(result?.message || "Thêm khu vực thất bại!")
-          return
-        }
+        console.log("Adding new zone")
+        result = await themKhuVuc(zoneData)
       }
 
-      // Reload zones and reset form
-      await loadZones()
-      setIsEditing(false)
-      setSelectedZone(null)
-      setFormData({
-        maKhuVuc: "",
-        tenKhuVuc: "",
-        moTa: "",
-      })
+      console.log("Save result:", result)
+
+      if (result && result.success) {
+        alert(selectedZone ? "Cập nhật khu vực thành công!" : "Thêm khu vực thành công!")
+        await loadZones()
+        setIsEditing(false)
+      } else {
+        alert(result?.message || "Không thể lưu khu vực")
+      }
     } catch (error) {
       console.error("Error saving zone:", error)
       alert("Lỗi lưu khu vực: " + error.message)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -121,29 +131,40 @@ const ParkingZoneDialog = ({ onClose }) => {
 
     if (window.confirm(`Bạn có chắc muốn xóa khu vực "${selectedZone.tenKhuVuc}"?`)) {
       try {
+        setIsLoading(true)
+        console.log("Deleting zone:", selectedZone.maKhuVuc)
         const result = await xoaKhuVuc(selectedZone.maKhuVuc)
         console.log("Delete result:", result)
+
         if (result && result.success) {
           alert("Xóa khu vực thành công!")
           await loadZones()
-          setSelectedZone(null)
-          setFormData({
-            maKhuVuc: "",
-            tenKhuVuc: "",
-            moTa: "",
-          })
-          setIsEditing(false)
+          clearForm()
         } else {
-          alert(result?.message || "Xóa khu vực thất bại!")
+          alert(result?.message || "Không thể xóa khu vực")
         }
       } catch (error) {
         console.error("Error deleting zone:", error)
         alert("Lỗi xóa khu vực: " + error.message)
+      } finally {
+        setIsLoading(false)
       }
     }
   }
 
+  const clearForm = () => {
+    console.log("Clearing form")
+    setFormData({
+      maKhuVuc: "",
+      tenKhuVuc: "",
+      moTa: "",
+    })
+    setSelectedZone(null)
+    setIsEditing(false)
+  }
+
   const handleCancel = () => {
+    console.log("Canceling edit")
     if (selectedZone) {
       setFormData({
         maKhuVuc: selectedZone.maKhuVuc || "",
@@ -151,11 +172,7 @@ const ParkingZoneDialog = ({ onClose }) => {
         moTa: selectedZone.moTa || "",
       })
     } else {
-      setFormData({
-        maKhuVuc: "",
-        tenKhuVuc: "",
-        moTa: "",
-      })
+      clearForm()
     }
     setIsEditing(false)
   }
@@ -171,6 +188,7 @@ const ParkingZoneDialog = ({ onClose }) => {
   return (
     <div className="dialog-overlay">
       <div className="parking-zone-dialog">
+        {/* Header */}
         <div className="dialog-header">
           <h3>Quản Lý Khu Vực Đỗ Xe</h3>
           <button className="close-button" onClick={onClose}>
@@ -179,80 +197,58 @@ const ParkingZoneDialog = ({ onClose }) => {
         </div>
 
         <div className="dialog-content">
-          <div className="zones-section">
-            <div className="zones-list">
-              <div className="list-header">
+          <div className="content-layout">
+            {/* Left Panel - Zone List */}
+            <div className="zone-list-panel">
+              <div className="panel-header">
                 <h4>Danh Sách Khu Vực</h4>
-                <button className="btn btn-primary" onClick={handleNewZone}>
-                  Thêm Mới
-                </button>
               </div>
-              <div className="zones-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Mã Khu Vực</th>
-                      <th>Tên Khu Vực</th>
-                      <th>Mô Tả</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {zones.length === 0 ? (
+
+              <div className="zone-table-container">
+                {isLoading ? (
+                  <div className="loading-message">Đang tải dữ liệu...</div>
+                ) : (
+                  <table className="zone-table">
+                    <thead>
                       <tr>
-                        <td colSpan="3" style={{ textAlign: "center", padding: "20px" }}>
-                          Không có dữ liệu
-                        </td>
+                        <th>Mã Khu Vực</th>
+                        <th>Tên Khu Vực</th>
+                        <th>Mô Tả</th>
                       </tr>
-                    ) : (
-                      zones.map((zone, index) => (
-                        <tr
-                          key={zone.maKhuVuc || index}
-                          className={selectedZone?.maKhuVuc === zone.maKhuVuc ? "selected" : ""}
-                          onClick={() => handleSelectZone(zone)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          <td>{zone.maKhuVuc}</td>
-                          <td>{zone.tenKhuVuc}</td>
-                          <td>{zone.moTa || ""}</td>
+                    </thead>
+                    <tbody>
+                      {zones.length === 0 ? (
+                        <tr>
+                          <td colSpan="3" className="no-data">
+                            Không có dữ liệu
+                          </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        zones.map((zone, index) => (
+                          <tr
+                            key={zone.maKhuVuc || index}
+                            className={selectedZone?.maKhuVuc === zone.maKhuVuc ? "selected" : ""}
+                            onClick={() => handleSelectZone(zone)}
+                          >
+                            <td>{zone.maKhuVuc}</td>
+                            <td>{zone.tenKhuVuc}</td>
+                            <td>{zone.moTa || ""}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
 
-            <div className="zone-details">
-              <div className="details-header">
+            {/* Right Panel - Zone Form */}
+            <div className="zone-form-panel">
+              <div className="panel-header">
                 <h4>Thông Tin Khu Vực</h4>
-                <div className="action-buttons">
-                  {selectedZone && !isEditing && (
-                    <>
-                      <button className="btn btn-secondary" onClick={handleEdit}>
-                        Sửa
-                      </button>
-                      <button className="btn btn-danger" onClick={handleDelete}>
-                        Xóa
-                      </button>
-                      <button className="btn btn-info" onClick={() => setShowAddCamera(true)}>
-                        Quản lý Camera
-                      </button>
-                    </>
-                  )}
-                  {isEditing && (
-                    <>
-                      <button className="btn btn-primary" onClick={handleSave}>
-                        Lưu
-                      </button>
-                      <button className="btn btn-cancel" onClick={handleCancel}>
-                        Hủy
-                      </button>
-                    </>
-                  )}
-                </div>
               </div>
 
-              <div className="form-section">
+              <div className="form-container">
                 <div className="form-group">
                   <label>Mã Khu Vực:</label>
                   <input
@@ -282,18 +278,52 @@ const ParkingZoneDialog = ({ onClose }) => {
                     onChange={(e) => handleInputChange("moTa", e.target.value)}
                     disabled={!isEditing}
                     placeholder="Nhập mô tả khu vực"
-                    rows="3"
+                    rows="4"
                   />
                 </div>
               </div>
+
+              {/* Action Buttons */}
+              <div className="button-group">
+                <button className="btn btn-primary" onClick={handleNewZone} disabled={isLoading}>
+                  Thêm mới
+                </button>
+
+                {selectedZone && !isEditing && (
+                  <button className="btn btn-secondary" onClick={handleEdit} disabled={isLoading}>
+                    Cập nhật
+                  </button>
+                )}
+
+                {selectedZone && !isEditing && (
+                  <button className="btn btn-danger" onClick={handleDelete} disabled={isLoading}>
+                    Xóa
+                  </button>
+                )}
+
+                {selectedZone && !isEditing && (
+                  <button className="btn btn-info" onClick={() => setShowAddCamera(true)} disabled={isLoading}>
+                    Quản lý Camera
+                  </button>
+                )}
+
+                {isEditing && (
+                  <>
+                    <button className="btn btn-success" onClick={handleSave} disabled={isLoading}>
+                      {isLoading ? "Đang lưu..." : "Lưu"}
+                    </button>
+                    <button className="btn btn-cancel" onClick={handleCancel} disabled={isLoading}>
+                      Hủy
+                    </button>
+                  </>
+                )}
+
+                <button className="btn btn-refresh" onClick={clearForm} disabled={isLoading}>
+                  Làm mới
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="dialog-footer">
-          <button className="btn btn-cancel" onClick={onClose}>
-            Đóng
-          </button>
         </div>
 
         {showAddCamera && selectedZone && (
