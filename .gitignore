@@ -1,0 +1,34 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Electron
+*.asar
+
+# Env files
+.env
+.env.*
+
+# VSCode
+.vscode/
+
+# Misc
+*.log
+*.pid
+*.seed
+*.tgz
+
+# Ignore frontend build if needed
+../frontend/build/

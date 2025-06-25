@@ -1,0 +1,118 @@
+/* WorkConfigDialog.css - giao diện hiện đại cho dialog cấu hình làm việc */
+.workconfig-dialog-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.workconfig-dialog {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(33,150,243,0.18);
+  width: 420px;
+  max-width: 96vw;
+  padding: 0 0 18px 0;
+  animation: fadeIn .3s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
+.workconfig-title-bar {
+  background: #2196F3;
+  color: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 18px 24px 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.workconfig-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+.workconfig-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.workconfig-close:hover {
+  color: #ff5252;
+}
+.workconfig-header {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  text-align: center;
+}
+.workconfig-content {
+  padding: 18px 24px 0 24px;
+}
+.workconfig-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px #e3e3e3;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+}
+.workconfig-card-title {
+  font-weight: 600;
+  color: #1976d2;
+  margin-bottom: 10px;
+}
+.workconfig-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #bdbdbd;
+  font-size: 1rem;
+  margin-bottom: 2px;
+  background: #fff;
+  transition: border 0.2s;
+}
+.workconfig-select:focus {
+  border: 1.5px solid #1976d2;
+  outline: none;
+}
+.workconfig-config-text {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #333;
+  padding: 8px 0;
+}
+.workconfig-footer {
+  padding: 0 24px;
+}
+.workconfig-start-btn {
+  width: 100%;
+  padding: 12px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+.workconfig-start-btn:disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}
+.workconfig-start-btn:hover:not(:disabled) {
+  background: #125ea2;
+}
+.workconfig-error {
+  color: #d32f2f;
+  text-align: center;
+  margin: 8px 0 0 0;
+  font-size: 1rem;
+}

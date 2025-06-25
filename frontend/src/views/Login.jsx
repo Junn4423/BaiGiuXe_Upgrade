@@ -1,0 +1,208 @@
+"use client"
+
+import { useState } from "react"
+import "../assets/styles/Login.css"
+import { taoBangChoPhienLamViec } from "../api/api"
+import WorkConfigDialog from "./dialogs/WorkConfigDialog"
+import MainUI from "./main/main_UI"
+
+const LOGIN_API = "http://192.168.1.94/parkinglot/login.sof.vn/index.php"
+
+const LoadingOverlay = ({ percent }) => (
+  <div className="login-loading-overlay">
+    <div className="login-loading-box">
+      <div className="login-spinner"></div>
+      <div className="login-loading-text">Đang khởi tạo hệ thống... {percent}%</div>
+    </div>
+  </div>
+)
+
+const Login = ({ onLoginSuccess }) => {
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [percent, setPercent] = useState(0)
+  const [showConfig, setShowConfig] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [showContinueDialog, setShowContinueDialog] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (username === "" || password === "") {
+      setError("Vui lòng nhập đầy đủ thông tin")
+      return
+    }
+    setError("")
+    setLoading(true)
+    setPercent(0)
+    let progress = 0
+    const interval = setInterval(() => {
+      progress += 2
+      setPercent(progress)
+      if (progress >= 90) clearInterval(interval)
+    }, 15)
+    try {
+      const res = await fetch(LOGIN_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txtUserName: username, txtPassword: password }),
+      })
+      const data = await res.json()
+      if (res.status === 200 && data.code && data.token) {
+        setShowConfig(true)
+        setLoading(false)
+        setPercent(100)
+        setTimeout(() => setPercent(0), 500)
+      } else {
+        setError("Tài khoản hoặc mật khẩu không đúng!")
+        setLoading(false)
+        setPercent(0)
+      }
+    } catch (err) {
+      setError("Không thể kết nối đến máy chủ: " + err.message)
+      setLoading(false)
+      setPercent(0)
+    }
+  }
+
+  const handleConfigSaved = async (config) => {
+    try {
+      console.log("Đang tạo phiên làm việc...")
+      const taoPhien = await taoBangChoPhienLamViec()
+      console.log("Kết quả tạo phiên:", taoPhien)
+
+      // Kiểm tra nếu thành công
+      if (taoPhien && taoPhien.success === true) {
+        console.log("Tạo phiên thành công")
+        setShowConfig(false)
+        setLoggedIn(true)
+        onLoginSuccess && onLoginSuccess({ username })
+        return
+      }
+
+      // Kiểm tra nếu lỗi do bảng đã tồn tại
+      const errorMessage = taoPhien?.message || ""
+      console.log("Error message:", errorMessage)
+
+      if (
+        errorMessage.includes("đã tồn tại") ||
+        errorMessage.includes("already exists") ||
+        errorMessage.toLowerCase().includes("duplicate") ||
+        errorMessage.includes("pm_nc0009_")
+      ) {
+        console.log("Phiên làm việc đã tồn tại, hiển thị dialog xác nhận")
+        setShowContinueDialog(true)
+        setShowConfig(false)
+        return
+      }
+
+      // Các lỗi khác
+      console.log("Lỗi khác:", errorMessage)
+      setError("Không thể tạo phiên làm việc mới: " + errorMessage)
+      setShowConfig(false)
+    } catch (e) {
+      console.log("Exception:", e)
+      const errorMessage = e.message || e.toString()
+
+      // Kiểm tra lỗi trong exception
+      if (
+        errorMessage.includes("đã tồn tại") ||
+        errorMessage.includes("already exists") ||
+        errorMessage.toLowerCase().includes("duplicate") ||
+        errorMessage.includes("pm_nc0009_")
+      ) {
+        console.log("Exception - Phiên làm việc đã tồn tại")
+        setShowContinueDialog(true)
+        setShowConfig(false)
+        return
+      }
+
+      setError("Không thể tạo phiên làm việc mới: " + errorMessage)
+      setShowConfig(false)
+    }
+  }
+
+  const handleContinueSession = (agree) => {
+    setShowContinueDialog(false)
+    if (agree) {
+      console.log("Người dùng chọn tiếp tục phiên làm việc")
+      setLoggedIn(true)
+      onLoginSuccess && onLoginSuccess({ username })
+    } else {
+      console.log("Người dùng hủy tiếp tục phiên làm việc")
+      // Quay lại màn hình cấu hình
+      setShowConfig(true)
+    }
+  }
+
+  const handleCancel = () => {
+    setUsername("")
+    setPassword("")
+    setError("")
+  }
+
+  if (loggedIn) return <MainUI />
+
+  return (
+    <div className="login-container">
+      <div className="login-header">
+        <div className="login-logo">P</div>
+        <div>
+          <div className="login-title">ĐĂNG NHẬP HỆ THỐNG</div>
+          <div className="login-subtitle">Vui lòng đăng nhập để tiếp tục</div>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} className="login-form">
+        <div className="login-form-group">
+          <label className="login-label">Tài khoản</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="login-input"
+            placeholder="Nhập tên đăng nhập"
+            autoFocus
+          />
+        </div>
+        <div className="login-form-group">
+          <label className="login-label">Mật khẩu</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="login-input"
+            placeholder="Nhập mật khẩu"
+          />
+        </div>
+        {error && <div className="login-error">{error}</div>}
+        <button type="submit" className="login-button" disabled={loading}>
+          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+        </button>
+        <button type="button" className="login-cancel-btn" onClick={handleCancel} disabled={loading}>
+          Hủy
+        </button>
+      </form>
+      {loading && <LoadingOverlay percent={percent} />}
+      {showConfig && <WorkConfigDialog onConfigSaved={handleConfigSaved} onClose={() => setShowConfig(false)} />}
+      {showContinueDialog && (
+        <div className="login-confirm-overlay">
+          <div className="login-confirm-box">
+            <div className="login-confirm-title">Phiên làm việc đã tồn tại</div>
+            <div className="login-confirm-message">Tiếp tục phiên làm việc hôm nay?</div>
+            <div className="login-confirm-actions">
+              <button className="login-confirm-btn" onClick={() => handleContinueSession(true)}>
+                Tiếp tục
+              </button>
+              <button className="login-cancel-btn" onClick={() => handleContinueSession(false)}>
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default Login

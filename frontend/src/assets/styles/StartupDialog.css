@@ -1,0 +1,85 @@
+.startup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.startup-dialog {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.startup-header {
+  padding: 24px 24px 16px 24px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+  border-radius: 12px 12px 0 0;
+}
+
+.startup-header h2 {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.startup-content {
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.startup-btn {
+  padding: 16px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.startup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.start-work {
+  background: #3b82f6;
+  color: white;
+}
+
+.start-work:hover {
+  background: #2563eb;
+}
+
+.config-camera {
+  background: #10b981;
+  color: white;
+}
+
+.config-camera:hover {
+  background: #059669;
+}
+
+.config-pricing {
+  background: #8b5cf6;
+  color: white;
+}
+
+.config-pricing:hover {
+  background: #7c3aed;
+}

@@ -1,0 +1,240 @@
+.camera-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.camera-grid-3x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  height: 100%;
+}
+
+.camera-panel {
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.camera-panel.active-mode {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.camera-panel.has-image {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: white;
+  min-height: 40px;
+}
+
+.panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.panel-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.panel-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  position: relative;
+  min-height: 0;
+}
+
+.panel-display img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.live-feed {
+  filter: brightness(1.1) contrast(1.05);
+}
+
+.captured-image {
+  border: 2px solid #10b981;
+}
+
+.placeholder {
+  opacity: 0.7;
+}
+
+.panel-info {
+  padding: 6px 12px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  font-size: 10px;
+  color: #64748b;
+  text-align: center;
+  font-weight: 500;
+}
+
+.license-plate-overlay {
+  position: absolute;
+  bottom: 40px;
+  left: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-align: center;
+  backdrop-filter: blur(4px);
+}
+
+.plate-text {
+  font-size: 14px;
+  font-weight: 900;
+  color: #fbbf24;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.plate-placeholder {
+  font-size: 11px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+  .camera-container {
+    padding: 12px;
+  }
+
+  .camera-grid-3x2 {
+    gap: 8px;
+  }
+
+  .panel-title {
+    font-size: 10px;
+  }
+
+  .panel-status {
+    font-size: 8px;
+  }
+
+  .panel-info {
+    font-size: 9px;
+    padding: 4px 8px;
+  }
+
+  .plate-text {
+    font-size: 12px;
+  }
+
+  .license-plate-overlay {
+    padding: 6px 8px;
+    bottom: 32px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .camera-grid-3x2 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+  }
+
+  .camera-container {
+    padding: 8px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .camera-grid-3x2 {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(6, 1fr);
+  }
+
+  .license-plate-overlay {
+    bottom: 28px;
+    padding: 4px 6px;
+  }
+
+  .plate-text {
+    font-size: 10px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .camera-container {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+
+  .camera-panel {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .panel-info {
+    background: #334155;
+    border-top-color: #475569;
+    color: #94a3b8;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .camera-panel {
+    border-width: 3px;
+  }
+
+  .camera-panel.active-mode {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+  }
+
+  .camera-panel.has-image {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+  }
+}
