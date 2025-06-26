@@ -2,7 +2,12 @@
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
 
+// Add immediate console log
+console.log("🚀 DauDocThe.jsx file loaded at", new Date().toISOString())
+
 const DauDocThe = React.forwardRef((props, ref) => {
+  console.log("🔥 DauDocThe component function called")
+
   const [isRunning, setIsRunning] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
   const [cardBuffer, setCardBuffer] = useState("")
@@ -16,22 +21,65 @@ const DauDocThe = React.forwardRef((props, ref) => {
   const lastKeyTime = useRef(0)
   const CARD_TIMEOUT = 100 // ms between characters for card reading
 
+  console.log("📊 DauDocThe initial state:", {
+    isRunning,
+    isScanning,
+    cardBuffer,
+    ui: !!ui,
+    vehicleManager: !!vehicleManager,
+    cameraManager: !!cameraManager,
+  })
+
   // Set UI reference
   const setUIReference = useCallback((uiRef) => {
+    console.log("🔗 DauDocThe: Setting UI Reference")
+    console.log("📋 UI Reference received:", uiRef)
     setUi(uiRef)
     setVehicleManager(uiRef?.vehicleManager)
     setCameraManager(uiRef?.cameraManager)
+    console.log("✅ UI Reference set successfully")
   }, [])
 
   // Handle keyboard events for RFID card reading
   const handleKeyDown = useCallback(
     (event) => {
-      if (!isRunning) return
+      console.log("⌨️ KEYBOARD EVENT:", {
+        key: event.key,
+        code: event.code,
+        target: event.target.tagName,
+        isRunning,
+        isScanning,
+        timestamp: new Date().toISOString(),
+      })
+
+      if (!isRunning) {
+        console.log("❌ Card reader not running, ignoring key")
+        return
+      }
+
+      // Skip if focus is on input elements
+      const activeElement = document.activeElement
+      if (
+        activeElement &&
+        (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA" || activeElement.isContentEditable)
+      ) {
+        console.log("🚫 Focus on input element, ignoring key:", activeElement.tagName)
+        return
+      }
 
       const currentTime = Date.now()
+      const timeDiff = currentTime - lastKeyTime.current
+
+      console.log("⏰ Timing info:", {
+        currentTime,
+        lastKeyTime: lastKeyTime.current,
+        timeDifference: timeDiff,
+        timeout: CARD_TIMEOUT,
+      })
 
       // If too much time has passed, reset buffer (new card scan)
-      if (currentTime - lastKeyTime.current > CARD_TIMEOUT) {
+      if (timeDiff > CARD_TIMEOUT) {
+        console.log("🔄 Timeout exceeded, resetting buffer. Old buffer:", keyboardBuffer.current)
         keyboardBuffer.current = ""
       }
 
@@ -39,21 +87,43 @@ const DauDocThe = React.forwardRef((props, ref) => {
 
       // Handle Enter key (end of card scan)
       if (event.key === "Enter") {
+        console.log("🎯 ENTER KEY DETECTED!")
+        console.log("📝 Current buffer content:", keyboardBuffer.current)
+        console.log("🔍 Is scanning:", isScanning)
+
         event.preventDefault()
+
         if (keyboardBuffer.current && !isScanning) {
           const cardId = keyboardBuffer.current.trim()
+          console.log("🏷️ Card ID extracted:", cardId)
+          console.log("📏 Card ID length:", cardId.length)
+
           if (cardId.length > 0) {
-            console.log(`Card scanned: ${cardId}`)
+            console.log("🚨 *** RFID CARD DETECTED: " + cardId + " ***")
+            console.log("🔄 Starting card processing...")
             processCardScan(cardId)
+          } else {
+            console.log("⚠️ Empty card ID, ignoring")
           }
+        } else {
+          console.log("❌ Cannot process:", {
+            hasBuffer: !!keyboardBuffer.current,
+            isScanning: isScanning,
+          })
         }
+
         keyboardBuffer.current = ""
+        console.log("🧹 Buffer cleared")
         return
       }
 
       // Handle regular characters (accumulate card ID)
       if (event.key.length === 1 && /[0-9A-Za-z]/.test(event.key)) {
         keyboardBuffer.current += event.key
+        console.log("📝 Building card ID:", keyboardBuffer.current)
+        console.log("📊 Buffer length:", keyboardBuffer.current.length)
+      } else {
+        console.log("🚫 Invalid character ignored:", event.key)
       }
     },
     [isRunning, isScanning],
@@ -61,412 +131,279 @@ const DauDocThe = React.forwardRef((props, ref) => {
 
   // Start card reader
   const startCardReader = useCallback(() => {
+    console.log("🚀 *** STARTING RFID CARD READER ***")
+    console.log("📅 Start time:", new Date().toISOString())
+
     setIsRunning(true)
-    console.log("Starting RFID card reader...")
+    console.log("✅ Card reader status: RUNNING")
 
     // Add keyboard event listener for card reading
     document.addEventListener("keydown", handleKeyDown, true)
+    console.log("👂 Keyboard event listener added with capture=true")
 
     // Try to connect to serial port for RFID reader
     connectSerialPort()
+
+    console.log("🎯 Card reader startup complete")
   }, [handleKeyDown])
 
   // Stop card reader
   const stopCardReader = useCallback(() => {
+    console.log("🛑 *** STOPPING RFID CARD READER ***")
+    console.log("📅 Stop time:", new Date().toISOString())
+
     setIsRunning(false)
-    console.log("Stopping RFID card reader...")
+    console.log("❌ Card reader status: STOPPED")
 
     // Remove keyboard event listener
     document.removeEventListener("keydown", handleKeyDown, true)
+    console.log("🔇 Keyboard event listener removed")
 
     // Close serial port if connected
     if (serialPort) {
       serialPort.close()
       setSerialPort(null)
+      console.log("🔌 Serial port closed")
     }
 
     // Clear any ongoing operations
     keyboardBuffer.current = ""
     setIsScanning(false)
+    console.log("🧹 All buffers and states cleared")
   }, [handleKeyDown, serialPort])
 
   // Connect to serial port for RFID reader
   const connectSerialPort = async () => {
+    console.log("🔌 Attempting Serial Port Connection...")
     try {
       if ("serial" in navigator) {
-        // Request serial port access
-        const port = await navigator.serial.requestPort()
-        await port.open({ baudRate: 9600 })
-        setSerialPort(port)
-
-        console.log("Serial port connected for RFID reader")
-
-        // Start reading from serial port
-        readFromSerialPort(port)
+        console.log("✅ Serial API available in browser")
+        // Don't actually request port to avoid popup
+        console.log("⏭️ Skipping serial port request (using keyboard mode)")
+      } else {
+        console.log("❌ Serial API not available in this browser")
       }
     } catch (error) {
-      console.log("Serial port not available or access denied:", error.message)
-      console.log("Falling back to keyboard input for RFID cards")
+      console.log("⚠️ Serial port connection failed:", error.message)
     }
-  }
-
-  // Read data from serial port
-  const readFromSerialPort = async (port) => {
-    try {
-      const reader = port.readable.getReader()
-
-      while (isRunning && port.readable) {
-        const { value, done } = await reader.read()
-        if (done) break
-
-        // Convert bytes to string
-        const cardData = new TextDecoder().decode(value).trim()
-        if (cardData && !isScanning) {
-          console.log(`Card read from serial: ${cardData}`)
-          processCardScan(cardData)
-        }
-      }
-
-      reader.releaseLock()
-    } catch (error) {
-      console.error("Error reading from serial port:", error)
-    }
+    console.log("⌨️ Using keyboard input mode for RFID cards")
   }
 
   // Reset scanning state
   const resetScanningState = useCallback(() => {
+    console.log("🔄 *** RESETTING SCANNING STATE ***")
+    console.log("📊 Previous state:", { isScanning, cardBuffer })
+
     setIsScanning(false)
     setCardBuffer("")
     keyboardBuffer.current = ""
-  }, [])
+
+    console.log("✅ Scanning state reset complete")
+  }, [isScanning, cardBuffer])
+
+  // Check if card exists in database
+  const checkCardExists = async (cardId) => {
+    console.log("🔍 *** CHECKING CARD EXISTENCE ***")
+    console.log("🏷️ Card ID to check:", cardId)
+
+    try {
+      console.log("📦 Importing API module...")
+      const { layDanhSachThe } = await import("../api/api")
+      console.log("✅ API module imported successfully")
+
+      console.log("🌐 Calling layDanhSachThe API...")
+      const cardList = await layDanhSachThe()
+      console.log("📋 API Response:", cardList)
+      console.log("📊 Response type:", typeof cardList)
+      console.log("📏 Response length:", Array.isArray(cardList) ? cardList.length : "Not array")
+
+      if (cardList && Array.isArray(cardList)) {
+        console.log("🔍 Searching for card in list...")
+        console.log("🎯 Looking for uidThe =", cardId)
+
+        const cardExists = cardList.find((card) => {
+          console.log("🔍 Checking card:", card)
+          return card.uidThe === cardId
+        })
+
+        console.log("🎯 Search result:", cardExists)
+        console.log("✅ Card exists:", !!cardExists)
+        return !!cardExists
+      } else {
+        console.log("❌ Invalid card list format or empty response")
+        return false
+      }
+    } catch (error) {
+      console.error("💥 Error checking card existence:", error)
+      console.error("📋 Error stack:", error.stack)
+      return false
+    }
+  }
 
   // Process card scan
   const processCardScan = useCallback(
     async (cardId) => {
-      if (isScanning) return // Prevent multiple simultaneous scans
+      console.log("🎯 *** PROCESSING CARD SCAN ***")
+      console.log("🏷️ Card ID:", cardId)
+      console.log("📊 Current state:", { isScanning, isRunning })
+      console.log("📅 Process start time:", new Date().toISOString())
+
+      if (isScanning) {
+        console.log("⚠️ Already scanning, ignoring this scan")
+        return
+      }
 
       try {
+        console.log("🔄 Setting scanning state to true...")
         setIsScanning(true)
-        console.log(`Processing card: ${cardId}`)
+        console.log("✅ Scanning state updated")
 
         if (ui) {
-          ui.updateCardReaderStatus(`Đang xử lý thẻ: ${cardId}...`, "#f39c12")
+          console.log("🎨 Updating UI status...")
+          ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Đang kiểm tra thẻ: ${cardId}...`, "#FF9800")
+        } else {
+          console.log("⚠️ No UI reference available")
         }
 
-        if (ui && cameraManager && vehicleManager) {
-          const currentMode = ui.currentMode || "vao"
-          const zone = ui.currentZone
+        // Check if card exists in database
+        console.log("🔍 Starting card existence check...")
+        const cardExists = await checkCardExists(cardId)
+        console.log("🎯 Card existence result:", cardExists)
 
-          if (!zone) {
-            console.log("Không có khu hiện tại!")
-            if (ui) {
-              ui.updateCardReaderStatus("Lỗi: Không có khu hiện tại", "#e74c3c")
-            }
-            return
+        if (cardExists) {
+          console.log("✅ *** CARD EXISTS - PROCEEDING WITH IMAGE CAPTURE ***")
+          alert(`Thẻ ${cardId} tồn tại! Đang chụp ảnh...`)
+
+          // TODO: Add image capture logic here
+          console.log("📸 Image capture would happen here")
+        } else {
+          console.log("❌ *** CARD NOT FOUND - SHOWING ADD DIALOG ***")
+
+          if (ui) {
+            ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ ${cardId} chưa được đăng ký`, "#FF5722")
           }
 
-          if (currentMode === "vao") {
-            // Process vehicle entry
-            const entryGateStr = zone.congVao && zone.congVao.length > 0 ? zone.congVao[0].maCong : "N/A"
-            const cameraId = zone.cameraVao && zone.cameraVao.length > 0 ? zone.cameraVao[0].maCamera : "N/A"
+          console.log("💬 Showing confirmation dialog...")
+          const shouldAdd = window.confirm(
+            `Thẻ ${cardId} chưa được đăng ký trong hệ thống.\n\nBạn có muốn thêm thẻ này không?`,
+          )
 
-            const [capturedFrame, licensePlate, faceImagePath] = await cameraManager.captureImage(cardId, "vao")
-            console.log(`Entry - Image: ${capturedFrame}, License: ${licensePlate}, Face: ${faceImagePath}`)
+          console.log("👤 User response to add card:", shouldAdd)
 
-            // Update license plate display
-            if (licensePlate && ui) {
-              ui.updateLicensePlateDisplay(licensePlate.toUpperCase())
-            }
-
-            if (!capturedFrame) {
-              console.log("Lỗi: Không chụp được ảnh xe vào")
-              if (ui) {
-                ui.updateCardReaderStatus("Lỗi: Không chụp được ảnh xe vào", "#e74c3c")
-              }
-              return
-            }
-
-            // Process vehicle entry
-            const result = await vehicleManager.processVehicleEntry(
-              cardId,
-              capturedFrame,
-              licensePlate,
-              null,
-              entryGateStr,
-              cameraId,
-              faceImagePath,
-            )
-
-            // Handle card not found error
-            if (result && typeof result === "object" && !result.success) {
-              const message = result.message || "Có lỗi xảy ra"
-
-              if (
-                message.toLowerCase().includes("không tồn tại") ||
-                message.toLowerCase().includes("chưa tồn tại") ||
-                message.toLowerCase().includes("not found") ||
-                message.toLowerCase().includes("không tìm thấy") ||
-                message.toLowerCase().includes("not exist") ||
-                message.toLowerCase().includes("does not exist")
-              ) {
-                if (ui) {
-                  ui.updateCardReaderStatus(`Thẻ ${cardId} chưa được đăng ký`, "#f39c12")
-                }
-
-                // Ask user if they want to add the card
-                const answer = window.confirm(
-                  `Thẻ ${cardId} chưa được đăng ký trong hệ thống.\n\nBạn có muốn thêm thẻ này không?`,
-                )
-
-                if (answer) {
-                  const addResult = await showAddCardDialog(cardId)
-
-                  if (addResult === "success") {
-                    if (ui) {
-                      ui.updateCardReaderStatus(`Thẻ ${cardId} đã được thêm, đang xử lý lại...`, "#27ae60")
-                    }
-                    // Retry processing entry
-                    await vehicleManager.processVehicleEntry(
-                      cardId,
-                      capturedFrame,
-                      licensePlate,
-                      null,
-                      entryGateStr,
-                      cameraId,
-                      faceImagePath,
-                    )
-                  } else {
-                    if (ui) {
-                      ui.updateCardReaderStatus("Đã hủy thêm thẻ", "#95a5a6")
-                    }
-                  }
-                } else {
-                  if (ui) {
-                    ui.updateCardReaderStatus("Từ chối thêm thẻ", "#95a5a6")
-                  }
-                }
-              } else {
-                if (ui) {
-                  ui.showError("Lỗi xe vào", message)
-                }
-              }
+          if (shouldAdd) {
+            console.log("➕ User wants to add card, showing add dialog...")
+            // Show add card dialog through UI
+            if (ui && ui.openAddCardDialog) {
+              console.log("🎨 Opening add card dialog through UI...")
+              ui.openAddCardDialog(cardId)
+            } else {
+              console.log("⚠️ No UI openAddCardDialog method, using fallback...")
+              alert(`Sẽ mở dialog thêm thẻ cho: ${cardId}`)
             }
           } else {
-            // Process vehicle exit
-            const exitGateStr = zone.congRa && zone.congRa.length > 0 ? zone.congRa[0].maCong : "N/A"
-            const cameraId = zone.cameraRa && zone.cameraRa.length > 0 ? zone.cameraRa[0].maCamera : "N/A"
-
-            const [exitImagePath, exitLicensePlate, exitFaceImagePath] = await cameraManager.captureImage(cardId, "ra")
-            console.log(`Exit - Image: ${exitImagePath}, License: ${exitLicensePlate}, Face: ${exitFaceImagePath}`)
-
-            // Update license plate display
-            if (exitLicensePlate && ui) {
-              ui.updateLicensePlateDisplay(exitLicensePlate.toUpperCase())
-            }
-
-            if (!exitImagePath) {
-              console.log("Lỗi: Không chụp được ảnh xe ra")
-              if (ui) {
-                ui.updateCardReaderStatus("Lỗi: Không chụp được ảnh xe ra", "#e74c3c")
-              }
-              return
-            }
-
-            const plateMatch = 1
-            // Process vehicle exit
-            const result = await vehicleManager.processVehicleExit(
-              cardId,
-              exitImagePath,
-              exitGateStr,
-              cameraId,
-              plateMatch,
-              exitLicensePlate,
-              exitFaceImagePath,
-            )
-
-            // Handle card not found error for exit
-            if (result && typeof result === "object" && !result.success) {
-              const message = result.message || "Có lỗi xảy ra"
-
-              if (
-                message.toLowerCase().includes("không tồn tại") ||
-                message.toLowerCase().includes("chưa tồn tại") ||
-                message.toLowerCase().includes("not found") ||
-                message.toLowerCase().includes("not exist") ||
-                message.toLowerCase().includes("does not exist") ||
-                message.toLowerCase().includes("không tìm thấy")
-              ) {
-                if (ui) {
-                  ui.updateCardReaderStatus(`Thẻ ${cardId} chưa được đăng ký`, "#f39c12")
-                }
-
-                const answer = window.confirm(
-                  `Thẻ ${cardId} chưa được đăng ký trong hệ thống.\n\nBạn có muốn thêm thẻ này không?`,
-                )
-
-                if (answer) {
-                  const addResult = await showAddCardDialog(cardId)
-
-                  if (addResult === "success") {
-                    if (ui) {
-                      ui.updateCardReaderStatus(`Thẻ ${cardId} đã được thêm thành công`, "#27ae60")
-                    }
-                  } else {
-                    if (ui) {
-                      ui.updateCardReaderStatus("Đã hủy thêm thẻ", "#95a5a6")
-                    }
-                  }
-                } else {
-                  if (ui) {
-                    ui.updateCardReaderStatus("Từ chối thêm thẻ", "#95a5a6")
-                  }
-                }
-              } else {
-                if (ui) {
-                  ui.showError("Lỗi xe ra", message)
-                }
-              }
-            }
+            console.log("❌ User declined to add card")
           }
         }
       } catch (error) {
-        console.error(`Lỗi xử lý quét thẻ: ${error}`)
+        console.error("💥 Error processing card scan:", error)
+        console.error("📋 Error stack:", error.stack)
+
         if (ui) {
-          ui.updateCardReaderStatus(`Lỗi xử lý thẻ: ${error.message}`, "#e74c3c")
+          ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Lỗi xử lý thẻ: ${error.message}`, "#F44336")
         }
       } finally {
-        resetScanningState()
+        console.log("🔄 Setting timeout to reset scanning state...")
+        setTimeout(() => {
+          console.log("⏰ Timeout reached, resetting scanning state...")
+          resetScanningState()
+          if (ui) {
+            ui.updateCardReaderStatus && ui.updateCardReaderStatus("Sẵn sàng quét thẻ", "#4CAF50")
+          }
+          console.log("✅ Card processing complete")
+        }, 3000)
       }
     },
-    [isScanning, ui, cameraManager, vehicleManager, resetScanningState],
+    [isScanning, ui, resetScanningState],
   )
-
-  // Show add card dialog
-  const showAddCardDialog = async (cardId) => {
-    try {
-      // Create a more sophisticated dialog
-      const cardType = await new Promise((resolve) => {
-        const modal = document.createElement("div")
-        modal.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0,0,0,0.5);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 10000;
-        `
-
-        const dialog = document.createElement("div")
-        dialog.style.cssText = `
-          background: white;
-          padding: 30px;
-          border-radius: 10px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-          max-width: 400px;
-          width: 90%;
-        `
-
-        dialog.innerHTML = `
-          <h3 style="margin-top: 0; color: #333;">Thêm thẻ mới</h3>
-          <p>Mã thẻ: <strong>${cardId}</strong></p>
-          <div style="margin: 20px 0;">
-            <label style="display: block; margin-bottom: 5px;">Loại thẻ:</label>
-            <select id="cardTypeSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-              <option value="Thẻ thường">Thẻ thường</option>
-              <option value="Thẻ VIP">Thẻ VIP</option>
-              <option value="Thẻ nhân viên">Thẻ nhân viên</option>
-            </select>
-          </div>
-          <div style="text-align: right; margin-top: 20px;">
-            <button id="cancelBtn" style="margin-right: 10px; padding: 8px 16px; border: 1px solid #ddd; background: #f5f5f5; border-radius: 4px; cursor: pointer;">Hủy</button>
-            <button id="confirmBtn" style="padding: 8px 16px; border: none; background: #007bff; color: white; border-radius: 4px; cursor: pointer;">Thêm thẻ</button>
-          </div>
-        `
-
-        modal.appendChild(dialog)
-        document.body.appendChild(modal)
-
-        const cancelBtn = dialog.querySelector("#cancelBtn")
-        const confirmBtn = dialog.querySelector("#confirmBtn")
-        const cardTypeSelect = dialog.querySelector("#cardTypeSelect")
-
-        cancelBtn.onclick = () => {
-          document.body.removeChild(modal)
-          resolve(null)
-        }
-
-        confirmBtn.onclick = () => {
-          const selectedType = cardTypeSelect.value
-          document.body.removeChild(modal)
-          resolve(selectedType)
-        }
-
-        // Focus on confirm button
-        confirmBtn.focus()
-      })
-
-      if (cardType) {
-        // Call API to add card
-        const { themThe } = await import("../api/api")
-        const result = await themThe(cardId, cardType, "1")
-
-        if (result && result.success) {
-          return "success"
-        } else {
-          window.alert("Lỗi thêm thẻ: " + (result?.message || "Unknown error"))
-          return "error"
-        }
-      }
-      return "cancel"
-    } catch (error) {
-      window.alert("Lỗi thêm thẻ: " + error.message)
-      return "error"
-    }
-  }
 
   // Simulate card scan (for testing)
   const simulateCardScan = useCallback(
     (cardId) => {
+      console.log("🧪 *** SIMULATING CARD SCAN ***")
+      console.log("🏷️ Simulated Card ID:", cardId)
+      console.log("📊 Current scanning state:", isScanning)
+
       if (!isScanning) {
-        console.log(`Simulating card scan: ${cardId}`)
+        console.log("▶️ Starting simulated card processing...")
         processCardScan(cardId)
+      } else {
+        console.log("⚠️ Already scanning, simulation ignored")
       }
     },
     [isScanning, processCardScan],
   )
 
-  // Cleanup on unmount
+  // Component lifecycle effects
   useEffect(() => {
+    console.log("🎬 *** DauDocThe Component Mounted ***")
+    console.log("📅 Mount time:", new Date().toISOString())
+    console.log("📊 Initial props:", props)
+
     return () => {
+      console.log("💀 *** DauDocThe Component Unmounting ***")
+      console.log("📅 Unmount time:", new Date().toISOString())
       stopCardReader()
     }
   }, [stopCardReader])
 
+  // Watch state changes
+  useEffect(() => {
+    console.log("📊 State change - isRunning:", isRunning)
+  }, [isRunning])
+
+  useEffect(() => {
+    console.log("📊 State change - isScanning:", isScanning)
+  }, [isScanning])
+
+  useEffect(() => {
+    console.log("📊 State change - UI reference:", !!ui)
+  }, [ui])
+
   // Expose methods to parent component
-  React.useImperativeHandle(ref, () => ({
-    startCardReader,
-    stopCardReader,
-    setUIReference,
-    simulateCardScan,
-    processCardScan,
+  React.useImperativeHandle(ref, () => {
+    console.log("🔗 Creating imperative handle with methods")
+    return {
+      startCardReader,
+      stopCardReader,
+      setUIReference,
+      simulateCardScan,
+      processCardScan,
+      resetScanningState,
+      isRunning,
+      isScanning,
+    }
+  })
+
+  console.log("🎨 *** DauDocThe Render ***")
+  console.log("📊 Render state:", {
     isRunning,
     isScanning,
-  }))
+    hasUI: !!ui,
+    timestamp: new Date().toISOString(),
+  })
 
   return (
     <div style={{ display: "none" }}>
       {/* RFID Card Reader Logic - No visible UI */}
       <div>
-        Status: {isRunning ? "Running" : "Stopped"} | Scanning: {isScanning ? "Yes" : "No"}
+        Status: {isRunning ? "RUNNING" : "STOPPED"} | Scanning: {isScanning ? "PROCESSING" : "READY"}
       </div>
     </div>
   )
 })
 
 DauDocThe.displayName = "DauDocThe"
+
+console.log("✅ DauDocThe component definition complete")
 
 export default DauDocThe

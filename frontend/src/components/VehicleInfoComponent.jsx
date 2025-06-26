@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import "../assets/styles/VehicleInfoComponent.css"
 
 const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, workConfig }) => {
@@ -20,6 +20,8 @@ const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, w
   })
 
   const [parkingFee, setParkingFee] = useState("")
+
+  const rfidBuffer = useRef("");
 
   // Update vehicle info
   const updateVehicleInfo = (newInfo) => {
@@ -116,6 +118,26 @@ const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, w
       showButtonsForVehicleType,
     }),
   )
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey || event.altKey || event.metaKey) return;
+      if (/^[a-zA-Z0-9]$/.test(event.key)) {
+        rfidBuffer.current += event.key;
+      } else if (event.key === "Enter") {
+        if (rfidBuffer.current.length > 0) {
+          setVehicleInfo((prev) => ({ ...prev, ma_the: rfidBuffer.current }));
+          rfidBuffer.current = "";
+        }
+      } else {
+        if (event.key === "Backspace") {
+          rfidBuffer.current = rfidBuffer.current.slice(0, -1);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="vehicle-info-container">

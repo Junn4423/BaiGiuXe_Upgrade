@@ -12,9 +12,14 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
   })
   const [isLoading, setIsLoading] = useState(false)
 
+  console.log("=== ThemTheDialog Rendered ===")
+  console.log("Card ID:", cardId)
+  console.log("Form Data:", formData)
+
   const cardTypes = ["Thẻ thường", "Thẻ VIP", "Thẻ tháng", "Thẻ nhân viên", "Thẻ khách"]
 
   const handleInputChange = (field, value) => {
+    console.log("Input changed:", field, "=", value)
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -22,22 +27,32 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
   }
 
   const handleSave = async () => {
+    console.log("=== Saving Card ===")
+    console.log("Form data to save:", formData)
+
     try {
       if (!formData.uid.trim()) {
+        console.log("Empty UID, showing alert")
         alert("Vui lòng nhập UID thẻ")
         return
       }
 
       setIsLoading(true)
+      console.log("Loading state set to true")
 
+      console.log("Calling themThe API...")
       const result = await themThe(formData.uid, formData.loaiThe, formData.trangThai)
+      console.log("API result:", result)
 
       if (result && result.success) {
+        console.log("Card saved successfully")
         alert("Thêm thẻ thành công!")
         if (onSave) {
+          console.log("Calling onSave callback")
           onSave(formData)
         }
       } else {
+        console.log("Failed to save card:", result?.message)
         alert("Lỗi thêm thẻ: " + (result?.message || "Unknown error"))
       }
     } catch (error) {
@@ -45,10 +60,12 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
       alert("Lỗi thêm thẻ: " + error.message)
     } finally {
       setIsLoading(false)
+      console.log("Loading state set to false")
     }
   }
 
   const handleCancel = () => {
+    console.log("=== Cancel Button Clicked ===")
     onClose()
   }
 
@@ -64,7 +81,7 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
 
         <div className="dialog-content">
           <div className="card-preview">
-            <div className="card-icon">🏷️</div>
+            <div className="card-icon">Thẻ</div>
             <div className="card-info">
               <div className="card-uid">{formData.uid || "Chưa có UID"}</div>
               <div className="card-type">{formData.loaiThe}</div>

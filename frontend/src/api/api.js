@@ -290,6 +290,11 @@ export async function xoaPhienGuiXe(maPhien) {
   return callApiWithAuth(payload)
 }
 
+export async function layDanhSachThe() {
+  const payload = { table: "pm_nc0003", func: "data" };
+  return callApiWithAuth(payload);
+}
+
 // Force refresh auth token - để gọi khi cần làm mới token
 export async function refreshAuthToken() {
   console.log("Forcing auth token refresh...")
