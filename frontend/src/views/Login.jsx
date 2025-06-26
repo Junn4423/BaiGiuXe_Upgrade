@@ -5,6 +5,7 @@ import "../assets/styles/Login.css"
 import { taoBangChoPhienLamViec } from "../api/api"
 import WorkConfigDialog from "./dialogs/WorkConfigDialog"
 import MainUI from "./main/main_UI"
+import sofLogo from "../assets/img/sof.png"
 
 const LOGIN_API = "http://192.168.1.94/parkinglot/login.sof.vn/index.php"
 
@@ -72,7 +73,6 @@ const Login = ({ onLoginSuccess }) => {
       const taoPhien = await taoBangChoPhienLamViec()
       console.log("Kết quả tạo phiên:", taoPhien)
 
-      // Kiểm tra nếu thành công
       if (taoPhien && taoPhien.success === true) {
         console.log("Tạo phiên thành công")
         setShowConfig(false)
@@ -81,7 +81,6 @@ const Login = ({ onLoginSuccess }) => {
         return
       }
 
-      // Kiểm tra nếu lỗi do bảng đã tồn tại
       const errorMessage = taoPhien?.message || ""
       console.log("Error message:", errorMessage)
 
@@ -97,7 +96,6 @@ const Login = ({ onLoginSuccess }) => {
         return
       }
 
-      // Các lỗi khác
       console.log("Lỗi khác:", errorMessage)
       setError("Không thể tạo phiên làm việc mới: " + errorMessage)
       setShowConfig(false)
@@ -105,7 +103,6 @@ const Login = ({ onLoginSuccess }) => {
       console.log("Exception:", e)
       const errorMessage = e.message || e.toString()
 
-      // Kiểm tra lỗi trong exception
       if (
         errorMessage.includes("đã tồn tại") ||
         errorMessage.includes("already exists") ||
@@ -131,7 +128,6 @@ const Login = ({ onLoginSuccess }) => {
       onLoginSuccess && onLoginSuccess({ username })
     } else {
       console.log("Người dùng hủy tiếp tục phiên làm việc")
-      // Quay lại màn hình cấu hình
       setShowConfig(true)
     }
   }
@@ -146,50 +142,76 @@ const Login = ({ onLoginSuccess }) => {
 
   return (
     <div className="login-container">
-      <div className="login-header">
-        <div className="login-logo">P</div>
-        <div>
-          <div className="login-title">ĐĂNG NHẬP HỆ THỐNG</div>
-          <div className="login-subtitle">Vui lòng đăng nhập để tiếp tục</div>
+      {/* Left Panel */}
+      <div className="login-left-panel">
+        <div className="login-logo-section">
+          <img src={sofLogo || "/placeholder.svg"} alt="SOF Logo" className="login-logo" />
+          <h1 className="login-brand-title">HỆ THỐNG QUẢN LÝ BÃI XE</h1>
+          <p className="login-brand-subtitle">Giải pháp thông minh cho việc quản lý bãi đỗ xe hiện đại</p>
+          <ul className="login-features">
+            <li>Quản lý ra vào tự động</li>
+            <li>Nhận diện biển số xe</li>
+            <li>Báo cáo thống kê chi tiết</li>
+            <li>Hệ thống camera giám sát</li>
+          </ul>
         </div>
       </div>
-      <form onSubmit={handleSubmit} className="login-form">
-        <div className="login-form-group">
-          <label className="login-label">Tài khoản</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="login-input"
-            placeholder="Nhập tên đăng nhập"
-            autoFocus
-          />
+
+      {/* Right Panel */}
+      <div className="login-right-panel">
+        <div className="login-form-container">
+          <div className="login-form-header">
+            <h2 className="login-form-title">Đăng Nhập</h2>
+            <p className="login-form-subtitle">Vui lòng đăng nhập để tiếp tục sử dụng hệ thống</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="login-form-group">
+              <label className="login-label">Tài khoản</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="login-input"
+                placeholder="Nhập tên đăng nhập"
+                autoFocus
+              />
+            </div>
+
+            <div className="login-form-group">
+              <label className="login-label">Mật khẩu</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="login-input"
+                placeholder="Nhập mật khẩu"
+              />
+            </div>
+
+            {error && <div className="login-error">{error}</div>}
+
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+            </button>
+
+            <button type="button" className="login-cancel-btn" onClick={handleCancel} disabled={loading}>
+              Hủy
+            </button>
+          </form>
         </div>
-        <div className="login-form-group">
-          <label className="login-label">Mật khẩu</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="login-input"
-            placeholder="Nhập mật khẩu"
-          />
-        </div>
-        {error && <div className="login-error">{error}</div>}
-        <button type="submit" className="login-button" disabled={loading}>
-          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-        </button>
-        <button type="button" className="login-cancel-btn" onClick={handleCancel} disabled={loading}>
-          Hủy
-        </button>
-      </form>
+      </div>
+
       {loading && <LoadingOverlay percent={percent} />}
       {showConfig && <WorkConfigDialog onConfigSaved={handleConfigSaved} onClose={() => setShowConfig(false)} />}
       {showContinueDialog && (
         <div className="login-confirm-overlay">
           <div className="login-confirm-box">
             <div className="login-confirm-title">Phiên làm việc đã tồn tại</div>
-            <div className="login-confirm-message">Tiếp tục phiên làm việc hôm nay?</div>
+            <div className="login-confirm-message">
+              Hệ thống phát hiện phiên làm việc hôm nay đã được tạo trước đó. Bạn có muốn tiếp tục với phiên làm việc
+              hiện tại không?
+            </div>
             <div className="login-confirm-actions">
               <button className="login-confirm-btn" onClick={() => handleContinueSession(true)}>
                 Tiếp tục

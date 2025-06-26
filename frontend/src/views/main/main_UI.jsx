@@ -241,19 +241,24 @@ const MainUI = () => {
 
   // Bind keyboard shortcuts
   const bindShortcuts = () => {
-    const handleKeyPress = (event) => {
-      if (event.key === "F5") {
+    const handleKeyDown = (event) => {
+      // Only handle on main content (not in input, textarea, etc.)
+      const tag = event.target.tagName.toLowerCase()
+      if (tag === "input" || tag === "textarea" || event.target.isContentEditable) return
+
+      // Tab: toggle between management <-> vehicle list
+      if (event.key === "Tab") {
         event.preventDefault()
-        reloadMainUI()
+        setActiveTab((prev) => (prev === "management" ? "list" : "management"))
       }
-      if (event.key === "F1") {
+      // Space: switch mode (vao <-> ra)
+      if (event.code === "Space" || event.key === " ") {
         event.preventDefault()
-        setShowWorkConfig(true)
+        setCurrentMode((prev) => (prev === "vao" ? "ra" : "vao"))
       }
     }
-
-    document.addEventListener("keydown", handleKeyPress)
-    return () => document.removeEventListener("keydown", handleKeyPress)
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
   }
 
   // Handle mode change
@@ -367,11 +372,16 @@ const MainUI = () => {
       <div className="tab-navigation">
         <button
           className={`tab-btn ${activeTab === "management" ? "active" : ""}`}
-          onClick={() => setActiveTab("management")}
+          tabIndex={-1}
+          style={{ pointerEvents: "none", opacity: 0.7 }}
         >
           QUẢN LÝ XE RA VÀO
         </button>
-        <button className={`tab-btn ${activeTab === "list" ? "active" : ""}`} onClick={() => setActiveTab("list")}>
+        <button
+          className={`tab-btn ${activeTab === "list" ? "active" : ""}`}
+          tabIndex={-1}
+          style={{ pointerEvents: "none", opacity: 0.7 }}
+        >
           DANH SÁCH XE TRONG BÃI
         </button>
       </div>
