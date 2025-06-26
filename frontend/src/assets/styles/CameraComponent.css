@@ -23,6 +23,7 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   position: relative;
+  overflow: hidden;
 }
 
 .camera-panel.active-mode {
@@ -43,6 +44,7 @@
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   color: white;
   min-height: 10px;
+  flex-shrink: 0;
 }
 
 .panel-title {
@@ -87,12 +89,23 @@
   background: #000;
   position: relative;
   min-height: 0;
+  overflow: hidden;
 }
 
-.panel-display img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.panel-display img,
+.panel-display video,
+.panel-display .rtsp-player {
+  width: 95% !important;
+  height: 95% !important;
+  object-fit: contain !important;
+  border-radius: 4px;
+  margin: auto;
+}
+
+.panel-display .rtsp-player video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
 }
 
 .live-feed {
@@ -108,26 +121,28 @@
 }
 
 .panel-info {
-  padding: 10px 12px 14px 12px;
+  padding: 6px 8px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   font-size: 10px;
   color: #64748b;
   text-align: center;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .license-plate-overlay {
   position: absolute;
-  bottom: 40px;
+  bottom: 30px;
   left: 8px;
   right: 8px;
   background: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 6px;
   text-align: center;
   backdrop-filter: blur(4px);
+  z-index: 10;
 }
 
 .plate-text {
@@ -164,7 +179,7 @@
 
   .panel-info {
     font-size: 9px;
-    padding: 4px 8px;
+    padding: 4px 6px;
   }
 
   .plate-text {
@@ -172,8 +187,8 @@
   }
 
   .license-plate-overlay {
-    padding: 6px 8px;
-    bottom: 32px;
+    padding: 4px 6px;
+    bottom: 24px;
   }
 }
 
@@ -196,8 +211,8 @@
   }
 
   .license-plate-overlay {
-    bottom: 28px;
-    padding: 4px 6px;
+    bottom: 20px;
+    padding: 3px 5px;
   }
 
   .plate-text {

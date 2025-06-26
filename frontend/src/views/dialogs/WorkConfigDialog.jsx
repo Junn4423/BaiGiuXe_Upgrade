@@ -9,13 +9,27 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
   const [vehicleTypes, setVehicleTypes] = useState([]) // full object
   const [selectedZone, setSelectedZone] = useState(null) // object
   const [selectedVehicleType, setSelectedVehicleType] = useState(null) // object
+  const [selectedMode, setSelectedMode] = useState("vao") // new: default mode
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
     fetchData()
+    loadSavedConfig()
   }, [])
+
+  const loadSavedConfig = () => {
+    try {
+      const savedConfig = localStorage.getItem("work_config")
+      if (savedConfig) {
+        const config = JSON.parse(savedConfig)
+        setSelectedMode(config.default_mode || "vao")
+      }
+    } catch (error) {
+      console.error("Error loading saved config:", error)
+    }
+  }
 
   const fetchData = async () => {
     try {
@@ -61,11 +75,17 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
     setSelectedVehicleType(vtObj || null)
   }
 
+  // Xử lý chọn chế độ
+  const handleModeChange = (e) => {
+    setSelectedMode(e.target.value)
+    console.log("Selected mode:", e.target.value)
+  }
+
   const handleSave = async () => {
     setSaving(true)
     setError("")
     try {
-      if (!selectedZone || !selectedVehicleType) {
+      if (!selectedZone || !selectedVehicleType || !selectedMode) {
         throw new Error("Chưa chọn đủ thông tin")
       }
 
@@ -76,6 +96,7 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
         vehicle_type: selectedVehicleType.tenLoaiPT || selectedVehicleType.name,
         loai_xe: selectedVehicleType.maLoaiPT || selectedVehicleType.code || "",
         ma_khu_vuc: selectedZone.maKhuVuc || selectedZone.code || "",
+        default_mode: selectedMode, // new: save default mode
       }
 
       console.log("Saving work config:", config)
@@ -106,7 +127,7 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
         </div>
 
         <div className="workconfig-header">
-          Vui lòng chọn khu vực và loại xe để bắt đầu
+          Vui lòng chọn khu vực, loại xe và chế độ để bắt đầu
           <button className="refresh-button" onClick={handleRefresh} disabled={loading}>
             {loading ? "Đang tải..." : "Làm mới"}
           </button>
@@ -154,12 +175,41 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
               </div>
 
               <div className="workconfig-card">
+                <div className="workconfig-card-title">Chọn chế độ mặc định</div>
+                <div className="mode-selection">
+                  <label className="mode-option">
+                    <input
+                      type="radio"
+                      name="mode"
+                      value="vao"
+                      checked={selectedMode === "vao"}
+                      onChange={handleModeChange}
+                    />
+                    <span className="mode-label vao">XE VÀO</span>
+                  </label>
+                  <label className="mode-option">
+                    <input
+                      type="radio"
+                      name="mode"
+                      value="ra"
+                      checked={selectedMode === "ra"}
+                      onChange={handleModeChange}
+                    />
+                    <span className="mode-label ra">XE RA</span>
+                  </label>
+                </div>
+                <div className="data-info">Chế độ sẽ được áp dụng khi khởi động</div>
+              </div>
+
+              <div className="workconfig-card">
                 <div className="workconfig-card-title">Cấu hình hiện tại</div>
                 <div className="workconfig-config-text">
                   Khu vực: {selectedZone ? selectedZone.tenKhuVuc || selectedZone.name : "Chưa chọn"}
                   <br />
                   Loại xe:{" "}
                   {selectedVehicleType ? selectedVehicleType.tenLoaiPT || selectedVehicleType.name : "Chưa chọn"}
+                  <br />
+                  Chế độ: {selectedMode === "vao" ? "XE VÀO" : "XE RA"}
                 </div>
               </div>
             </>
@@ -172,7 +222,7 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
           <button
             className="workconfig-start-btn"
             onClick={handleSave}
-            disabled={saving || loading || !selectedZone || !selectedVehicleType}
+            disabled={saving || loading || !selectedZone || !selectedVehicleType || !selectedMode}
           >
             {saving ? "Đang lưu..." : "BẮT ĐẦU LÀM VIỆC"}
           </button>

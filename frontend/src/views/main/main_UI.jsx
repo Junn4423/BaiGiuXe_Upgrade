@@ -68,6 +68,8 @@ const MainUI = () => {
         const config = JSON.parse(savedConfig)
         setWorkConfig(config)
         setCurrentVehicleType(config.loai_xe || "xe_may")
+        // Set default mode from config
+        setCurrentMode(config.default_mode || "vao")
         console.log("✅ Loaded work config:", config)
       } else {
         // Show work config dialog if no config exists
