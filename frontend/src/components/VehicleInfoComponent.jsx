@@ -163,7 +163,12 @@ const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, w
           <div className="mode-display">
             <span className={`mode-value ${currentMode}`}>{currentMode === "vao" ? "XE VÀO" : "XE RA"}</span>
           </div>
-          <button className={`mode-toggle-btn ${currentMode}`} onClick={handleModeToggle}>
+          <button
+            className={`mode-toggle-btn ${currentMode}`}
+            onClick={(e) => e.preventDefault()}
+            tabIndex={-1}
+            style={{ pointerEvents: "none" }}
+          >
             CHUYỂN {currentMode === "vao" ? "RA" : "VÀO"}
           </button>
         </div>

@@ -10,6 +10,8 @@ const DauDocThe = React.forwardRef((props, ref) => {
 
   const [isRunning, setIsRunning] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
+  const isRunningRef = useRef(false)
+  const isScanningRef = useRef(false)
   const [cardBuffer, setCardBuffer] = useState("")
   const [ui, setUi] = useState(null)
   const [vehicleManager, setVehicleManager] = useState(null)
@@ -19,6 +21,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
   const cardReaderThread = useRef(null)
   const keyboardBuffer = useRef("")
   const lastKeyTime = useRef(0)
+  const currentCardIdRef = useRef(null)
   const CARD_TIMEOUT = 100 // ms between characters for card reading
 
   console.log("📊 DauDocThe initial state:", {
@@ -47,12 +50,12 @@ const DauDocThe = React.forwardRef((props, ref) => {
         key: event.key,
         code: event.code,
         target: event.target.tagName,
-        isRunning,
-        isScanning,
+        isRunning: isRunningRef.current,
+        isScanning: isScanningRef.current,
         timestamp: new Date().toISOString(),
       })
 
-      if (!isRunning) {
+      if (!isRunningRef.current) {
         console.log("❌ Card reader not running, ignoring key")
         return
       }
@@ -89,11 +92,11 @@ const DauDocThe = React.forwardRef((props, ref) => {
       if (event.key === "Enter") {
         console.log("🎯 ENTER KEY DETECTED!")
         console.log("📝 Current buffer content:", keyboardBuffer.current)
-        console.log("🔍 Is scanning:", isScanning)
+        console.log("🔍 Is scanning:", isScanningRef.current)
 
         event.preventDefault()
 
-        if (keyboardBuffer.current && !isScanning) {
+        if (keyboardBuffer.current && (!isScanningRef.current || keyboardBuffer.current !== currentCardIdRef.current)) {
           const cardId = keyboardBuffer.current.trim()
           console.log("🏷️ Card ID extracted:", cardId)
           console.log("📏 Card ID length:", cardId.length)
@@ -101,6 +104,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
           if (cardId.length > 0) {
             console.log("🚨 *** RFID CARD DETECTED: " + cardId + " ***")
             console.log("🔄 Starting card processing...")
+            currentCardIdRef.current = cardId
             processCardScan(cardId)
           } else {
             console.log("⚠️ Empty card ID, ignoring")
@@ -108,12 +112,13 @@ const DauDocThe = React.forwardRef((props, ref) => {
         } else {
           console.log("❌ Cannot process:", {
             hasBuffer: !!keyboardBuffer.current,
-            isScanning: isScanning,
+            isScanning: isScanningRef.current,
           })
         }
 
         keyboardBuffer.current = ""
         console.log("🧹 Buffer cleared")
+        currentCardIdRef.current = null
         return
       }
 
@@ -126,7 +131,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
         console.log("🚫 Invalid character ignored:", event.key)
       }
     },
-    [isRunning, isScanning],
+    [],
   )
 
   // Start card reader
@@ -135,6 +140,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
     console.log("📅 Start time:", new Date().toISOString())
 
     setIsRunning(true)
+    isRunningRef.current = true
     console.log("✅ Card reader status: RUNNING")
 
     // Add keyboard event listener for card reading
@@ -153,6 +159,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
     console.log("📅 Stop time:", new Date().toISOString())
 
     setIsRunning(false)
+    isRunningRef.current = false
     console.log("❌ Card reader status: STOPPED")
 
     // Remove keyboard event listener
@@ -169,6 +176,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
     // Clear any ongoing operations
     keyboardBuffer.current = ""
     setIsScanning(false)
+    isScanningRef.current = false
     console.log("🧹 All buffers and states cleared")
   }, [handleKeyDown, serialPort])
 
@@ -197,6 +205,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
     setIsScanning(false)
     setCardBuffer("")
     keyboardBuffer.current = ""
+    isScanningRef.current = false
 
     console.log("✅ Scanning state reset complete")
   }, [isScanning, cardBuffer])
@@ -248,7 +257,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
       console.log("📊 Current state:", { isScanning, isRunning })
       console.log("📅 Process start time:", new Date().toISOString())
 
-      if (isScanning) {
+      if (isScanningRef.current) {
         console.log("⚠️ Already scanning, ignoring this scan")
         return
       }
@@ -256,6 +265,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
       try {
         console.log("🔄 Setting scanning state to true...")
         setIsScanning(true)
+        isScanningRef.current = true
         console.log("✅ Scanning state updated")
 
         if (ui) {
@@ -312,7 +322,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
           ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Lỗi xử lý thẻ: ${error.message}`, "#F44336")
         }
       } finally {
-        console.log("🔄 Setting timeout to reset scanning state...")
+        console.log("🔄 Scheduling quick reset of scanning state (300ms)...")
         setTimeout(() => {
           console.log("⏰ Timeout reached, resetting scanning state...")
           resetScanningState()
@@ -320,10 +330,10 @@ const DauDocThe = React.forwardRef((props, ref) => {
             ui.updateCardReaderStatus && ui.updateCardReaderStatus("Sẵn sàng quét thẻ", "#4CAF50")
           }
           console.log("✅ Card processing complete")
-        }, 3000)
+        }, 0)
       }
     },
-    [isScanning, ui, resetScanningState],
+    [],
   )
 
   // Simulate card scan (for testing)
@@ -331,16 +341,16 @@ const DauDocThe = React.forwardRef((props, ref) => {
     (cardId) => {
       console.log("🧪 *** SIMULATING CARD SCAN ***")
       console.log("🏷️ Simulated Card ID:", cardId)
-      console.log("📊 Current scanning state:", isScanning)
+      console.log("📊 Current scanning state:", isScanningRef.current)
 
-      if (!isScanning) {
+      if (!isScanningRef.current) {
         console.log("▶️ Starting simulated card processing...")
         processCardScan(cardId)
       } else {
         console.log("⚠️ Already scanning, simulation ignored")
       }
     },
-    [isScanning, processCardScan],
+    [],
   )
 
   // Component lifecycle effects
@@ -358,16 +368,20 @@ const DauDocThe = React.forwardRef((props, ref) => {
 
   // Watch state changes
   useEffect(() => {
-    console.log("📊 State change - isRunning:", isRunning)
-  }, [isRunning])
+    console.log("📊 State change - isRunning:", isRunningRef.current)
+  }, [isRunningRef])
 
   useEffect(() => {
-    console.log("📊 State change - isScanning:", isScanning)
-  }, [isScanning])
+    console.log("📊 State change - isScanning:", isScanningRef.current)
+  }, [isScanningRef])
 
   useEffect(() => {
     console.log("📊 State change - UI reference:", !!ui)
   }, [ui])
+
+  // Keep refs in sync with state
+  useEffect(() => { isScanningRef.current = isScanning }, [isScanning])
+  useEffect(() => { isRunningRef.current = isRunning }, [isRunning])
 
   // Expose methods to parent component
   React.useImperativeHandle(ref, () => {
@@ -379,15 +393,15 @@ const DauDocThe = React.forwardRef((props, ref) => {
       simulateCardScan,
       processCardScan,
       resetScanningState,
-      isRunning,
-      isScanning,
+      isRunning: isRunningRef.current,
+      isScanning: isScanningRef.current,
     }
   })
 
   console.log("🎨 *** DauDocThe Render ***")
   console.log("📊 Render state:", {
-    isRunning,
-    isScanning,
+    isRunning: isRunningRef.current,
+    isScanning: isScanningRef.current,
     hasUI: !!ui,
     timestamp: new Date().toISOString(),
   })
@@ -396,7 +410,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
     <div style={{ display: "none" }}>
       {/* RFID Card Reader Logic - No visible UI */}
       <div>
-        Status: {isRunning ? "RUNNING" : "STOPPED"} | Scanning: {isScanning ? "PROCESSING" : "READY"}
+        Status: {isRunningRef.current ? "RUNNING" : "STOPPED"} | Scanning: {isScanningRef.current ? "PROCESSING" : "READY"}
       </div>
     </div>
   )

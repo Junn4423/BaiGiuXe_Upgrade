@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #163555 0%, #094391 100%);
 }
 
 .camera-grid-3x2 {
@@ -15,7 +15,7 @@
 }
 
 .camera-panel {
-  background: white;
+  background:#000 ;
   border-radius: 12px;
   border: 2px solid #e2e8f0;
   display: flex;
@@ -43,7 +43,8 @@
   padding: 4px 6px;
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   color: white;
-  min-height: 10px;
+  min-height: 5px;
+  max-height: 5px !important;
   flex-shrink: 0;
 }
 

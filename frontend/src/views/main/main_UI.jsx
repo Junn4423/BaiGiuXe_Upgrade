@@ -390,33 +390,37 @@ const MainUI = () => {
 
       {/* Main Content */}
       <div className="main-content">
-        {activeTab === "management" && (
-          <div className="management-layout">
-            <div className="camera-section">
-              <CameraComponent ref={cameraComponentRef} currentMode={currentMode} zoneInfo={zoneInfo} />
-            </div>
-            <div className="vehicle-info-section">
-              <VehicleInfoComponent
-                ref={vehicleInfoComponentRef}
-                currentMode={currentMode}
-                currentVehicleType={currentVehicleType}
-                onModeChange={handleModeChange}
-                workConfig={workConfig}
-              />
-            </div>
+        {/* Management Layout (always mounted to keep camera stream) */}
+        <div
+          className="management-layout"
+          style={{ display: activeTab === "management" ? "grid" : "none" }}
+        >
+          <div className="camera-section">
+            <CameraComponent ref={cameraComponentRef} currentMode={currentMode} zoneInfo={zoneInfo} />
           </div>
-        )}
-
-        {activeTab === "list" && (
-          <div className="list-layout">
-            <VehicleListComponent
-              ref={vehicleListComponentRef}
-              onVehicleSelect={(vehicle) => {
-                console.log("Selected vehicle:", vehicle)
-              }}
+          <div className="vehicle-info-section">
+            <VehicleInfoComponent
+              ref={vehicleInfoComponentRef}
+              currentMode={currentMode}
+              currentVehicleType={currentVehicleType}
+              onModeChange={handleModeChange}
+              workConfig={workConfig}
             />
           </div>
-        )}
+        </div>
+
+        {/* Vehicle List Layout (always mounted) */}
+        <div
+          className="list-layout"
+          style={{ display: activeTab === "list" ? "block" : "none" }}
+        >
+          <VehicleListComponent
+            ref={vehicleListComponentRef}
+            onVehicleSelect={(vehicle) => {
+              console.log("Selected vehicle:", vehicle)
+            }}
+          />
+        </div>
       </div>
 
       {/* Hidden Logic Components */}
