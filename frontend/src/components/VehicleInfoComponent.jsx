@@ -127,10 +127,10 @@ const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, w
             <span className="config-label">KHU VỰC:</span>
             <span className="config-value zone">{getZoneDisplay()}</span>
           </div>
-          <div className="config-item">
+          {/* <div className="config-item">
             <span className="config-label">LOẠI XE:</span>
             <span className="config-value vehicle">{getVehicleTypeDisplay()}</span>
-          </div>
+          </div> */}
         </div>
       </div>
 
