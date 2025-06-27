@@ -434,161 +434,469 @@ const MainUI = () => {
     console.log(`🎯 Card scanned: ${cardId} in mode: ${actualMode}`)
     setScannedCardId(cardId)
 
-    // Update vehicle info with scanned card
-    if (vehicleInfoComponentRef.current) {
-      console.log(`📝 Updating vehicle info with card: ${cardId} and mode: ${actualMode}`)
-      vehicleInfoComponentRef.current.updateVehicleInfo({ 
-        ma_the: cardId,
-        trang_thai: `Xe ${actualMode === 'vao' ? 'vào' : 'ra'}` 
-      })
-      vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG CHỤP ẢNH...", "#f59e0b")
-    } else {
-      console.error(`❌ VehicleInfoComponentRef is null - cannot update vehicle info`)
-    }
+    // Step 1: Check if card exists in database
+    try {
+      console.log(`🔍 Checking if card ${cardId} exists in database...`)
+      if (vehicleInfoComponentRef.current) {
+        vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG KIỂM TRA THẺ...", "#f59e0b")
+      }
 
-    // Capture images from camera
-    if (cameraManagerRef.current) {
-      try {
-        console.log(`📸 Capturing images for card ${cardId} in ${actualMode} mode`)
-        
-        const [plateImage, licensePlate, faceImage] = await cameraManagerRef.current.captureImage(cardId, actualMode)
-        
-        console.log(`📷 Capture results:`, {
-          plateImage: plateImage ? { url: plateImage.url || plateImage, hasBlob: !!plateImage.blob } : null,
-          faceImage: faceImage ? { url: faceImage.url || faceImage, hasBlob: !!faceImage.blob } : null,
-          mode: actualMode
-        })
-        
-        setCapturedImages({
-          plateImage: plateImage?.url || plateImage, // Handle both new format and old format
-          faceImage: faceImage?.url || faceImage,
-          plateImageBlob: plateImage?.blob, // Store blob for API calls
-          faceImageBlob: faceImage?.blob
-        })
+      // Load all cards to check existence
+      const { layDanhSachThe, timTheDangCoPhien } = await import("../../api/api")
+      const cardList = await layDanhSachThe()
+      
+      if (!cardList || !Array.isArray(cardList)) {
+        throw new Error("Không thể tải danh sách thẻ")
+      }
 
-        // Display captured images directly on camera panels instead of modal
-        if (cameraComponentRef.current) {
-          console.log(`📺 Displaying images on camera panels for card ${cardId}`)
-          // Display plate image on capture panel
-          if (plateImage?.url || plateImage) {
-            console.log(`📺 Displaying plate image on panel 1:`, plateImage?.url || plateImage)
-            cameraComponentRef.current.displayCapturedImage(plateImage?.url || plateImage, 1)
-          }
-          
-          // Display face image on capture panel  
-          if (faceImage?.url || faceImage) {
-            console.log(`📺 Displaying face image on panel 2:`, faceImage?.url || faceImage)
-            cameraComponentRef.current.displayCapturedFaceImage(faceImage?.url || faceImage)
-          }
-        } else {
-          console.error(`❌ CameraComponentRef is null - cannot display images`)
-        }
-
-        // Update status after capture and display
+      const cardExists = cardList.find(card => card.uidThe === cardId)
+      
+      if (!cardExists) {
+        console.log(`❌ Card ${cardId} not found in database - opening add card dialog`)
         if (vehicleInfoComponentRef.current) {
-          vehicleInfoComponentRef.current.updateCardReaderStatus("ẢNH ĐÃ HIỂN THỊ", "#10b981")
+          vehicleInfoComponentRef.current.updateCardReaderStatus("THẺ CHƯA ĐĂNG KÝ", "#ef4444")
+        }
+        
+        // Open add card dialog with scanned card ID
+        setShowAddCard({ show: true, cardId: cardId })
+        showToast(`🔔 Thẻ ${cardId} chưa được đăng ký. Vui lòng thêm thẻ mới.`, 'warning', 5000)
+        return
+      }
+
+      console.log(`✅ Card ${cardId} found in database:`, cardExists)
+      
+      // Step 2: Check if card has active parking session (only for "vao" mode)
+      if (actualMode === 'vao') {
+        console.log(`🔍 Checking if card ${cardId} has active parking session...`)
+        if (vehicleInfoComponentRef.current) {
+          vehicleInfoComponentRef.current.updateCardReaderStatus("KIỂM TRA PHIÊN GỬI XE...", "#f59e0b")
         }
 
-        // Auto recognize license plate after capture
-        if (plateImage?.blob || capturedImages.plateImageBlob) {
-          console.log(`🚗 Starting automatic license plate recognition for ${actualMode} mode...`)
-          
-          // Update status to show recognition in progress
+        const activeSession = await timTheDangCoPhien(cardId)
+        
+        if (activeSession && activeSession.length > 0) {
+          console.log(`❌ Card ${cardId} already has active parking session:`, activeSession)
           if (vehicleInfoComponentRef.current) {
-            vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG NHẬN DẠNG BIỂN SỐ...", "#f59e0b")
+            vehicleInfoComponentRef.current.updateCardReaderStatus("THẺ ĐÃ CÓ PHIÊN GỬI XE", "#ef4444")
           }
+          showToast(`❌ Thẻ ${cardId} đã tồn tại trong phiên gửi xe!`, 'error', 5000)
+          return
+        }
+      }
+
+      console.log(`✅ Card ${cardId} is valid and ready for processing`)
+
+      // Update vehicle info with scanned card
+      if (vehicleInfoComponentRef.current) {
+        console.log(`📝 Updating vehicle info with card: ${cardId} and mode: ${actualMode}`)
+        vehicleInfoComponentRef.current.updateVehicleInfo({ 
+          ma_the: cardId,
+          trang_thai: `Xe ${actualMode === 'vao' ? 'vào' : 'ra'}` 
+        })
+        vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG CHỤP ẢNH...", "#f59e0b")
+      }
+
+      // Step 3: Capture images from camera
+      if (cameraManagerRef.current) {
+        try {
+          console.log(`📸 Capturing images for card ${cardId} in ${actualMode} mode`)
           
-          try {
-            // Use blob for recognition
-            const blob = plateImage?.blob || capturedImages.plateImageBlob
-            if (blob) {
-              console.log(`📤 Sending image for recognition, blob size: ${blob.size} bytes`)
-              const recognitionResult = await nhanDangBienSo(blob)
-              console.log(`✅ License plate recognition result:`, recognitionResult)
-              
-              // Extract license plate from result
-              let licensePlate = "N/A"
-              let confidence = 0
-              
-              if (recognitionResult && recognitionResult.ket_qua && recognitionResult.ket_qua.length > 0) {
-                const firstResult = recognitionResult.ket_qua[0]
-                console.log(`🔍 Processing OCR result:`, firstResult)
+          const [plateImage, licensePlate, faceImage] = await cameraManagerRef.current.captureImage(cardId, actualMode)
+          
+          console.log(`📷 Capture results:`, {
+            plateImage: plateImage ? { url: plateImage.url || plateImage, hasBlob: !!plateImage.blob } : null,
+            faceImage: faceImage ? { url: faceImage.url || faceImage, hasBlob: !!faceImage.blob } : null,
+            mode: actualMode
+          })
+          
+          setCapturedImages({
+            plateImage: plateImage?.url || plateImage,
+            faceImage: faceImage?.url || faceImage,
+            plateImageBlob: plateImage?.blob,
+            faceImageBlob: faceImage?.blob
+          })
+
+          // Display captured images on camera panels
+          if (cameraComponentRef.current) {
+            console.log(`📺 Displaying images on camera panels for card ${cardId}`)
+            if (plateImage?.url || plateImage) {
+              console.log(`📺 Displaying plate image on panel 1:`, plateImage?.url || plateImage)
+              cameraComponentRef.current.displayCapturedImage(plateImage?.url || plateImage, 1)
+            }
+            
+            if (faceImage?.url || faceImage) {
+              console.log(`📺 Displaying face image on panel 2:`, faceImage?.url || faceImage)
+              cameraComponentRef.current.displayCapturedFaceImage(faceImage?.url || faceImage)
+            }
+          }
+
+          // Update status after capture and display
+          if (vehicleInfoComponentRef.current) {
+            vehicleInfoComponentRef.current.updateCardReaderStatus("ẢNH ĐÃ HIỂN THỊ", "#10b981")
+          }
+
+          // Auto recognize license plate after capture
+          let recognizedLicensePlate = null
+          if (plateImage?.blob || capturedImages.plateImageBlob) {
+            console.log(`🚗 Starting automatic license plate recognition for ${actualMode} mode...`)
+            
+            if (vehicleInfoComponentRef.current) {
+              vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG NHẬN DẠNG BIỂN SỐ...", "#f59e0b")
+            }
+            
+            try {
+              const blob = plateImage?.blob || capturedImages.plateImageBlob
+              if (blob) {
+                console.log(`📤 Sending image for recognition, blob size: ${blob.size} bytes`)
+                const recognitionResult = await nhanDangBienSo(blob)
+                console.log(`✅ License plate recognition result:`, recognitionResult)
                 
-                if (firstResult.ocr) {
-                  if (typeof firstResult.ocr === 'string') {
-                    // Parse string format: "OcrResult(text='86B821322', confidence=0.913814127445221)"
-                    const textMatch = firstResult.ocr.match(/text='([^']+)'/)
-                    const confMatch = firstResult.ocr.match(/confidence=([0-9.]+)/)
-                    
-                    if (textMatch) licensePlate = textMatch[1]
-                    if (confMatch) confidence = parseFloat(confMatch[1])
-                  } else if (typeof firstResult.ocr === 'object') {
-                    licensePlate = firstResult.ocr.text || "N/A"
-                    confidence = firstResult.ocr.confidence || 0
+                let confidence = 0
+                
+                if (recognitionResult && recognitionResult.ket_qua && recognitionResult.ket_qua.length > 0) {
+                  const firstResult = recognitionResult.ket_qua[0]
+                  console.log(`🔍 Processing OCR result:`, firstResult)
+                  
+                  if (firstResult.ocr) {
+                    if (typeof firstResult.ocr === 'string') {
+                      const textMatch = firstResult.ocr.match(/text='([^']+)'/)
+                      const confMatch = firstResult.ocr.match(/confidence=([0-9.]+)/)
+                      
+                      if (textMatch) recognizedLicensePlate = textMatch[1]
+                      if (confMatch) confidence = parseFloat(confMatch[1])
+                    } else if (typeof firstResult.ocr === 'object') {
+                      recognizedLicensePlate = firstResult.ocr.text || null
+                      confidence = firstResult.ocr.confidence || 0
+                    }
                   }
                 }
-              }
-              
-              console.log(`🏷️ Extracted license plate: ${licensePlate}, confidence: ${confidence}`)
-              
-              // Display license plate on camera panel
-              if (cameraComponentRef.current && licensePlate !== "N/A") {
-                const direction = actualMode === 'vao' ? 'in' : 'out'
-                console.log(`📺 Displaying license plate: ${licensePlate} on direction: ${direction}`)
-                cameraComponentRef.current.updateLicensePlateDisplay(licensePlate, null, direction)
                 
-                // Update status with license plate and confidence
-                if (vehicleInfoComponentRef.current) {
-                  const confidencePercent = (confidence * 100).toFixed(1)
-                  vehicleInfoComponentRef.current.updateCardReaderStatus(
-                    `BIỂN SỐ: ${licensePlate} (${confidencePercent}%)`, 
-                    "#10b981"
-                  )
-                }
+                console.log(`🏷️ Extracted license plate: ${recognizedLicensePlate}, confidence: ${confidence}`)
                 
-                // Show recognition success toast
-                showToast(`🏷️ Nhận dạng biển số: ${licensePlate}`, 'success', 3000)
-              } else {
-                // Failed to recognize
-                if (vehicleInfoComponentRef.current) {
-                  vehicleInfoComponentRef.current.updateCardReaderStatus("KHÔNG NHẬN DẠNG ĐƯỢC BIỂN SỐ", "#ef4444")
+                if (recognizedLicensePlate && cameraComponentRef.current) {
+                  const direction = actualMode === 'vao' ? 'in' : 'out'
+                  cameraComponentRef.current.updateLicensePlateDisplay(recognizedLicensePlate, null, direction)
+                  
+                  if (vehicleInfoComponentRef.current) {
+                    const confidencePercent = (confidence * 100).toFixed(1)
+                    vehicleInfoComponentRef.current.updateCardReaderStatus(
+                      `BIỂN SỐ: ${recognizedLicensePlate} (${confidencePercent}%)`, 
+                      "#10b981"
+                    )
+                  }
+                  
+                  showToast(`🏷️ Nhận dạng biển số: ${recognizedLicensePlate}`, 'success', 3000)
+                } else {
+                  if (vehicleInfoComponentRef.current) {
+                    vehicleInfoComponentRef.current.updateCardReaderStatus("KHÔNG NHẬN DẠNG ĐƯỢC BIỂN SỐ", "#ef4444")
+                  }
+                  showToast(`❌ Không nhận dạng được biển số`, 'warning', 3000)
                 }
-                showToast(`❌ Không nhận dạng được biển số`, 'warning', 3000)
               }
-              
-            } else {
-              console.log(`❌ No blob available for license plate recognition`)
+            } catch (recognitionError) {
+              console.error("❌ Error recognizing license plate:", recognitionError)
               if (vehicleInfoComponentRef.current) {
-                vehicleInfoComponentRef.current.updateCardReaderStatus("KHÔNG CÓ ẢNH ĐỂ NHẬN DẠNG", "#ef4444")
+                vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI NHẬN DẠNG BIỂN SỐ", "#ef4444")
               }
+              showToast(`❌ Lỗi nhận dạng biển số: ${recognitionError.message}`, 'error', 4000)
             }
-          } catch (recognitionError) {
-            console.error("❌ Error recognizing license plate:", recognitionError)
-            if (vehicleInfoComponentRef.current) {
-              vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI NHẬN DẠNG BIỂN SỐ", "#ef4444")
-            }
-            showToast(`❌ Lỗi nhận dạng biển số: ${recognitionError.message}`, 'error', 4000)
           }
-        } else {
-          console.log(`❌ No plate image available for recognition`)
-        }
 
-        // Show success toast
-        const saveMessage = environmentInfo?.isElectron 
-          ? `✅ Đã lưu ảnh vào thư mục tự động cho thẻ: ${cardId} (${actualMode})`
-          : `✅ Đã download ảnh tự động cho thẻ: ${cardId} (${actualMode})`
-        
-        showToast(saveMessage, 'success', 3000)
+          // Step 4: Save parking session for "vao" mode
+          if (actualMode === 'vao') {
+            console.log(`💾 Saving parking session for card ${cardId}...`)
+            
+            if (vehicleInfoComponentRef.current) {
+              vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG LƯU PHIÊN GỬI XE...", "#f59e0b")
+            }
 
-        // Don't open modal - images are displayed directly on panels
-        // setShowImageCaptureModal(true) // REMOVED - no longer show modal
-      } catch (error) {
-        console.error("❌ Error capturing images:", error)
-        if (vehicleInfoComponentRef.current) {
-          vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI CHỤP ẢNH", "#ef4444")
+            try {
+              // Get dynamic data from APIs
+              console.log(`🔍 Loading dynamic configuration data...`)
+              
+              // Import APIs
+              const { layChinhSachGiaTheoLoaiPT, layALLLoaiPhuongTien } = await import("../../api/api")
+              
+              // Determine vehicle type based on work config
+              let vehicleTypeCode = "XE_MAY" // default
+              if (workConfig?.loai_xe) {
+                // Map display names to codes
+                const vehicleTypeMapping = {
+                  "xe_may": "XE_MAY",
+                  "oto": "OT"
+                }
+                vehicleTypeCode = vehicleTypeMapping[workConfig.loai_xe] || "XE_MAY"
+              }
+              
+              console.log(`🚗 Vehicle type determined: ${vehicleTypeCode}`)
+              
+              // Get pricing policy for vehicle type
+              let pricingPolicy = null
+              try {
+                const policies = await layChinhSachGiaTheoLoaiPT(vehicleTypeCode)
+                console.log(`💰 Pricing policies for ${vehicleTypeCode}:`, policies)
+                
+                if (policies && policies.length > 0) {
+                  // Use first matching policy or a specific one based on criteria
+                  pricingPolicy = policies[0].lv001 // lv001 is policy ID
+                  console.log(`✅ Selected pricing policy: ${pricingPolicy}`)
+                } else {
+                  console.warn(`⚠️ No pricing policy found for vehicle type: ${vehicleTypeCode}`)
+                  // Fallback to default based on vehicle type
+                  pricingPolicy = vehicleTypeCode === "XE_MAY" ? "CS_XEMAY_4H" : "CS_OTO_4H"
+                }
+              } catch (policyError) {
+                console.error("❌ Error loading pricing policy:", policyError)
+                // Use fallback policy
+                pricingPolicy = vehicleTypeCode === "XE_MAY" ? "CS_XEMAY_4H" : "CS_OTO_4H"
+              }
+              
+              // Get entry gate from zone info or work config
+              let entryGate = "GATE01" // default
+              if (zoneInfo?.cameraVao && zoneInfo.cameraVao.length > 0) {
+                // Use first available entry camera as gate identifier
+                entryGate = zoneInfo.cameraVao[0].tenCamera || zoneInfo.cameraVao[0].maCamera || "GATE01"
+              } else if (workConfig?.entry_gate) {
+                entryGate = workConfig.entry_gate
+              }
+              
+              // Get parking spot from work config or generate based on zone
+              let parkingSpot = "A01" // default
+              if (workConfig?.parking_spot) {
+                parkingSpot = workConfig.parking_spot
+              } else if (zoneInfo?.maKhuVuc) {
+                // Generate parking spot based on zone code and timestamp
+                const timestamp = new Date().getTime().toString().slice(-3)
+                parkingSpot = `${zoneInfo.maKhuVuc}-${timestamp}`
+              }
+              
+              // Get camera ID
+              let cameraId = "CAM001" // default
+              if (zoneInfo?.cameraVao && zoneInfo.cameraVao.length > 0) {
+                cameraId = zoneInfo.cameraVao[0].maCamera
+              }
+              
+              console.log(`📋 Dynamic configuration loaded:`, {
+                vehicleTypeCode,
+                pricingPolicy,
+                entryGate,
+                parkingSpot,
+                cameraId,
+                zoneCode: zoneInfo?.maKhuVuc
+              })
+
+              // Prepare session data with dynamic values
+              const sessionData = {
+                uidThe: cardId,
+                bienSo: recognizedLicensePlate || "",
+                viTriGui: parkingSpot,
+                chinhSach: pricingPolicy,
+                congVao: entryGate,
+                gioVao: new Date().toISOString(),
+                anhVao: plateImage?.url || plateImage || "",
+                anhMatVao: faceImage?.url || faceImage || "",
+                camera_id: cameraId
+              }
+
+              console.log(`💾 Session data to save (with dynamic config):`, sessionData)
+
+              // Import and call API
+              const { themPhienGuiXe } = await import("../../api/api")
+              const result = await themPhienGuiXe(sessionData)
+
+              if (result && result.success) {
+                console.log(`✅ Parking session saved successfully:`, result)
+                
+                if (vehicleInfoComponentRef.current) {
+                  vehicleInfoComponentRef.current.updateCardReaderStatus("XE VÀO THÀNH CÔNG", "#10b981")
+                  vehicleInfoComponentRef.current.updateVehicleStatus("XE ĐÃ VÀO BÃI", "#10b981")
+                  // Update parking info
+                  vehicleInfoComponentRef.current.updateVehicleInfo({
+                    ma_the: cardId,
+                    bien_so: recognizedLicensePlate || "Chưa nhận dạng",
+                    vi_tri: parkingSpot,
+                    chinh_sach: pricingPolicy,
+                    cong_vao: entryGate,
+                    trang_thai: "Xe đã vào bãi"
+                  })
+                }
+                
+                showToast(`✅ Xe vào thành công! Thẻ: ${cardId} | Vị trí: ${parkingSpot}`, 'success', 5000)
+                
+                // Show success info for 3 seconds before clearing
+                setTimeout(() => {
+                  if (vehicleInfoComponentRef.current) {
+                    vehicleInfoComponentRef.current.clearVehicleInfo()
+                  }
+                  // Restore camera feeds
+                  if (cameraComponentRef.current) {
+                    cameraComponentRef.current.restoreCaptureFeeds()
+                  }
+                }, 3000)
+                
+              } else {
+                throw new Error(result?.message || "Không thể lưu phiên gửi xe")
+              }
+
+            } catch (sessionError) {
+              console.error("❌ Error saving parking session:", sessionError)
+              if (vehicleInfoComponentRef.current) {
+                vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI LƯU PHIÊN GỬI XE", "#ef4444")
+              }
+              showToast(`❌ Lỗi lưu phiên gửi xe: ${sessionError.message}`, 'error', 5000)
+            }
+          } else {
+            // For "ra" mode, process vehicle exit
+            console.log(`🚪 Processing vehicle exit for card ${cardId}...`)
+            
+            if (vehicleInfoComponentRef.current) {
+              vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG XỬ LÝ XE RA...", "#f59e0b")
+            }
+
+            try {
+              // Find active parking session for this card
+              const { loadPhienGuiXeTheoMaThe, capNhatPhienGuiXe, tinhPhiGuiXe } = await import("../../api/api")
+              
+              console.log(`🔍 Loading active session for card ${cardId}...`)
+              const activeSessions = await loadPhienGuiXeTheoMaThe(cardId)
+              
+              if (!activeSessions || activeSessions.length === 0) {
+                throw new Error("Không tìm thấy phiên gửi xe cho thẻ này")
+              }
+
+              // Get the most recent active session
+              const activeSession = activeSessions[0]
+              console.log(`✅ Found active session:`, activeSession)
+
+              // Get exit gate from zone info or work config
+              let exitGate = "GATE01" // default
+              if (zoneInfo?.cameraRa && zoneInfo.cameraRa.length > 0) {
+                exitGate = zoneInfo.cameraRa[0].tenCamera || zoneInfo.cameraRa[0].maCamera || "GATE01"
+              } else if (workConfig?.exit_gate) {
+                exitGate = workConfig.exit_gate
+              }
+
+              // Get exit camera ID
+              let exitCameraId = "CAM002" // default
+              if (zoneInfo?.cameraRa && zoneInfo.cameraRa.length > 0) {
+                exitCameraId = zoneInfo.cameraRa[0].maCamera
+              }
+
+              // Update session with exit information
+              const exitSessionData = {
+                maPhien: activeSession.maPhien,
+                congRa: exitGate,
+                gioRa: new Date().toISOString(),
+                anhRa: plateImage?.url || plateImage || "",
+                anhMatRa: faceImage?.url || faceImage || "",
+                camera_id: exitCameraId,
+                plate_match: recognizedLicensePlate ? 1 : 0, // 1 if license plate recognized, 0 otherwise
+                plate: recognizedLicensePlate || ""
+              }
+
+              console.log(`💾 Exit session data to update:`, exitSessionData)
+
+              // Update parking session with exit data
+              const updateResult = await capNhatPhienGuiXe(exitSessionData)
+
+              if (updateResult && updateResult.success) {
+                console.log(`✅ Exit session updated successfully:`, updateResult)
+                
+                // Calculate parking fee
+                try {
+                  console.log(`💰 Calculating parking fee for session ${activeSession.maPhien}...`)
+                  const feeResult = await tinhPhiGuiXe(activeSession.maPhien)
+                  console.log(`💰 Fee calculation result:`, feeResult)
+                  
+                  let parkingFee = 0
+                  let parkingDuration = 0
+                  
+                  if (feeResult && feeResult.success) {
+                    parkingFee = feeResult.phi || feeResult.fee || 0
+                    parkingDuration = feeResult.tongPhut || feeResult.duration || 0
+                  }
+
+                  if (vehicleInfoComponentRef.current) {
+                    vehicleInfoComponentRef.current.updateCardReaderStatus("XE RA THÀNH CÔNG", "#10b981")
+                    vehicleInfoComponentRef.current.updateVehicleStatus("XE ĐÃ RA KHỎI BÃI", "#10b981")
+                    vehicleInfoComponentRef.current.updateParkingFee(parkingFee)
+                    
+                    // Update vehicle info with exit details
+                    vehicleInfoComponentRef.current.updateVehicleInfo({
+                      ma_the: cardId,
+                      bien_so: recognizedLicensePlate || activeSession.bienSo || "Chưa nhận dạng",
+                      vi_tri: activeSession.viTriGui || "N/A",
+                      cong_ra: exitGate,
+                      thoi_gian_gui: parkingDuration ? `${parkingDuration} phút` : "N/A",
+                      phi_gui_xe: parkingFee,
+                      trang_thai: "Xe đã ra khỏi bãi"
+                    })
+                  }
+
+                  // Update license plate display with fee
+                  if (cameraComponentRef.current && recognizedLicensePlate) {
+                    cameraComponentRef.current.updateLicensePlateDisplay(recognizedLicensePlate, parkingFee, 'out')
+                  }
+
+                  const feeText = parkingFee > 0 ? ` | Phí: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(parkingFee)}` : ""
+                  showToast(`✅ Xe ra thành công! Thẻ: ${cardId}${feeText}`, 'success', 5000)
+
+                } catch (feeError) {
+                  console.error("❌ Error calculating parking fee:", feeError)
+                  // Still show success for exit, just without fee info
+                  if (vehicleInfoComponentRef.current) {
+                    vehicleInfoComponentRef.current.updateCardReaderStatus("XE RA THÀNH CÔNG (CHƯA TÍNH PHÍ)", "#f59e0b")
+                    vehicleInfoComponentRef.current.updateVehicleStatus("XE ĐÃ RA KHỎI BÃI", "#10b981")
+                  }
+                  showToast(`✅ Xe ra thành công! Thẻ: ${cardId} (Lỗi tính phí: ${feeError.message})`, 'warning', 5000)
+                }
+                
+                // Show success info for 5 seconds before clearing (longer for exit to review fee)
+                setTimeout(() => {
+                  if (vehicleInfoComponentRef.current) {
+                    vehicleInfoComponentRef.current.clearVehicleInfo()
+                  }
+                  // Restore camera feeds
+                  if (cameraComponentRef.current) {
+                    cameraComponentRef.current.restoreCaptureFeeds()
+                  }
+                }, 5000)
+
+              } else {
+                throw new Error(updateResult?.message || "Không thể cập nhật phiên gửi xe")
+              }
+
+            } catch (exitError) {
+              console.error("❌ Error processing vehicle exit:", exitError)
+              if (vehicleInfoComponentRef.current) {
+                vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI XỬ LÝ XE RA", "#ef4444")
+              }
+              showToast(`❌ Lỗi xử lý xe ra: ${exitError.message}`, 'error', 5000)
+              
+              // Still show captured images even if exit processing fails
+              const saveMessage = environmentInfo?.isElectron 
+                ? `⚠️ Đã lưu ảnh nhưng có lỗi xử lý xe ra cho thẻ: ${cardId}`
+                : `⚠️ Đã download ảnh nhưng có lỗi xử lý xe ra cho thẻ: ${cardId}`
+              
+              showToast(saveMessage, 'warning', 4000)
+            }
+          }
+
+        } catch (error) {
+          console.error("❌ Error capturing images:", error)
+          if (vehicleInfoComponentRef.current) {
+            vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI CHỤP ẢNH", "#ef4444")
+          }
+          showToast(`❌ Lỗi chụp ảnh cho thẻ: ${cardId} (${actualMode})`, 'error', 5000)
         }
-        showToast(`❌ Lỗi chụp ảnh cho thẻ: ${cardId} (${actualMode})`, 'error', 5000)
       }
+
+    } catch (error) {
+      console.error("❌ Error in card scanning process:", error)
+      if (vehicleInfoComponentRef.current) {
+        vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI XỬ LÝ THẺ", "#ef4444")
+      }
+      showToast(`❌ Lỗi xử lý thẻ: ${error.message}`, 'error', 5000)
     }
   }
 
