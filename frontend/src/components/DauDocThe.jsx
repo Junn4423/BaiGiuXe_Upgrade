@@ -184,20 +184,12 @@ const DauDocThe = React.forwardRef((props, ref) => {
           console.log("Card not found:", cardId)
 
           if (ui) {
-            ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ ${cardId} chưa được đăng ký`, "#FF5722")
+            ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ ${cardId} chưa được đăng ký - Đang chụp ảnh...`, "#FF9800")
           }
 
-          const shouldAdd = window.confirm(
-            `Thẻ ${cardId} chưa được đăng ký trong hệ thống.\n\nBạn có muốn thêm thẻ này không?`,
-          )
-
-          if (shouldAdd) {
-            // Show add card dialog through UI
-            if (ui && ui.openAddCardDialog) {
-              ui.openAddCardDialog(cardId)
-            } else {
-              alert(`Sẽ mở dialog thêm thẻ cho: ${cardId}`)
-            }
+          // Vẫn chụp ảnh và hiển thị lên UI ngay cả khi thẻ chưa đăng ký
+          if (ui && ui.handleCardScanned) {
+            ui.handleCardScanned(cardId)
           }
         }
       } catch (error) {
@@ -212,7 +204,7 @@ const DauDocThe = React.forwardRef((props, ref) => {
           if (ui) {
             ui.updateCardReaderStatus && ui.updateCardReaderStatus("Sẵn sàng quét thẻ", "#4CAF50")
           }
-        }, 100)
+        }, 2000) // Tăng từ 100ms lên 2000ms để người dùng có thời gian xem ảnh
       }
     },
     [],

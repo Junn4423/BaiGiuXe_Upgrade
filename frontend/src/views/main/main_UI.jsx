@@ -8,6 +8,7 @@ import VehicleListComponent from "../../components/VehicleListComponent"
 import QuanLyCamera from "../../components/QuanLyCamera"
 import QuanLyXe from "../../components/QuanLyXe"
 import DauDocThe from "../../components/DauDocThe"
+import { nhanDangBienSo } from "../../api/api"
 import BienSoLoiDialog from "../dialogs/BienSoLoiDialog"
 import CameraConfigDialog from "../dialogs/CameraConfigDialog"
 import ParkingZoneDialog from "../dialogs/ParkingZoneDialog"
@@ -232,9 +233,9 @@ const MainUI = () => {
           cameraComponentRef.current.displayEntryImagesAfterExit(entryImageUrl, entryFaceUrl)
         }
       },
-      updateLicensePlateDisplay: (licensePlate, fee) => {
+      updateLicensePlateDisplay: (licensePlate, fee, direction) => {
         if (cameraComponentRef.current) {
-          cameraComponentRef.current.updateLicensePlateDisplay(licensePlate, fee)
+          cameraComponentRef.current.updateLicensePlateDisplay(licensePlate, fee, direction)
         }
       },
       restoreCaptureFeeds: () => {
@@ -432,8 +433,14 @@ const MainUI = () => {
 
     // Update vehicle info with scanned card
     if (vehicleInfoComponentRef.current) {
-      vehicleInfoComponentRef.current.updateVehicleInfo({ ma_the: cardId })
+      console.log(`📝 Updating vehicle info with card: ${cardId} and mode: ${actualMode}`)
+      vehicleInfoComponentRef.current.updateVehicleInfo({ 
+        ma_the: cardId,
+        trang_thai: `Xe ${actualMode === 'vao' ? 'vào' : 'ra'}` 
+      })
       vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG CHỤP ẢNH...", "#f59e0b")
+    } else {
+      console.error(`❌ VehicleInfoComponentRef is null - cannot update vehicle info`)
     }
 
     // Capture images from camera
@@ -456,9 +463,111 @@ const MainUI = () => {
           faceImageBlob: faceImage?.blob
         })
 
-        // Update status after capture
+        // Display captured images directly on camera panels instead of modal
+        if (cameraComponentRef.current) {
+          console.log(`📺 Displaying images on camera panels for card ${cardId}`)
+          // Display plate image on capture panel
+          if (plateImage?.url || plateImage) {
+            console.log(`📺 Displaying plate image on panel 1:`, plateImage?.url || plateImage)
+            cameraComponentRef.current.displayCapturedImage(plateImage?.url || plateImage, 1)
+          }
+          
+          // Display face image on capture panel  
+          if (faceImage?.url || faceImage) {
+            console.log(`📺 Displaying face image on panel 2:`, faceImage?.url || faceImage)
+            cameraComponentRef.current.displayCapturedFaceImage(faceImage?.url || faceImage)
+          }
+        } else {
+          console.error(`❌ CameraComponentRef is null - cannot display images`)
+        }
+
+        // Update status after capture and display
         if (vehicleInfoComponentRef.current) {
-          vehicleInfoComponentRef.current.updateCardReaderStatus("ẢNH ĐÃ LƯU TỰ ĐỘNG", "#10b981")
+          vehicleInfoComponentRef.current.updateCardReaderStatus("ẢNH ĐÃ HIỂN THỊ", "#10b981")
+        }
+
+        // Auto recognize license plate after capture
+        if (plateImage?.blob || capturedImages.plateImageBlob) {
+          console.log(`🚗 Starting automatic license plate recognition for ${actualMode} mode...`)
+          
+          // Update status to show recognition in progress
+          if (vehicleInfoComponentRef.current) {
+            vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG NHẬN DẠNG BIỂN SỐ...", "#f59e0b")
+          }
+          
+          try {
+            // Use blob for recognition
+            const blob = plateImage?.blob || capturedImages.plateImageBlob
+            if (blob) {
+              console.log(`📤 Sending image for recognition, blob size: ${blob.size} bytes`)
+              const recognitionResult = await nhanDangBienSo(blob)
+              console.log(`✅ License plate recognition result:`, recognitionResult)
+              
+              // Extract license plate from result
+              let licensePlate = "N/A"
+              let confidence = 0
+              
+              if (recognitionResult && recognitionResult.ket_qua && recognitionResult.ket_qua.length > 0) {
+                const firstResult = recognitionResult.ket_qua[0]
+                console.log(`🔍 Processing OCR result:`, firstResult)
+                
+                if (firstResult.ocr) {
+                  if (typeof firstResult.ocr === 'string') {
+                    // Parse string format: "OcrResult(text='86B821322', confidence=0.913814127445221)"
+                    const textMatch = firstResult.ocr.match(/text='([^']+)'/)
+                    const confMatch = firstResult.ocr.match(/confidence=([0-9.]+)/)
+                    
+                    if (textMatch) licensePlate = textMatch[1]
+                    if (confMatch) confidence = parseFloat(confMatch[1])
+                  } else if (typeof firstResult.ocr === 'object') {
+                    licensePlate = firstResult.ocr.text || "N/A"
+                    confidence = firstResult.ocr.confidence || 0
+                  }
+                }
+              }
+              
+              console.log(`🏷️ Extracted license plate: ${licensePlate}, confidence: ${confidence}`)
+              
+              // Display license plate on camera panel
+              if (cameraComponentRef.current && licensePlate !== "N/A") {
+                const direction = actualMode === 'vao' ? 'in' : 'out'
+                console.log(`📺 Displaying license plate: ${licensePlate} on direction: ${direction}`)
+                cameraComponentRef.current.updateLicensePlateDisplay(licensePlate, null, direction)
+                
+                // Update status with license plate and confidence
+                if (vehicleInfoComponentRef.current) {
+                  const confidencePercent = (confidence * 100).toFixed(1)
+                  vehicleInfoComponentRef.current.updateCardReaderStatus(
+                    `BIỂN SỐ: ${licensePlate} (${confidencePercent}%)`, 
+                    "#10b981"
+                  )
+                }
+                
+                // Show recognition success toast
+                showToast(`🏷️ Nhận dạng biển số: ${licensePlate}`, 'success', 3000)
+              } else {
+                // Failed to recognize
+                if (vehicleInfoComponentRef.current) {
+                  vehicleInfoComponentRef.current.updateCardReaderStatus("KHÔNG NHẬN DẠNG ĐƯỢC BIỂN SỐ", "#ef4444")
+                }
+                showToast(`❌ Không nhận dạng được biển số`, 'warning', 3000)
+              }
+              
+            } else {
+              console.log(`❌ No blob available for license plate recognition`)
+              if (vehicleInfoComponentRef.current) {
+                vehicleInfoComponentRef.current.updateCardReaderStatus("KHÔNG CÓ ẢNH ĐỂ NHẬN DẠNG", "#ef4444")
+              }
+            }
+          } catch (recognitionError) {
+            console.error("❌ Error recognizing license plate:", recognitionError)
+            if (vehicleInfoComponentRef.current) {
+              vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI NHẬN DẠNG BIỂN SỐ", "#ef4444")
+            }
+            showToast(`❌ Lỗi nhận dạng biển số: ${recognitionError.message}`, 'error', 4000)
+          }
+        } else {
+          console.log(`❌ No plate image available for recognition`)
         }
 
         // Show success toast
@@ -466,11 +575,10 @@ const MainUI = () => {
           ? `✅ Đã lưu ảnh vào thư mục tự động cho thẻ: ${cardId} (${actualMode})`
           : `✅ Đã download ảnh tự động cho thẻ: ${cardId} (${actualMode})`
         
-        showToast(saveMessage, 'success', 4000)
+        showToast(saveMessage, 'success', 3000)
 
-        if ((plateImage?.url || plateImage) || (faceImage?.url || faceImage)) {
-          setShowImageCaptureModal(true)
-        }
+        // Don't open modal - images are displayed directly on panels
+        // setShowImageCaptureModal(true) // REMOVED - no longer show modal
       } catch (error) {
         console.error("❌ Error capturing images:", error)
         if (vehicleInfoComponentRef.current) {

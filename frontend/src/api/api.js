@@ -212,14 +212,8 @@ export async function layChinhSachGiaTheoLoaiPT(maLoaiPT) {
 }
 
 export async function themThe(uidThe, loaiThe, trangThai = "1") {
-  const payload = {
-    table: "pm_nc0003",
-    func: "add",
-    uidThe,
-    loaiThe,
-    trangThai,
-  }
-  return callApiWithAuth(payload)
+  // Wrapper function for backward compatibility
+  return themTheRFID({ uidThe, loaiThe, trangThai })
 }
 
 // -------------------- Pricing Policy Functions --------------------
@@ -292,16 +286,91 @@ export async function xoaPhienGuiXe(maPhien) {
   return callApiWithAuth(payload)
 }
 
-export async function layDanhSachThe() {
-  const payload = { table: "pm_nc0003", func: "data" };
-  return callApiWithAuth(payload);
-}
-
 // Force refresh auth token - để gọi khi cần làm mới token
 export async function refreshAuthToken() {
   console.log("Forcing auth token refresh...")
   authCache = null // Clear cache
   return await getAuthToken()
+}
+
+// -------------------- RFID Card Management Functions --------------------
+
+/**
+ * Lấy danh sách tất cả thẻ RFID
+ * @returns {Promise<Array>} Danh sách thẻ RFID
+ */
+export async function layDanhSachThe() {
+  const payload = { table: "pm_nc0003", func: "data" }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Thêm thẻ RFID mới
+ * @param {Object} theRFID - Thông tin thẻ RFID
+ * @param {string} theRFID.uidThe - UID của thẻ
+ * @param {string} theRFID.loaiThe - Loại thẻ
+ * @param {string} theRFID.trangThai - Trạng thái thẻ (mặc định: "1")
+ * @returns {Promise<Object>} Kết quả thêm thẻ
+ */
+export async function themTheRFID(theRFID) {
+  const payload = {
+    table: "pm_nc0003",
+    func: "add",
+    uidThe: theRFID.uidThe,
+    loaiThe: theRFID.loaiThe,
+    trangThai: theRFID.trangThai || "1",
+    // ngayPhatHanh sẽ được set tự động ở backend
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật thẻ RFID
+ * @param {Object} theRFID - Thông tin thẻ RFID cần cập nhật
+ * @param {string} theRFID.uidThe - UID của thẻ
+ * @param {string} theRFID.loaiThe - Loại thẻ
+ * @param {string} theRFID.trangThai - Trạng thái thẻ
+ * @param {string} [theRFID.ngayPhatHanh] - Ngày phát hành (optional)
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatTheRFID(theRFID) {
+  const payload = {
+    table: "pm_nc0003",
+    func: "edit",
+    uidThe: theRFID.uidThe,
+    loaiThe: theRFID.loaiThe,
+    trangThai: theRFID.trangThai,
+    ngayPhatHanh: theRFID.ngayPhatHanh, // Optional, sẽ dùng ngày hiện tại nếu không có
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa thẻ RFID
+ * @param {string|Array<string>} uidThe - UID thẻ hoặc mảng UID thẻ cần xóa
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaTheRFID(uidThe) {
+  const payload = {
+    table: "pm_nc0003", 
+    func: "delete",
+    uidThe: uidThe,
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Tìm thẻ đang có phiên gửi xe
+ * @param {string} uidThe - UID của thẻ
+ * @returns {Promise<Array>} Thông tin thẻ và phiên gửi xe
+ */
+export async function timTheDangCoPhien(uidThe) {
+  const payload = {
+    table: "pm_nc0003",
+    func: "timTheDangCoPhien", 
+    uidThe: uidThe,
+  }
+  return callApiWithAuth(payload)
 }
 
 // -------------------- License Plate Recognition API --------------------

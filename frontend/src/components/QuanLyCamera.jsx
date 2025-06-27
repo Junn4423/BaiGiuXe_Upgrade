@@ -56,12 +56,27 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
       
       const licensePlate = `29A-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`
 
-      // Display captured image on UI
-      if (ui && ui.displayCapturedImage) {
-        ui.displayCapturedImage(plateImagePath, 1)
+      // Display captured images on UI panels immediately
+      if (ui && ui.displayCapturedImage && plateImagePath) {
+        console.log(`📺 QuanLyCamera: Displaying plate image on panel 1`)
+        ui.displayCapturedImage(plateImagePath?.url || plateImagePath, 1)
+      } else {
+        console.log(`❌ QuanLyCamera: Cannot display plate image:`, {
+          hasUI: !!ui,
+          hasDisplayMethod: !!(ui && ui.displayCapturedImage),
+          hasPlateImage: !!plateImagePath
+        })
       }
-      if (ui && ui.displayCapturedFaceImage) {
-        ui.displayCapturedFaceImage(faceImagePath)
+      
+      if (ui && ui.displayCapturedFaceImage && faceImagePath) {
+        console.log(`📺 QuanLyCamera: Displaying face image on panel 2`)
+        ui.displayCapturedFaceImage(faceImagePath?.url || faceImagePath)
+      } else {
+        console.log(`❌ QuanLyCamera: Cannot display face image:`, {
+          hasUI: !!ui,
+          hasDisplayMethod: !!(ui && ui.displayCapturedFaceImage),
+          hasFaceImage: !!faceImagePath
+        })
       }
 
       console.log(`✅ All images captured and auto-saved for card ${cardId}`)

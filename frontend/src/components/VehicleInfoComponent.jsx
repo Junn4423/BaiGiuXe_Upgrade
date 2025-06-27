@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import "../assets/styles/VehicleInfoComponent.css"
 
-const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, workConfig }) => {
+const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType, onModeChange, workConfig }, ref) => {
   const [vehicleInfo, setVehicleInfo] = useState({
     ma_the: "",
     trang_thai: "",
@@ -23,6 +23,7 @@ const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, w
 
   // Update vehicle info
   const updateVehicleInfo = (newInfo) => {
+    console.log(`📝 VehicleInfoComponent.updateVehicleInfo called with:`, newInfo)
     setVehicleInfo((prev) => ({
       ...prev,
       ma_the: newInfo.ma_the || prev.ma_the,
@@ -32,6 +33,7 @@ const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, w
     if (newInfo.phi) {
       setParkingFee(newInfo.phi)
     }
+    console.log(`📝 Vehicle info updated - mã thẻ: ${newInfo.ma_the}`)
   }
 
   // Update card reader status
@@ -102,20 +104,17 @@ const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, w
   }
 
   // Expose methods to parent component
-  React.useImperativeHandle(
-    React.forwardRef(() => null),
-    () => ({
-      updateVehicleInfo,
-      updateCardReaderStatus,
-      updateVehicleStatus,
-      updateParkingFee,
-      clearVehicleInfo,
-      displayEntryVehicleImageInConfirmation,
-      displayPlaceholderEntryImage,
-      restoreOriginalConfirmationFrame,
-      showButtonsForVehicleType,
-    }),
-  )
+  React.useImperativeHandle(ref, () => ({
+    updateVehicleInfo,
+    updateCardReaderStatus,
+    updateVehicleStatus,
+    updateParkingFee,
+    clearVehicleInfo,
+    displayEntryVehicleImageInConfirmation,
+    displayPlaceholderEntryImage,
+    restoreOriginalConfirmationFrame,
+    showButtonsForVehicleType,
+  }))
 
   return (
     <div className="vehicle-info-container">
@@ -197,6 +196,6 @@ const VehicleInfoComponent = ({ currentMode, currentVehicleType, onModeChange, w
       </div>
     </div>
   )
-}
+})
 
 export default VehicleInfoComponent

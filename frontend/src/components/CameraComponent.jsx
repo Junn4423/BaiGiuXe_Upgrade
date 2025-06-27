@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from "react"
 import RTSPPlayer from "./RTSPPlayer"
 import "../assets/styles/CameraComponent.css"
 
-const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
+const CameraComponent = React.forwardRef(({ currentMode = "vao", zoneInfo }, ref) => {
   const [staticImageStates, setStaticImageStates] = useState({
     capturePanel1: false,
     capturePanel2: false,
@@ -92,6 +92,7 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
 
   // Display captured image on capture panel
   const displayCapturedImage = (imagePath, panelNumber = 1) => {
+    console.log(`📺 CameraComponent.displayCapturedImage called with:`, { imagePath, panelNumber })
     if (!imagePath) {
       console.log(`Image does not exist: ${imagePath}`)
       return
@@ -105,12 +106,13 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
     setStaticImageStates((prev) => ({ ...prev, [panelKey]: true }))
     setCameraFeeds((prev) => ({ ...prev, [panelKey]: imagePath }))
 
-    console.log(`Displayed captured image on ${panelKey}: ${imagePath}`)
-    restoreTimer.current = setTimeout(restoreCaptureFeeds, 6000)
+    console.log(`✅ Displayed captured image on ${panelKey}: ${imagePath}`)
+    restoreTimer.current = setTimeout(restoreCaptureFeeds, 10000) // Tăng thời gian hiển thị lên 10 giây
   }
 
   // Display captured face image
   const displayCapturedFaceImage = (imagePath) => {
+    console.log(`📺 CameraComponent.displayCapturedFaceImage called with:`, imagePath)
     displayCapturedImage(imagePath, 2)
   }
 
@@ -176,18 +178,15 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
   }, [])
 
   // Expose methods to parent component
-  React.useImperativeHandle(
-    React.forwardRef(() => null),
-    () => ({
-      displayCapturedImage,
-      displayCapturedFaceImage,
-      displayEntryImagesAfterExit,
-      updateLicensePlateDisplay,
-      restoreCaptureFeeds,
-      updateCameraFrame,
-      setCameraStatus: setCameraStatusState,
-    }),
-  )
+  React.useImperativeHandle(ref, () => ({
+    displayCapturedImage,
+    displayCapturedFaceImage,
+    displayEntryImagesAfterExit,
+    updateLicensePlateDisplay,
+    restoreCaptureFeeds,
+    updateCameraFrame,
+    setCameraStatus: setCameraStatusState,
+  }))
 
   const renderCameraFrame = (cameraKey, title, isActive, showLicensePlate = false, direction = null) => {
     const data = cameraData[cameraKey]
@@ -316,6 +315,6 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
       </div>
     </div>
   )
-}
+})
 
-export default React.memo(CameraComponent) // Memo để tránh re-render không cần thiết
+export default React.memo(CameraComponent)
