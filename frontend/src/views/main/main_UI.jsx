@@ -13,6 +13,7 @@ import BienSoLoiDialog from "../dialogs/BienSoLoiDialog"
 import CameraConfigDialog from "../dialogs/CameraConfigDialog"
 import ParkingZoneDialog from "../dialogs/ParkingZoneDialog"
 import PricingPolicyDialog from "../dialogs/PricingPolicyDialog"
+import RfidManagerDialog from "../dialogs/RfidManagerDialog"
 import ThemTheDialog from "../dialogs/ThemTheDialog"
 import WorkConfigDialog from "../dialogs/WorkConfigDialog"
 import ImageCaptureModal from "../../components/ImageCaptureModal"
@@ -52,6 +53,7 @@ const MainUI = () => {
   const [showWorkConfig, setShowWorkConfig] = useState(false)
   const [showAddCard, setShowAddCard] = useState(false)
   const [showLicensePlateError, setShowLicensePlateError] = useState(false)
+  const [showRfidManager, setShowRfidManager] = useState(false)
   
   // Card scanning and image capture
   const [showImageCaptureModal, setShowImageCaptureModal] = useState(false)
@@ -391,6 +393,7 @@ const MainUI = () => {
   const openPricingPolicy = () => setShowPricingPolicy(true)
   const openParkingZoneManagement = () => setShowParkingZone(true)
   const openWorkConfig = () => setShowWorkConfig(true)
+  const openRfidManager = () => setShowRfidManager(true)
 
   const reloadMainUI = () => {
     window.location.reload()
@@ -633,6 +636,9 @@ const MainUI = () => {
           <button className="toolbar-btn" onClick={openParkingZoneManagement}>
             KHU VỰC
           </button>
+          <button className="toolbar-btn" onClick={openRfidManager}>
+            THẺ RFID
+          </button>
           <button className="toolbar-btn logout-btn" onClick={logout}>
             ĐĂNG XUẤT
           </button>
@@ -721,6 +727,16 @@ const MainUI = () => {
       {showPricingPolicy && <PricingPolicyDialog onClose={() => setShowPricingPolicy(false)} />}
 
       {showParkingZone && <ParkingZoneDialog onClose={() => setShowParkingZone(false)} />}
+
+      {showRfidManager && (
+        <RfidManagerDialog
+          onClose={() => setShowRfidManager(false)}
+          onSave={() => {
+            console.log("RFID cards updated")
+            setShowRfidManager(false)
+          }}
+        />
+      )}
 
       {showAddCard && showAddCard.show && (
         <ThemTheDialog

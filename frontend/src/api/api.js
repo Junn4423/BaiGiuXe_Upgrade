@@ -462,3 +462,21 @@ export function blobToBase64(blob) {
     reader.readAsDataURL(blob)
   })
 }
+
+// -------------------- Card History Management Functions --------------------
+
+/**
+ * Lấy nhật ký gửi xe theo mã thẻ
+ * @param {string} maThe - Mã thẻ RFID cần xem nhật ký
+ * @param {string} [ngay] - Ngày cần xem (định dạng dd-mm-yyyy) hoặc 'all' để xem tất cả
+ * @returns {Promise<Object>} Danh sách nhật ký theo thẻ
+ */
+export async function layNhatKyTheoThe(maThe, ngay = null) {
+  const payload = {
+    table: "pm_nc0010",
+    func: "layNhatKyTheoThe",
+    maThe: maThe,
+    ngay: ngay
+  }
+  return callApiWithAuth(payload)
+}
