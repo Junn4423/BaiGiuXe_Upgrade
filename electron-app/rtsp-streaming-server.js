@@ -71,8 +71,29 @@ class RTSPStreamingServer {
       })
     }, 30000) // Check every 30 seconds
 
+    // Setup stream health check
+    const streamHealthCheck = setInterval(() => {
+      for (const [rtspUrl, streamInfo] of this.activeStreams) {
+        const timeSinceStart = Date.now() - streamInfo.startTime
+        const timeSinceLastData = Date.now() - streamInfo.lastDataTime
+        const hasClients = streamInfo.clients.size > 0
+        const isStuck = hasClients && timeSinceLastData > 30000 // No data for 30s
+        
+        if (isStuck && !streamInfo.isRestarting) {
+          console.log(`🔧 Stream appears stuck for ${rtspUrl} (${Math.round(timeSinceLastData/1000)}s since last data), restarting...`)
+          streamInfo.ffmpeg.kill("SIGTERM")
+        }
+        
+        // Log stream stats periodically
+        if (hasClients && timeSinceStart % 120000 < 45000) { // Every 2 minutes (within health check window)
+          console.log(`📊 Stream stats for ${rtspUrl}: ${streamInfo.dataCount} chunks, ${streamInfo.clients.size} clients, ${Math.round(timeSinceStart/1000)}s uptime`)
+        }
+      }
+    }, 45000) // Check every 45 seconds
+
     this.wss.on("close", () => {
       clearInterval(heartbeat)
+      clearInterval(streamHealthCheck)
     })
 
     // Cleanup on process exit
@@ -83,7 +104,29 @@ class RTSPStreamingServer {
   getOrCreateStream(rtspUrl, cameraId, ws) {
     let streamInfo = this.activeStreams.get(rtspUrl)
 
-    if (!streamInfo || streamInfo.ffmpeg.killed) {
+    // Check if we need to create a new stream
+    const needNewStream = !streamInfo || 
+                         streamInfo.ffmpeg.killed || 
+                         streamInfo.ffmpeg.exitCode !== null ||
+                         streamInfo.ffmpeg.signalCode !== null
+
+    if (needNewStream) {
+      // Preserve existing clients if stream exists
+      let existingClients = new Set()
+      if (streamInfo && streamInfo.clients) {
+        existingClients = new Set(streamInfo.clients)
+        console.log(`🔄 Preserving ${existingClients.size} existing clients for camera ${cameraId}`)
+      }
+
+      // Clean up old stream if exists
+      if (streamInfo) {
+        console.log(`🗑️ Cleaning up old stream for camera ${cameraId}`)
+        if (!streamInfo.ffmpeg.killed) {
+          streamInfo.ffmpeg.kill("SIGKILL")
+        }
+        this.activeStreams.delete(rtspUrl)
+      }
+
       // Create new FFmpeg process
       console.log(`🎬 Starting new FFmpeg process for camera ${cameraId}`)
 
@@ -140,11 +183,13 @@ class RTSPStreamingServer {
 
       streamInfo = {
         ffmpeg: ffmpeg,
-        clients: new Set(),
+        clients: existingClients, // Start with existing clients
         lastData: null,
         startTime: Date.now(),
         restartCount: 0,
         isRestarting: false,
+        dataCount: 0,
+        lastDataTime: Date.now(),
       }
 
       this.activeStreams.set(rtspUrl, streamInfo)
@@ -152,6 +197,14 @@ class RTSPStreamingServer {
       // Handle FFmpeg stdout (video data)
       ffmpeg.stdout.on("data", (chunk) => {
         streamInfo.lastData = chunk
+        streamInfo.dataCount++
+        streamInfo.lastDataTime = Date.now()
+        
+        // Log data flow periodically
+        if (streamInfo.dataCount % 100 === 0) {
+          console.log(`📊 Camera ${cameraId}: ${streamInfo.dataCount} chunks sent to ${streamInfo.clients.size} clients`)
+        }
+        
         // Broadcast to all clients for this stream
         streamInfo.clients.forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
@@ -223,9 +276,9 @@ class RTSPStreamingServer {
       ffmpeg.on("exit", (code, signal) => {
         console.log(`🔚 FFmpeg process for camera ${cameraId} exited with code ${code}, signal ${signal}`)
 
-        // Clean exit or manual kill - don't restart
-        if (code === 0 || signal === "SIGKILL") {
-          console.log(`✅ Clean exit for camera ${cameraId}, not restarting`)
+        // Manual kill - don't restart
+        if (signal === "SIGKILL") {
+          console.log(`🛑 Manual kill for camera ${cameraId}, not restarting`)
           this.activeStreams.delete(rtspUrl)
           return
         }
@@ -236,14 +289,21 @@ class RTSPStreamingServer {
           return
         }
 
-        // Only auto-restart if there are still clients and restart count is reasonable
-        if (streamInfo.clients.size > 0 && streamInfo.restartCount < 3) {
+        // Auto-restart if there are still clients and restart count is reasonable
+        if (streamInfo.clients.size > 0 && streamInfo.restartCount < 5) {
           streamInfo.isRestarting = true
           streamInfo.restartCount++
-          const delay = 3000 + streamInfo.restartCount * 2000 // 3s, 5s, 7s
+          
+          // Different delays based on exit code
+          let delay = 2000; // Default 2s delay
+          if (code === 0) {
+            delay = 1000; // Quick restart for clean exits (normal completion)
+          } else {
+            delay = 3000 + streamInfo.restartCount * 1000; // Incremental delay for errors
+          }
 
           console.log(
-            `🔄 Auto-restarting FFmpeg for camera ${cameraId} in ${delay}ms (attempt ${streamInfo.restartCount}/3)...`,
+            `🔄 Auto-restarting FFmpeg for camera ${cameraId} in ${delay}ms (attempt ${streamInfo.restartCount}/5, exit code: ${code})...`,
           )
 
           setTimeout(() => {

@@ -1,6 +1,8 @@
 // api.js - Chuyển đổi các hàm Python sang React (JS)
 // Lưu ý: Cần chỉnh sửa urlApi cho đúng endpoint backend của bạn
 
+import { api_BienSo } from './url'
+
 const urlApi = "http://192.168.1.94/parkinglot/services.sof.vn/index.php" // Thay đổi cho đúng backend
 const urlLoginApi = "http://192.168.1.94/parkinglot/login.sof.vn/index.php"
 
@@ -300,4 +302,94 @@ export async function refreshAuthToken() {
   console.log("Forcing auth token refresh...")
   authCache = null // Clear cache
   return await getAuthToken()
+}
+
+// -------------------- License Plate Recognition API --------------------
+
+/**
+ * Gửi ảnh biển số lên API nhận dạng
+ * @param {Blob|File} imageBlob - Ảnh biển số dạng Blob hoặc File
+ * @returns {Promise<Object>} - Kết quả nhận dạng biển số
+ */
+export async function nhanDangBienSo(imageBlob) {
+  try {
+    console.log("🚗 Bắt đầu nhận dạng biển số...", {
+      blob: imageBlob,
+      type: imageBlob.type,
+      size: imageBlob.size,
+      name: imageBlob.name || 'license_plate.jpg'
+    })
+    
+    // Chỉ sử dụng FormData method vì server không hỗ trợ Base64
+    return await nhanDangBienSoFormData(imageBlob)
+    
+  } catch (error) {
+    console.error("❌ Lỗi nhận dạng biển số:", error)
+    throw new Error(`Không thể nhận dạng biển số: ${error.message}`)
+  }
+}
+
+/**
+ * Gửi ảnh biển số lên API nhận dạng (phương pháp FormData)
+ * @param {Blob|File} imageBlob - Ảnh biển số dạng Blob hoặc File
+ * @returns {Promise<Object>} - Kết quả nhận dạng biển số
+ */
+async function nhanDangBienSoFormData(imageBlob) {
+  console.log("📤 Trying FormData method...")
+  
+  // Tạo FormData để gửi file - khớp với Postman
+  const formData = new FormData()
+  
+  // Đảm bảo file có đúng định dạng như Postman
+  const file = new File([imageBlob], 'license_plate.jpg', {
+    type: 'image/jpeg',
+    lastModified: Date.now()
+  })
+  
+  // API server mong đợi field tên là 'file' chứ không phải 'image'
+  formData.append('file', file)
+  
+  // Log FormData để debug
+  console.log("📤 FormData entries:")
+  for (const [key, value] of formData.entries()) {
+    console.log(`  ${key}:`, value instanceof File ? {
+      name: value.name,
+      type: value.type,
+      size: value.size
+    } : value)
+  }
+  
+  const response = await fetch(api_BienSo, {
+    method: 'POST',
+    body: formData,
+    // Không set Content-Type để browser tự động thêm boundary cho multipart/form-data
+  })
+  
+  console.log("📡 Response status (FormData):", response.status)
+  console.log("📡 Response headers:", Object.fromEntries(response.headers.entries()))
+  
+  if (!response.ok) {
+    // Log response text để debug lỗi 422
+    const errorText = await response.text()
+    console.error("❌ API Error Response (FormData):", errorText)
+    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+  }
+  
+  const result = await response.json()
+  console.log("✅ Kết quả nhận dạng biển số (FormData):", result)
+  return result
+}
+
+/**
+ * Convert blob/file to base64 string (utility function)
+ * @param {Blob|File} blob - File blob
+ * @returns {Promise<string>} - base64 string
+ */
+export function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
 }

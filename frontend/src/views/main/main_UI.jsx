@@ -14,12 +14,23 @@ import ParkingZoneDialog from "../dialogs/ParkingZoneDialog"
 import PricingPolicyDialog from "../dialogs/PricingPolicyDialog"
 import ThemTheDialog from "../dialogs/ThemTheDialog"
 import WorkConfigDialog from "../dialogs/WorkConfigDialog"
+import ImageCaptureModal from "../../components/ImageCaptureModal"
+import { useToast } from "../../components/Toast"
 import { layDanhSachCamera, layDanhSachKhu } from "../../api/api"
+import { cleanupObjectUrls, getEnvironmentInfo } from "../../utils/imageUtils"
 
 const MainUI = () => {
+  const { showToast, ToastContainer } = useToast()
+  
   // State management
   const [activeTab, setActiveTab] = useState("management")
   const [currentMode, setCurrentMode] = useState("vao")
+  const currentModeRef = useRef("vao") // Add ref to track current mode
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentModeRef.current = currentMode
+  }, [currentMode])
   const [currentVehicleType, setCurrentVehicleType] = useState("xe_may")
   const [currentZone, setCurrentZone] = useState(null)
   const [workConfig, setWorkConfig] = useState(null)
@@ -40,6 +51,18 @@ const MainUI = () => {
   const [showWorkConfig, setShowWorkConfig] = useState(false)
   const [showAddCard, setShowAddCard] = useState(false)
   const [showLicensePlateError, setShowLicensePlateError] = useState(false)
+  
+  // Card scanning and image capture
+  const [showImageCaptureModal, setShowImageCaptureModal] = useState(false)
+  const [capturedImages, setCapturedImages] = useState({ 
+    plateImage: null, 
+    faceImage: null,
+    plateImageBlob: null,
+    faceImageBlob: null 
+  })
+  const [scannedCardId, setScannedCardId] = useState("")
+  const [environmentInfo, setEnvironmentInfo] = useState(null)
+  const rfidBuffer = useRef("")
 
   // Initialize components and connections
   useEffect(() => {
@@ -59,6 +82,59 @@ const MainUI = () => {
       loadZoneInfo(workConfig.ma_khu_vuc)
     }
   }, [workConfig])
+
+  // Check environment and setup auto-save info
+  useEffect(() => {
+    const checkEnvironment = async () => {
+      try {
+        const envInfo = await getEnvironmentInfo()
+        setEnvironmentInfo(envInfo)
+        console.log('🖥️ Environment info:', envInfo)
+        
+        if (envInfo.isElectron) {
+          showToast(`✅ Electron App: Ảnh sẽ tự động lưu vào ${envInfo.saveLocation}`, 'success', 6000)
+        } else {
+          showToast(`🌐 Web App: Ảnh sẽ được download tự động`, 'info', 4000)
+        }
+      } catch (error) {
+        console.error('Error checking environment:', error)
+      }
+    }
+    checkEnvironment()
+  }, []) // Empty dependency array - chỉ chạy 1 lần khi mount
+
+  // Card scanning effect
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Ignore if typing in input fields
+      const tag = event.target.tagName.toLowerCase()
+      if (tag === "input" || tag === "textarea" || event.target.isContentEditable) return
+
+      // Ignore modifier keys
+      if (event.ctrlKey || event.altKey || event.metaKey) return
+
+      // Only allow digits and letters
+      if (/^[a-zA-Z0-9]$/.test(event.key)) {
+        rfidBuffer.current += event.key
+      } else if (event.key === "Enter") {
+        if (rfidBuffer.current.length > 0) {
+          handleCardScanned(rfidBuffer.current)
+          rfidBuffer.current = ""
+        }
+      } else if (event.key === "Backspace") {
+        rfidBuffer.current = rfidBuffer.current.slice(0, -1)
+      } else if (event.key === "F2") {
+        // Test hotkey - simulate card scan
+        event.preventDefault()
+        const testCardId = "0002468477"
+        console.log(`🧪 Testing card scan with: ${testCardId}`)
+        handleCardScanned(testCardId)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   // Load work configuration
   const loadWorkConfig = () => {
@@ -212,10 +288,15 @@ const MainUI = () => {
 
       // Utility methods
       showNotification: (title, message) => {
-        console.log(`📢 Notification: ${title} - ${message}`)
+        console.log(`📢 ${title}: ${message}`)
+        // Show as toast warning for camera fallback issues
+        if (title.includes('Camera') || message.includes('camera')) {
+          showToast(`⚠️ ${message}`, 'warning', 6000)
+        }
       },
       showError: (title, message) => {
         console.error(`❌ Error: ${title} - ${message}`)
+        showToast(`❌ ${title}: ${message}`, 'error', 5000)
       },
     }
 
@@ -256,7 +337,12 @@ const MainUI = () => {
       // Space: switch mode (vao <-> ra)
       if (event.code === "Space" || event.key === " ") {
         event.preventDefault()
-        setCurrentMode((prev) => (prev === "vao" ? "ra" : "vao"))
+        setCurrentMode((prev) => {
+          const newMode = prev === "vao" ? "ra" : "vao"
+          currentModeRef.current = newMode // Update ref immediately
+          console.log(`🔄 Mode changed from ${prev} to ${newMode} (via Space key)`)
+          return newMode
+        })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
@@ -265,7 +351,9 @@ const MainUI = () => {
 
   // Handle mode change
   const handleModeChange = (mode, vehicleType) => {
+    console.log(`🔄 Mode changed to ${mode}, vehicle type: ${vehicleType}`)
     setCurrentMode(mode)
+    currentModeRef.current = mode // Update ref immediately
     setCurrentVehicleType(vehicleType)
 
     // Clear vehicle info
@@ -334,6 +422,79 @@ const MainUI = () => {
     setCurrentVehicleType(config.loai_xe || "xe_may")
     setShowWorkConfig(false)
     console.log("✅ Work config updated:", config)
+  }
+
+  // Handle card scanning
+  const handleCardScanned = async (cardId) => {
+    const actualMode = currentModeRef.current // Use ref to get latest mode
+    console.log(`🎯 Card scanned: ${cardId} in mode: ${actualMode}`)
+    setScannedCardId(cardId)
+
+    // Update vehicle info with scanned card
+    if (vehicleInfoComponentRef.current) {
+      vehicleInfoComponentRef.current.updateVehicleInfo({ ma_the: cardId })
+      vehicleInfoComponentRef.current.updateCardReaderStatus("ĐANG CHỤP ẢNH...", "#f59e0b")
+    }
+
+    // Capture images from camera
+    if (cameraManagerRef.current) {
+      try {
+        console.log(`📸 Capturing images for card ${cardId} in ${actualMode} mode`)
+        
+        const [plateImage, licensePlate, faceImage] = await cameraManagerRef.current.captureImage(cardId, actualMode)
+        
+        console.log(`📷 Capture results:`, {
+          plateImage: plateImage ? { url: plateImage.url || plateImage, hasBlob: !!plateImage.blob } : null,
+          faceImage: faceImage ? { url: faceImage.url || faceImage, hasBlob: !!faceImage.blob } : null,
+          mode: actualMode
+        })
+        
+        setCapturedImages({
+          plateImage: plateImage?.url || plateImage, // Handle both new format and old format
+          faceImage: faceImage?.url || faceImage,
+          plateImageBlob: plateImage?.blob, // Store blob for API calls
+          faceImageBlob: faceImage?.blob
+        })
+
+        // Update status after capture
+        if (vehicleInfoComponentRef.current) {
+          vehicleInfoComponentRef.current.updateCardReaderStatus("ẢNH ĐÃ LƯU TỰ ĐỘNG", "#10b981")
+        }
+
+        // Show success toast
+        const saveMessage = environmentInfo?.isElectron 
+          ? `✅ Đã lưu ảnh vào thư mục tự động cho thẻ: ${cardId} (${actualMode})`
+          : `✅ Đã download ảnh tự động cho thẻ: ${cardId} (${actualMode})`
+        
+        showToast(saveMessage, 'success', 4000)
+
+        if ((plateImage?.url || plateImage) || (faceImage?.url || faceImage)) {
+          setShowImageCaptureModal(true)
+        }
+      } catch (error) {
+        console.error("❌ Error capturing images:", error)
+        if (vehicleInfoComponentRef.current) {
+          vehicleInfoComponentRef.current.updateCardReaderStatus("LỖI CHỤP ẢNH", "#ef4444")
+        }
+        showToast(`❌ Lỗi chụp ảnh cho thẻ: ${cardId} (${actualMode})`, 'error', 5000)
+      }
+    }
+  }
+
+  // Close image capture modal
+  const handleCloseImageModal = () => {
+    console.log('🔒 Closing image capture modal')
+    setShowImageCaptureModal(false)
+    setCapturedImages({ 
+      plateImage: null, 
+      faceImage: null,
+      plateImageBlob: null,
+      faceImageBlob: null 
+    })
+    setScannedCardId("")
+    
+    // Cleanup object URLs to prevent memory leaks
+    cleanupObjectUrls()
   }
 
   return (
@@ -474,6 +635,17 @@ const MainUI = () => {
           }}
         />
       )}
+
+      {/* Image Capture Modal */}
+      <ImageCaptureModal
+        isOpen={showImageCaptureModal}
+        onClose={handleCloseImageModal}
+        images={capturedImages}
+        cardId={scannedCardId}
+      />
+
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   )
 }

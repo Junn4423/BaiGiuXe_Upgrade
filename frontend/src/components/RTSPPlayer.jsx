@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 
-const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onConnected, className = "" }) => {
+const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onConnected, className = "", cameraType }) => {
   const videoRef = useRef(null)
   const wsRef = useRef(null)
   const mediaSourceRef = useRef(null)
@@ -30,13 +30,12 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
 
   // Memoize callbacks để tránh re-render
   const handleConnected = useCallback(() => {
-    console.log(`✅ Camera ${stableCameraId.current} connected successfully`)
     onConnected?.()
   }, [onConnected])
 
   const handleError = useCallback(
     (errorMsg) => {
-      console.error(`❌ Camera ${stableCameraId.current} error: ${errorMsg}`)
+
       onError?.(errorMsg)
     },
     [onError],
@@ -45,27 +44,26 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
   useEffect(() => {
     // Prevent multiple initializations
     if (initializingRef.current) {
-      console.log(`⚠️ Already initializing camera ${cameraId}, skipping...`)
+
       return
     }
 
     mountedRef.current = true
-    console.log(`🎥 RTSPPlayer useEffect triggered for camera ${cameraId}`)
-    console.log(`🔗 RTSP URL: ${rtspUrl}`)
+
 
     if (!rtspUrl) {
-      console.log("❌ No RTSP URL provided")
+
       setError("No RTSP URL provided")
       return
     }
 
     if (!rtspUrl.startsWith("rtsp://")) {
-      console.log("❌ Invalid RTSP URL format")
+
       setError("Invalid RTSP URL format")
       return
     }
 
-    console.log(`✅ Starting RTSP Player initialization for camera ${cameraId}`)
+  
     initializingRef.current = true
     reconnectAttemptsRef.current = 0
     isInitializedRef.current = false // Reset initialization flag
@@ -82,7 +80,6 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
 
         // Generate WebSocket URL with RTSP URL and camera ID
         const wsUrl = `ws://localhost:9999/?rtsp=${encodeURIComponent(stableRtspUrl.current)}&cameraId=${encodeURIComponent(stableCameraId.current || "unknown")}`
-        console.log(`🔌 Connecting to WebSocket for camera ${cameraId} (attempt ${reconnectAttemptsRef.current + 1})`)
 
         const ws = new WebSocket(wsUrl)
         wsRef.current = ws
@@ -91,7 +88,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
         // Add connection timeout
         const connectionTimeout = setTimeout(() => {
           if (ws.readyState === WebSocket.CONNECTING) {
-            console.error(`⏰ WebSocket connection timeout for camera ${cameraId}`)
+
             ws.close()
             if (mountedRef.current && initializingRef.current) {
               setError("Connection timeout - Check Electron app")
@@ -104,7 +101,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
           if (!mountedRef.current || !initializingRef.current) return
 
           clearTimeout(connectionTimeout)
-          console.log(`✅ WebSocket connected for camera ${cameraId}`)
+
           setIsConnected(true)
           setError(null)
           reconnectAttemptsRef.current = 0 // Reset reconnect attempts on successful connection
@@ -113,7 +110,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
 
         ws.onerror = (e) => {
           clearTimeout(connectionTimeout)
-          console.error(`❌ WebSocket error for camera ${cameraId}:`, e)
+
           if (mountedRef.current && initializingRef.current) {
             setError("WebSocket connection error")
             setIsConnected(false)
@@ -123,7 +120,6 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
 
         ws.onclose = (e) => {
           clearTimeout(connectionTimeout)
-          console.warn(`🔌 WebSocket closed for camera ${cameraId}: ${e.code} ${e.reason}`)
 
           if (!mountedRef.current || !initializingRef.current) return
 
@@ -132,9 +128,6 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
           // Auto-reconnect with exponential backoff, but only if component is still mounted
           if (e.code !== 1000 && stableRtspUrl.current && reconnectAttemptsRef.current < maxReconnectAttempts) {
             const delay = Math.min(10000 * Math.pow(2, reconnectAttemptsRef.current), 60000) // Max 60 seconds
-            console.log(
-              `🔄 Scheduling reconnect for camera ${cameraId} in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`,
-            )
 
             reconnectTimeoutRef.current = setTimeout(() => {
               if (mountedRef.current && initializingRef.current) {
@@ -154,23 +147,16 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
           try {
             const chunk = new Uint8Array(ev.data)
             const sourceBuffer = sourceBufferRef.current
-
-            console.log(`📦 Received video chunk for camera ${cameraId}: ${chunk.length} bytes`)
-
             if (!sourceBuffer) {
-              console.warn(`⚠️ SourceBuffer not available for camera ${cameraId}`)
               return
             }
 
             if (!isInitializedRef.current) {
-              console.warn(`⚠️ SourceBuffer not initialized for camera ${cameraId}`)
-              console.warn(`⚠️ isInitializedRef.current: ${isInitializedRef.current}`)
               return
             }
 
             // Limit queue size to prevent memory issues
             if (queueRef.current.length > 5) {
-              console.warn(`⚠️ Queue too large for camera ${cameraId}, clearing old chunks`)
               queueRef.current = queueRef.current.slice(-2) // Keep only last 2 chunks
             }
 
@@ -181,19 +167,17 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
             if (!sourceBuffer.updating && queueRef.current.length > 0) {
               try {
                 const nextChunk = queueRef.current.shift()
-                console.log(`📽️ Appending video chunk for camera ${cameraId}: ${nextChunk.length} bytes`)
+
                 sourceBuffer.appendBuffer(nextChunk)
               } catch (err) {
-                console.error(`❌ Error appending buffer for camera ${cameraId}:`, err)
+
                 queueRef.current = []
               }
             }
           } catch (err) {
-            console.error(`❌ Error processing WebSocket message for camera ${cameraId}:`, err)
           }
         }
       } catch (err) {
-        console.error(`❌ Error connecting WebSocket for camera ${cameraId}:`, err)
         if (mountedRef.current && initializingRef.current) {
           setError(err.message)
           handleError(err.message)
@@ -207,7 +191,6 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
       try {
         const video = videoRef.current
         if (!video) {
-          console.error(`❌ Video element not found for camera ${cameraId}`)
           // Retry after a short delay
           setTimeout(() => {
             if (mountedRef.current && initializingRef.current) {
@@ -216,9 +199,6 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
           }, 100)
           return
         }
-
-        console.log(`🎥 Video element ready for camera ${cameraId}`)
-        console.log(`🎥 Video readyState: ${video.readyState}`)
 
         // Reset state
         setIsConnected(false)
@@ -236,8 +216,6 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
           return
         }
 
-        console.log(`🔧 Creating MediaSource for camera ${cameraId}`)
-
         // Clean up any existing MediaSource
         if (mediaSourceRef.current) {
           try {
@@ -245,7 +223,6 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
               mediaSourceRef.current.endOfStream()
             }
           } catch (err) {
-            console.warn(`⚠️ Error cleaning up old MediaSource: ${err}`)
           }
         }
 
@@ -253,20 +230,13 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
         const mediaSource = new MediaSource()
         mediaSourceRef.current = mediaSource
 
-        console.log(`📺 MediaSource created, readyState: ${mediaSource.readyState}`)
 
         // Handle MediaSource events
         const handleSourceOpen = () => {
           if (!mountedRef.current || !initializingRef.current) {
-            console.log(`⚠️ Component unmounted during sourceopen for camera ${cameraId}`)
             return
           }
-
-          console.log(`📺 MediaSource opened for camera ${cameraId}`)
-          console.log(`📺 MediaSource readyState: ${mediaSource.readyState}`)
-
           const mime = 'video/mp4; codecs="avc1.42E01E"'
-          console.log(`🎬 Checking MIME support: ${mime}`)
 
           if (!MediaSource.isTypeSupported(mime)) {
             const errorMsg = `Unsupported MIME type: ${mime}`
@@ -277,23 +247,23 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
           }
 
           try {
-            console.log(`🎬 Creating SourceBuffer for camera ${cameraId}`)
+
             const sourceBuffer = mediaSource.addSourceBuffer(mime)
             sourceBufferRef.current = sourceBuffer
 
-            console.log(`✅ SourceBuffer created successfully for camera ${cameraId}`)
+
             isInitializedRef.current = true // Use ref instead of state
-            console.log(`✅ isInitializedRef.current set to: ${isInitializedRef.current}`)
+
 
             // Handle buffer updates
             const handleUpdateEnd = () => {
               if (!mountedRef.current || !initializingRef.current) return
 
-              console.log(`🔄 SourceBuffer updateend for camera ${cameraId}`)
+
 
               // Mark that we have video data
               if (!hasVideoData) {
-                console.log(`🎬 First video data processed for camera ${cameraId}`)
+
                 setHasVideoData(true)
               }
 
@@ -301,17 +271,17 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
               if (queueRef.current.length > 0 && !sourceBuffer.updating) {
                 try {
                   const nextChunk = queueRef.current.shift()
-                  console.log(`📽️ Processing next queued chunk for camera ${cameraId}: ${nextChunk.length} bytes`)
+
                   sourceBuffer.appendBuffer(nextChunk)
                 } catch (err) {
-                  console.error(`❌ Error appending queued buffer for camera ${cameraId}:`, err)
+
                   queueRef.current = []
                 }
               }
             }
 
             const handleSourceBufferError = (e) => {
-              console.error(`❌ SourceBuffer error for camera ${cameraId}:`, e)
+
               queueRef.current = []
             }
 
@@ -322,22 +292,22 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
             console.log(`🔌 SourceBuffer ready, connecting WebSocket for camera ${cameraId}`)
             connectWebSocket()
           } catch (err) {
-            console.error(`❌ Error creating source buffer for camera ${cameraId}:`, err)
+
             setError(err.message)
             handleError(err.message)
           }
         }
 
         const handleSourceClose = () => {
-          console.log(`📺 MediaSource closed for camera ${cameraId}`)
+
         }
 
         const handleSourceEnded = () => {
-          console.log(`📺 MediaSource ended for camera ${cameraId}`)
+
         }
 
         const handleSourceError = (e) => {
-          console.error(`📺 MediaSource error for camera ${cameraId}:`, e)
+
           setError("MediaSource error")
           handleError("MediaSource error")
         }
@@ -350,32 +320,28 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
 
         // Set video src to MediaSource object URL
         const objectURL = URL.createObjectURL(mediaSource)
-        console.log(`🔗 Setting video src to: ${objectURL} for camera ${cameraId}`)
+
         video.src = objectURL
 
         // Add video event listeners for debugging
         const handleLoadStart = () => {
-          console.log(`📹 Video loadstart for camera ${cameraId}`)
+
         }
 
         const handleLoadedMetadata = () => {
-          console.log(`📹 Video metadata loaded for camera ${cameraId}`)
-          console.log(`📹 Video dimensions: ${video.videoWidth}x${video.videoHeight}`)
-          console.log(`📹 Video duration: ${video.duration}`)
+
         }
 
         const handleCanPlay = () => {
-          console.log(`📹 Video can play for camera ${cameraId}`)
+
         }
 
         const handlePlaying = () => {
-          console.log(`📹 Video playing for camera ${cameraId}`)
+
         }
 
         const handleVideoError = (e) => {
-          console.error(`📹 Video error for camera ${cameraId}:`, e)
-          console.error(`📹 Video error code: ${video.error?.code}`)
-          console.error(`📹 Video error message: ${video.error?.message}`)
+
         }
 
         video.addEventListener("loadstart", handleLoadStart)
@@ -386,21 +352,18 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
 
         // Check if MediaSource is already open (race condition)
         if (mediaSource.readyState === "open") {
-          console.log(`📺 MediaSource already open for camera ${cameraId}, calling handler directly`)
+
           setTimeout(() => handleSourceOpen(), 0)
         }
 
         // Timeout fallback if sourceopen doesn't fire
         setTimeout(() => {
           if (mountedRef.current && initializingRef.current && !isInitializedRef.current) {
-            console.error(`⏰ MediaSource sourceopen timeout for camera ${cameraId}`)
-            console.error(`📺 MediaSource readyState: ${mediaSource.readyState}`)
-            console.error(`📹 Video readyState: ${video.readyState}`)
-            console.error(`📹 Video src: ${video.src}`)
+
 
             // If MediaSource is open but SourceBuffer not created, force create it
             if (mediaSource.readyState === "open" && !sourceBufferRef.current) {
-              console.log(`🔧 Force creating SourceBuffer for camera ${cameraId}`)
+
               handleSourceOpen()
             } else {
               setError("MediaSource initialization timeout")
@@ -409,7 +372,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
           }
         }, 5000) // 5 second timeout
       } catch (err) {
-        console.error(`❌ Error initializing player for camera ${cameraId}:`, err)
+
         setError(err.message)
         handleError(err.message)
       }
@@ -463,6 +426,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
         muted
         playsInline
         controls={false}
+        data-camera-type={cameraType}
         style={{
           width: "100%",
           height: "100%",

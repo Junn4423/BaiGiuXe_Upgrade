@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require("electron")
+const { app, BrowserWindow, ipcMain, dialog } = require("electron")
 const path = require("path")
+const fs = require("fs").promises
 const RTSPStreamingServer = require("./rtsp-streaming-server")
 
 let mainWindow
@@ -16,6 +17,7 @@ function createWindow() {
       contextIsolation: true,
       enableRemoteModule: false,
       webSecurity: false, // Allow RTSP connections
+      preload: path.join(__dirname, "preload.js"),
     },
   })
 
@@ -70,5 +72,81 @@ app.on("before-quit", () => {
   if (rtspServer) {
     console.log("Stopping RTSP streaming server before quit...")
     rtspServer.stop()
+  }
+})
+
+// ==================== IPC HANDLERS FOR IMAGE SAVING ====================
+
+// IPC Handler for saving images automatically
+ipcMain.handle('save-image', async (event, { data, fileName, folder }) => {
+  try {
+    // Get app data directory or user documents
+    const documentsPath = app.getPath('documents')
+    const appFolderPath = path.join(documentsPath, 'ParkingLotApp')
+    const fullFolderPath = path.join(appFolderPath, folder)
+    
+    // Create directory if it doesn't exist
+    await fs.mkdir(fullFolderPath, { recursive: true })
+    
+    // Full file path
+    const filePath = path.join(fullFolderPath, fileName)
+    
+    // Convert array back to buffer
+    const buffer = Buffer.from(data)
+    
+    // Write file
+    await fs.writeFile(filePath, buffer)
+    
+    console.log(`✅ Image auto-saved to: ${filePath}`)
+    return filePath
+  } catch (error) {
+    console.error('❌ Error auto-saving image:', error)
+    throw error
+  }
+})
+
+// IPC Handler for choosing custom save directory
+ipcMain.handle('choose-save-directory', async () => {
+  try {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory', 'createDirectory'],
+      title: 'Chọn thư mục lưu ảnh',
+      buttonLabel: 'Chọn thư mục'
+    })
+    
+    if (!result.canceled && result.filePaths.length > 0) {
+      return result.filePaths[0]
+    }
+    return null
+  } catch (error) {
+    console.error('❌ Error choosing directory:', error)
+    throw error
+  }
+})
+
+// IPC Handler for getting app paths
+ipcMain.handle('get-app-paths', async () => {
+  const documentsPath = app.getPath('documents')
+  const appFolderPath = path.join(documentsPath, 'ParkingLotApp')
+  
+  return {
+    userData: app.getPath('userData'),
+    documents: documentsPath,
+    downloads: app.getPath('downloads'),
+    desktop: app.getPath('desktop'),
+    appFolder: appFolderPath,
+    defaultImageFolder: path.join(appFolderPath, 'assets', 'imgAnhChup')
+  }
+})
+
+// IPC Handler for opening file explorer to show saved files
+ipcMain.handle('show-in-explorer', async (event, filePath) => {
+  try {
+    const { shell } = require('electron')
+    await shell.showItemInFolder(filePath)
+    return true
+  } catch (error) {
+    console.error('❌ Error opening explorer:', error)
+    return false
   }
 })

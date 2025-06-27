@@ -31,6 +31,17 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
 
   const restoreTimer = useRef(null)
 
+  // Convert camera key to camera type format for video element identification
+  const getCameraTypeFromKey = (cameraKey) => {
+    const keyMap = {
+      'cameraInPlate': 'vao-plate',
+      'cameraInFace': 'vao-face', 
+      'cameraOutPlate': 'ra-plate',
+      'cameraOutFace': 'ra-face'
+    }
+    return keyMap[cameraKey] || cameraKey
+  }
+
   // Memoize camera data để tránh re-render không cần thiết
   const cameraData = useMemo(() => {
     if (!zoneInfo) return {}
@@ -233,6 +244,7 @@ const CameraComponent = ({ currentMode = "vao", zoneInfo }) => {
               onConnected={() => handleCameraConnected(cameraKey)}
               onError={(error) => handleCameraError(cameraKey, error)}
               className="live-feed"
+              cameraType={getCameraTypeFromKey(cameraKey)} // Convert cameraKey to proper format
             />
           ) : (
             <div
