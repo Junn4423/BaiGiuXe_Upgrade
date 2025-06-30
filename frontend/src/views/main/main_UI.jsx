@@ -614,8 +614,9 @@ const MainUI = () => {
               // Get dynamic data from APIs
               console.log(`🔍 Loading dynamic configuration data...`)
               
-              // Import APIs
-              const { layChinhSachGiaTheoLoaiPT, layALLLoaiPhuongTien } = await import("../../api/api")
+              // Import APIs and validation utilities
+              const { layChinhSachMacDinhChoLoaiPT } = await import("../../api/api")
+              const { validateAndEnsurePricingPolicy, themPhienGuiXeWithValidation } = await import("../../utils/sessionValidation")
               
               // Determine vehicle type based on work config
               let vehicleTypeCode = "XE_MAY" // default
@@ -630,36 +631,57 @@ const MainUI = () => {
               
               console.log(`🚗 Vehicle type determined: ${vehicleTypeCode}`)
               
-              // Get pricing policy for vehicle type
-              let pricingPolicy = null
-              try {
-                const policies = await layChinhSachGiaTheoLoaiPT(vehicleTypeCode)
-                console.log(`💰 Pricing policies for ${vehicleTypeCode}:`, policies)
-                
-                if (policies && policies.length > 0) {
-                  // Use first matching policy or a specific one based on criteria
-                  pricingPolicy = policies[0].lv001 // lv001 is policy ID
-                  console.log(`✅ Selected pricing policy: ${pricingPolicy}`)
-                } else {
-                  console.warn(`⚠️ No pricing policy found for vehicle type: ${vehicleTypeCode}`)
-                  // Fallback to default based on vehicle type
-                  pricingPolicy = vehicleTypeCode === "XE_MAY" ? "CS_XEMAY_4H" : "CS_OTO_4H"
-                }
-              } catch (policyError) {
-                console.error("❌ Error loading pricing policy:", policyError)
-                // Use fallback policy
-                pricingPolicy = vehicleTypeCode === "XE_MAY" ? "CS_XEMAY_4H" : "CS_OTO_4H"
+              // Get pricing policy using helper function (logic from python-example)
+              console.log(`🔍 Getting pricing policy for workConfig.loai_xe: ${workConfig?.loai_xe}, vehicleTypeCode: ${vehicleTypeCode}`)
+              const rawPricingPolicy = await layChinhSachMacDinhChoLoaiPT(workConfig?.loai_xe, vehicleTypeCode)
+              console.log(`✅ Raw pricing policy from helper: ${rawPricingPolicy}`)
+              
+              // Apply validation middleware to ensure policy is always valid
+              const pricingPolicy = validateAndEnsurePricingPolicy(rawPricingPolicy, workConfig?.loai_xe, vehicleTypeCode)
+              console.log(`✅ Final validated pricing policy: ${pricingPolicy}`)
+              
+              // Extra validation to ensure we have a valid policy
+              if (!pricingPolicy || pricingPolicy === "" || pricingPolicy === null || pricingPolicy === undefined) {
+                console.error(`❌ CRITICAL: Got invalid pricing policy after validation: ${pricingPolicy}`)
+                console.error(`❌ workConfig:`, workConfig)
+                console.error(`❌ vehicleTypeCode:`, vehicleTypeCode)
+                console.error(`❌ rawPricingPolicy:`, rawPricingPolicy)
+                throw new Error("Không thể xác định chính sách giá phù hợp. Vui lòng kiểm tra cấu hình.")
               }
               
-              // Get entry gate from zone info or work config
-              let entryGate = "GATE01" // default
+              // Get entry gate from zone info, work config, or API (pm_nc0007)
+              let entryGate = null
               if (zoneInfo?.cameraVao && zoneInfo.cameraVao.length > 0) {
                 // Use first available entry camera as gate identifier
-                entryGate = zoneInfo.cameraVao[0].tenCamera || zoneInfo.cameraVao[0].maCamera || "GATE01"
+                entryGate = zoneInfo.cameraVao[0].tenCamera || zoneInfo.cameraVao[0].maCamera
               } else if (workConfig?.entry_gate) {
                 entryGate = workConfig.entry_gate
               }
-              
+              // Nếu vẫn chưa có entryGate, lấy từ bảng pm_nc0007
+              if (!entryGate) {
+                try {
+                  const { layDanhSachCong } = await import("../../api/api")
+                  const gateRes = await layDanhSachCong()
+                  let gates = gateRes?.data || gateRes || []
+                  if (Array.isArray(gates) && gates.length > 0) {
+                    // Ưu tiên cổng thuộc zone hiện tại nếu có
+                    if (zoneInfo?.maKhuVuc) {
+                      const zoneGate = gates.find(g => g.maKhuVuc === zoneInfo.maKhuVuc)
+                      if (zoneGate) entryGate = zoneGate.tenCong || zoneGate.maCong
+                    }
+                    // Nếu vẫn chưa có, lấy cổng đầu tiên
+                    if (!entryGate) entryGate = gates[0].tenCong || gates[0].maCong
+                  } else {
+                    entryGate = "GATE_UNKNOWN"
+                  }
+                  console.log("🔑 Entry gate lấy từ pm_nc0007:", entryGate)
+                } catch (err) {
+                  console.error("❌ Không lấy được danh sách cổng từ pm_nc0007:", err)
+                  entryGate = "GATE_UNKNOWN"
+                }
+              }
+              if (!entryGate) entryGate = "GATE_UNKNOWN"
+
               // Get parking spot from work config or generate based on zone
               let parkingSpot = "A01" // default
               if (workConfig?.parking_spot) {
@@ -686,23 +708,57 @@ const MainUI = () => {
               })
 
               // Prepare session data with dynamic values
+              const currentTime = new Date()
+              
+              // Final safety check for pricing policy
+              let finalPricingPolicy = pricingPolicy
+              if (!finalPricingPolicy || finalPricingPolicy.trim() === '') {
+                console.error(`❌ CRITICAL: pricingPolicy is invalid: ${finalPricingPolicy}`)
+                // Emergency fallback based on vehicleTypeCode
+                finalPricingPolicy = (vehicleTypeCode === "OT") ? "CS_OTO_4H" : "CS_XEMAY_4H"
+                console.log(`🚨 Emergency fallback policy: ${finalPricingPolicy}`)
+              }
+              
               const sessionData = {
                 uidThe: cardId,
                 bienSo: recognizedLicensePlate || "",
                 viTriGui: parkingSpot,
-                chinhSach: pricingPolicy,
+                chinhSach: finalPricingPolicy,
                 congVao: entryGate,
-                gioVao: new Date().toISOString(),
+                gioVao: currentTime.toISOString().slice(0, 19).replace("T", " "), // Format: YYYY-MM-DD HH:mm:ss
                 anhVao: plateImage?.url || plateImage || "",
                 anhMatVao: faceImage?.url || faceImage || "",
-                camera_id: cameraId
+                trangThai: "TRONG_BAI", // Explicitly set status
+                camera_id: cameraId,
+                plate_match: recognizedLicensePlate ? 1 : 0, // 1 if license plate recognized, 0 otherwise
+                plate: recognizedLicensePlate || ""
               }
 
               console.log(`💾 Session data to save (with dynamic config):`, sessionData)
+              
+              // Extra detailed logging for debugging
+              console.log(`🔍 DEBUGGING SESSION DATA:`)
+              console.log(`  - uidThe: "${sessionData.uidThe}" (type: ${typeof sessionData.uidThe})`)
+              console.log(`  - chinhSach: "${sessionData.chinhSach}" (type: ${typeof sessionData.chinhSach})`)
+              console.log(`  - congVao: "${sessionData.congVao}" (type: ${typeof sessionData.congVao})`)
+              console.log(`  - gioVao: "${sessionData.gioVao}" (type: ${typeof sessionData.gioVao})`)
 
-              // Import and call API
-              const { themPhienGuiXe } = await import("../../api/api")
-              const result = await themPhienGuiXe(sessionData)
+              // Validate required fields before sending
+              const requiredFields = ['uidThe', 'chinhSach', 'congVao', 'gioVao']
+              const missingFields = requiredFields.filter(field => !sessionData[field] || sessionData[field] === "" || sessionData[field] === null || sessionData[field] === undefined)
+              
+              if (missingFields.length > 0) {
+                console.error(`❌ MISSING FIELDS DETECTED:`, missingFields)
+                console.error(`❌ FULL SESSION DATA:`, sessionData)
+                throw new Error(`Thiếu thông tin bắt buộc: ${missingFields.join(', ')}`)
+              }
+
+              console.log(`✅ All required fields present, sending to API...`)
+
+              // Use enhanced API call with built-in validation
+              const result = await themPhienGuiXeWithValidation(sessionData)
+              
+              console.log(`📥 API Response:`, result)
 
               if (result && result.success) {
                 console.log(`✅ Parking session saved successfully:`, result)

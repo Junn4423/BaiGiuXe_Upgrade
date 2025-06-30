@@ -39,17 +39,22 @@ const QuanLyXe = () => {
     const session = {
       uidThe: cardId,
       bienSo: licensePlate || "",
-      viTriGui: null,
-      chinhSach: policy,
-      congVao: entryGate,
+      viTriGui: "A01", // Default parking spot - should be passed from UI
+      chinhSach: policy || "CS_XEMAY_4H", // Default policy if not provided
+      congVao: entryGate || "GATE01", // Default gate if not provided
       gioVao: entryTime,
       anhVao: imagePath || "",
       anhMatVao: faceImagePath || "",
-      camera_id: cameraId,
+      trangThai: "TRONG_BAI", // Explicitly set status
+      camera_id: cameraId || "CAM001", // Default camera ID if not provided
+      plate_match: licensePlate ? 1 : 0, // 1 if license plate provided, 0 otherwise
+      plate: licensePlate || ""
     }
 
     try {
+      console.log(`📤 Calling themPhienGuiXe with data:`, session)
       const apiResult = await themPhienGuiXe(session)
+      console.log(`📥 themPhienGuiXe API response:`, apiResult)
 
       let success = false
       let errorMessage = ""
@@ -60,6 +65,8 @@ const QuanLyXe = () => {
       } else {
         success = Boolean(apiResult)
       }
+
+      console.log(`🔍 Processing result - Success: ${success}, Error: ${errorMessage}`)
 
       if (success) {
         setActiveParkingSessions((prev) => ({ ...prev, [cardId]: session }))

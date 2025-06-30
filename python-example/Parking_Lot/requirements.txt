@@ -1,0 +1,8 @@
+#lenh cai dat thu vien can co cua chuong trinh pip install -r requirements.txt
+pydantic
+pillow
+opencv-python
+requests
+numpy
+keyboard
+mysql-connector-python 

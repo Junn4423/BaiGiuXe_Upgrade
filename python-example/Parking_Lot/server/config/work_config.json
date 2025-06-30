@@ -1,0 +1,13 @@
+{
+  "zone": "Khu A",
+  "zone_data": {
+    "maKhuVuc": "K0001",
+    "tenKhuVuc": "Khu A",
+    "moTa": "Tầng trệt",
+    "cameras": [],
+    "gates": []
+  },
+  "vehicle_type": "Xe máy",
+  "loai_xe": "xe_may",
+  "ma_khu_vuc": "K0001"
+}

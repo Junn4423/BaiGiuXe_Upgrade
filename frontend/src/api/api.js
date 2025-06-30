@@ -158,15 +158,25 @@ export async function themPhienGuiXe(session) {
     table: "pm_nc0009",
     func: "add",
     uidThe: session.uidThe,
-    bienSo: session.bienSo,
+    bienSo: session.bienSo || "",
     viTriGui: session.viTriGui,
     chinhSach: session.chinhSach,
     congVao: session.congVao,
     gioVao: session.gioVao,
-    anhVao: session.anhVao,
-    anhMatVao: session.anhMatVao,
+    anhVao: session.anhVao || "",
+    anhMatVao: session.anhMatVao || "",
+    trangThai: session.trangThai || "TRONG_BAI",
     camera_id: session.camera_id,
+    plate_match: session.plate_match || 0,
+    plate: session.plate || ""
   }
+  // Remove undefined/null values to avoid API issues
+  Object.keys(payload).forEach(key => {
+    if (payload[key] === undefined || payload[key] === null) {
+      delete payload[key]
+    }
+  })
+  console.log("📤 Sending themPhienGuiXe payload:", payload)
   return callApiWithAuth(payload)
 }
 
@@ -235,9 +245,16 @@ export async function capNhatChinhSachGia(maChinhSach, chinhSach) {
   return callApiWithAuth(payload)
 }
 
+
 export async function xoaChinhSachGia(maChinhSach) {
   console.log("xoaChinhSachGia called with:", maChinhSach)
   const payload = { table: "pm_nc0008", func: "deletePolicy", policyId: maChinhSach }
+  return callApiWithAuth(payload)
+}
+
+//lay danh sach cong
+export async function layDanhSachCong() {
+  const payload = { table: "pm_nc0007", func: "data" }
   return callApiWithAuth(payload)
 }
 
@@ -480,3 +497,80 @@ export async function layNhatKyTheoThe(maThe, ngay = null) {
   }
   return callApiWithAuth(payload)
 }
+
+// -------------------- Helper Functions --------------------
+
+/**
+ * Tự động chọn chính sách mặc định theo loại phương tiện
+ * Logic tương tự như trong python-example/QuanLyXe.py
+ * @param {string} loaiXe - Loại xe từ WorkConfig ("xe_may" hoặc "oto") 
+ * @param {string} maLoaiPT - Mã loại phương tiện từ API ("XE_MAY" hoặc "OT")
+ * @returns {Promise<string>} - Mã chính sách phù hợp
+ */
+export async function layChinhSachMacDinhChoLoaiPT(loaiXe, maLoaiPT) {
+  console.log(`🔍 Đang lấy chính sách mặc định cho loại xe: ${loaiXe}, mã loại PT: ${maLoaiPT}`)
+  
+  try {
+    // Bước 1: Thử lấy chính sách theo mã loại PT từ API
+    if (maLoaiPT) {
+      console.log(`🌐 Đang gọi API để lấy chính sách cho ${maLoaiPT}...`)
+      const policies = await layChinhSachGiaTheoLoaiPT(maLoaiPT)
+      console.log(`💰 Chính sách tìm được từ API cho ${maLoaiPT}:`, policies)
+      
+      if (policies && policies.length > 0) {
+        const selectedPolicy = policies[0].lv001 // lv001 là mã chính sách
+        if (selectedPolicy && selectedPolicy.trim() !== '') {
+          console.log(`✅ Chọn chính sách từ API: ${selectedPolicy}`)
+          return selectedPolicy
+        } else {
+          console.log(`⚠️ Chính sách từ API không hợp lệ: ${selectedPolicy}`)
+        }
+      } else {
+        console.log(`⚠️ Không có chính sách nào từ API cho ${maLoaiPT}`)
+      }
+    }
+    
+    // Bước 2: Fallback theo loại xe từ WorkConfig (giống python-example)
+    let fallbackPolicy = "CS_XEMAY_4H" // Mặc định cho xe máy
+    
+    if (loaiXe === "oto" || maLoaiPT === "OT") {
+      fallbackPolicy = "CS_OTO_4H"
+    } else if (loaiXe === "xe_may" || maLoaiPT === "XE_MAY") {
+      fallbackPolicy = "CS_XEMAY_4H"
+    }
+    
+    console.log(`⚠️ Không tìm thấy chính sách từ API, sử dụng fallback: ${fallbackPolicy}`)
+    
+    // Đảm bảo fallback policy không bao giờ là null/empty
+    if (!fallbackPolicy || fallbackPolicy.trim() === '') {
+      fallbackPolicy = "CS_XEMAY_4H" // Mặc định cuối cùng
+      console.log(`🔧 Sử dụng mặc định cuối cùng: ${fallbackPolicy}`)
+    }
+    
+    return fallbackPolicy
+    
+  } catch (error) {
+    console.error("❌ Lỗi khi lấy chính sách:", error)
+    
+    // Fallback cuối cùng dựa vào loại xe
+    let fallbackPolicy = "CS_XEMAY_4H" // Mặc định
+    
+    if (loaiXe === "oto" || maLoaiPT === "OT") {
+      fallbackPolicy = "CS_OTO_4H"
+    } else if (loaiXe === "xe_may" || maLoaiPT === "XE_MAY") {
+      fallbackPolicy = "CS_XEMAY_4H"
+    }
+    
+    console.log(`⚠️ Sử dụng chính sách fallback cuối cùng: ${fallbackPolicy}`)
+    
+    // Đảm bảo không bao giờ trả về null/empty
+    if (!fallbackPolicy || fallbackPolicy.trim() === '') {
+      fallbackPolicy = "CS_XEMAY_4H"
+      console.log(`🔧 Sử dụng mặc định tuyệt đối: ${fallbackPolicy}`)
+    }
+    
+    return fallbackPolicy
+  }
+}
+
+// -------------------- Authentication helpers --------------------

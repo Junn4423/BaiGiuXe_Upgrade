@@ -1,10 +1,10 @@
 import requests
 import json
 from typing import List, Dict, Any
-from backend import schemas as models
-import backend.url as url
+import models
+import server.url as url
 from server.config.api_config import call_api_with_auth
-from backend.schemas import KhuVuc
+from models import KhuVuc
 
 
 def handle_api_response(response: requests.Response) -> Dict[str, Any]:
@@ -111,47 +111,26 @@ def themPhienGuiXe(session: models.PhienGuiXe) -> Dict[str, Any]:
     Trả về dict chứa success và message từ API
     """
     api = url.url_api
-    
-    # Validate required fields
-    if not session.uidThe:
-        return {"success": False, "message": "Thiếu mã thẻ (uidThe)"}
-    
-    if not session.chinhSach:
-        return {"success": False, "message": "Thiếu chính sách giá (chinhSach)"}
-    
-    if not session.congVao:
-        return {"success": False, "message": "Thiếu thông tin cổng vào (congVao)"}
-    
-    if not session.gioVao:
-        return {"success": False, "message": "Thiếu thông tin giờ vào (gioVao)"}
-    
     payload = {
         "table": "pm_nc0009",
         "func": "add",
         "uidThe": session.uidThe,
-        "bienSo": session.bienSo or "",
-        "viTriGui": getattr(session, "viTriGui", "A01"),  # Default parking spot
+        "bienSo": session.bienSo,
+        "viTriGui": getattr(session, "viTriGui", None),
         "chinhSach": session.chinhSach,
         "congVao": session.congVao,
         "gioVao": session.gioVao,
-        "anhVao": session.anhVao or "",
-        "anhMatVao": session.anhMatVao or "",
-        "trangThai": getattr(session, "trangThai", "TRONG_BAI"),
-        "camera_id": getattr(session, "camera_id", None),
-        "plate_match": getattr(session, "plate_match", None),
-        "plate": getattr(session, "plate", None),
+        "anhVao": session.anhVao,
+        "anhMatVao": session.anhMatVao,
+        "camera_id": getattr(session, "camera_id", None), 
     }
-    # Remove None values but keep empty strings
     payload = {k: v for k, v in payload.items() if v is not None}
-    
-    print("📤 Backend sending themPhienGuiXe payload:", payload)
-    print(f"📋 Required fields check: uidThe={session.uidThe}, chinhSach={session.chinhSach}, congVao={session.congVao}, gioVao={session.gioVao}")
     
     try:
         res = requests.post(api, json=payload)
         return handle_api_response(res)
     except Exception as e:
-        print("Lỗi gọi API themPhienGuiXe:", str(e))
+        print("Lỗi gọi API:", str(e))
         print("Status code:", res.status_code if 'res' in locals() else 'N/A')
         print("Response text:", res.text if 'res' in locals() else 'N/A')
         # Trả về dict với thông tin lỗi
@@ -430,42 +409,6 @@ def layChinhSachGiaTheoLoaiPT(ma_loai_pt: str) -> List[Dict[str, Any]]:
     except Exception as e:
         print(f"Lỗi lấy chính sách giá theo loại PT {ma_loai_pt}: {str(e)}")
         return []
-
-def layChinhSachMacDinhChoLoaiPT(ma_loai_pt: str) -> str:
-    """
-    Lấy chính sách giá mặc định cho loại phương tiện
-    
-    Args:
-        ma_loai_pt (str): Mã loại phương tiện (VD: "XE_MAY", "OT")
-        
-    Returns:
-        str: Mã chính sách mặc định
-    """
-    try:
-        # Lấy danh sách chính sách cho loại phương tiện
-        policies = layChinhSachGiaTheoLoaiPT(ma_loai_pt)
-        
-        if policies and len(policies) > 0:
-            # Trả về chính sách đầu tiên (có thể cải thiện logic chọn chính sách)
-            return policies[0].get('lv001', '')
-        else:
-            # Fallback to default policies based on vehicle type
-            if ma_loai_pt == "XE_MAY":
-                return "CS_XEMAY_4H"
-            elif ma_loai_pt == "OT":
-                return "CS_OTO_4H"
-            else:
-                return "CS_DEFAULT"
-                
-    except Exception as e:
-        print(f"Lỗi lấy chính sách mặc định cho loại PT {ma_loai_pt}: {str(e)}")
-        # Return fallback policy
-        if ma_loai_pt == "XE_MAY":
-            return "CS_XEMAY_4H"
-        elif ma_loai_pt == "OT":
-            return "CS_OTO_4H"
-        else:
-            return "CS_DEFAULT"
 
 def layDanhSachKhuVuc():
     """
