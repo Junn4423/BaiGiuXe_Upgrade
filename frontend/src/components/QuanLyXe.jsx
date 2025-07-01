@@ -1,21 +1,33 @@
 "use client"
 
-import React, { useState } from "react"
-import {
-  themPhienGuiXe,
-  loadPhienGuiXeTheoMaThe,
-  capNhatPhienGuiXe,
-  tinhPhiGuiXe,
-  loadPhienGuiXeTheoMaThe_XeRa,
-} from "../api/api"
+import React, { useState, useEffect } from "react"
+import { useVehicleManager } from "../hooks/useVehicleManager"
+import LicensePlateErrorDialog from "./LicensePlateErrorDialog"
+import VehicleStatusNotification, { VehicleNotificationContainer } from "./VehicleStatusNotification"
 
 const QuanLyXe = () => {
-  const [activeParkingSessions, setActiveParkingSessions] = useState({})
-  const [vehicles, setVehicles] = useState([])
-  const [ui, setUi] = useState(null)
+  const {
+    vehicles,
+    activeSessions,
+    isProcessing,
+    lastError,
+    setUI,
+    processVehicleEntry,
+    processVehicleExit,
+    getVehicleByCardId,
+    isVehicleParked,
+    getParkingStatistics,
+    clearError,
+    refreshVehicleData
+  } = useVehicleManager();
+
+  const [ui, setUiState] = useState(null)
+  const [showLicensePlateDialog, setShowLicensePlateDialog] = useState(false)
+  const [licensePlateDialogData, setLicensePlateDialogData] = useState(null)
+  const [licensePlateDialogResolver, setLicensePlateDialogResolver] = useState(null)
 
   // Process vehicle entry
-  const processVehicleEntry = async (
+  const handleProcessVehicleEntry = async (
     cardId,
     imagePath,
     licensePlate,
@@ -104,7 +116,7 @@ const QuanLyXe = () => {
   }
 
   // Process vehicle exit
-  const processVehicleExit = async (
+  const handleProcessVehicleExit = async (
     cardId,
     exitImagePath,
     exitGate,
@@ -584,8 +596,8 @@ const QuanLyXe = () => {
   React.useImperativeHandle(
     React.forwardRef(() => null),
     () => ({
-      processVehicleEntry,
-      processVehicleExit,
+      processVehicleEntry: handleProcessVehicleEntry,
+      processVehicleExit: handleProcessVehicleExit,
       setUIReference,
       updateVehicleInList,
     }),

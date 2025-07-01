@@ -348,6 +348,9 @@ export async function themTheRFID(theRFID) {
  * @param {string} theRFID.loaiThe - Loại thẻ
  * @param {string} theRFID.trangThai - Trạng thái thẻ
  * @param {string} [theRFID.ngayPhatHanh] - Ngày phát hành (optional)
+ * @param {string} [theRFID.bienSoXe] - Biển số xe (optional)
+ * @param {string} [theRFID.maChinhSach] - Mã chính sách (optional)
+ * @param {string} [theRFID.ngayKetThucCS] - Ngày kết thúc chính sách (optional)
  * @returns {Promise<Object>} Kết quả cập nhật
  */
 export async function capNhatTheRFID(theRFID) {
@@ -357,21 +360,10 @@ export async function capNhatTheRFID(theRFID) {
     uidThe: theRFID.uidThe,
     loaiThe: theRFID.loaiThe,
     trangThai: theRFID.trangThai,
-    ngayPhatHanh: theRFID.ngayPhatHanh, // Optional, sẽ dùng ngày hiện tại nếu không có
-  }
-  return callApiWithAuth(payload)
-}
-
-/**
- * Xóa thẻ RFID
- * @param {string|Array<string>} uidThe - UID thẻ hoặc mảng UID thẻ cần xóa
- * @returns {Promise<Object>} Kết quả xóa
- */
-export async function xoaTheRFID(uidThe) {
-  const payload = {
-    table: "pm_nc0003", 
-    func: "delete",
-    uidThe: uidThe,
+    ngayPhatHanh: theRFID.ngayPhatHanh,
+    bienSoXe: theRFID.bienSoXe,
+    maChinhSach: theRFID.maChinhSach,
+    ngayKetThucCS: theRFID.ngayKetThucCS
   }
   return callApiWithAuth(payload)
 }
@@ -481,16 +473,15 @@ export function blobToBase64(blob) {
 }
 
 // -------------------- Card History Management Functions --------------------
-
 /**
- * Lấy nhật ký gửi xe theo mã thẻ
- * @param {string} maThe - Mã thẻ RFID cần xem nhật ký
- * @param {string} [ngay] - Ngày cần xem (định dạng dd-mm-yyyy) hoặc 'all' để xem tất cả
- * @returns {Promise<Object>} Danh sách nhật ký theo thẻ
+ * Lấy nhật ký theo thẻ từ bảng pm_nc0010
+ * @param {string} maThe - Mã thẻ RFID
+ * @param {string} ngay - Ngày theo định dạng dd-mm-yyyy, hoặc "all" cho tất cả
+ * @returns {Promise<Object>} Nhật ký phiên gửi xe
  */
-export async function layNhatKyTheoThe(maThe, ngay = null) {
-  const payload = {
-    table: "pm_nc0010",
+export async function layNhatKyTheoThe(maThe, ngay = "all") {
+  const payload = { 
+    table: "pm_nc0010", 
     func: "layNhatKyTheoThe",
     maThe: maThe,
     ngay: ngay
@@ -498,79 +489,687 @@ export async function layNhatKyTheoThe(maThe, ngay = null) {
   return callApiWithAuth(payload)
 }
 
-// -------------------- Helper Functions --------------------
-
+// -------------------- Vehicle Search Functions --------------------
 /**
- * Tự động chọn chính sách mặc định theo loại phương tiện
- * Logic tương tự như trong python-example/QuanLyXe.py
- * @param {string} loaiXe - Loại xe từ WorkConfig ("xe_may" hoặc "oto") 
- * @param {string} maLoaiPT - Mã loại phương tiện từ API ("XE_MAY" hoặc "OT")
- * @returns {Promise<string>} - Mã chính sách phù hợp
+ * Tìm phiên gửi xe theo biển số
+ * @param {string} bienSo - Biển số xe
+ * @returns {Promise<Array>} Danh sách phiên gửi xe
  */
-export async function layChinhSachMacDinhChoLoaiPT(loaiXe, maLoaiPT) {
-  console.log(`🔍 Đang lấy chính sách mặc định cho loại xe: ${loaiXe}, mã loại PT: ${maLoaiPT}`)
-  
-  try {
-    // Bước 1: Thử lấy chính sách theo mã loại PT từ API
-    if (maLoaiPT) {
-      console.log(`🌐 Đang gọi API để lấy chính sách cho ${maLoaiPT}...`)
-      const policies = await layChinhSachGiaTheoLoaiPT(maLoaiPT)
-      console.log(`💰 Chính sách tìm được từ API cho ${maLoaiPT}:`, policies)
-      
-      if (policies && policies.length > 0) {
-        const selectedPolicy = policies[0].lv001 // lv001 là mã chính sách
-        if (selectedPolicy && selectedPolicy.trim() !== '') {
-          console.log(`✅ Chọn chính sách từ API: ${selectedPolicy}`)
-          return selectedPolicy
-        } else {
-          console.log(`⚠️ Chính sách từ API không hợp lệ: ${selectedPolicy}`)
-        }
-      } else {
-        console.log(`⚠️ Không có chính sách nào từ API cho ${maLoaiPT}`)
-      }
-    }
-    
-    // Bước 2: Fallback theo loại xe từ WorkConfig (giống python-example)
-    let fallbackPolicy = "CS_XEMAY_4H" // Mặc định cho xe máy
-    
-    if (loaiXe === "oto" || maLoaiPT === "OT") {
-      fallbackPolicy = "CS_OTO_4H"
-    } else if (loaiXe === "xe_may" || maLoaiPT === "XE_MAY") {
-      fallbackPolicy = "CS_XEMAY_4H"
-    }
-    
-    console.log(`⚠️ Không tìm thấy chính sách từ API, sử dụng fallback: ${fallbackPolicy}`)
-    
-    // Đảm bảo fallback policy không bao giờ là null/empty
-    if (!fallbackPolicy || fallbackPolicy.trim() === '') {
-      fallbackPolicy = "CS_XEMAY_4H" // Mặc định cuối cùng
-      console.log(`🔧 Sử dụng mặc định cuối cùng: ${fallbackPolicy}`)
-    }
-    
-    return fallbackPolicy
-    
-  } catch (error) {
-    console.error("❌ Lỗi khi lấy chính sách:", error)
-    
-    // Fallback cuối cùng dựa vào loại xe
-    let fallbackPolicy = "CS_XEMAY_4H" // Mặc định
-    
-    if (loaiXe === "oto" || maLoaiPT === "OT") {
-      fallbackPolicy = "CS_OTO_4H"
-    } else if (loaiXe === "xe_may" || maLoaiPT === "XE_MAY") {
-      fallbackPolicy = "CS_XEMAY_4H"
-    }
-    
-    console.log(`⚠️ Sử dụng chính sách fallback cuối cùng: ${fallbackPolicy}`)
-    
-    // Đảm bảo không bao giờ trả về null/empty
-    if (!fallbackPolicy || fallbackPolicy.trim() === '') {
-      fallbackPolicy = "CS_XEMAY_4H"
-      console.log(`🔧 Sử dụng mặc định tuyệt đối: ${fallbackPolicy}`)
-    }
-    
-    return fallbackPolicy
+export async function timPhienTheoBienSo(bienSo) {
+  const payload = { 
+    table: "pm_nc0009", 
+    func: "timPhienTheoBienSo", 
+    bienSo: bienSo 
   }
+  return callApiWithAuth(payload)
 }
 
-// -------------------- Authentication helpers --------------------
+// -------------------- Extended Parking Session Functions --------------------
+/**
+ * Cập nhật trạng thái phiên gửi xe thành "ĐANG GỬI"
+ * @param {string} maPhien - Mã phiên gửi xe
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatTrangThaiDangGui(maPhien) {
+  const payload = { 
+    table: "pm_nc0009", 
+    func: "edit_TrangThai", 
+    maPhien: maPhien 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Gate Management Functions --------------------
+/**
+ * Thêm cổng mới
+ * @param {Object} cong - Thông tin cổng
+ * @returns {Promise<Object>} Kết quả thêm cổng
+ */
+export async function themCong(cong) {
+  const payload = {
+    table: "pm_nc0007",
+    func: "add",
+    maCong: cong.maCong,
+    tenCong: cong.tenCong,
+    loaiCong: cong.loaiCong,
+    viTriLapDat: cong.viTriLapDat,
+    maKhuVuc: cong.maKhuVuc
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật thông tin cổng
+ * @param {Object} cong - Thông tin cổng
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatCong(cong) {
+  const payload = {
+    table: "pm_nc0007",
+    func: "edit",
+    maCong: cong.maCong,
+    tenCong: cong.tenCong,
+    loaiCong: cong.loaiCong,
+    viTriLapDat: cong.viTriLapDat,
+    maKhuVuc: cong.maKhuVuc
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa cổng
+ * @param {string} maCong - Mã cổng
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaCong(maCong) {
+  const payload = { 
+    table: "pm_nc0007", 
+    func: "delete", 
+    maCong: maCong 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Extended Camera Functions --------------------
+/**
+ * Cập nhật URL RTSP của camera
+ * @param {string} maCamera - Mã camera
+ * @param {string} rtspUrl - URL RTSP mới
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatRTSPCamera(maCamera, rtspUrl) {
+  const payload = {
+    table: "pm_nc0006_2",
+    func: "updateUrl",
+    id: maCamera,
+    data: { rtsp_url: rtspUrl }
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Extended Zone Functions --------------------
+/**
+ * Lấy thông tin khu vực theo mã
+ * @param {string} maKhuVuc - Mã khu vực
+ * @returns {Promise<Object>} Thông tin khu vực
+ */
+export async function layKhuVucTheoMa(maKhuVuc) {
+  const payload = {
+    table: "pm_nc0004_2",
+    func: "getById",
+    maKhuVuc: maKhuVuc
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Parking Spot Management Functions --------------------
+/**
+ * Lấy danh sách chỗ đỗ xe
+ * @returns {Promise<Array>} Danh sách chỗ đỗ xe
+ */
+export async function layDanhSachChoDo() {
+  const payload = { table: "pm_nc0005", func: "data" }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Thêm chỗ đỗ xe mới
+ * @param {Object} choDo - Thông tin chỗ đỗ xe
+ * @returns {Promise<Object>} Kết quả thêm chỗ đỗ xe
+ */
+export async function themChoDo(choDo) {
+  const payload = {
+    table: "pm_nc0005",
+    func: "add",
+    maChoDo: choDo.maChoDo,
+    maKhuVuc: choDo.maKhuVuc,
+    trangThai: choDo.trangThai || "TRONG"
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật thông tin chỗ đỗ xe
+ * @param {Object} choDo - Thông tin chỗ đỗ xe
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatChoDo(choDo) {
+  const payload = {
+    table: "pm_nc0005",
+    func: "edit",
+    maChoDo: choDo.maChoDo,
+    maKhuVuc: choDo.maKhuVuc,
+    trangThai: choDo.trangThai
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa chỗ đỗ xe
+ * @param {string} maChoDo - Mã chỗ đỗ xe
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaChoDo(maChoDo) {
+  const payload = { 
+    table: "pm_nc0005", 
+    func: "delete", 
+    maChoDo: maChoDo 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Vehicle Management Functions --------------------
+/**
+ * Lấy danh sách phương tiện
+ * @returns {Promise<Array>} Danh sách phương tiện
+ */
+export async function layDanhSachPhuongTien() {
+  const payload = { table: "pm_nc0002", func: "data" }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Thêm phương tiện mới
+ * @param {Object} phuongTien - Thông tin phương tiện
+ * @returns {Promise<Object>} Kết quả thêm phương tiện
+ */
+export async function themPhuongTien(phuongTien) {
+  const payload = {
+    table: "pm_nc0002",
+    func: "add",
+    bienSo: phuongTien.bienSo,
+    maLoaiPT: phuongTien.maLoaiPT
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật thông tin phương tiện
+ * @param {Object} phuongTien - Thông tin phương tiện
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatPhuongTien(phuongTien) {
+  const payload = {
+    table: "pm_nc0002",
+    func: "edit",
+    bienSo: phuongTien.bienSo,
+    maLoaiPT: phuongTien.maLoaiPT
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa phương tiện
+ * @param {string} bienSo - Biển số xe
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaPhuongTien(bienSo) {
+  const payload = { 
+    table: "pm_nc0002", 
+    func: "delete", 
+    bienSo: bienSo 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Extended RFID Card Functions --------------------
+/**
+ * Tìm thẻ từ UID
+ * @param {string} uidThe - UID thẻ RFID
+ * @returns {Promise<Array>} Thông tin thẻ
+ */
+export async function timTheTuUID(uidThe) {
+  const payload = { 
+    table: "pm_nc0003", 
+    func: "timTheTuUID", 
+    uidThe: uidThe 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa thẻ RFID
+ * @param {string} uidThe - UID thẻ RFID
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaTheRFID(uidThe) {
+  const payload = { 
+    table: "pm_nc0003", 
+    func: "delete", 
+    uidThe: uidThe 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Advanced Pricing Functions --------------------
+/**
+ * Lấy danh sách chính sách giá theo table pm_nc0008 từ ngocchung.php
+ * @returns {Promise<Array>} Danh sách chính sách giá
+ */
+export async function layDanhSachChinhSachGia() {
+  const payload = { table: "pm_nc0008", func: "data" }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Thêm chính sách giá mới (từ kebao.php)
+ * @param {Object} chinhSach - Thông tin chính sách giá
+ * @returns {Promise<Object>} Kết quả thêm chính sách
+ */
+export async function themChinhSachGiaKebao(chinhSach) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "add",
+    maChinhSach: chinhSach.maChinhSach,
+    maLoaiPT: chinhSach.maLoaiPT,
+    thoiGian: chinhSach.thoiGian,
+    donGia: chinhSach.donGia,
+    quaGio: chinhSach.quaGio,
+    donGiaQuaGio: chinhSach.donGiaQuaGio,
+    loaiChinhSach: chinhSach.loaiChinhSach,
+    tongNgay: chinhSach.tongNgay
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật chính sách giá (từ kebao.php)
+ * @param {Object} chinhSach - Thông tin chính sách giá
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatChinhSachGiaKebao(chinhSach) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "edit",
+    maChinhSach: chinhSach.maChinhSach,
+    maLoaiPT: chinhSach.maLoaiPT,
+    thoiGian: chinhSach.thoiGian,
+    donGia: chinhSach.donGia,
+    quaGio: chinhSach.quaGio,
+    donGiaQuaGio: chinhSach.donGiaQuaGio,
+    loaiChinhSach: chinhSach.loaiChinhSach,
+    tongNgay: chinhSach.tongNgay
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa chính sách giá (từ kebao.php)
+ * @param {string} maChinhSach - Mã chính sách giá
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaChinhSachGiaKebao(maChinhSach) {
+  const payload = { 
+    table: "pm_nc0008", 
+    func: "delete", 
+    maChinhSach: maChinhSach 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Camera Management Functions (kebao.php) --------------------
+/**
+ * Lấy danh sách camera từ kebao.php
+ * @returns {Promise<Array>} Danh sách camera
+ */
+export async function layDanhSachCameraKebao() {
+  const payload = { table: "pm_nc0006_1", func: "data" }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Thêm camera mới (từ kebao.php)
+ * @param {Object} camera - Thông tin camera
+ * @returns {Promise<Object>} Kết quả thêm camera
+ */
+export async function themCameraKebao(camera) {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "add",
+    maCamera: camera.maCamera,
+    tenCamera: camera.tenCamera,
+    loaiCamera: camera.loaiCamera,
+    chucNangCamera: camera.chucNangCamera,
+    maKhuVuc: camera.maKhuVuc,
+    linkRTSP: camera.linkRTSP
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật camera (từ kebao.php)
+ * @param {Object} camera - Thông tin camera
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatCameraKebao(camera) {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "edit",
+    maCamera: camera.maCamera,
+    tenCamera: camera.tenCamera,
+    loaiCamera: camera.loaiCamera,
+    chucNangCamera: camera.chucNangCamera,
+    maKhuVuc: camera.maKhuVuc,
+    linkRTSP: camera.linkRTSP
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa camera (từ kebao.php)
+ * @param {string} maCamera - Mã camera
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaCameraKebao(maCamera) {
+  const payload = { 
+    table: "pm_nc0006_1", 
+    func: "delete", 
+    maCamera: maCamera 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Gate Management Functions (kebao.php) --------------------
+/**
+ * Lấy danh sách cổng từ kebao.php (pm_nc0007)
+ * @returns {Promise<Array>} Danh sách cổng
+ */
+export async function layDanhSachCongKebao() {
+  const payload = { table: "pm_nc0007", func: "data" }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Thêm cổng mới (từ kebao.php)
+ * @param {Object} cong - Thông tin cổng
+ * @returns {Promise<Object>} Kết quả thêm cổng
+ */
+export async function themCongKebao(cong) {
+  const payload = {
+    table: "pm_nc0007",
+    func: "add",
+    maCong: cong.maCong,
+    tenCong: cong.tenCong,
+    loaiCong: cong.loaiCong,
+    viTriLapDat: cong.viTriLapDat,
+    maKhuVuc: cong.maKhuVuc
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật cổng (từ kebao.php)
+ * @param {Object} cong - Thông tin cổng
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatCongKebao(cong) {
+  const payload = {
+    table: "pm_nc0007",
+    func: "edit",
+    maCong: cong.maCong,
+    tenCong: cong.tenCong,
+    loaiCong: cong.loaiCong,
+    viTriLapDat: cong.viTriLapDat,
+    maKhuVuc: cong.maKhuVuc
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa cổng (từ kebao.php)
+ * @param {string} maCong - Mã cổng
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaCongKebao(maCong) {
+  const payload = { 
+    table: "pm_nc0007", 
+    func: "delete", 
+    maCong: maCong 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Parking Session Functions (kebao.php) --------------------
+/**
+ * Lấy phiên gửi xe theo UID thẻ (từ kebao.php)
+ * @param {string} uidThe - UID thẻ RFID
+ * @returns {Promise<Array>} Danh sách phiên gửi xe
+ */
+export async function layPhienGuiXeTheoUIDKebao(uidThe) {
+  const payload = { 
+    table: "pm_nc0009", 
+    func: "layPhienGuiXeTuUID", 
+    uidThe: uidThe 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Lấy phiên gửi xe đã ra theo UID thẻ (từ kebao.php)
+ * @param {string} uidThe - UID thẻ RFID
+ * @returns {Promise<Array>} Danh sách phiên gửi xe đã hoàn thành
+ */
+export async function layPhienGuiXeDaRaTheoUIDKebao(uidThe) {
+  const payload = { 
+    table: "pm_nc0009", 
+    func: "layPhienGuiXeTuUID_Da_Ra", 
+    uidThe: uidThe 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Tìm phiên gửi xe theo biển số (từ kebao.php)
+ * @param {string} bienSo - Biển số xe
+ * @returns {Promise<Array>} Danh sách phiên gửi xe
+ */
+export async function timPhienTheoBS(bienSo) {
+  const payload = { 
+    table: "pm_nc0009", 
+    func: "timPhienTheoBienSo", 
+    bienSo: bienSo 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Tạo bảng cho phiên làm việc (từ kebao.php)
+ * @returns {Promise<Object>} Kết quả tạo bảng
+ */
+export async function taoBangChoPhienLamViecKebao() {
+  const payload = { 
+    table: "pm_nc0009", 
+    func: "taoBangChoPhienLamViec" 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật trạng thái phiên gửi xe (từ kebao.php)
+ * @param {string} maPhien - Mã phiên gửi xe
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatTrangThaiPhienKebao(maPhien) {
+  const payload = { 
+    table: "pm_nc0009", 
+    func: "edit_TrangThai", 
+    maPhien: maPhien 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Zone Management Functions (ngocchung.php) --------------------
+/**
+ * Lấy khu vực theo ID (từ ngocchung.php)
+ * @param {string} maKhuVuc - Mã khu vực
+ * @returns {Promise<Object>} Thông tin khu vực
+ */
+export async function layKhuVucTheoID(maKhuVuc) {
+  const payload = { 
+    table: "pm_nc0004_2", 
+    func: "getById", 
+    maKhuVuc: maKhuVuc 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Thêm khu vực mới (từ ngocchung.php)
+ * @param {Object} khuVuc - Thông tin khu vực
+ * @returns {Promise<Object>} Kết quả thêm khu vực
+ */
+export async function themKhuVucNgocChung(khuVuc) {
+  const payload = {
+    table: "pm_nc0004_2",
+    func: "add",
+    maKhuVuc: khuVuc.maKhuVuc,
+    tenKhuVuc: khuVuc.tenKhuVuc,
+    moTa: khuVuc.moTa
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật khu vực (từ ngocchung.php)
+ * @param {Object} khuVuc - Thông tin khu vực
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatKhuVucNgocChung(khuVuc) {
+  const payload = {
+    table: "pm_nc0004_2",
+    func: "edit",
+    maKhuVuc: khuVuc.maKhuVuc,
+    tenKhuVuc: khuVuc.tenKhuVuc,
+    moTa: khuVuc.moTa
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa khu vực (từ ngocchung.php)
+ * @param {string} maKhuVuc - Mã khu vực
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaKhuVucNgocChung(maKhuVuc) {
+  const payload = { 
+    table: "pm_nc0004_2", 
+    func: "delete", 
+    maKhuVuc: maKhuVuc 
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Camera URL Update Functions (ngocchung.php) --------------------
+/**
+ * Cập nhật URL RTSP của camera (từ ngocchung.php)
+ * @param {string} id - ID camera
+ * @param {string} rtspUrl - URL RTSP mới
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatURLCamera(id, rtspUrl) {
+  const payload = {
+    table: "pm_nc0006_2",
+    func: "updateUrl",
+    id: id,
+    data: { rtsp_url: rtspUrl }
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- Pricing Policy Functions (ngocchung.php) --------------------
+/**
+ * Lấy tất cả chính sách giá (từ ngocchung.php)
+ * @returns {Promise<Array>} Danh sách chính sách giá
+ */
+export async function layTatCaChinhSachGiaNgocChung() {
+  const payload = { 
+    table: "pm_nc0008", 
+    func: "getAllPolicies" 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Tạo chính sách giá mới (từ ngocchung.php)
+ * @param {Object} policy - Thông tin chính sách giá
+ * @returns {Promise<Object>} Kết quả tạo chính sách
+ */
+export async function taoChinhSachGiaNgocChung(policy) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "createPolicy",
+    ...policy
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật chính sách giá (từ ngocchung.php)
+ * @param {Object} policy - Thông tin chính sách giá
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatChinhSachGiaNgocChung(policy) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "updatePolicy",
+    ...policy
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa chính sách giá (từ ngocchung.php)
+ * @param {string} policyId - ID chính sách giá
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaChinhSachGiaNgocChung(policyId) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "deletePolicy",
+    policyId: policyId
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Tính phí gửi xe (từ ngocchung.php)
+ * @param {Object} data - Dữ liệu tính phí
+ * @returns {Promise<Object>} Kết quả tính phí
+ */
+export async function tinhPhiGuiXeNgocChung(data) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "tinhPhiGuiXe",
+    ...data
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Lấy chính sách từ phương tiện (từ ngocchung.php)
+ * @param {string} maLoaiPT - Mã loại phương tiện
+ * @returns {Promise<Object>} Chính sách giá
+ */
+export async function layChinhSachTuPTNgocChung(maLoaiPT) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "layChinhSachTuPT",
+    maLoaiPT: maLoaiPT
+  }
+  return callApiWithAuth(payload)
+}
+
+// -------------------- History Functions (ngocchung.php) --------------------
+/**
+ * Lấy nhật ký theo thẻ (từ ngocchung.php)
+ * @param {string} uidThe - UID thẻ RFID
+ * @returns {Promise<Array>} Nhật ký thẻ
+ */
+export async function layNhatKyTheoTheNgocChung(uidThe) {
+  const payload = {
+    table: "pm_nc0010",
+    func: "layNhatKyTheoThe",
+    uidThe: uidThe
+  }
+  return callApiWithAuth(payload)
+}

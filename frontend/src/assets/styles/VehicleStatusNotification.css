@@ -1,0 +1,237 @@
+.vehicle-notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.vehicle-status-notification {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  min-width: 300px;
+  max-width: 400px;
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.vehicle-status-notification.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.vehicle-status-notification.hidden {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px;
+  gap: 12px;
+}
+
+.notification-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notification-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.notification-message {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #6b7280;
+  word-wrap: break-word;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.notification-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.notification-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  width: 100%;
+  transform-origin: left;
+  animation: progressBar linear forwards;
+}
+
+@keyframes progressBar {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Type-specific styles */
+.vehicle-status-notification.success {
+  border-left: 4px solid #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.vehicle-status-notification.success .notification-title {
+  color: #065f46;
+}
+
+.vehicle-status-notification.success .notification-progress {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.vehicle-status-notification.error {
+  border-left: 4px solid #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.vehicle-status-notification.error .notification-title {
+  color: #991b1b;
+}
+
+.vehicle-status-notification.error .notification-progress {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.vehicle-status-notification.warning {
+  border-left: 4px solid #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+}
+
+.vehicle-status-notification.warning .notification-title {
+  color: #92400e;
+}
+
+.vehicle-status-notification.warning .notification-progress {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.vehicle-status-notification.info {
+  border-left: 4px solid #3b82f6;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+.vehicle-status-notification.info .notification-title {
+  color: #1e40af;
+}
+
+.vehicle-status-notification.info .notification-progress {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .vehicle-notification-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+  
+  .vehicle-status-notification {
+    min-width: auto;
+    max-width: none;
+    width: 100%;
+  }
+  
+  .notification-content {
+    padding: 14px;
+  }
+  
+  .notification-title {
+    font-size: 13px;
+  }
+  
+  .notification-message {
+    font-size: 12px;
+  }
+}
+
+/* Animation variants for different entry directions */
+.vehicle-status-notification.slide-left {
+  transform: translateX(-100%);
+}
+
+.vehicle-status-notification.slide-left.visible {
+  transform: translateX(0);
+}
+
+.vehicle-status-notification.slide-left.hidden {
+  transform: translateX(-100%);
+}
+
+.vehicle-status-notification.slide-up {
+  transform: translateY(-100%);
+}
+
+.vehicle-status-notification.slide-up.visible {
+  transform: translateY(0);
+}
+
+.vehicle-status-notification.slide-up.hidden {
+  transform: translateY(-100%);
+}
+
+.vehicle-status-notification.fade {
+  transform: scale(0.9);
+}
+
+.vehicle-status-notification.fade.visible {
+  transform: scale(1);
+}
+
+.vehicle-status-notification.fade.hidden {
+  transform: scale(0.9);
+}
+
+/* Hover effects */
+.vehicle-status-notification:hover {
+  transform: translateX(0) scale(1.02);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.vehicle-status-notification:hover .notification-progress {
+  animation-play-state: paused;
+}

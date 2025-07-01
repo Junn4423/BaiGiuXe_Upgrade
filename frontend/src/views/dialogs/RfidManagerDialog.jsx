@@ -27,14 +27,14 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
   // Form state for add/edit
   const [formData, setFormData] = useState({
     uidThe: "",
-    loaiThe: "Thẻ thường",
+    loaiThe: "THUONG",
     trangThai: "1"
   })
 
   const cardTypes = [
-    "Thẻ thường",
-    "Thẻ VIP", 
-    "Thẻ tháng",
+    "THUONG",
+    "VIP", 
+    "NHANVIEN",
     "Thẻ nhân viên",
     "Thẻ khách"
   ]

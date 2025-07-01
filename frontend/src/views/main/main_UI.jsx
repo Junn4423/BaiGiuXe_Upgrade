@@ -615,7 +615,7 @@ const MainUI = () => {
               console.log(`🔍 Loading dynamic configuration data...`)
               
               // Import APIs and validation utilities
-              const { layChinhSachMacDinhChoLoaiPT } = await import("../../api/api")
+              const { layChinhSachGiaTheoLoaiPT } = await import("../../api/api")
               const { validateAndEnsurePricingPolicy, themPhienGuiXeWithValidation } = await import("../../utils/sessionValidation")
               
               // Determine vehicle type based on work config
@@ -633,7 +633,7 @@ const MainUI = () => {
               
               // Get pricing policy using helper function (logic from python-example)
               console.log(`🔍 Getting pricing policy for workConfig.loai_xe: ${workConfig?.loai_xe}, vehicleTypeCode: ${vehicleTypeCode}`)
-              const rawPricingPolicy = await layChinhSachMacDinhChoLoaiPT(workConfig?.loai_xe, vehicleTypeCode)
+              const rawPricingPolicy = await layChinhSachGiaTheoLoaiPT(vehicleTypeCode)
               console.log(`✅ Raw pricing policy from helper: ${rawPricingPolicy}`)
               
               // Apply validation middleware to ensure policy is always valid
@@ -667,10 +667,10 @@ const MainUI = () => {
                     // Ưu tiên cổng thuộc zone hiện tại nếu có
                     if (zoneInfo?.maKhuVuc) {
                       const zoneGate = gates.find(g => g.maKhuVuc === zoneInfo.maKhuVuc)
-                      if (zoneGate) entryGate = zoneGate.tenCong || zoneGate.maCong
+                      if (zoneGate) entryGate = zoneGate.maCong || zoneGate.tenCong
                     }
-                    // Nếu vẫn chưa có, lấy cổng đầu tiên
-                    if (!entryGate) entryGate = gates[0].tenCong || gates[0].maCong
+                    // Nếu vẫn chưa có, lấy cổng đầu tiên  
+                    if (!entryGate) entryGate = gates[0].maCong || gates[0].tenCong
                   } else {
                     entryGate = "GATE_UNKNOWN"
                   }
