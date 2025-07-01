@@ -2,15 +2,19 @@
 
 import { useState, useEffect } from "react"
 import "../../assets/styles/dialog-base.css"
+import "../../assets/styles/enhanced-dialogs.css"
 import { 
   layDanhSachThe, 
   themThe, 
   capNhatTheRFID, 
   xoaTheRFID,
-  layNhatKyTheoTheNgocChung
+  layNhatKyTheoTheNgocChung,
+  timTheDangCoPhien
 } from "../../api/api"
+import CardHistoryDialog from "./CardHistoryDialog"
 
-const RfidManagerDialogNew = ({ onClose, onSave }) => {
+const RfidManagerDialog = ({ onClose, onSave }) => {
+  // Basic states
   const [cards, setCards] = useState([])
   const [filteredCards, setFilteredCards] = useState([])
   const [selectedCard, setSelectedCard] = useState(null)
@@ -19,26 +23,31 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
+  
+  // Dialog states
   const [showHistory, setShowHistory] = useState(false)
   const [cardHistory, setCardHistory] = useState([])
+  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showCardHistory, setShowCardHistory] = useState(false)
+  const [selectedCardForHistory, setSelectedCardForHistory] = useState(null)
   
-  // Thêm states mới theo mobile app
-  const [policies, setPolicies] = useState([]) // Danh sách chính sách giá
-  const [cardsWithVehicles, setCardsWithVehicles] = useState(new Set()) // Thẻ đang có xe gửi
-  const [showPolicyAssignment, setShowPolicyAssignment] = useState(false) // Dialog gán chính sách
-  const [selectedCardForPolicy, setSelectedCardForPolicy] = useState(null) // Thẻ được chọn để gán chính sách
+  // Enhanced states from mobile app
+  const [policies, setPolicies] = useState([])
+  const [cardsWithVehicles, setCardsWithVehicles] = useState(new Set())
+  const [showPolicyAssignment, setShowPolicyAssignment] = useState(false)
+  const [selectedCardForPolicy, setSelectedCardForPolicy] = useState(null)
 
   // Form state
   const [formData, setFormData] = useState({
     uidThe: "",
-    loaiThe: "NHANVIEN",
+    loaiThe: "THUONG",
     trangThai: "1",
     bienSoXe: "",
     maChinhSach: "",
     ngayKetThucCS: "",
-    tongNgay: 0, // Số ngày có hiệu lực của chính sách
-    ngayBatDauCS: "", // Ngày bắt đầu chính sách
-    ghiChu: "" // Ghi chú thêm
+    tongNgay: 0,
+    ngayBatDauCS: "",
+    ghiChu: ""
   })
 
   const cardTypes = [
@@ -51,7 +60,7 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
 
   useEffect(() => {
     loadCards()
-    loadPolicies() // Load danh sách chính sách
+    loadPolicies()
   }, [])
 
   useEffect(() => {
@@ -71,11 +80,8 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
     }
   }
 
-  // Thêm function để load chính sách giá
   const loadPolicies = async () => {
     try {
-      // const policyList = await layDanhSachChinhSachGia()
-      // Tạm thời dùng dữ liệu mẫu
       const policyList = [
         { maChinhSach: "CS_VIP_1T", tenChinhSach: "VIP 1 Tháng", tongNgay: 30, donGia: 500000 },
         { maChinhSach: "CS_VIP_3T", tenChinhSach: "VIP 3 Tháng", tongNgay: 90, donGia: 1400000 },
@@ -84,33 +90,6 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
       setPolicies(policyList)
     } catch (error) {
       console.error("Error loading policies:", error)
-    }
-  }
-
-  // Kiểm tra thẻ đang có xe gửi
-  const checkCardsWithVehicles = async () => {
-    try {
-      const cardsWithVehicleSet = new Set()
-      
-      for (const card of cards) {
-        try {
-          // const vehicleData = await kiemTraTheCoXeGui(card.uidThe)
-          // if (vehicleData && vehicleData.length > 0) {
-          //   cardsWithVehicleSet.add(card.uidThe)
-          // }
-          
-          // Tạm thời mô phỏng 
-          if (Math.random() > 0.7) {
-            cardsWithVehicleSet.add(card.uidThe)
-          }
-        } catch (error) {
-          console.error(`Error checking vehicle for card ${card.uidThe}:`, error)
-        }
-      }
-      
-      setCardsWithVehicles(cardsWithVehicleSet)
-    } catch (error) {
-      console.error("Error checking cards with vehicles:", error)
     }
   }
 
@@ -136,11 +115,27 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
     setFilteredCards(filtered)
   }
 
+  const handleAddCard = () => {
+    setEditingCard(null)
+    setFormData({
+      uidThe: "",
+      loaiThe: "THUONG",
+      trangThai: "1",
+      bienSoXe: "",
+      maChinhSach: "",
+      ngayKetThucCS: "",
+      tongNgay: 0,
+      ngayBatDauCS: "",
+      ghiChu: ""
+    })
+    setShowAddDialog(true)
+  }
+
   const handleEditCard = (card) => {
     setEditingCard(card)
     setFormData({
       uidThe: card.uidThe,
-      loaiThe: card.loaiThe || "Thẻ thường",
+      loaiThe: card.loaiThe || "THUONG",
       trangThai: card.trangThai || "1",
       bienSoXe: card.bienSoXe || "",
       maChinhSach: card.maChinhSach || "",
@@ -149,23 +144,30 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
       ngayBatDauCS: card.ngayBatDauCS || "",
       ghiChu: card.ghiChu || ""
     })
-    setSelectedCard(card)
+    setShowAddDialog(true)
   }
 
   const handleDeleteCard = async (card) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa thẻ "${card.uidThe}"?`)) {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa thẻ ${card.uidThe}?`)) {
       return
     }
 
     try {
+      // Check if card has active session
+      const activeSession = await timTheDangCoPhien(card.uidThe)
+      if (activeSession && activeSession.length > 0) {
+        alert("Không thể xóa thẻ đang có phiên gửi xe!")
+        return
+      }
+
       setLoading(true)
       const result = await xoaTheRFID(card.uidThe)
       
-      if (result.success) {
-        alert("Xóa thẻ thành công!")
-        loadCards()
+      if (result && result.success) {
+        alert("Xóa thẻ thành công")
+        await loadCards()
       } else {
-        throw new Error(result.message || "Xóa thất bại")
+        alert("Lỗi xóa thẻ: " + (result?.message || "Không xác định"))
       }
     } catch (error) {
       console.error("Error deleting card:", error)
@@ -175,45 +177,33 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
     }
   }
 
-  const handleViewHistory = async (card) => {
-    try {
-      setLoading(true)
-      setSelectedCard(card)
-      setShowHistory(true)
-      
-      const history = await layNhatKyTheoTheNgocChung(card.uidThe)
-      setCardHistory(history || [])
-    } catch (error) {
-      console.error("Error loading history:", error)
-      alert("Lỗi tải lịch sử: " + error.message)
-      setCardHistory([])
-    } finally {
-      setLoading(false)
-    }
+  const handleViewHistory = (card) => {
+    setSelectedCardForHistory(card.uidThe)
+    setShowCardHistory(true)
   }
 
   const handleFormSubmit = async () => {
-    if (!formData.uidThe || !formData.loaiThe) {
-      alert("Vui lòng điền đầy đủ thông tin bắt buộc")
+    if (!formData.uidThe.trim()) {
+      alert("Vui lòng nhập UID thẻ")
       return
     }
 
     try {
       setLoading(true)
       let result
-      
+
       if (editingCard) {
         result = await capNhatTheRFID(formData)
       } else {
-        result = await themThe(formData)
+        result = await themThe(formData.uidThe, formData.loaiThe, formData.trangThai)
       }
-      
-      if (result.success) {
-        alert(editingCard ? "Cập nhật thẻ thành công!" : "Thêm thẻ thành công!")
-        resetForm()
-        loadCards()
+
+      if (result && result.success) {
+        alert(editingCard ? "Cập nhật thẻ thành công" : "Thêm thẻ thành công")
+        setShowAddDialog(false)
+        await loadCards()
       } else {
-        throw new Error(result.message || "Thao tác thất bại")
+        alert("Lỗi: " + (result?.message || "Không xác định"))
       }
     } catch (error) {
       console.error("Error saving card:", error)
@@ -221,22 +211,6 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
     } finally {
       setLoading(false)
     }
-  }
-
-  const resetForm = () => {
-    setFormData({
-      uidThe: "",
-      loaiThe: "Thẻ thường",
-      trangThai: "1",
-      bienSoXe: "",
-      maChinhSach: "",
-      ngayKetThucCS: "",
-      tongNgay: 0,
-      ngayBatDauCS: "",
-      ghiChu: ""
-    })
-    setEditingCard(null)
-    setSelectedCard(null)
   }
 
   const getStatusText = (status) => {
@@ -252,7 +226,6 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
     return new Date(dateString).toLocaleDateString("vi-VN")
   }
 
-  // Tính toán ngày hết hạn chính sách
   const calculatePolicyEndDate = (startDate, policyDays) => {
     if (!startDate || !policyDays) return ""
     
@@ -260,542 +233,403 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
     const endDate = new Date(start.getTime() + (policyDays * 24 * 60 * 60 * 1000))
     return endDate.toISOString().split('T')[0]
   }
-
-  // Gán chính sách cho thẻ VIP
-  const handleAssignPolicy = (card) => {
-    setSelectedCardForPolicy(card)
-    setFormData({
-      ...formData,
-      uidThe: card.uidThe,
-      maChinhSach: card.maChinhSach || "",
-      ngayBatDauCS: card.ngayBatDauCS || new Date().toISOString().split('T')[0],
-      ngayKetThucCS: card.ngayKetThucCS || "",
-      tongNgay: card.tongNgay || 0
-    })
-    setShowPolicyAssignment(true)
-  }
-
   return (
-    <div className="dialog-overlay">
-      <div className="dialog-container extra-large">
-        <div className="dialog-header">
-          <h2 className="dialog-title">Quản Lý Thẻ RFID</h2>
-          <button className="dialog-close" onClick={onClose}>×</button>
-        </div>
+    <>
+      <div className="dialog-overlay">
+        <div className="dialog-container extra-large">
+          <div className="dialog-header">
+            <h2 className="dialog-title">Quản Lý Thẻ RFID</h2>
+            <button className="dialog-close" onClick={onClose}>×</button>
+          </div>
 
-        <div className="dialog-subtitle">
-          Quản lý thẻ RFID và xem lịch sử sử dụng thẻ
-        </div>
+          <div className="dialog-subtitle">
+            Quản lý thẻ RFID và xem lịch sử sử dụng thẻ
+          </div>
 
-        <div className="dialog-content main-sidebar">
-          {/* Left Panel - Card List */}
-          <div className="dialog-panel">
-            <div className="dialog-panel-title">
-              Danh Sách Thẻ ({filteredCards.length})
+          <div className="dialog-content main-sidebar">
+            {/* Left Panel - Card List */}
+            <div className="dialog-panel">
+              <div className="dialog-panel-title" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <span>Danh Sách Thẻ ({filteredCards.length})</span>
+                <button className="dialog-btn dialog-btn-primary" onClick={handleAddCard}>
+                  + Thêm Thẻ
+                </button>
+              </div>
+              
+              {/* Search and Filters */}
+              <div className="dialog-grid cols-3" style={{marginBottom: '16px'}}>
+                <div className="form-group">
+                  <label>Tìm kiếm:</label>
+                  <input
+                    type="text"
+                    className="dialog-input"
+                    placeholder="UID thẻ hoặc biển số..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Trạng thái:</label>
+                  <select 
+                    className="dialog-select"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="all">Tất cả</option>
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Không hoạt động</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>Loại thẻ:</label>
+                  <select 
+                    className="dialog-select"
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                  >
+                    <option value="all">Tất cả</option>
+                    {cardTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="dialog-loading">Đang tải...</div>
+              ) : (
+                <div style={{maxHeight: '400px', overflowY: 'auto'}}>
+                  <table className="dialog-table">
+                    <thead>
+                      <tr>
+                        <th>UID Thẻ</th>
+                        <th>Loại</th>
+                        <th>Trạng thái</th>
+                        <th>Biển số</th>
+                        <th>Chính sách</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredCards.map(card => (
+                        <tr 
+                          key={card.uidThe}
+                          className={selectedCard?.uidThe === card.uidThe ? 'selected' : ''}
+                          onClick={() => setSelectedCard(card)}
+                        >
+                          <td style={{ fontFamily: 'monospace' }}>{card.uidThe}</td>
+                          <td>
+                            <span className={`badge ${card.loaiThe === 'VIP' ? 'badge-premium' : 
+                              card.loaiThe === 'NHANVIEN' ? 'badge-info' : 'badge-default'}`}>
+                              {card.loaiThe}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`badge ${getStatusClass(card.trangThai)}`}>
+                              {getStatusText(card.trangThai)}
+                            </span>
+                          </td>
+                          <td style={{ fontFamily: 'monospace' }}>{card.bienSoXe || 'Chưa có'}</td>
+                          <td>
+                            {card.maChinhSach ? (
+                              <div className="policy-info">
+                                <span className="policy-name">{card.maChinhSach}</span>
+                                {card.ngayKetThucCS && (
+                                  <small className="policy-expire">
+                                    Hết hạn: {formatDate(card.ngayKetThucCS)}
+                                  </small>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="no-policy">Chưa có</span>
+                            )}
+                          </td>
+                          <td>
+                            <div className="action-buttons">
+                              <button 
+                                className="btn-small btn-secondary"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEditCard(card)
+                                }}
+                                title="Chỉnh sửa"
+                              >
+                                ✏️
+                              </button>
+                              <button 
+                                className="btn-small btn-warning"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleViewHistory(card)
+                                }}
+                                title="Xem lịch sử"
+                              >
+                                📋
+                              </button>
+                              <button 
+                                className="btn-small btn-danger"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteCard(card)
+                                }}
+                                title="Xóa"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredCards.length === 0 && (
+                        <tr>
+                          <td colSpan="6" className="no-data">
+                            {searchTerm || statusFilter !== "all" || typeFilter !== "all" 
+                              ? "Không tìm thấy thẻ nào" 
+                              : "Chưa có thẻ nào"}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-            
-            {/* Search and Filters */}
-            <div className="dialog-grid cols-3" style={{marginBottom: '16px'}}>
+
+            {/* Right Panel - Statistics */}
+            <div className="dialog-panel primary">
+              <div className="dialog-panel-title">Thống Kê</div>
+              
+              <div className="dialog-info-card">
+                <div className="dialog-info-title">Tổng Quan</div>
+                <div className="stats-grid">
+                  <div className="stat-item">
+                    <span className="stat-number">{cards.length}</span>
+                    <span className="stat-label">Tổng thẻ</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-number">
+                      {cards.filter(card => card.trangThai === "1").length}
+                    </span>
+                    <span className="stat-label">Hoạt động</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-number">
+                      {cards.filter(card => card.trangThai === "0").length}
+                    </span>
+                    <span className="stat-label">Không hoạt động</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="dialog-info-card">
+                <div className="dialog-info-title">Phân Loại Thẻ</div>
+                <div className="card-type-stats">
+                  {cardTypes.map(type => {
+                    const count = cards.filter(card => card.loaiThe === type).length
+                    return count > 0 ? (
+                      <div key={type} className="type-stat">
+                        <span className="type-name">{type}</span>
+                        <span className="type-count">{count}</span>
+                      </div>
+                    ) : null
+                  })}
+                </div>
+              </div>
+
+              {selectedCard && (
+                <div className="dialog-info-card">
+                  <div className="dialog-info-title">Chi Tiết Thẻ</div>
+                  <div className="card-details">
+                    <div><strong>UID:</strong> <code>{selectedCard.uidThe}</code></div>
+                    <div><strong>Loại:</strong> {selectedCard.loaiThe}</div>
+                    <div><strong>Trạng thái:</strong> {getStatusText(selectedCard.trangThai)}</div>
+                    <div><strong>Biển số:</strong> {selectedCard.bienSoXe || 'Chưa có'}</div>
+                    <div><strong>Ngày phát hành:</strong> {formatDate(selectedCard.ngayPhatHanh)}</div>
+                    {selectedCard.maChinhSach && (
+                      <>
+                        <div><strong>Chính sách:</strong> {selectedCard.maChinhSach}</div>
+                        {selectedCard.ngayKetThucCS && (
+                          <div><strong>Hết hạn:</strong> {formatDate(selectedCard.ngayKetThucCS)}</div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="dialog-footer">
+            <button className="dialog-btn dialog-btn-secondary" onClick={onClose}>
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Add/Edit Card Dialog */}
+      {showAddDialog && (
+        <div className="dialog-overlay">
+          <div className="dialog-container">
+            <div className="dialog-header">
+              <h3 className="dialog-title">{editingCard ? "Sửa Thẻ" : "Thêm Thẻ Mới"}</h3>
+              <button className="dialog-close" onClick={() => setShowAddDialog(false)}>×</button>
+            </div>
+
+            <div className="dialog-content">
               <div className="form-group">
-                <label>Tìm kiếm:</label>
+                <label>UID Thẻ *</label>
                 <input
                   type="text"
                   className="dialog-input"
-                  placeholder="UID thẻ hoặc biển số..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={formData.uidThe}
+                  onChange={(e) => setFormData({...formData, uidThe: e.target.value})}
+                  placeholder="Nhập UID thẻ"
+                  disabled={!!editingCard}
+                  style={{ fontFamily: 'monospace', fontSize: '1.1rem' }}
                 />
               </div>
-              
+
               <div className="form-group">
-                <label>Trạng thái:</label>
-                <select 
+                <label>Loại Thẻ *</label>
+                <select
                   className="dialog-select"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  value={formData.loaiThe}
+                  onChange={(e) => setFormData({...formData, loaiThe: e.target.value})}
                 >
-                  <option value="all">Tất cả</option>
+                  {cardTypes.map((type, index) => (
+                    <option key={index} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Trạng Thái *</label>
+                <select
+                  className="dialog-select"
+                  value={formData.trangThai}
+                  onChange={(e) => setFormData({...formData, trangThai: e.target.value})}
+                >
                   <option value="1">Hoạt động</option>
                   <option value="0">Không hoạt động</option>
                 </select>
               </div>
-              
+
               <div className="form-group">
-                <label>Loại thẻ:</label>
-                <select 
-                  className="dialog-select"
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                >
-                  <option value="all">Tất cả</option>
-                  {cardTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
+                <label>Biển Số Xe</label>
+                <input
+                  type="text"
+                  className="dialog-input"
+                  value={formData.bienSoXe}
+                  onChange={(e) => setFormData({...formData, bienSoXe: e.target.value.toUpperCase()})}
+                  placeholder="Nhập biển số xe (nếu có)"
+                  style={{ fontFamily: 'monospace' }}
+                />
               </div>
-            </div>
 
-            {loading ? (
-              <div className="dialog-loading">Đang tải...</div>
-            ) : (
-              <div style={{maxHeight: '400px', overflowY: 'auto'}}>
-                <table className="dialog-table">
-                  <thead>
-                    <tr>
-                      <th>UID Thẻ</th>
-                      <th>Loại</th>
-                      <th>Trạng thái</th>
-                      <th>Biển số</th>
-                      <th>Chính sách</th>
-                      <th>Có xe gửi</th>
-                      <th>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCards.map(card => (
-                      <tr 
-                        key={card.uidThe}
-                        className={selectedCard?.uidThe === card.uidThe ? 'selected' : ''}
-                        onClick={() => setSelectedCard(card)}
-                      >
-                        <td>{card.uidThe}</td>
-                        <td>
-                          <span className={`badge ${card.loaiThe === 'VIP' ? 'badge-premium' : 
-                            card.loaiThe === 'NHANVIEN' ? 'badge-info' : 'badge-default'}`}>
-                            {card.loaiThe}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`badge ${card.trangThai === '1' ? 'badge-success' : 'badge-danger'}`}>
-                            {card.trangThai === '1' ? 'Hoạt động' : 'Ngừng'}
-                          </span>
-                        </td>
-                        <td>{card.bienSoXe || 'Chưa có'}</td>
-                        <td>
-                          {card.maChinhSach ? (
-                            <div className="policy-info">
-                              <span className="policy-name">{card.maChinhSach}</span>
-                              {card.ngayKetThucCS && (
-                                <small className="policy-expire">
-                                  Hết hạn: {new Date(card.ngayKetThucCS).toLocaleDateString()}
-                                </small>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="no-policy">Chưa có</span>
-                          )}
-                        </td>
-                        <td>
-                          <span className={`vehicle-status ${cardsWithVehicles.has(card.uidThe) ? 'has-vehicle' : 'no-vehicle'}`}>
-                            {cardsWithVehicles.has(card.uidThe) ? '🚗 Có xe' : '🚫 Trống'}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="action-buttons">
-                            <button 
-                              className="btn-small btn-secondary"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleEditCard(card)
-                              }}
-                              title="Chỉnh sửa"
-                            >
-                              ✏️
-                            </button>
-                            {(card.loaiThe === 'VIP' || card.loaiThe === 'NHANVIEN') && (
-                              <button 
-                                className="btn-small btn-info"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleAssignPolicy(card)
-                                }}
-                                title="Gán chính sách"
-                              >
-                                💳
-                              </button>
-                            )}
-                            <button 
-                              className="btn-small btn-warning"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleViewHistory(card)
-                              }}
-                              title="Xem lịch sử"
-                            >
-                              📋
-                            </button>
-                            <button 
-                              className="btn-small btn-danger"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleDeleteCard(card)
-                              }}
-                              title="Xóa"
-                            >
-                              🗑️
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Right Panel - Card Form or History */}
-          <div className="dialog-panel primary">
-            {showHistory ? (
-              <>
-                <div className="dialog-panel-title">
-                  Lịch Sử Thẻ: {selectedCard?.uidThe}
-                  <button 
-                    className="dialog-btn dialog-btn-sm dialog-btn-secondary"
-                    style={{float: 'right'}}
-                    onClick={() => setShowHistory(false)}
-                  >
-                    ← Quay lại
-                  </button>
-                </div>
-                
-                <div style={{maxHeight: '500px', overflowY: 'auto'}}>
-                  {cardHistory.length > 0 ? (
-                    <table className="dialog-table">
-                      <thead>
-                        <tr>
-                          <th>Thời gian</th>
-                          <th>Hoạt động</th>
-                          <th>Camera</th>
-                          <th>Kết quả</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cardHistory.map((record, index) => (
-                          <tr key={index}>
-                            <td>{formatDate(record.thoiGian)}</td>
-                            <td>{record.hoatDong}</td>
-                            <td>{record.camera}</td>
-                            <td>{record.ketQua}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <div className="dialog-loading">Không có dữ liệu lịch sử</div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="dialog-panel-title">
-                  {editingCard ? "Chỉnh Sửa Thẻ" : "Thêm Thẻ Mới"}
-                </div>
-
-                <form onSubmit={(e) => {e.preventDefault(); handleFormSubmit();}}>
+              {(formData.loaiThe === 'VIP' || formData.loaiThe === 'NHANVIEN') && (
+                <>
                   <div className="form-group">
-                    <label>UID Thẻ *</label>
-                    <input
-                      type="text"
-                      className="dialog-input"
-                      value={formData.uidThe}
-                      onChange={(e) => setFormData({...formData, uidThe: e.target.value})}
-                      disabled={!!editingCard}
-                      placeholder="Nhập UID thẻ"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Loại Thẻ *</label>
+                    <label>Mã Chính Sách</label>
                     <select
                       className="dialog-select"
-                      value={formData.loaiThe}
-                      onChange={(e) => setFormData({...formData, loaiThe: e.target.value})}
-                      required
+                      value={formData.maChinhSach}
+                      onChange={(e) => setFormData({...formData, maChinhSach: e.target.value})}
                     >
-                      {cardTypes.map(type => (
-                        <option key={type} value={type}>{type}</option>
+                      <option value="">-- Chọn chính sách --</option>
+                      {policies.map(policy => (
+                        <option key={policy.maChinhSach} value={policy.maChinhSach}>
+                          {policy.tenChinhSach} - {policy.donGia?.toLocaleString()}đ
+                        </option>
                       ))}
                     </select>
                   </div>
 
-                  <div className="form-group">
-                    <label>Trạng Thái *</label>
-                    <select
-                      className="dialog-select"
-                      value={formData.trangThai}
-                      onChange={(e) => setFormData({...formData, trangThai: e.target.value})}
-                      required
-                    >
-                      <option value="1">Hoạt động</option>
-                      <option value="0">Không hoạt động</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Biển Số Xe</label>
-                    <input
-                      type="text"
-                      className="dialog-input"
-                      value={formData.bienSoXe || ''}
-                      onChange={(e) => setFormData({...formData, bienSoXe: e.target.value})}
-                      placeholder="VD: 29A-12345"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Mã Chính Sách</label>
-                    <input
-                      type="text"
-                      className="dialog-input"
-                      value={formData.maChinhSach || ''}
-                      onChange={(e) => setFormData({...formData, maChinhSach: e.target.value})}
-                      placeholder="VD: CS_XEMAY_4H"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Ngày Kết Thúc Chính Sách</label>
-                    <input
-                      type="date"
-                      className="dialog-input"
-                      value={formData.ngayKetThucCS || ''}
-                      onChange={(e) => setFormData({...formData, ngayKetThucCS: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Ngày Bắt Đầu Chính Sách</label>
-                    <input
-                      type="date"
-                      className="dialog-input"
-                      value={formData.ngayBatDauCS || ''}
-                      onChange={(e) => setFormData({...formData, ngayBatDauCS: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Số Ngày Có Hiệu Lực</label>
-                    <input
-                      type="number"
-                      className="dialog-input"
-                      value={formData.tongNgay || 0}
-                      onChange={(e) => setFormData({...formData, tongNgay: Number(e.target.value)})}
-                      placeholder="VD: 30"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Ghi Chú</label>
-                    <textarea
-                      className="dialog-textarea"
-                      value={formData.ghiChu || ''}
-                      onChange={(e) => setFormData({...formData, ghiChu: e.target.value})}
-                      placeholder="Nhập ghi chú thêm về thẻ"
-                    />
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="dialog-btn dialog-btn-primary"
-                    style={{width: '100%', marginTop: '16px'}}
-                    disabled={loading}
-                  >
-                    {loading ? "Đang xử lý..." : (editingCard ? "Cập nhật thẻ" : "Thêm thẻ mới")}
-                  </button>
-
-                  {editingCard && (
-                    <button 
-                      type="button"
-                      className="dialog-btn dialog-btn-secondary"
-                      style={{width: '100%', marginTop: '8px'}}
-                      onClick={resetForm}
-                    >
-                      Hủy chỉnh sửa
-                    </button>
+                  {formData.maChinhSach && (
+                    <div className="form-group">
+                      <label>Ngày Bắt Đầu Chính Sách</label>
+                      <input
+                        type="date"
+                        className="dialog-input"
+                        value={formData.ngayBatDauCS}
+                        onChange={(e) => {
+                          const startDate = e.target.value
+                          const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+                          const endDate = selectedPolicy ? calculatePolicyEndDate(startDate, selectedPolicy.tongNgay) : ""
+                          
+                          setFormData({
+                            ...formData, 
+                            ngayBatDauCS: startDate,
+                            ngayKetThucCS: endDate,
+                            tongNgay: selectedPolicy?.tongNgay || 0
+                          })
+                        }}
+                      />
+                    </div>
                   )}
-                </form>
-              </>
-            )}
-          </div>
-        </div>
 
-        <div className="dialog-footer">
-          <button className="dialog-btn dialog-btn-primary" onClick={onSave}>
-            Lưu & Đóng
-          </button>
-          <button className="dialog-btn dialog-btn-secondary" onClick={onClose}>
-            Đóng
-          </button>
-        </div>
-      </div>
+                  {formData.ngayKetThucCS && (
+                    <div className="form-group">
+                      <label>Ngày Kết Thúc Chính Sách</label>
+                      <input
+                        type="date"
+                        className="dialog-input"
+                        value={formData.ngayKetThucCS}
+                        readOnly
+                        style={{ backgroundColor: '#f3f4f6' }}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
 
-      {/* Policy Assignment Dialog */}
-      {showPolicyAssignment && selectedCardForPolicy && (
-        <div className="dialog-overlay">
-          <div className="dialog-container">
-            <div className="dialog-header">
-              <h3>Gán Chính Sách - Thẻ {selectedCardForPolicy.uidThe}</h3>
-              <button 
-                className="close-button" 
-                onClick={() => setShowPolicyAssignment(false)}
-              >
-                ×
-              </button>
+              <div className="form-group">
+                <label>Ghi Chú</label>
+                <textarea
+                  className="dialog-input"
+                  value={formData.ghiChu}
+                  onChange={(e) => setFormData({...formData, ghiChu: e.target.value})}
+                  placeholder="Ghi chú thêm (tùy chọn)"
+                  rows="3"
+                />
+              </div>
             </div>
 
-            <div className="dialog-content">
-              <div className="form-container">
-                <div className="form-group">
-                  <label>Chính Sách:</label>
-                  <select
-                    className="dialog-select"
-                    value={formData.maChinhSach}
-                    onChange={(e) => {
-                      const selectedPolicy = policies.find(p => p.maChinhSach === e.target.value)
-                      setFormData({
-                        ...formData,
-                        maChinhSach: e.target.value,
-                        tongNgay: selectedPolicy?.tongNgay || 0,
-                        ngayKetThucCS: selectedPolicy && formData.ngayBatDauCS ? 
-                          calculatePolicyEndDate(formData.ngayBatDauCS, selectedPolicy.tongNgay) : ""
-                      })
-                    }}
-                  >
-                    <option value="">Chọn chính sách</option>
-                    {policies.map(policy => (
-                      <option key={policy.maChinhSach} value={policy.maChinhSach}>
-                        {policy.tenChinhSach} ({policy.tongNgay} ngày) - {policy.donGia?.toLocaleString()}đ
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Ngày Bắt Đầu:</label>
-                  <input
-                    type="date"
-                    className="dialog-input"
-                    value={formData.ngayBatDauCS}
-                    onChange={(e) => {
-                      const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
-                      setFormData({
-                        ...formData,
-                        ngayBatDauCS: e.target.value,
-                        ngayKetThucCS: selectedPolicy ? 
-                          calculatePolicyEndDate(e.target.value, selectedPolicy.tongNgay) : ""
-                      })
-                    }}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Ngày Kết Thúc:</label>
-                  <input
-                    type="date"
-                    className="dialog-input"
-                    value={formData.ngayKetThucCS}
-                    readOnly
-                    style={{ backgroundColor: '#f5f5f5' }}
-                  />
-                  <small className="form-help">
-                    Tự động tính từ ngày bắt đầu và số ngày của chính sách
-                  </small>
-                </div>
-
-                <div className="form-group">
-                  <label>Số Ngày Hiệu Lực:</label>
-                  <input
-                    type="number"
-                    className="dialog-input"
-                    value={formData.tongNgay}
-                    readOnly
-                    style={{ backgroundColor: '#f5f5f5' }}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Ghi Chú:</label>
-                  <textarea
-                    className="dialog-textarea"
-                    value={formData.ghiChu}
-                    onChange={(e) => setFormData({...formData, ghiChu: e.target.value})}
-                    placeholder="Ghi chú về việc gán chính sách..."
-                    rows="3"
-                  />
-                </div>
-
-                <div className="button-group">
-                  <button 
-                    className="btn btn-success"
-                    onClick={async () => {
-                      try {
-                        setLoading(true)
-                        // await capNhatChinhSachChoThe(formData)
-                        alert("Gán chính sách thành công!")
-                        setShowPolicyAssignment(false)
-                        loadCards()
-                      } catch (error) {
-                        alert("Lỗi gán chính sách: " + error.message)
-                      } finally {
-                        setLoading(false)
-                      }
-                    }}
-                    disabled={loading || !formData.maChinhSach || !formData.ngayBatDauCS}
-                  >
-                    {loading ? "Đang lưu..." : "Gán Chính Sách"}
-                  </button>
-                  <button 
-                    className="btn btn-cancel"
-                    onClick={() => setShowPolicyAssignment(false)}
-                  >
-                    Hủy
-                  </button>
-                </div>
-              </div>
+            <div className="dialog-footer">
+              <button 
+                className="dialog-btn dialog-btn-primary" 
+                onClick={handleFormSubmit} 
+                disabled={loading || !formData.uidThe.trim()}
+              >
+                {loading ? "Đang lưu..." : (editingCard ? "Cập Nhật" : "Thêm Mới")}
+              </button>
+              <button 
+                className="dialog-btn dialog-btn-secondary" 
+                onClick={() => setShowAddDialog(false)}
+              >
+                Hủy
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      <style jsx>{`
-        .badge {
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 12px;
-          font-weight: 600;
-          text-transform: uppercase;
-        }
-        
-        .badge-success {
-          background: #dcfce7;
-          color: #166534;
-        }
-        
-        .badge-danger {
-          background: #fecaca;
-          color: #991b1b;
-        }
-        
-        .dialog-btn-sm {
-          padding: 4px 8px;
-          font-size: 12px;
-        }
-        
-        .form-group {
-          margin-bottom: 16px;
-        }
-        
-        .form-group label {
-          display: block;
-          margin-bottom: 4px;
-          font-weight: 600;
-          color: #374151;
-        }
-      `}</style>
-    </div>
+      {/* Card History Dialog */}
+      {showCardHistory && (
+        <CardHistoryDialog
+          cardId={selectedCardForHistory}
+          onClose={() => {
+            setShowCardHistory(false)
+            setSelectedCardForHistory(null)
+          }}
+        />
+      )}
+    </>
   )
 }
 
-export default RfidManagerDialogNew
+export default RfidManagerDialog
