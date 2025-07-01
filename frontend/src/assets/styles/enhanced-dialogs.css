@@ -1,0 +1,335 @@
+/* Enhanced Parking Zone Dialog Styles */
+
+.stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.stats-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f0f9ff;
+  color: #0369a1;
+  font-size: 0.875rem;
+}
+
+.stats-badge small {
+  color: #64748b;
+  margin-left: 4px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.btn-small:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-info {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.zone-details-panel {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.zone-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-group label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.info-group span {
+  color: #6b7280;
+}
+
+.zone-stats-detail {
+  margin: 16px 0;
+}
+
+.stats-section {
+  margin-bottom: 16px;
+}
+
+.stats-section h5 {
+  margin-bottom: 8px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.stat-name {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.zone-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* Camera Status Styles */
+.camera-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.status-badge {
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-badge.online {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.offline {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.status-badge.checking {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-detail {
+  font-size: 0.625rem;
+  color: #6b7280;
+}
+
+/* RFID Card Styles */
+.badge-premium {
+  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  color: #92400e;
+  font-weight: bold;
+}
+
+.badge-info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-default {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.badge-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-danger {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.policy-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.policy-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.policy-expire {
+  color: #ef4444;
+  font-size: 0.75rem;
+}
+
+.no-policy {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.vehicle-status.has-vehicle {
+  color: #059669;
+  font-weight: 500;
+}
+
+.vehicle-status.no-vehicle {
+  color: #9ca3af;
+}
+
+/* Form Help Text */
+.form-help {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Policy Assignment Dialog */
+.policy-assignment-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.policy-assignment-dialog {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.policy-assignment-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.policy-assignment-content {
+  padding: 24px;
+}
+
+/* Enhanced animations */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dialog-overlay {
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .stats-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .zone-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .btn-small {
+    padding: 6px 8px;
+    font-size: 0.7rem;
+  }
+}

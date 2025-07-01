@@ -10,15 +10,26 @@ const PricingPolicyDialog = ({ onClose }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Form data state
+  // Form data state - cập nhật theo mobile app
   const [formData, setFormData] = useState({
     policyId: "",
     vehicleType: "XE_MAY",
     timeLimit: "240",
-    basePrice: "5000",
+    basePrice: "5000", 
     overTimePrice: "2000",
+    policyType: "NGAY", // NGAY, THANG, NAM
+    policyCount: 1, // Số lượng (1 ngày, 3 tháng, 1 năm)
+    totalDays: 1, // Tổng số ngày
+    isSpecialOffer: false // Có phải ưu đãi đặc biệt
   })
   const [overTime, setOverTime] = useState(false)
+
+  // Các loại chính sách
+  const policyTypes = [
+    { value: "NGAY", label: "Ngày", multiplier: 1 },
+    { value: "THANG", label: "Tháng", multiplier: 30 },
+    { value: "NAM", label: "Năm", multiplier: 365 }
+  ]
 
   // Load policies when component mounts
   useEffect(() => {
@@ -57,6 +68,10 @@ const PricingPolicyDialog = ({ onClose }) => {
       timeLimit: (policy.lv003 || 240).toString(),
       basePrice: (policy.lv004 || 5000).toString(),
       overTimePrice: (policy.lv006 || 2000).toString(),
+      policyType: policy.policyType || "NGAY",
+      policyCount: policy.policyCount || 1,
+      totalDays: policy.totalDays || 1,
+      isSpecialOffer: policy.isSpecialOffer === 1,
     })
     setOverTime(Number.parseInt(policy.lv005) === 1)
     setIsEditing(false)
@@ -71,6 +86,10 @@ const PricingPolicyDialog = ({ onClose }) => {
       timeLimit: "240",
       basePrice: "5000",
       overTimePrice: "2000",
+      policyType: "NGAY",
+      policyCount: 1,
+      totalDays: 1,
+      isSpecialOffer: false
     })
     setOverTime(false)
     setIsEditing(true)
@@ -95,24 +114,38 @@ const PricingPolicyDialog = ({ onClose }) => {
       return false
     }
 
-    const timeLimit = Number.parseInt(formData.timeLimit)
-    if (isNaN(timeLimit) || timeLimit <= 0) {
-      alert("Thời gian phải lớn hơn 0")
-      return false
-    }
+    // Validation cho chính sách VIP
+    if (formData.isSpecialOffer) {
+      if (formData.policyCount <= 0) {
+        alert("Số lượng phải lớn hơn 0")
+        return false
+      }
+      if (!formData.policyType) {
+        alert("Vui lòng chọn loại chính sách")
+        return false
+      }
+    } else {
+      // Validation cho chính sách thường
+      const timeLimit = Number.parseInt(formData.timeLimit)
+      if (isNaN(timeLimit) || timeLimit <= 0) {
+        alert("Thời gian phải lớn hơn 0")
+        return false
+      }
 
-    const basePrice = Number.parseFloat(formData.basePrice)
-    if (isNaN(basePrice) || basePrice < 0) {
-      alert("Đơn giá gói không được âm")
-      return false
-    }
+      const basePrice = Number.parseInt(formData.basePrice)
+      if (isNaN(basePrice) || basePrice <= 0) {
+        alert("Giá cơ bản phải lớn hơn 0")
+        return false
+      }
 
-    const overTimePrice = Number.parseFloat(formData.overTimePrice)
-    if (isNaN(overTimePrice) || overTimePrice < 0) {
-      alert("Đơn giá quá giờ không được âm")
-      return false
+      if (overTime) {
+        const overTimePrice = Number.parseInt(formData.overTimePrice)
+        if (isNaN(overTimePrice) || overTimePrice <= 0) {
+          alert("Giá quá giờ phải lớn hơn 0")
+          return false
+        }
+      }
     }
-
     return true
   }
 
@@ -129,6 +162,10 @@ const PricingPolicyDialog = ({ onClose }) => {
         lv004: Number.parseFloat(formData.basePrice),
         lv005: overTime ? 1 : 0,
         lv006: Number.parseFloat(formData.overTimePrice),
+        policyType: formData.policyType,
+        policyCount: formData.policyCount,
+        totalDays: formData.totalDays,
+        isSpecialOffer: formData.isSpecialOffer ? 1 : 0,
       }
 
       console.log("Policy data to save:", policyData)
@@ -198,6 +235,10 @@ const PricingPolicyDialog = ({ onClose }) => {
       timeLimit: "240",
       basePrice: "5000",
       overTimePrice: "2000",
+      policyType: "NGAY",
+      policyCount: 1,
+      totalDays: 1,
+      isSpecialOffer: false
     })
     setOverTime(false)
     setSelectedPolicy(null)
@@ -214,6 +255,10 @@ const PricingPolicyDialog = ({ onClose }) => {
         timeLimit: (selectedPolicy.lv003 || 240).toString(),
         basePrice: (selectedPolicy.lv004 || 5000).toString(),
         overTimePrice: (selectedPolicy.lv006 || 2000).toString(),
+        policyType: selectedPolicy.policyType || "NGAY",
+        policyCount: selectedPolicy.policyCount || 1,
+        totalDays: selectedPolicy.totalDays || 1,
+        isSpecialOffer: selectedPolicy.isSpecialOffer === 1,
       })
       setOverTime(Number.parseInt(selectedPolicy.lv005) === 1)
     } else {
@@ -240,6 +285,29 @@ const PricingPolicyDialog = ({ onClose }) => {
     console.log("Back to startup")
     onClose()
   }
+
+  // Tính toán tổng số ngày
+  useEffect(() => {
+    const selectedType = policyTypes.find(type => type.value === formData.policyType)
+    if (selectedType) {
+      const totalDays = formData.policyCount * selectedType.multiplier
+      setFormData(prev => ({
+        ...prev,
+        totalDays: totalDays
+      }))
+    }
+  }, [formData.policyType, formData.policyCount])
+
+  // Tự động tạo mã chính sách
+  useEffect(() => {
+    if (formData.vehicleType && formData.policyType && formData.policyCount) {
+      const autoId = `CS_${formData.vehicleType}_${formData.policyCount}${formData.policyType}`
+      setFormData(prev => ({
+        ...prev,
+        policyId: autoId
+      }))
+    }
+  }, [formData.vehicleType, formData.policyType, formData.policyCount])
 
   return (
     <div className="dialog-overlay">
@@ -341,50 +409,132 @@ const PricingPolicyDialog = ({ onClose }) => {
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label>Thời gian (phút):</label>
-                  <input
-                    type="number"
-                    value={formData.timeLimit}
-                    onChange={(e) => handleInputChange("timeLimit", e.target.value)}
-                    disabled={!isEditing}
-                    min="1"
-                  />
-                </div>
+                {formData.isSpecialOffer ? (
+                  // Form cho chính sách VIP
+                  <>
+                    <div className="form-group">
+                      <label>Loại chính sách:</label>
+                      <select
+                        value={formData.policyType}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          policyType: e.target.value
+                        }))}
+                        disabled={!isEditing}
+                      >
+                        {policyTypes.map(type => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                <div className="form-group">
-                  <label>Đơn giá gói:</label>
-                  <input
-                    type="number"
-                    value={formData.basePrice}
-                    onChange={(e) => handleInputChange("basePrice", e.target.value)}
-                    disabled={!isEditing}
-                    min="0"
-                    step="1000"
-                  />
-                </div>
+                    <div className="form-group">
+                      <label>Số lượng:</label>
+                      <input
+                        type="number"
+                        value={formData.policyCount}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          policyCount: parseInt(e.target.value) || 1
+                        }))}
+                        disabled={!isEditing}
+                        min="1"
+                      />
+                    </div>
 
-                <div className="form-group">
-                  <label>Đơn giá quá giờ:</label>
-                  <input
-                    type="number"
-                    value={formData.overTimePrice}
-                    onChange={(e) => handleInputChange("overTimePrice", e.target.value)}
-                    disabled={!isEditing}
-                    min="0"
-                    step="1000"
-                  />
-                </div>
+                    <div className="form-group">
+                      <label>Tổng số ngày:</label>
+                      <input
+                        type="number"
+                        value={formData.totalDays}
+                        disabled
+                        style={{ backgroundColor: '#f5f5f5' }}
+                      />
+                      <small className="form-help">
+                        Tự động tính từ loại chính sách và số lượng
+                      </small>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Giá gói ({formData.policyCount} {policyTypes.find(t => t.value === formData.policyType)?.label.toLowerCase()}):</label>
+                      <input
+                        type="number"
+                        value={formData.basePrice}
+                        onChange={(e) => handleInputChange("basePrice", e.target.value)}
+                        disabled={!isEditing}
+                        min="0"
+                        step="1000"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  // Form cho chính sách thường
+                  <>
+                    <div className="form-group">
+                      <label>Thời gian (phút):</label>
+                      <input
+                        type="number"
+                        value={formData.timeLimit}
+                        onChange={(e) => handleInputChange("timeLimit", e.target.value)}
+                        disabled={!isEditing}
+                        min="1"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Đơn giá gói:</label>
+                      <input
+                        type="number"
+                        value={formData.basePrice}
+                        onChange={(e) => handleInputChange("basePrice", e.target.value)}
+                        disabled={!isEditing}
+                        min="0"
+                        step="1000"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={overTime}
+                          onChange={(e) => setOverTime(e.target.checked)}
+                          disabled={!isEditing}
+                        />
+                        Có tính phí quá giờ
+                      </label>
+                    </div>
+
+                    {overTime && (
+                      <div className="form-group">
+                        <label>Đơn giá quá giờ:</label>
+                        <input
+                          type="number"
+                          value={formData.overTimePrice}
+                          onChange={(e) => handleInputChange("overTimePrice", e.target.value)}
+                          disabled={!isEditing}
+                          min="0"
+                          step="1000"
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
 
                 <div className="form-group checkbox-group">
                   <label>
                     <input
                       type="checkbox"
-                      checked={overTime}
-                      onChange={(e) => setOverTime(e.target.checked)}
+                      checked={formData.isSpecialOffer}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        isSpecialOffer: e.target.checked
+                      }))}
                       disabled={!isEditing}
                     />
-                    Tính phí quá giờ
+                    Chính sách ưu đãi đặc biệt (VIP)
                   </label>
                 </div>
 

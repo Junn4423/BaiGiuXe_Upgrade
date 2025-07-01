@@ -14,10 +14,15 @@ import {
 const CameraManagementDialogNew = ({ onClose, onSave }) => {
   const [cameras, setCameras] = useState([])
   const [zones, setZones] = useState([])
+  const [gates, setGates] = useState([])
   const [selectedZone, setSelectedZone] = useState("")
   const [selectedCamera, setSelectedCamera] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [cameraStatus, setCameraStatus] = useState({}) // Trạng thái camera realtime
+  const [activeTab, setActiveTab] = useState('all') // all, vao, ra
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false) // Trạng thái kiểm tra camera
+  const [statusCheckInterval, setStatusCheckInterval] = useState(null) // Interval để check realtime
   const [formData, setFormData] = useState({
     maCamera: "",
     tenCamera: "",
@@ -25,7 +30,81 @@ const CameraManagementDialogNew = ({ onClose, onSave }) => {
     chucNangCamera: "BIENSO",
     maKhuVuc: "",
     linkRTSP: "",
+    maCong: "", // Gắn với cổng nào
+    ipAddress: "",
+    port: "554",
+    trangThai: "HOAT_DONG",
   })
+
+  useEffect(() => {
+    loadData()
+    // Bắt đầu kiểm tra trạng thái camera realtime
+    startCameraStatusCheck()
+    
+    // Cleanup khi component unmount
+    return () => {
+      if (statusCheckInterval) {
+        clearInterval(statusCheckInterval)
+      }
+    }
+  }, [])
+
+  // Hàm kiểm tra trạng thái camera realtime
+  const startCameraStatusCheck = () => {
+    // Kiểm tra ngay lập tức
+    checkAllCameraStatus()
+    
+    // Sau đó kiểm tra mỗi 30 giây
+    const interval = setInterval(() => {
+      checkAllCameraStatus()
+    }, 30000)
+    
+    setStatusCheckInterval(interval)
+  }
+
+  const checkAllCameraStatus = async () => {
+    if (cameras.length === 0) return
+    
+    const statusPromises = cameras.map(camera => checkCameraStatus(camera))
+    const results = await Promise.allSettled(statusPromises)
+    
+    const newStatus = {}
+    results.forEach((result, index) => {
+      const camera = cameras[index]
+      newStatus[camera.maCamera] = {
+        isOnline: result.status === 'fulfilled' ? result.value : false,
+        lastCheck: new Date().toISOString(),
+        responseTime: result.status === 'fulfilled' ? result.value.responseTime : null
+      }
+    })
+    
+    setCameraStatus(newStatus)
+  }
+
+  const checkCameraStatus = async (camera) => {
+    try {
+      const startTime = performance.now()
+      
+      // Thử ping đến camera hoặc kiểm tra RTSP stream
+      const response = await fetch(`http://${camera.ipAddress}:${camera.port || 554}`, {
+        method: 'HEAD',
+        timeout: 5000
+      })
+      
+      const endTime = performance.now()
+      const responseTime = Math.round(endTime - startTime)
+      
+      return {
+        isOnline: response.ok,
+        responseTime: responseTime
+      }
+    } catch (error) {
+      return {
+        isOnline: false,
+        responseTime: null
+      }
+    }
+  }
 
   useEffect(() => {
     loadData()
@@ -156,8 +235,60 @@ const CameraManagementDialogNew = ({ onClose, onSave }) => {
   }
 
   const getFilteredCameras = () => {
-    if (!selectedZone) return cameras
-    return cameras.filter(camera => camera.maKhuVuc === selectedZone)
+    let filtered = cameras
+    
+    if (selectedZone) {
+      filtered = filtered.filter(camera => camera.maKhuVuc === selectedZone)
+    }
+    
+    switch (activeTab) {
+      case 'vao':
+        return filtered.filter(camera => camera.loaiCamera === 'VAO')
+      case 'ra':
+        return filtered.filter(camera => camera.loaiCamera === 'RA')
+      default:
+        return filtered
+    }
+  }
+
+  // Render trạng thái camera
+  const renderCameraStatus = (camera) => {
+    const status = cameraStatus[camera.maCamera]
+    if (!status) {
+      return <span className="status-badge checking">Đang kiểm tra...</span>
+    }
+    
+    const isOnline = status.isOnline
+    const responseTime = status.responseTime
+    const lastCheck = new Date(status.lastCheck).toLocaleTimeString()
+    
+    return (
+      <div className="camera-status">
+        <span className={`status-badge ${isOnline ? 'online' : 'offline'}`}>
+          {isOnline ? '🟢 Trực tuyến' : '🔴 Ngoại tuyến'}
+        </span>
+        <small className="status-detail">
+          {responseTime && `${responseTime}ms`} | {lastCheck}
+        </small>
+      </div>
+    )
+  }
+
+  // Thống kê camera theo loại
+  const getCameraStats = () => {
+    const filtered = getFilteredCameras()
+    const totalCameras = filtered.length
+    const camerasVao = filtered.filter(c => c.loaiCamera === 'VAO').length
+    const camerasRa = filtered.filter(c => c.loaiCamera === 'RA').length
+    const onlineCameras = filtered.filter(c => cameraStatus[c.maCamera]?.isOnline).length
+    
+    return {
+      total: totalCameras,
+      vao: camerasVao,
+      ra: camerasRa,
+      online: onlineCameras,
+      offline: totalCameras - onlineCameras
+    }
   }
 
   const getZoneName = (maKhuVuc) => {
@@ -178,6 +309,54 @@ const CameraManagementDialogNew = ({ onClose, onSave }) => {
         </div>
 
         <div className="dialog-content main-sidebar">
+          {/* Statistics Panel */}
+          <div className="stats-panel">
+            <div className="stats-grid">
+              <div className="stat-item">
+                <span className="stat-number">{getCameraStats().total}</span>
+                <span className="stat-label">Tổng Camera</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{getCameraStats().vao}</span>
+                <span className="stat-label">Camera Vào</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{getCameraStats().ra}</span>
+                <span className="stat-label">Camera Ra</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{getCameraStats().online}</span>
+                <span className="stat-label">Trực Tuyến</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{getCameraStats().offline}</span>
+                <span className="stat-label">Ngoại Tuyến</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="filter-tabs">
+            <button 
+              className={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveTab('all')}
+            >
+              Tất cả ({getCameraStats().total})
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'vao' ? 'active' : ''}`}
+              onClick={() => setActiveTab('vao')}
+            >
+              Camera Vào ({getCameraStats().vao})
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'ra' ? 'active' : ''}`}
+              onClick={() => setActiveTab('ra')}
+            >
+              Camera Ra ({getCameraStats().ra})
+            </button>
+          </div>
+
           {/* Left Panel - Camera List */}
           <div className="dialog-panel">
             <div className="dialog-panel-title">
@@ -211,7 +390,8 @@ const CameraManagementDialogNew = ({ onClose, onSave }) => {
                       <th>Mã</th>
                       <th>Tên Camera</th>
                       <th>Loại</th>
-                      <th>Chức năng</th>
+                      <th>Trạng Thái</th>
+                      <th>Cổng</th>
                       <th>Khu vực</th>
                       <th>Thao tác</th>
                     </tr>
@@ -219,42 +399,53 @@ const CameraManagementDialogNew = ({ onClose, onSave }) => {
                   <tbody>
                     {getFilteredCameras().map(camera => (
                       <tr 
-                        key={camera.maCamera}
-                        style={{
-                          backgroundColor: selectedCamera?.maCamera === camera.maCamera ? '#e0f2fe' : ''
-                        }}
+                        key={camera.maCamera} 
+                        className={selectedCamera?.maCamera === camera.maCamera ? 'selected' : ''}
+                        onClick={() => setSelectedCamera(camera)}
                       >
                         <td>{camera.maCamera}</td>
                         <td>{camera.tenCamera}</td>
                         <td>
-                          <span className={`badge ${camera.loaiCamera === 'VAO' ? 'badge-success' : 'badge-warning'}`}>
-                            {camera.loaiCamera}
+                          <span className={`badge ${camera.loaiCamera === 'VAO' ? 'success' : 'warning'}`}>
+                            {camera.loaiCamera === 'VAO' ? 'Vào' : 'Ra'}
                           </span>
                         </td>
-                        <td>{camera.chucNangCamera}</td>
+                        <td>{renderCameraStatus(camera)}</td>
+                        <td>{camera.maCong || 'Chưa gán'}</td>
                         <td>{getZoneName(camera.maKhuVuc)}</td>
                         <td>
-                          <div style={{display: 'flex', gap: '8px'}}>
+                          <div className="action-buttons">
                             <button 
-                              className="dialog-btn dialog-btn-sm dialog-btn-primary"
-                              onClick={() => handleEdit(camera)}
+                              className="btn-small btn-info"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleCheckSingleCamera(camera)
+                              }}
+                              disabled={isCheckingStatus}
+                              title="Kiểm tra trạng thái"
                             >
-                              Sửa
+                              🔍
                             </button>
                             <button 
-                              className="dialog-btn dialog-btn-sm dialog-btn-danger"
-                              onClick={() => handleDelete(camera)}
+                              className="btn-small btn-secondary"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEdit(camera)
+                              }}
+                              title="Chỉnh sửa"
                             >
-                              Xóa
+                              ✏️
                             </button>
-                            {camera.linkRTSP && (
-                              <button 
-                                className="dialog-btn dialog-btn-sm dialog-btn-secondary"
-                                onClick={() => testRTSP(camera.linkRTSP)}
-                              >
-                                Test
-                              </button>
-                            )}
+                            <button 
+                              className="btn-small btn-danger"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDelete(camera)
+                              }}
+                              title="Xóa"
+                            >
+                              🗑️
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -338,6 +529,60 @@ const CameraManagementDialogNew = ({ onClose, onSave }) => {
                         {zone.tenKhuVuc}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Gán với Cổng</label>
+                  <select
+                    className="dialog-select"
+                    value={formData.maCong}
+                    onChange={(e) => setFormData({...formData, maCong: e.target.value})}
+                  >
+                    <option value="">Chọn cổng (tùy chọn)</option>
+                    {gates.filter(gate => gate.maKhuVuc === formData.maKhuVuc).map(gate => (
+                      <option key={gate.maCong} value={gate.maCong}>
+                        {gate.tenCong} ({gate.loaiCong === 'VAO' ? 'Vào' : 'Ra'})
+                      </option>
+                    ))}
+                  </select>
+                  <small className="form-help">
+                    Gán camera với cổng cụ thể để theo dõi phương tiện
+                  </small>
+                </div>
+
+                <div className="form-group">
+                  <label>IP Address</label>
+                  <input
+                    type="text"
+                    className="dialog-input"
+                    value={formData.ipAddress}
+                    onChange={(e) => setFormData({...formData, ipAddress: e.target.value})}
+                    placeholder="192.168.1.100"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Port</label>
+                  <input
+                    type="text"
+                    className="dialog-input"
+                    value={formData.port}
+                    onChange={(e) => setFormData({...formData, port: e.target.value})}
+                    placeholder="554"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Trạng Thái</label>
+                  <select
+                    className="dialog-select"
+                    value={formData.trangThai}
+                    onChange={(e) => setFormData({...formData, trangThai: e.target.value})}
+                  >
+                    <option value="HOAT_DONG">Hoạt Động</option>
+                    <option value="NGUNG">Ngừng Hoạt Động</option>
+                    <option value="BAO_TRI">Bảo Trì</option>
                   </select>
                 </div>
 

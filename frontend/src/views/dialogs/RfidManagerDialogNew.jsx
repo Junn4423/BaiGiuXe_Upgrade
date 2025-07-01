@@ -21,6 +21,12 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
   const [typeFilter, setTypeFilter] = useState("all")
   const [showHistory, setShowHistory] = useState(false)
   const [cardHistory, setCardHistory] = useState([])
+  
+  // Thêm states mới theo mobile app
+  const [policies, setPolicies] = useState([]) // Danh sách chính sách giá
+  const [cardsWithVehicles, setCardsWithVehicles] = useState(new Set()) // Thẻ đang có xe gửi
+  const [showPolicyAssignment, setShowPolicyAssignment] = useState(false) // Dialog gán chính sách
+  const [selectedCardForPolicy, setSelectedCardForPolicy] = useState(null) // Thẻ được chọn để gán chính sách
 
   // Form state
   const [formData, setFormData] = useState({
@@ -29,7 +35,10 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
     trangThai: "1",
     bienSoXe: "",
     maChinhSach: "",
-    ngayKetThucCS: ""
+    ngayKetThucCS: "",
+    tongNgay: 0, // Số ngày có hiệu lực của chính sách
+    ngayBatDauCS: "", // Ngày bắt đầu chính sách
+    ghiChu: "" // Ghi chú thêm
   })
 
   const cardTypes = [
@@ -42,6 +51,7 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
 
   useEffect(() => {
     loadCards()
+    loadPolicies() // Load danh sách chính sách
   }, [])
 
   useEffect(() => {
@@ -58,6 +68,49 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
       alert("Lỗi tải danh sách thẻ: " + error.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Thêm function để load chính sách giá
+  const loadPolicies = async () => {
+    try {
+      // const policyList = await layDanhSachChinhSachGia()
+      // Tạm thời dùng dữ liệu mẫu
+      const policyList = [
+        { maChinhSach: "CS_VIP_1T", tenChinhSach: "VIP 1 Tháng", tongNgay: 30, donGia: 500000 },
+        { maChinhSach: "CS_VIP_3T", tenChinhSach: "VIP 3 Tháng", tongNgay: 90, donGia: 1400000 },
+        { maChinhSach: "CS_VIP_1NAM", tenChinhSach: "VIP 1 Năm", tongNgay: 365, donGia: 5000000 }
+      ]
+      setPolicies(policyList)
+    } catch (error) {
+      console.error("Error loading policies:", error)
+    }
+  }
+
+  // Kiểm tra thẻ đang có xe gửi
+  const checkCardsWithVehicles = async () => {
+    try {
+      const cardsWithVehicleSet = new Set()
+      
+      for (const card of cards) {
+        try {
+          // const vehicleData = await kiemTraTheCoXeGui(card.uidThe)
+          // if (vehicleData && vehicleData.length > 0) {
+          //   cardsWithVehicleSet.add(card.uidThe)
+          // }
+          
+          // Tạm thời mô phỏng 
+          if (Math.random() > 0.7) {
+            cardsWithVehicleSet.add(card.uidThe)
+          }
+        } catch (error) {
+          console.error(`Error checking vehicle for card ${card.uidThe}:`, error)
+        }
+      }
+      
+      setCardsWithVehicles(cardsWithVehicleSet)
+    } catch (error) {
+      console.error("Error checking cards with vehicles:", error)
     }
   }
 
@@ -91,7 +144,10 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
       trangThai: card.trangThai || "1",
       bienSoXe: card.bienSoXe || "",
       maChinhSach: card.maChinhSach || "",
-      ngayKetThucCS: card.ngayKetThucCS || ""
+      ngayKetThucCS: card.ngayKetThucCS || "",
+      tongNgay: card.tongNgay || 0,
+      ngayBatDauCS: card.ngayBatDauCS || "",
+      ghiChu: card.ghiChu || ""
     })
     setSelectedCard(card)
   }
@@ -174,7 +230,10 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
       trangThai: "1",
       bienSoXe: "",
       maChinhSach: "",
-      ngayKetThucCS: ""
+      ngayKetThucCS: "",
+      tongNgay: 0,
+      ngayBatDauCS: "",
+      ghiChu: ""
     })
     setEditingCard(null)
     setSelectedCard(null)
@@ -191,6 +250,29 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A"
     return new Date(dateString).toLocaleDateString("vi-VN")
+  }
+
+  // Tính toán ngày hết hạn chính sách
+  const calculatePolicyEndDate = (startDate, policyDays) => {
+    if (!startDate || !policyDays) return ""
+    
+    const start = new Date(startDate)
+    const endDate = new Date(start.getTime() + (policyDays * 24 * 60 * 60 * 1000))
+    return endDate.toISOString().split('T')[0]
+  }
+
+  // Gán chính sách cho thẻ VIP
+  const handleAssignPolicy = (card) => {
+    setSelectedCardForPolicy(card)
+    setFormData({
+      ...formData,
+      uidThe: card.uidThe,
+      maChinhSach: card.maChinhSach || "",
+      ngayBatDauCS: card.ngayBatDauCS || new Date().toISOString().split('T')[0],
+      ngayKetThucCS: card.ngayKetThucCS || "",
+      tongNgay: card.tongNgay || 0
+    })
+    setShowPolicyAssignment(true)
   }
 
   return (
@@ -264,7 +346,8 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
                       <th>Loại</th>
                       <th>Trạng thái</th>
                       <th>Biển số</th>
-                      <th>Ngày phát hành</th>
+                      <th>Chính sách</th>
+                      <th>Có xe gửi</th>
                       <th>Thao tác</th>
                     </tr>
                   </thead>
@@ -272,38 +355,84 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
                     {filteredCards.map(card => (
                       <tr 
                         key={card.uidThe}
-                        style={{
-                          backgroundColor: selectedCard?.uidThe === card.uidThe ? '#e0f2fe' : ''
-                        }}
+                        className={selectedCard?.uidThe === card.uidThe ? 'selected' : ''}
+                        onClick={() => setSelectedCard(card)}
                       >
-                        <td><code>{card.uidThe}</code></td>
-                        <td>{card.loaiThe}</td>
+                        <td>{card.uidThe}</td>
                         <td>
-                          <span className={`badge ${getStatusClass(card.trangThai)}`}>
-                            {getStatusText(card.trangThai)}
+                          <span className={`badge ${card.loaiThe === 'VIP' ? 'badge-premium' : 
+                            card.loaiThe === 'NHANVIEN' ? 'badge-info' : 'badge-default'}`}>
+                            {card.loaiThe}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge ${card.trangThai === '1' ? 'badge-success' : 'badge-danger'}`}>
+                            {card.trangThai === '1' ? 'Hoạt động' : 'Ngừng'}
                           </span>
                         </td>
                         <td>{card.bienSoXe || 'Chưa có'}</td>
-                        <td>{formatDate(card.ngayPhatHanh)}</td>
                         <td>
-                          <div style={{display: 'flex', gap: '4px'}}>
+                          {card.maChinhSach ? (
+                            <div className="policy-info">
+                              <span className="policy-name">{card.maChinhSach}</span>
+                              {card.ngayKetThucCS && (
+                                <small className="policy-expire">
+                                  Hết hạn: {new Date(card.ngayKetThucCS).toLocaleDateString()}
+                                </small>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="no-policy">Chưa có</span>
+                          )}
+                        </td>
+                        <td>
+                          <span className={`vehicle-status ${cardsWithVehicles.has(card.uidThe) ? 'has-vehicle' : 'no-vehicle'}`}>
+                            {cardsWithVehicles.has(card.uidThe) ? '🚗 Có xe' : '🚫 Trống'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
                             <button 
-                              className="dialog-btn dialog-btn-sm dialog-btn-primary"
-                              onClick={() => handleEditCard(card)}
+                              className="btn-small btn-secondary"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditCard(card)
+                              }}
+                              title="Chỉnh sửa"
                             >
-                              Sửa
+                              ✏️
+                            </button>
+                            {(card.loaiThe === 'VIP' || card.loaiThe === 'NHANVIEN') && (
+                              <button 
+                                className="btn-small btn-info"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleAssignPolicy(card)
+                                }}
+                                title="Gán chính sách"
+                              >
+                                💳
+                              </button>
+                            )}
+                            <button 
+                              className="btn-small btn-warning"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleViewHistory(card)
+                              }}
+                              title="Xem lịch sử"
+                            >
+                              📋
                             </button>
                             <button 
-                              className="dialog-btn dialog-btn-sm dialog-btn-secondary"
-                              onClick={() => handleViewHistory(card)}
+                              className="btn-small btn-danger"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteCard(card)
+                              }}
+                              title="Xóa"
                             >
-                              Lịch sử
-                            </button>
-                            <button 
-                              className="dialog-btn dialog-btn-sm dialog-btn-danger"
-                              onClick={() => handleDeleteCard(card)}
-                            >
-                              Xóa
+                              🗑️
                             </button>
                           </div>
                         </td>
@@ -436,6 +565,37 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
                     />
                   </div>
 
+                  <div className="form-group">
+                    <label>Ngày Bắt Đầu Chính Sách</label>
+                    <input
+                      type="date"
+                      className="dialog-input"
+                      value={formData.ngayBatDauCS || ''}
+                      onChange={(e) => setFormData({...formData, ngayBatDauCS: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Số Ngày Có Hiệu Lực</label>
+                    <input
+                      type="number"
+                      className="dialog-input"
+                      value={formData.tongNgay || 0}
+                      onChange={(e) => setFormData({...formData, tongNgay: Number(e.target.value)})}
+                      placeholder="VD: 30"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Ghi Chú</label>
+                    <textarea
+                      className="dialog-textarea"
+                      value={formData.ghiChu || ''}
+                      onChange={(e) => setFormData({...formData, ghiChu: e.target.value})}
+                      placeholder="Nhập ghi chú thêm về thẻ"
+                    />
+                  </div>
+
                   <button 
                     type="submit" 
                     className="dialog-btn dialog-btn-primary"
@@ -470,6 +630,134 @@ const RfidManagerDialogNew = ({ onClose, onSave }) => {
           </button>
         </div>
       </div>
+
+      {/* Policy Assignment Dialog */}
+      {showPolicyAssignment && selectedCardForPolicy && (
+        <div className="dialog-overlay">
+          <div className="dialog-container">
+            <div className="dialog-header">
+              <h3>Gán Chính Sách - Thẻ {selectedCardForPolicy.uidThe}</h3>
+              <button 
+                className="close-button" 
+                onClick={() => setShowPolicyAssignment(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="dialog-content">
+              <div className="form-container">
+                <div className="form-group">
+                  <label>Chính Sách:</label>
+                  <select
+                    className="dialog-select"
+                    value={formData.maChinhSach}
+                    onChange={(e) => {
+                      const selectedPolicy = policies.find(p => p.maChinhSach === e.target.value)
+                      setFormData({
+                        ...formData,
+                        maChinhSach: e.target.value,
+                        tongNgay: selectedPolicy?.tongNgay || 0,
+                        ngayKetThucCS: selectedPolicy && formData.ngayBatDauCS ? 
+                          calculatePolicyEndDate(formData.ngayBatDauCS, selectedPolicy.tongNgay) : ""
+                      })
+                    }}
+                  >
+                    <option value="">Chọn chính sách</option>
+                    {policies.map(policy => (
+                      <option key={policy.maChinhSach} value={policy.maChinhSach}>
+                        {policy.tenChinhSach} ({policy.tongNgay} ngày) - {policy.donGia?.toLocaleString()}đ
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Ngày Bắt Đầu:</label>
+                  <input
+                    type="date"
+                    className="dialog-input"
+                    value={formData.ngayBatDauCS}
+                    onChange={(e) => {
+                      const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+                      setFormData({
+                        ...formData,
+                        ngayBatDauCS: e.target.value,
+                        ngayKetThucCS: selectedPolicy ? 
+                          calculatePolicyEndDate(e.target.value, selectedPolicy.tongNgay) : ""
+                      })
+                    }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Ngày Kết Thúc:</label>
+                  <input
+                    type="date"
+                    className="dialog-input"
+                    value={formData.ngayKetThucCS}
+                    readOnly
+                    style={{ backgroundColor: '#f5f5f5' }}
+                  />
+                  <small className="form-help">
+                    Tự động tính từ ngày bắt đầu và số ngày của chính sách
+                  </small>
+                </div>
+
+                <div className="form-group">
+                  <label>Số Ngày Hiệu Lực:</label>
+                  <input
+                    type="number"
+                    className="dialog-input"
+                    value={formData.tongNgay}
+                    readOnly
+                    style={{ backgroundColor: '#f5f5f5' }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Ghi Chú:</label>
+                  <textarea
+                    className="dialog-textarea"
+                    value={formData.ghiChu}
+                    onChange={(e) => setFormData({...formData, ghiChu: e.target.value})}
+                    placeholder="Ghi chú về việc gán chính sách..."
+                    rows="3"
+                  />
+                </div>
+
+                <div className="button-group">
+                  <button 
+                    className="btn btn-success"
+                    onClick={async () => {
+                      try {
+                        setLoading(true)
+                        // await capNhatChinhSachChoThe(formData)
+                        alert("Gán chính sách thành công!")
+                        setShowPolicyAssignment(false)
+                        loadCards()
+                      } catch (error) {
+                        alert("Lỗi gán chính sách: " + error.message)
+                      } finally {
+                        setLoading(false)
+                      }
+                    }}
+                    disabled={loading || !formData.maChinhSach || !formData.ngayBatDauCS}
+                  >
+                    {loading ? "Đang lưu..." : "Gán Chính Sách"}
+                  </button>
+                  <button 
+                    className="btn btn-cancel"
+                    onClick={() => setShowPolicyAssignment(false)}
+                  >
+                    Hủy
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .badge {
