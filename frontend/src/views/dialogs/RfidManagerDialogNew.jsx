@@ -5,11 +5,15 @@ import "../../assets/styles/dialog-base.css"
 import "../../assets/styles/enhanced-dialogs.css"
 import { 
   layDanhSachThe, 
-  themThe, 
-  capNhatTheRFID, 
+  themTheMobile,
+  capNhatTheRFIDMobile, 
   xoaTheRFID,
   layNhatKyTheoTheNgocChung,
-  timTheDangCoPhien
+  timTheDangCoPhien,
+  thongTinTheDangCoXeGui,
+  layTheRFIDTheoUID,
+  layDanhSachChinhSachGiaV2,
+  tinhNgayKetThucChinhSach
 } from "../../api/api"
 import CardHistoryDialog from "./CardHistoryDialog"
 
@@ -36,11 +40,12 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
   const [cardsWithVehicles, setCardsWithVehicles] = useState(new Set())
   const [showPolicyAssignment, setShowPolicyAssignment] = useState(false)
   const [selectedCardForPolicy, setSelectedCardForPolicy] = useState(null)
+  const [validationErrors, setValidationErrors] = useState({})
 
-  // Form state
+  // Form state - theo chuẩn mobile app
   const [formData, setFormData] = useState({
     uidThe: "",
-    loaiThe: "THUONG",
+    loaiThe: "KHACH", // Giống mobile app
     trangThai: "1",
     bienSoXe: "",
     maChinhSach: "",
@@ -49,13 +54,15 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
     ngayBatDauCS: "",
     ghiChu: ""
   })
+  
+  // Debug log current form data
+  console.log(`🐛 Current formData:`, formData)
 
+  // Card types theo mobile app
   const cardTypes = [
-    "THUONG",
-    "VIP", 
-    "NHANVIEN",
-    "Thẻ nhân viên",
-    "Thẻ khách"
+    { value: 'KHACH', label: 'Thẻ thường', icon: '💳', description: 'Thẻ dành cho khách thường' },
+    { value: 'VIP', label: 'Thẻ VIP', icon: '💎', description: 'Thẻ VIP với ưu đãi đặc biệt' },
+    { value: 'NHANVIEN', label: 'Thẻ nhân viên', icon: '👤', description: 'Thẻ dành cho nhân viên' }
   ]
 
   useEffect(() => {
@@ -66,6 +73,55 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
   useEffect(() => {
     filterCards()
   }, [cards, searchTerm, statusFilter, typeFilter])
+
+  // Tự động tính ngày kết thúc chính sách khi thay đổi (realtime update)
+  useEffect(() => {
+    console.log(`🔍 useEffect triggered - maChinhSach: ${formData.maChinhSach}, ngayBatDauCS: ${formData.ngayBatDauCS}`)
+    console.log(`🔍 Available policies count: ${policies.length}`)
+    console.log(`🔍 Available policies:`, policies.map(p => ({ 
+      maChinhSach: p.maChinhSach, 
+      tongNgay: p.tongNgay,
+      donGia: p.donGia 
+    })))
+    
+    if (formData.maChinhSach && formData.ngayBatDauCS) {
+      const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+      console.log(`🔍 Selected policy for ${formData.maChinhSach}:`, selectedPolicy)
+      
+      if (selectedPolicy && selectedPolicy.tongNgay > 0) {
+        const endDate = calculatePolicyEndDate(formData.ngayBatDauCS, selectedPolicy.tongNgay)
+        console.log(`🔍 Calculated end date: ${endDate}`)
+        
+        // Chỉ cập nhật nếu ngày kết thúc thực sự thay đổi
+        if (endDate && endDate !== formData.ngayKetThucCS) {
+          console.log(`🔍 Updating formData with new end date: ${endDate}`)
+          setFormData(prev => ({
+            ...prev,
+            ngayKetThucCS: endDate,
+            tongNgay: selectedPolicy.tongNgay
+          }))
+        }
+      } else {
+        console.log(`🔍 No policy found or tongNgay <= 0`)
+      }
+    } else {
+      console.log(`🔍 Missing maChinhSach or ngayBatDauCS`)
+    }
+  }, [formData.maChinhSach, formData.ngayBatDauCS, policies])
+
+  // Tự động set ngày bắt đầu mặc định khi chọn chính sách VIP
+  useEffect(() => {
+    if (formData.maChinhSach && !formData.ngayBatDauCS) {
+      const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+      if (selectedPolicy && selectedPolicy.tongNgay > 0) {
+        const today = new Date().toISOString().split('T')[0] // Format YYYY-MM-DD
+        setFormData(prev => ({
+          ...prev,
+          ngayBatDauCS: today
+        }))
+      }
+    }
+  }, [formData.maChinhSach, policies])
 
   const loadCards = async () => {
     try {
@@ -82,14 +138,20 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
 
   const loadPolicies = async () => {
     try {
-      const policyList = [
+      // Lấy từ API thực tế thay vì hardcode
+      const policyList = await layDanhSachChinhSachGiaV2()
+      console.log(`📋 Loaded policies from API:`, policyList)
+      setPolicies(policyList || [])
+    } catch (error) {
+      console.error("Error loading policies:", error)
+      // Fallback với dữ liệu mẫu
+      const fallbackPolicies = [
         { maChinhSach: "CS_VIP_1T", tenChinhSach: "VIP 1 Tháng", tongNgay: 30, donGia: 500000 },
         { maChinhSach: "CS_VIP_3T", tenChinhSach: "VIP 3 Tháng", tongNgay: 90, donGia: 1400000 },
         { maChinhSach: "CS_VIP_1NAM", tenChinhSach: "VIP 1 Năm", tongNgay: 365, donGia: 5000000 }
       ]
-      setPolicies(policyList)
-    } catch (error) {
-      console.error("Error loading policies:", error)
+      console.log(`📋 Using fallback policies:`, fallbackPolicies)
+      setPolicies(fallbackPolicies)
     }
   }
 
@@ -117,9 +179,10 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
 
   const handleAddCard = () => {
     setEditingCard(null)
+    setValidationErrors({})
     setFormData({
       uidThe: "",
-      loaiThe: "THUONG",
+      loaiThe: "KHACH", // Mặc định giống mobile app
       trangThai: "1",
       bienSoXe: "",
       maChinhSach: "",
@@ -133,9 +196,10 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
 
   const handleEditCard = (card) => {
     setEditingCard(card)
+    setValidationErrors({})
     setFormData({
       uidThe: card.uidThe,
-      loaiThe: card.loaiThe || "THUONG",
+      loaiThe: card.loaiThe || "KHACH",
       trangThai: card.trangThai || "1",
       bienSoXe: card.bienSoXe || "",
       maChinhSach: card.maChinhSach || "",
@@ -182,9 +246,62 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
     setShowCardHistory(true)
   }
 
-  const handleFormSubmit = async () => {
+  // Validation theo mobile app
+  const validateCardForm = () => {
+    const errors = {}
+
+    // Kiểm tra UID thẻ
     if (!formData.uidThe.trim()) {
-      alert("Vui lòng nhập UID thẻ")
+      errors.uidThe = "Vui lòng nhập mã thẻ"
+    } else if (formData.uidThe.trim().length < 4) {
+      errors.uidThe = "Mã thẻ phải có ít nhất 4 ký tự"
+    }
+
+    // Kiểm tra biển số bắt buộc cho VIP và NHANVIEN (như mobile app)
+    if ((formData.loaiThe === 'VIP' || formData.loaiThe === 'NHANVIEN') && 
+        !formData.bienSoXe.trim()) {
+      errors.bienSoXe = "Vui lòng nhập biển số xe cho thẻ VIP/Nhân viên"
+    }
+
+    // Kiểm tra format biển số nếu có nhập
+    if (formData.bienSoXe.trim() && formData.bienSoXe.trim().length < 7) {
+      errors.bienSoXe = "Biển số xe không hợp lệ (ít nhất 7 ký tự)"
+    }
+
+    // Kiểm tra chính sách VIP phải có ngày bắt đầu
+    if (formData.maChinhSach && !formData.ngayBatDauCS) {
+      errors.ngayBatDauCS = "Vui lòng chọn ngày bắt đầu chính sách"
+    }
+
+    // Tự động tính ngày kết thúc nếu có chính sách và ngày bắt đầu nhưng chưa có ngày kết thúc
+    if (formData.maChinhSach && formData.ngayBatDauCS && !formData.ngayKetThucCS) {
+      const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+      if (selectedPolicy && selectedPolicy.tongNgay > 0) {
+        // Tính ngày kết thúc ngay lập tức
+        const calculatedEndDate = tinhNgayKetThucChinhSach(formData.ngayBatDauCS, selectedPolicy.tongNgay)
+        console.log(`🔧 Auto-calculate end date: ${formData.ngayBatDauCS} + ${selectedPolicy.tongNgay} days = ${calculatedEndDate}`)
+        
+        // Cập nhật formData với ngày kết thúc đã tính
+        setFormData(prev => ({
+          ...prev,
+          ngayKetThucCS: calculatedEndDate,
+          tongNgay: selectedPolicy.tongNgay
+        }))
+        
+        // Không báo lỗi nếu có thể tính được
+        if (!calculatedEndDate) {
+          errors.ngayKetThucCS = "Không thể tính ngày kết thúc chính sách. Vui lòng kiểm tra dữ liệu."
+        }
+      }
+    }
+
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleFormSubmit = async () => {
+    // Validation trước khi submit
+    if (!validateCardForm()) {
       return
     }
 
@@ -193,21 +310,91 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
       let result
 
       if (editingCard) {
-        result = await capNhatTheRFID(formData)
+        // Đảm bảo ngày kết thúc chính sách được tính đúng cho trường hợp edit
+        let finalEndDate = formData.ngayKetThucCS
+        
+        // Nếu có chính sách và ngày bắt đầu nhưng chưa có ngày kết thúc, tính lại
+        if (formData.maChinhSach && formData.ngayBatDauCS && !finalEndDate) {
+          const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+          if (selectedPolicy && selectedPolicy.tongNgay > 0) {
+            finalEndDate = tinhNgayKetThucChinhSach(formData.ngayBatDauCS, selectedPolicy.tongNgay)
+            console.log(`🔄 Tính lại ngày kết thúc cho edit: ${formData.ngayBatDauCS} + ${selectedPolicy.tongNgay} ngày = ${finalEndDate}`)
+          }
+        }
+
+        // Debug log để kiểm tra dữ liệu gửi đi khi edit
+        console.log(`📤 Dữ liệu gửi capNhatTheRFIDMobile:`, {
+          uidThe: formData.uidThe,
+          loaiThe: formData.loaiThe,
+          trangThai: formData.trangThai,
+          bienSoXe: formData.bienSoXe.trim() || "",
+          maChinhSach: formData.maChinhSach || "",
+          ngayKetThucCS: finalEndDate || "",
+          tongNgayChinhSach: formData.tongNgay
+        })
+
+        // Cập nhật thẻ - sử dụng mobile app API với đầy đủ thông tin
+        result = await capNhatTheRFIDMobile({
+          uidThe: formData.uidThe,
+          loaiThe: formData.loaiThe,
+          trangThai: formData.trangThai,
+          bienSoXe: formData.bienSoXe.trim() || "",
+          maChinhSach: formData.maChinhSach || "",
+          ngayKetThucCS: finalEndDate || ""
+        })
       } else {
-        result = await themThe(formData.uidThe, formData.loaiThe, formData.trangThai)
+        // Đảm bảo ngày kết thúc chính sách được tính đúng trước khi gửi
+        let finalEndDate = formData.ngayKetThucCS
+        
+        // Nếu có chính sách và ngày bắt đầu nhưng chưa có ngày kết thúc, tính lại
+        if (formData.maChinhSach && formData.ngayBatDauCS && !finalEndDate) {
+          const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+          if (selectedPolicy && selectedPolicy.tongNgay > 0) {
+            finalEndDate = tinhNgayKetThucChinhSach(formData.ngayBatDauCS, selectedPolicy.tongNgay)
+            console.log(`🔄 Tính lại ngày kết thúc: ${formData.ngayBatDauCS} + ${selectedPolicy.tongNgay} ngày = ${finalEndDate}`)
+          }
+        }
+
+        // Debug log để kiểm tra dữ liệu gửi đi
+        console.log(`📤 Dữ liệu gửi themTheMobile:`, {
+          uidThe: formData.uidThe.trim(),
+          loaiThe: formData.loaiThe,
+          trangThai: formData.trangThai,
+          bienSoXe: formData.bienSoXe.trim() || "",
+          maChinhSach: formData.maChinhSach || "",
+          ngayKetThucCS: finalEndDate || "",
+          tongNgayChinhSach: formData.tongNgay
+        })
+
+        // Thêm thẻ mới - sử dụng mobile app API
+        result = await themTheMobile(
+          formData.uidThe.trim(),
+          formData.loaiThe,
+          formData.trangThai,
+          formData.bienSoXe.trim() || "",
+          formData.maChinhSach || "",
+          finalEndDate || ""
+        )
       }
 
       if (result && result.success) {
-        alert(editingCard ? "Cập nhật thẻ thành công" : "Thêm thẻ thành công")
+        // Thông báo thành công giống mobile app
+        const cardTypeName = cardTypes.find(t => t.value === formData.loaiThe)?.label || formData.loaiThe
+        const successMessage = editingCard 
+          ? `Đã cập nhật thẻ ${formData.uidThe} (${cardTypeName}) thành công!`
+          : `Đã thêm thẻ ${formData.uidThe} (${cardTypeName}) thành công!${
+              formData.bienSoXe.trim() ? `\nBiển số: ${formData.bienSoXe.trim()}` : ''
+            }`
+        
+        alert(successMessage)
         setShowAddDialog(false)
         await loadCards()
       } else {
-        alert("Lỗi: " + (result?.message || "Không xác định"))
+        alert("Lỗi: " + (result?.message || "Không thể lưu thẻ"))
       }
     } catch (error) {
       console.error("Error saving card:", error)
-      alert("Lỗi: " + error.message)
+      alert("Lỗi: " + (error instanceof Error ? error.message : "Lỗi không xác định"))
     } finally {
       setLoading(false)
     }
@@ -227,11 +414,16 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
   }
 
   const calculatePolicyEndDate = (startDate, policyDays) => {
-    if (!startDate || !policyDays) return ""
+    console.log(`🔄 calculatePolicyEndDate called with: startDate=${startDate}, policyDays=${policyDays}`)
     
-    const start = new Date(startDate)
-    const endDate = new Date(start.getTime() + (policyDays * 24 * 60 * 60 * 1000))
-    return endDate.toISOString().split('T')[0]
+    if (!startDate || !policyDays || policyDays <= 0) {
+      console.log(`⚠️ Invalid input for calculatePolicyEndDate`)
+      return ''
+    }
+    
+    const endDate = tinhNgayKetThucChinhSach(startDate, policyDays)
+    console.log(`🔄 Tính ngày kết thúc chính sách: ${startDate} + ${policyDays} ngày = ${endDate}`)
+    return endDate
   }
   return (
     <>
@@ -291,7 +483,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                   >
                     <option value="all">Tất cả</option>
                     {cardTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type.value} value={type.value}>{type.label}</option>
                     ))}
                   </select>
                 </div>
@@ -321,9 +513,12 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                         >
                           <td style={{ fontFamily: 'monospace' }}>{card.uidThe}</td>
                           <td>
-                            <span className={`badge ${card.loaiThe === 'VIP' ? 'badge-premium' : 
-                              card.loaiThe === 'NHANVIEN' ? 'badge-info' : 'badge-default'}`}>
-                              {card.loaiThe}
+                            <span className={`badge ${
+                              card.loaiThe === 'VIP' ? 'badge-premium' : 
+                              card.loaiThe === 'NHANVIEN' ? 'badge-info' : 
+                              card.loaiThe === 'KHACH' ? 'badge-default' : 'badge-secondary'
+                            }`}>
+                              {cardTypes.find(t => t.value === card.loaiThe)?.label || card.loaiThe}
                             </span>
                           </td>
                           <td>
@@ -427,10 +622,11 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                 <div className="dialog-info-title">Phân Loại Thẻ</div>
                 <div className="card-type-stats">
                   {cardTypes.map(type => {
-                    const count = cards.filter(card => card.loaiThe === type).length
+                    const count = cards.filter(card => card.loaiThe === type.value).length
                     return count > 0 ? (
-                      <div key={type} className="type-stat">
-                        <span className="type-name">{type}</span>
+                      <div key={type.value} className="type-stat">
+                        <span className="type-icon">{type.icon}</span>
+                        <span className="type-name">{type.label}</span>
                         <span className="type-count">{count}</span>
                       </div>
                     ) : null
@@ -443,7 +639,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                   <div className="dialog-info-title">Chi Tiết Thẻ</div>
                   <div className="card-details">
                     <div><strong>UID:</strong> <code>{selectedCard.uidThe}</code></div>
-                    <div><strong>Loại:</strong> {selectedCard.loaiThe}</div>
+                    <div><strong>Loại:</strong> {cardTypes.find(t => t.value === selectedCard.loaiThe)?.label || selectedCard.loaiThe}</div>
                     <div><strong>Trạng thái:</strong> {getStatusText(selectedCard.trangThai)}</div>
                     <div><strong>Biển số:</strong> {selectedCard.bienSoXe || 'Chưa có'}</div>
                     <div><strong>Ngày phát hành:</strong> {formatDate(selectedCard.ngayPhatHanh)}</div>
@@ -479,56 +675,129 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
             </div>
 
             <div className="dialog-content">
+              {/* Thông báo cảnh báo giống mobile app */}
+              {!editingCard && (
+                <div className="warning-card" style={{
+                  background: '#fff3cd',
+                  border: '1px solid #ffeaa7',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{color: '#ff9800', fontSize: '18px'}}>⚠️</span>
+                  <span style={{color: '#856404', fontSize: '14px'}}>
+                    Thẻ RFID chưa tồn tại trong hệ thống. Vui lòng thêm thẻ mới để tiếp tục.
+                  </span>
+                </div>
+              )}
+
               <div className="form-group">
-                <label>UID Thẻ *</label>
+                <label>Mã Thẻ RFID <span style={{color: 'red'}}>*</span></label>
                 <input
                   type="text"
-                  className="dialog-input"
+                  className={`dialog-input ${validationErrors.uidThe ? 'error' : ''}`}
                   value={formData.uidThe}
-                  onChange={(e) => setFormData({...formData, uidThe: e.target.value})}
-                  placeholder="Nhập UID thẻ"
+                  onChange={(e) => {
+                    setFormData({...formData, uidThe: e.target.value})
+                    if (validationErrors.uidThe) {
+                      setValidationErrors({...validationErrors, uidThe: null})
+                    }
+                  }}
+                  placeholder="Nhập mã thẻ RFID"
                   disabled={!!editingCard}
                   style={{ fontFamily: 'monospace', fontSize: '1.1rem' }}
+                  maxLength={50}
                 />
+                {validationErrors.uidThe && (
+                  <div className="error-message" style={{color: 'red', fontSize: '12px', marginTop: '4px'}}>
+                    {validationErrors.uidThe}
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
-                <label>Loại Thẻ *</label>
+                <label>Loại Thẻ <span style={{color: 'red'}}>*</span></label>
                 <select
                   className="dialog-select"
                   value={formData.loaiThe}
-                  onChange={(e) => setFormData({...formData, loaiThe: e.target.value})}
+                  onChange={(e) => {
+                    const newLoaiThe = e.target.value
+                    setFormData({
+                      ...formData, 
+                      loaiThe: newLoaiThe,
+                      // Reset biển số và chính sách khi đổi loại
+                      bienSoXe: newLoaiThe === 'KHACH' ? '' : formData.bienSoXe, 
+                      maChinhSach: newLoaiThe === 'KHACH' ? '' : formData.maChinhSach
+                    })
+                    // Clear validation error
+                    if (validationErrors.bienSoXe && newLoaiThe === 'KHACH') {
+                      setValidationErrors({...validationErrors, bienSoXe: null})
+                    }
+                  }}
                 >
-                  {cardTypes.map((type, index) => (
-                    <option key={index} value={type}>
-                      {type}
+                  {cardTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.icon} {type.label}
                     </option>
                   ))}
                 </select>
+                {/* Hiển thị mô tả loại thẻ */}
+                <div style={{fontSize: '12px', color: '#666', marginTop: '4px'}}>
+                  {cardTypes.find(t => t.value === formData.loaiThe)?.description}
+                </div>
               </div>
 
               <div className="form-group">
-                <label>Trạng Thái *</label>
+                <label>Trạng Thái <span style={{color: 'red'}}>*</span></label>
                 <select
                   className="dialog-select"
                   value={formData.trangThai}
                   onChange={(e) => setFormData({...formData, trangThai: e.target.value})}
                 >
-                  <option value="1">Hoạt động</option>
-                  <option value="0">Không hoạt động</option>
+                  <option value="1">🟢 Hoạt động</option>
+                  <option value="0">🔴 Không hoạt động</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Biển Số Xe</label>
+                <label>
+                  Biển Số Xe 
+                  {(formData.loaiThe === 'VIP' || formData.loaiThe === 'NHANVIEN') && (
+                    <span style={{color: 'red'}}>*</span>
+                  )}
+                </label>
                 <input
                   type="text"
-                  className="dialog-input"
+                  className={`dialog-input ${validationErrors.bienSoXe ? 'error' : ''}`}
                   value={formData.bienSoXe}
-                  onChange={(e) => setFormData({...formData, bienSoXe: e.target.value.toUpperCase()})}
-                  placeholder="Nhập biển số xe (nếu có)"
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase()
+                    setFormData({...formData, bienSoXe: value})
+                    if (validationErrors.bienSoXe) {
+                      setValidationErrors({...validationErrors, bienSoXe: null})
+                    }
+                  }}
+                  placeholder={
+                    formData.loaiThe === 'VIP' || formData.loaiThe === 'NHANVIEN' 
+                      ? "Nhập biển số xe (bắt buộc)" 
+                      : "Nhập biển số xe (tùy chọn)"
+                  }
                   style={{ fontFamily: 'monospace' }}
+                  maxLength={15}
                 />
+                {validationErrors.bienSoXe && (
+                  <div className="error-message" style={{color: 'red', fontSize: '12px', marginTop: '4px'}}>
+                    {validationErrors.bienSoXe}
+                  </div>
+                )}
+                {(formData.loaiThe === 'VIP' || formData.loaiThe === 'NHANVIEN') && (
+                  <div style={{fontSize: '12px', color: '#ff9800', marginTop: '4px'}}>
+                    ⚠️ Biển số xe bắt buộc cho thẻ VIP/Nhân viên
+                  </div>
+                )}
               </div>
 
               {(formData.loaiThe === 'VIP' || formData.loaiThe === 'NHANVIEN') && (
@@ -538,15 +807,61 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                     <select
                       className="dialog-select"
                       value={formData.maChinhSach}
-                      onChange={(e) => setFormData({...formData, maChinhSach: e.target.value})}
+                      onChange={(e) => {
+                        const selectedPolicyId = e.target.value
+                        const selectedPolicy = policies.find(p => p.maChinhSach === selectedPolicyId)
+                        
+                        console.log(`🎯 User selected policy: ${selectedPolicyId}`)
+                        console.log(`🎯 Selected policy details:`, selectedPolicy)
+                        
+                        // Nếu chọn chính sách có tongNgay > 0 và chưa có ngày bắt đầu, tự động set ngày hôm nay
+                        let startDate = formData.ngayBatDauCS
+                        if (selectedPolicy?.tongNgay > 0 && !startDate) {
+                          startDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+                          console.log(`🎯 Auto-set start date to today: ${startDate}`)
+                        }
+                        
+                        // Tự động cập nhật thông tin chính sách và tính ngày kết thúc
+                        const updatedFormData = {
+                          ...formData, 
+                          maChinhSach: selectedPolicyId,
+                          tongNgay: selectedPolicy?.tongNgay || 0,
+                          ngayBatDauCS: startDate
+                        }
+                        
+                        // Tính ngày kết thúc nếu có chính sách VIP và ngày bắt đầu
+                        if (selectedPolicy?.tongNgay > 0 && startDate) {
+                          const calculatedEndDate = calculatePolicyEndDate(startDate, selectedPolicy.tongNgay)
+                          updatedFormData.ngayKetThucCS = calculatedEndDate
+                          console.log(`🎯 Auto-calculated end date: ${calculatedEndDate}`)
+                        } else {
+                          updatedFormData.ngayKetThucCS = "" // Clear end date for non-VIP policies
+                        }
+                        
+                        console.log(`🎯 Final updated form data:`, updatedFormData)
+                        setFormData(updatedFormData)
+                      }}
                     >
                       <option value="">-- Chọn chính sách --</option>
                       {policies.map(policy => (
                         <option key={policy.maChinhSach} value={policy.maChinhSach}>
-                          {policy.tenChinhSach} - {policy.donGia?.toLocaleString()}đ
+                          {policy.maChinhSach} - {policy.donGia?.toLocaleString()}đ{policy.tongNgay > 0 ? `/${policy.tongNgay} ngày` : '/lượt'}
                         </option>
                       ))}
                     </select>
+                    {formData.maChinhSach && (
+                      <div style={{fontSize: '12px', color: '#6b7280', marginTop: '4px'}}>
+                        {(() => {
+                          const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+                          if (selectedPolicy) {
+                            return selectedPolicy.tongNgay > 0 
+                              ? `📅 Chính sách VIP: ${selectedPolicy.tongNgay} ngày - ${selectedPolicy.loaiChinhSach}`
+                              : `⏰ Chính sách thường: ${selectedPolicy.thoiGian} phút`
+                          }
+                          return ''
+                        })()}
+                      </div>
+                    )}
                   </div>
 
                   {formData.maChinhSach && (
@@ -559,7 +874,13 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                         onChange={(e) => {
                           const startDate = e.target.value
                           const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+                          
+                          console.log(`📅 User changed start date: ${startDate}`)
+                          console.log(`📅 Selected policy for calculation:`, selectedPolicy)
+                          
                           const endDate = selectedPolicy ? calculatePolicyEndDate(startDate, selectedPolicy.tongNgay) : ""
+                          
+                          console.log(`📅 Calculated end date: ${endDate}`)
                           
                           setFormData({
                             ...formData, 
@@ -597,6 +918,38 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                   rows="3"
                 />
               </div>
+
+              {/* Debug test button */}
+              <div className="form-group">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    console.log('🧪 Test Button Clicked')
+                    console.log('🧪 Current formData:', formData)
+                    console.log('🧪 Available policies:', policies)
+                    
+                    if (formData.maChinhSach && formData.ngayBatDauCS) {
+                      const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
+                      console.log('🧪 Selected policy:', selectedPolicy)
+                      
+                      if (selectedPolicy?.tongNgay) {
+                        const testEndDate = tinhNgayKetThucChinhSach(formData.ngayBatDauCS, selectedPolicy.tongNgay)
+                        console.log('🧪 Test calculated end date:', testEndDate)
+                        
+                        // Force update formData
+                        setFormData(prev => ({
+                          ...prev,
+                          ngayKetThucCS: testEndDate
+                        }))
+                      }
+                    }
+                  }}
+                  style={{ marginBottom: '10px' }}
+                >
+                  🧪 Test Calculate End Date
+                </button>
+              </div>
             </div>
 
             <div className="dialog-footer">
@@ -604,14 +957,22 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                 className="dialog-btn dialog-btn-primary" 
                 onClick={handleFormSubmit} 
                 disabled={loading || !formData.uidThe.trim()}
+                style={{
+                  opacity: loading || !formData.uidThe.trim() ? 0.6 : 1,
+                  cursor: loading || !formData.uidThe.trim() ? 'not-allowed' : 'pointer'
+                }}
               >
-                {loading ? "Đang lưu..." : (editingCard ? "Cập Nhật" : "Thêm Mới")}
+                {loading ? "⏳ Đang lưu..." : (editingCard ? "✅ Cập Nhật" : "➕ Thêm Mới")}
               </button>
               <button 
                 className="dialog-btn dialog-btn-secondary" 
-                onClick={() => setShowAddDialog(false)}
+                onClick={() => {
+                  setShowAddDialog(false)
+                  setValidationErrors({})
+                }}
+                disabled={loading}
               >
-                Hủy
+                ❌ Hủy
               </button>
             </div>
           </div>

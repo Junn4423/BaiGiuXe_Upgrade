@@ -135,6 +135,9 @@ switch ($vtable) {
                 $pm_nc0003->lv002 = $input['loaiThe'] ?? $_POST['lv002'] ?? null;
                 $pm_nc0003->lv003 = $input['trangThai'] ?? $_POST['lv003'] ?? null;
                 $pm_nc0003->lv004 = $input['ngayPhatHanh'] ?? $_POST['lv004'] ?? date('Y-m-d');
+                $pm_nc0003->lv005 = $input['bienSoXe'] ?? $_POST['lv005'] ?? null;
+                $pm_nc0003->lv006 = $input['maChinhSach'] ?? $_POST['lv006'] ?? null;
+                $pm_nc0003->lv007 = $input['ngayKetThucCS'] ?? $_POST['lv007'] ?? null;
                 $result = $pm_nc0003->KB_Update();
                 $vOutput = $result ? ['success'=>true,'message'=>'Cập nhật thành công'] : ['success'=>false,'message'=>'Lỗi khi cập nhật'];
                 break;

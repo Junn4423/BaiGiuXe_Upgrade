@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { layALLChinhSachGia } from "../../api/api"
-import PricingPolicyDialog from "./PricingPolicyDialog"
+import PricingPolicyDialogNew from "./PricingPolicyDialogNew"
 import WorkConfigDialog from "./WorkConfigDialog"
 import "../../assets/styles/StartupDialog.css"
 
@@ -88,7 +88,7 @@ const StartupDialog = ({ isOpen, onClose, onResult }) => {
       )}
 
       {/* Pricing Policy Dialog */}
-      {showPricingDialog && <PricingPolicyDialog isOpen={showPricingDialog} onClose={handlePricingDialogClose} />}
+      {showPricingDialog && <PricingPolicyDialogNew onClose={() => setShowPricingDialog(false)} />}
     </>
   )
 }

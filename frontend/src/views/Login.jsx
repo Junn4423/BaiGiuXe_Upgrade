@@ -3,11 +3,12 @@
 import { useState } from "react"
 import "../assets/styles/Login.css"
 import { taoBangChoPhienLamViec } from "../api/api"
+import { url_login_api } from "../api/url"
 import WorkConfigDialog from "./dialogs/WorkConfigDialog"
 import MainUI from "./main/main_UI"
 import sofLogo from "../assets/img/sof.png"
 
-const LOGIN_API = "http://192.168.1.94/parkinglot/login.sof.vn/index.php"
+const LOGIN_API = url_login_api
 
 const LoadingOverlay = ({ percent }) => (
   <div className="login-loading-overlay">

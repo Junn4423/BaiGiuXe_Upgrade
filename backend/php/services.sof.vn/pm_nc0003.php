@@ -40,7 +40,7 @@ class pm_nc0003 extends lv_controler{
 
     // Sửa
     function KB_Update() {
-        $sql = "UPDATE pm_nc0003 SET lv002 = '$this->lv002', lv003 = '$this->lv003', lv004 = CURDATE() WHERE lv001 = '$this->lv001'";
+        $sql = "UPDATE pm_nc0003 SET lv002 = '$this->lv002', lv003 = '$this->lv003', lv005 = '$this->lv005', lv006 = '$this->lv006', lv007 = '$this->lv007' WHERE lv001 = '$this->lv001'";
         return db_query($sql);
     }
 

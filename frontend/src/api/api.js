@@ -1,10 +1,10 @@
 // api.js - Chuyển đổi các hàm Python sang React (JS)
 // Lưu ý: Cần chỉnh sửa urlApi cho đúng endpoint backend của bạn
 
-import { api_BienSo } from './url'
+import { api_BienSo, url_api, url_login_api } from './url'
 
-const urlApi = "http://192.168.1.94/parkinglot/services.sof.vn/index.php" // Thay đổi cho đúng backend
-const urlLoginApi = "http://192.168.1.94/parkinglot/login.sof.vn/index.php"
+const urlApi = url_api // Thay đổi cho đúng backend
+const urlLoginApi = url_login_api
 
 // -------------------- Authentication helpers --------------------
 let authCache = null // Lưu token sau lần đăng nhập đầu tiên
@@ -1172,4 +1172,537 @@ export async function layNhatKyTheoTheNgocChung(uidThe) {
     uidThe: uidThe
   }
   return callApiWithAuth(payload)
+}
+
+// -------------------- Enhanced RFID Card Functions (từ mobile app) --------------------
+
+/**
+ * Thêm thẻ RFID với đầy đủ thông tin (theo mobile app)
+ * @param {string} uidThe - UID thẻ RFID
+ * @param {string} loaiThe - Loại thẻ (KHACH, VIP, NHANVIEN)
+ * @param {string} trangThai - Trạng thái thẻ (mặc định: "1")
+ * @param {string} bienSoXe - Biển số xe (optional)
+ * @param {string} maChinhSach - Mã chính sách (optional)
+ * @param {string} ngayKetThucCS - Ngày kết thúc chính sách (optional)
+ * @returns {Promise<Object>} Kết quả thêm thẻ
+ */
+export async function themTheMobile(uidThe, loaiThe, trangThai = "1", bienSoXe = "", maChinhSach = "", ngayKetThucCS = "") {
+  const payload = {
+    table: "pm_nc0003",
+    func: "add",
+    uidThe: uidThe,
+    loaiThe: loaiThe,
+    trangThai: trangThai,
+    bienSoXe: bienSoXe,
+    maChinhSach: maChinhSach,
+    ngayKetThucCS: ngayKetThucCS
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Lấy thông tin thẻ RFID theo UID (theo mobile app)
+ * @param {string} uidThe - UID thẻ RFID
+ * @returns {Promise<Array>} Thông tin thẻ
+ */
+export async function layTheRFIDTheoUID(uidThe) {
+  const payload = { 
+    table: "pm_nc0003", 
+    func: "timTheTuUID", 
+    uidThe: uidThe 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật thẻ RFID theo mobile app
+ * @param {Object} theRFID - Thông tin thẻ RFID
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatTheRFIDMobile(theRFID) {
+  const payload = {
+    table: "pm_nc0003",
+    func: "edit",
+    uidThe: theRFID.uidThe,
+    loaiThe: theRFID.loaiThe,
+    trangThai: theRFID.trangThai,
+    bienSoXe: theRFID.bienSoXe || "",
+    maChinhSach: theRFID.maChinhSach || "",
+    ngayKetThucCS: theRFID.ngayKetThucCS || ""
+    // ngayPhatHanh sẽ được giữ nguyên ở backend
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Lấy tất cả thẻ RFID (theo mobile app)
+ * @returns {Promise<Array>} Danh sách thẻ RFID
+ */
+export async function layTatCaTheRFID() {
+  return layDanhSachThe() // Sử dụng function có sẵn
+}
+
+/**
+ * Lấy thông tin thẻ đang có xe gửi (theo mobile app)
+ * @param {string} uidThe - UID thẻ RFID
+ * @returns {Promise<Array>} Thông tin thẻ và phiên gửi xe
+ */
+export async function thongTinTheDangCoXeGui(uidThe) {
+  return timTheDangCoPhien(uidThe) // Sử dụng function có sẵn
+}
+
+// -------------------- Enhanced Pricing Policy Functions (Mobile App Standard) --------------------
+/**
+ * Lấy danh sách tất cả chính sách giá (theo chuẩn mobile app)
+ * @returns {Promise<Array>} Danh sách chính sách giá
+ */
+export async function layAllChinhSach() {
+  const payload = { table: "pm_nc0008", func: "data" }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Thêm chính sách giá mới (theo chuẩn mobile app)
+ * @param {Object} chinhSach - Thông tin chính sách giá
+ * @returns {Promise<Object>} Kết quả thêm chính sách
+ */
+export async function themChinhSach(chinhSach) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "add",
+    maChinhSach: chinhSach.maChinhSach,
+    maLoaiPT: chinhSach.maLoaiPT,
+    thoiGian: chinhSach.thoiGian,
+    donGia: chinhSach.donGia,
+    quaGio: chinhSach.quaGio || 0,
+    donGiaQuaGio: chinhSach.donGiaQuaGio || 0,
+    loaiChinhSach: chinhSach.loaiChinhSach || '',
+    tongNgay: chinhSach.tongNgay || 0
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật chính sách giá (theo chuẩn mobile app)
+ * @param {Object} chinhSach - Thông tin chính sách giá
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function suaChinhSach(chinhSach) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "edit",
+    maChinhSach: chinhSach.maChinhSach,
+    maLoaiPT: chinhSach.maLoaiPT,
+    thoiGian: chinhSach.thoiGian,
+    donGia: chinhSach.donGia,
+    quaGio: chinhSach.quaGio || 0,
+    donGiaQuaGio: chinhSach.donGiaQuaGio || 0,
+    loaiChinhSach: chinhSach.loaiChinhSach || '',
+    tongNgay: chinhSach.tongNgay || 0
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa chính sách giá (theo chuẩn mobile app)
+ * @param {string} maChinhSach - Mã chính sách giá
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaChinhSach(maChinhSach) {
+  const payload = { 
+    table: "pm_nc0008", 
+    func: "delete", 
+    maChinhSach: maChinhSach 
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Tính toán ngày kết thúc chính sách VIP
+ * @param {string} startDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {number} tongNgay - Tổng số ngày
+ * @returns {string} Ngày kết thúc (YYYY-MM-DD)
+ */
+export function tinhNgayKetThucChinhSach(startDate, tongNgay) {
+  if (!startDate || !tongNgay || tongNgay <= 0) {
+    return ''
+  }
+  
+  const start = new Date(startDate)
+  if (isNaN(start.getTime())) {
+    return ''
+  }
+  
+  const endDate = new Date(start)
+  endDate.setDate(start.getDate() + tongNgay - 1) // -1 vì bao gồm ngày bắt đầu
+  
+  return endDate.toISOString().split('T')[0] // Format YYYY-MM-DD
+}
+
+/**
+ * Tạo mã chính sách tự động theo cấu hình
+ * @param {string} maLoaiPT - Mã loại phương tiện
+ * @param {string} loaiChinhSach - Loại chính sách (NGAY, THANG, NAM)
+ * @param {number} soLuong - Số lượng (1 ngày, 3 tháng, 1 năm)
+ * @returns {string} Mã chính sách tự động
+ */
+export function taoMaChinhSachTuDong(maLoaiPT, loaiChinhSach, soLuong) {
+  if (!maLoaiPT || !loaiChinhSach || !soLuong) {
+    return ''
+  }
+  
+  // Đồng bộ với mobile app - sử dụng policyType value trực tiếp
+  const typeCode = {
+    'N': 'N',       // Ngày
+    'T': 'T',       // Tuần
+    'Th': 'Th',     // Tháng  
+    'NAM': 'NAM'    // Năm
+  }[loaiChinhSach] || 'N'
+  
+  const vehicleCode = maLoaiPT.toUpperCase().replace(/\s/g, '_')
+  return `CS_${vehicleCode}_${soLuong}${typeCode}`
+}
+
+/**
+ * Tính tổng số ngày từ loại chính sách và số lượng
+ * @param {string} loaiChinhSach - Loại chính sách (NGAY, THANG, NAM)
+ * @param {number} soLuong - Số lượng
+ * @returns {number} Tổng số ngày
+ */
+export function tinhTongNgay(loaiChinhSach, soLuong) {
+  // Đồng bộ với mobile app
+  const multiplier = {
+    'N': 1,      // Ngày
+    'T': 7,      // Tuần  
+    'Th': 30,    // Tháng
+    'NAM': 365   // Năm
+  }[loaiChinhSach] || 1
+  
+  return soLuong * multiplier
+}
+
+/**
+ * Lấy danh sách chính sách theo chuẩn backend pm_nc0008
+ * @returns {Promise<Array>} Danh sách chính sách với đầy đủ thông tin
+ */
+export async function layDanhSachChinhSachGiaV2() {
+  const payload = { table: "pm_nc0008", func: "getAllPolicies" }
+  try {
+    const response = await callApiWithAuth(payload)
+    if (response && response.success && response.data) {
+      // Map data để đảm bảo format đúng
+      return response.data.map(policy => ({
+        maChinhSach: policy.lv001,
+        maLoaiPT: policy.lv002,
+        thoiGian: parseInt(policy.lv003) || 0,
+        donGia: parseFloat(policy.lv004) || 0,
+        quaGio: parseInt(policy.lv005) || 0,
+        donGiaQuaGio: parseFloat(policy.lv006) || 0,
+        loaiChinhSach: policy.lv007 || '',
+        tongNgay: parseInt(policy.lv008) || 0
+      }))
+    }
+    return []
+  } catch (error) {
+    console.error('Lỗi layDanhSachChinhSachGiaV2:', error)
+    throw error
+  }
+}
+
+/**
+ * Thêm chính sách giá mới (backend pm_nc0008)
+ * @param {Object} chinhSach - Thông tin chính sách
+ * @returns {Promise<Object>} Kết quả thêm
+ */
+export async function themChinhSachV2(chinhSach) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "createPolicy",
+    policyData: {
+      lv001: chinhSach.maChinhSach,
+      lv002: chinhSach.maLoaiPT,
+      lv003: chinhSach.thoiGian,
+      lv004: chinhSach.donGia,
+      lv005: chinhSach.quaGio,
+      lv006: chinhSach.donGiaQuaGio,
+      lv007: chinhSach.loaiChinhSach,
+      lv008: chinhSach.tongNgay
+    }
+  }
+  console.log("themChinhSachV2 - Payload gửi đi:", payload)
+  console.log("themChinhSachV2 - tongNgay value:", chinhSach.tongNgay, "type:", typeof chinhSach.tongNgay)
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật chính sách giá (backend pm_nc0008)
+ * @param {Object} chinhSach - Thông tin chính sách
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function suaChinhSachV2(chinhSach) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "updatePolicy",
+    policyId: chinhSach.maChinhSach,
+    policyData: {
+      lv001: chinhSach.maChinhSach,
+      lv002: chinhSach.maLoaiPT,
+      lv003: chinhSach.thoiGian,
+      lv004: chinhSach.donGia,
+      lv005: chinhSach.quaGio,
+      lv006: chinhSach.donGiaQuaGio,
+      lv007: chinhSach.loaiChinhSach,
+      lv008: chinhSach.tongNgay
+    }
+  }
+  console.log("suaChinhSachV2 - Payload gửi đi:", payload)
+  console.log("suaChinhSachV2 - tongNgay value:", chinhSach.tongNgay, "type:", typeof chinhSach.tongNgay)
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Xóa chính sách giá (backend pm_nc0008)
+ * @param {string} maChinhSach - Mã chính sách
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaChinhSachV2(maChinhSach) {
+  const payload = {
+    table: "pm_nc0008",
+    func: "deletePolicy",
+    policyId: maChinhSach
+  }
+  return callApiWithAuth(payload)
+}
+
+// ==================== Camera Management Advanced Functions ====================
+
+/**
+ * Kiểm tra trạng thái hoạt động của camera (online/offline)
+ * @param {string} maCamera - Mã camera cần kiểm tra
+ * @returns {Promise<Object>} Trạng thái camera
+ */
+export async function kiemTraTrangThaiCamera(maCamera) {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "checkStatus",
+    maCamera: maCamera
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Lấy danh sách camera theo khu vực
+ * @param {string} maKhuVuc - Mã khu vực
+ * @returns {Promise<Array>} Danh sách camera trong khu vực
+ */
+export async function layDanhSachCameraTheoKhuVuc(maKhuVuc) {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "getByArea",
+    maKhuVuc: maKhuVuc
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật link RTSP của camera
+ * @param {string} maCamera - Mã camera
+ * @param {string} linkRTSP - Link RTSP mới
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatLinkCamera(maCamera, linkRTSP) {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "updateRTSP",
+    maCamera: maCamera,
+    linkRTSP: linkRTSP
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Lấy danh sách camera theo loại (vào/ra)
+ * @param {string} chucNangCamera - Chức năng camera (vào/ra)
+ * @returns {Promise<Array>} Danh sách camera theo chức năng
+ */
+export async function layDanhSachCameraTheoLoai(chucNangCamera) {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "getByFunction",
+    chucNangCamera: chucNangCamera
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Kiểm tra trạng thái tất cả camera
+ * @returns {Promise<Array>} Trạng thái tất cả camera
+ */
+export async function kiemTraTrangThaiTatCaCamera() {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "checkAllStatus"
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Tạo URL RTSP đầy đủ từ thông tin camera
+ * @param {Object} camera - Thông tin camera
+ * @returns {string} URL RTSP đầy đủ
+ */
+export function taoURLRTSP(camera) {
+  if (!camera.linkRTSP) return ""
+  
+  // Nếu đã có protocol thì trả về như cũ
+  if (camera.linkRTSP.startsWith("rtsp://")) {
+    return camera.linkRTSP
+  }
+  
+  // Tạo URL RTSP đầy đủ
+  return `rtsp://${camera.linkRTSP}`
+}
+
+/**
+ * Test kết nối RTSP của camera
+ * @param {string} rtspUrl - URL RTSP cần test
+ * @returns {Promise<Object>} Kết quả test kết nối
+ */
+export async function testKetNoiRTSP(rtspUrl) {
+  try {
+    // Tạo một video element để test stream
+    const video = document.createElement('video')
+    video.src = rtspUrl
+    video.muted = true
+    
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        resolve({
+          success: false,
+          message: "Timeout - không thể kết nối trong 5 giây",
+          url: rtspUrl
+        })
+      }, 5000)
+      
+      video.onloadstart = () => {
+        clearTimeout(timeout)
+        resolve({
+          success: true,
+          message: "Kết nối RTSP thành công",
+          url: rtspUrl
+        })
+      }
+      
+      video.onerror = (error) => {
+        clearTimeout(timeout)
+        resolve({
+          success: false,
+          message: `Lỗi kết nối RTSP: ${error.message || 'Unknown error'}`,
+          url: rtspUrl
+        })
+      }
+    })
+  } catch (error) {
+    return {
+      success: false,
+      message: `Lỗi test RTSP: ${error.message}`,
+      url: rtspUrl
+    }
+  }
+}
+
+/**
+ * Lấy thống kê camera (tổng số, online, offline)
+ * @returns {Promise<Object>} Thống kê camera
+ */
+export async function layThongKeCamera() {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "getStatistics"
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Cập nhật cấu hình camera (độ phân giải, FPS, etc.)
+ * @param {string} maCamera - Mã camera
+ * @param {Object} cauHinh - Cấu hình camera
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatCauHinhCamera(maCamera, cauHinh) {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "updateConfig",
+    maCamera: maCamera,
+    ...cauHinh
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Lấy lịch sử hoạt động của camera
+ * @param {string} maCamera - Mã camera
+ * @param {string} tuNgay - Từ ngày (YYYY-MM-DD)
+ * @param {string} denNgay - Đến ngày (YYYY-MM-DD)
+ * @returns {Promise<Array>} Lịch sử hoạt động
+ */
+export async function layLichSuCamera(maCamera, tuNgay, denNgay) {
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "getHistory",
+    maCamera: maCamera,
+    tuNgay: tuNgay,
+    denNgay: denNgay
+  }
+  return callApiWithAuth(payload)
+}
+
+/**
+ * Phân loại camera theo cổng vào/ra và trạng thái
+ * @returns {Promise<Object>} Camera được phân loại theo cổng và trạng thái
+ */
+export async function phanLoaiCameraTheoTrangThai() {
+  try {
+    const danhSachCamera = await layDanhSachCamera()
+    const trangThaiTatCa = await kiemTraTrangThaiTatCaCamera()
+    
+    const ketQua = {
+      cameraVao: [],
+      cameraRa: [],
+      cameraOnline: [],
+      cameraOffline: [],
+      tongSo: danhSachCamera.length || 0
+    }
+    
+    if (Array.isArray(danhSachCamera)) {
+      danhSachCamera.forEach(camera => {
+        // Phân loại theo chức năng
+        if (camera.chucNangCamera === 'vào' || camera.chucNangCamera === 'Vào') {
+          ketQua.cameraVao.push(camera)
+        } else if (camera.chucNangCamera === 'ra' || camera.chucNangCamera === 'Ra') {
+          ketQua.cameraRa.push(camera)
+        }
+        
+        // Phân loại theo trạng thái (giả định có thông tin trạng thái)
+        const trangThai = trangThaiTatCa?.find(t => t.maCamera === camera.maCamera)
+        if (trangThai?.online) {
+          ketQua.cameraOnline.push(camera)
+        } else {
+          ketQua.cameraOffline.push(camera)
+        }
+      })
+    }
+    
+    return ketQua
+  } catch (error) {
+    console.error("Lỗi phân loại camera:", error)
+    return {
+      cameraVao: [],
+      cameraRa: [],
+      cameraOnline: [],
+      cameraOffline: [],
+      tongSo: 0,
+      error: error.message
+    }
+  }
 }
