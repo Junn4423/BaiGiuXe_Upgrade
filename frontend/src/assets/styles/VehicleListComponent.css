@@ -251,6 +251,66 @@
   font-size: 16px;
 }
 
+/* Additional styles for parking management integration */
+.parking-management-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.parking-management-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.view-parking-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  min-width: 35px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-parking-btn:hover {
+  background: #059669;
+  transform: scale(1.1);
+}
+
+.actions {
+  text-align: center;
+  padding: 8px !important;
+}
+
+/* Update table to accommodate actions column */
+.vehicle-table th:last-child,
+.vehicle-table td:last-child {
+  width: 60px;
+  text-align: center;
+}
+
+.vehicle-table th:last-child {
+  font-size: 11px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1400px) {
   .statistics-section {

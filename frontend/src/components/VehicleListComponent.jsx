@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react"
 import "../assets/styles/VehicleListComponent.css"
 import { layALLPhienGuiXe } from "../api/api"
+import ParkingLotManagement from "../views/ParkingLotManagement"
 
 const VehicleListComponent = ({ onVehicleSelect }) => {
   const [vehicles, setVehicles] = useState([])
@@ -17,6 +18,10 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
   const [sortBy, setSortBy] = useState("time_in")
   const [sortOrder, setSortOrder] = useState("desc")
   const [now, setNow] = useState(Date.now())
+  
+  // State for parking lot management
+  const [showParkingManagement, setShowParkingManagement] = useState(false)
+  const [selectedVehicleForParking, setSelectedVehicleForParking] = useState(null)
 
   // Load vehicle data from API
   useEffect(() => {
@@ -99,6 +104,18 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
     }
   }
 
+  // Handle parking management view
+  const handleViewParkingSpot = (vehicle) => {
+    setSelectedVehicleForParking(vehicle)
+    setShowParkingManagement(true)
+  }
+
+  // Handle close parking management
+  const handleCloseParkingManagement = () => {
+    setShowParkingManagement(false)
+    setSelectedVehicleForParking(null)
+  }
+
   // Format time display
   const formatTime = (timeString) => {
     if (!timeString) return "---"
@@ -176,39 +193,45 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
           <div className="stat-header">DOANH THU</div>
           <div className="stat-value">{formatCurrency(statistics.totalRevenue)}</div>
         </div>
-      </div>
+      </div>        {/* Controls */}
+        <div className="controls-section">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Tìm kiếm biển số hoặc mã thẻ..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
 
-      {/* Controls */}
-      <div className="controls-section">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Tìm kiếm biển số hoặc mã thẻ..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
+          <div className="filter-controls">
+            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="filter-select">
+              <option value="all">Tất cả loại xe</option>
+              <option value="xe_may">Xe máy</option>
+              <option value="oto">Ô tô</option>
+            </select>
+
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
+              <option value="timeIn">Thời gian vào</option>
+              <option value="licensePlate">Biển số</option>
+              <option value="fee">Phí gửi xe</option>
+              <option value="duration">Thời gian đỗ</option>
+            </select>
+
+            <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} className="sort-order-btn">
+              {sortOrder === "asc" ? "Tăng dần" : "Giảm dần"}
+            </button>
+            
+            <button 
+              onClick={() => setShowParkingManagement(true)} 
+              className="parking-management-btn"
+              title="Xem sơ đồ bãi đỗ xe"
+            >
+              🅿️ Sơ đồ bãi đỗ
+            </button>
+          </div>
         </div>
-
-        <div className="filter-controls">
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="filter-select">
-            <option value="all">Tất cả loại xe</option>
-            <option value="xe_may">Xe máy</option>
-            <option value="oto">Ô tô</option>
-          </select>
-
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
-            <option value="timeIn">Thời gian vào</option>
-            <option value="licensePlate">Biển số</option>
-            <option value="fee">Phí gửi xe</option>
-            <option value="duration">Thời gian đỗ</option>
-          </select>
-
-          <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} className="sort-order-btn">
-            {sortOrder === "asc" ? "Tăng dần" : "Giảm dần"}
-          </button>
-        </div>
-      </div>
 
       {/* Vehicle Table */}
       <div className="table-section">
@@ -225,12 +248,13 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
                 <th>PHÍ</th>
                 <th>TRẠNG THÁI</th>
                 <th>KHU VỰC</th>
+                <th>THAO TÁC</th>
               </tr>
             </thead>
             <tbody>
               {filteredAndSortedVehicles.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="no-data">
+                  <td colSpan="10" className="no-data">
                     Không có dữ liệu
                   </td>
                 </tr>
@@ -246,6 +270,20 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
                     <td className="fee">{formatCurrency(vehicle.fee)}</td>
                     <td className={`status ${vehicle.status === "Trong bãi" ? "active" : "completed"}`}>{vehicle.status}</td>
                     <td className="zone">{vehicle.zone}</td>
+                    <td className="actions">
+                      {vehicle.status === "Trong bãi" && (
+                        <button 
+                          className="view-parking-btn"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleViewParkingSpot(vehicle)
+                          }}
+                          title="Xem vị trí đỗ xe"
+                        >
+                          🅿️
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -253,6 +291,14 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
           </table>
         </div>
       </div>
+      
+      {/* Parking Lot Management Modal */}
+      {showParkingManagement && (
+        <ParkingLotManagement 
+          selectedVehicle={selectedVehicleForParking}
+          onClose={handleCloseParkingManagement}
+        />
+      )}
     </div>
   )
 }

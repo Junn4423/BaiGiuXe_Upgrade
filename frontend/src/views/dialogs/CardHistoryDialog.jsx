@@ -157,8 +157,8 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                           <span className="session-date">{session.ngay}</span>
                         </div>
                         <div className="session-details">
-                          <span className="license-plate">🚗 {session.bienSo || "N/A"}</span>
-                          <span className="parking-spot">📍 {session.viTriGui || "N/A"}</span>
+                          <span className="license-plate">Biển số: {session.bienSo || "N/A"}</span>
+                          <span className="parking-spot">Vị trí: {session.viTriGui || "N/A"}</span>
                           <span className={`session-status ${getStatusClass(session.trangThai)}`}>
                             {getStatusText(session.trangThai)}
                           </span>

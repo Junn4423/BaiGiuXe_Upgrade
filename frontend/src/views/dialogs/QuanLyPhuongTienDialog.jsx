@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import "../../assets/styles/dialog-base.css"
+import "../../assets/styles/enhanced-dialogs.css"
 import { layDanhSachPhuongTien, themPhuongTien, capNhatPhuongTien, xoaPhuongTien, layALLLoaiPhuongTien } from "../../api/api"
 
 const QuanLyPhuongTienDialog = ({ onClose }) => {
@@ -117,7 +118,7 @@ const QuanLyPhuongTienDialog = ({ onClose }) => {
         <div className="dialog-left-panel">
           <div className="dialog-title-bar">
             <span className="dialog-title">Quản Lý Phương Tiện</span>
-            <button className="dialog-close" onClick={onClose}>✕</button>
+            <button className="dialog-close" onClick={onClose}>×</button>
           </div>
 
           <div className="dialog-content">

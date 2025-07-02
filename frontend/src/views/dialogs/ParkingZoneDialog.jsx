@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react"
 import "../../assets/styles/ParkingZoneDialog.css"
 import "../../assets/styles/enhanced-dialogs.css"
-import { layDanhSachKhuVuc, themKhuVuc, capNhatKhuVuc, xoaKhuVuc } from "../../api/api"
+import { layDanhSachKhuVuc, themKhuVuc, capNhatKhuVuc, xoaKhuVuc, layDanhSachCamera, layDanhSachCong } from "../../api/api"
 import AddCameraDialog from "./AddCameraDialog"
-import GateManagementDialog from "./GateManagementDialog" // Thêm dialog quản lý cổng
+import GateManagementDialog from "./GateManagementDialog" 
 
 const ParkingZoneDialog = ({ onClose }) => {
   const [zones, setZones] = useState([])
@@ -16,6 +16,8 @@ const ParkingZoneDialog = ({ onClose }) => {
   const [showGateManagement, setShowGateManagement] = useState(false) // State cho dialog cổng
   const [showZoneDetails, setShowZoneDetails] = useState(false) // State cho xem chi tiết
   const [zoneStats, setZoneStats] = useState({}) // Thống kê camera/cổng theo khu vực
+  const [zoneCameras, setZoneCameras] = useState([]) // Danh sách camera trong khu vực chi tiết
+  const [zoneGates, setZoneGates] = useState([]) // Danh sách cổng trong khu vực chi tiết
   const [formData, setFormData] = useState({
     maKhuVuc: "",
     tenKhuVuc: "",
@@ -49,16 +51,20 @@ const ParkingZoneDialog = ({ onClose }) => {
   // Thêm function để load thống kê khu vực
   const loadZoneStats = async (zoneList) => {
     try {
+      // Fetch all cameras and gates
+      const allCameras = await layDanhSachCamera()
+      const allGates = await layDanhSachCong()
       const stats = {}
       for (const zone of zoneList) {
-        // Giả lập API call để lấy thống kê - cần implement API thực tế
+        const cams = allCameras.filter(c => c.maKhuVuc === zone.maKhuVuc)
+        const gates = allGates.filter(g => g.maKhuVuc === zone.maKhuVuc)
         stats[zone.maKhuVuc] = {
-          tongCamera: 0,
-          cameraVao: 0,
-          cameraRa: 0,
-          tongCong: 0,
-          congVao: 0,
-          congRa: 0
+          tongCamera: cams.length,
+          cameraVao: cams.filter(c => c.chucNangCamera === 'VAO').length,
+          cameraRa: cams.filter(c => c.chucNangCamera === 'RA').length,
+          tongCong: gates.length,
+          congVao: gates.filter(g => g.loaiCong === 'VAO').length,
+          congRa: gates.filter(g => g.loaiCong === 'RA').length
         }
       }
       setZoneStats(stats)
@@ -76,6 +82,8 @@ const ParkingZoneDialog = ({ onClose }) => {
       moTa: zone.moTa || "",
     })
     setIsEditing(false)
+    // Load detailed lists
+    loadZoneDetails(zone.maKhuVuc)
     setShowZoneDetails(true)
   }
 
@@ -218,6 +226,8 @@ const ParkingZoneDialog = ({ onClose }) => {
   // Hàm xem chi tiết khu vực
   const handleViewDetails = (zone) => {
     setSelectedZone(zone)
+    // Load detailed lists
+    loadZoneDetails(zone.maKhuVuc)
     setShowZoneDetails(true)
   }
 
@@ -225,6 +235,20 @@ const ParkingZoneDialog = ({ onClose }) => {
   const handleManageGates = (zone) => {
     setSelectedZone(zone)
     setShowGateManagement(true)
+  }
+
+  // Load cameras and gates for detail view
+  const loadZoneDetails = async (maKhuVuc) => {
+    try {
+      const cams = await layDanhSachCamera()
+      const gates = await layDanhSachCong()
+      setZoneCameras(cams.filter(c => c.maKhuVuc === maKhuVuc))
+      setZoneGates(gates.filter(g => g.maKhuVuc === maKhuVuc))
+    } catch (error) {
+      console.error("Error loading zone details:", error)
+      setZoneCameras([])
+      setZoneGates([])
+    }
   }
 
   // Render thống kê tổng quan
@@ -321,6 +345,32 @@ const ParkingZoneDialog = ({ onClose }) => {
                   </div>
                 </div>
               </div>
+
+              <div className="details-row">
+                <div className="details-label">Danh sách Camera:</div>
+                <div className="details-value">
+                  {zoneCameras.length > 0 ? (
+                    <ul>
+                      {zoneCameras.map(camera => (
+                        <li key={camera.maCamera}>{camera.tenCamera} ({camera.chucNangCamera})</li>
+                      ))}
+                    </ul>
+                  ) : "Không có camera trong khu vực này."}
+                </div>
+              </div>
+
+              <div className="details-row">
+                <div className="details-label">Danh sách Cổng:</div>
+                <div className="details-value">
+                  {zoneGates.length > 0 ? (
+                    <ul>
+                      {zoneGates.map(gate => (
+                        <li key={gate.maCong}>{gate.tenCong} ({gate.loaiCong})</li>
+                      ))}
+                    </ul>
+                  ) : "Không có cổng trong khu vực này."}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -330,7 +380,7 @@ const ParkingZoneDialog = ({ onClose }) => {
 
   return (
     <div className="dialog-overlay">
-      <div className="parking-zone-dialog">
+      <div className="dialog-container extra-large parking-zone-dialog">
         {/* Header */}
         <div className="dialog-header">
           <h3>Quản Lý Khu Vực Đỗ Xe</h3>
@@ -362,32 +412,28 @@ const ParkingZoneDialog = ({ onClose }) => {
                         <th>Camera</th>
                         <th>Cổng</th>
                         <th>Mô Tả</th>
+                        <th>Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
                       {zones.length === 0 ? (
-                        <tr>
-                          <td colSpan="5" className="no-data">
-                            Không có dữ liệu
-                          </td>
-                        </tr>
+                        <tr><td colSpan="4" className="no-data">Không có khu vực</td></tr>
                       ) : (
-                        zones.map((zone, index) => {
-                          const stats = zoneStats[zone.maKhuVuc] || {}
-                          return (
-                            <tr
-                              key={zone.maKhuVuc || index}
-                              className={selectedZone?.maKhuVuc === zone.maKhuVuc ? "selected" : ""}
-                              onClick={() => handleSelectZone(zone)}
-                            >
-                              <td>{zone.maKhuVuc}</td>
-                              <td>{zone.tenKhuVuc}</td>
-                              <td>{stats.tongCamera || 0}</td>
-                              <td>{stats.tongCong || 0}</td>
-                              <td>{zone.moTa || ""}</td>
-                            </tr>
-                          )
-                        })
+                        zones.map(zone => (
+                          <tr key={zone.maKhuVuc} className={selectedZone?.maKhuVuc === zone.maKhuVuc ? 'selected' : ''}>
+                            <td>{zone.maKhuVuc}</td>
+                            <td>{zone.tenKhuVuc}</td>
+                            <td>{zoneStats[zone.maKhuVuc]?.tongCamera || 0}</td>
+                            <td>{zoneStats[zone.maKhuVuc]?.tongCong || 0}</td>
+                            <td>{zone.moTa || '-'}</td>
+                            <td className="action-buttons">
+                              <button className="btn btn-info" onClick={() => handleSelectZone(zone) & handleViewDetails(zone)}>Chi tiết</button>
+                              <button className="btn btn-success" onClick={() => handleSelectZone(zone) & handleManageGates(zone)}>Cổng</button>
+                              <button className="btn btn-secondary" onClick={() => { handleSelectZone(zone); setIsEditing(true) }}>Sửa</button>
+                              <button className="btn btn-danger" onClick={() => { handleSelectZone(zone); handleDelete() }}>Xóa</button>
+                            </td>
+                          </tr>
+                        ))
                       )}
                     </tbody>
                   </table>
@@ -398,12 +444,124 @@ const ParkingZoneDialog = ({ onClose }) => {
             {/* Right Panel - Zone Details */}
             <div className="zone-form-panel">
               <div className="panel-header">
-                <h4>Chi Tiết Khu Vực</h4>
+                <h4>{isEditing ? (selectedZone ? 'Chỉnh Sửa Khu Vực' : 'Thêm Khu Vực Mới') : 'Chi Tiết Khu Vực'}</h4>
               </div>
 
-              {selectedZone ? renderZoneDetails() : (
+              {isEditing ? (
+                <div className="zone-edit-form">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="maKhuVuc">Mã Khu Vực *</label>
+                    <input
+                      type="text"
+                      id="maKhuVuc"
+                      value={formData.maKhuVuc}
+                      onChange={(e) => handleInputChange('maKhuVuc', e.target.value)}
+                      placeholder="Nhập mã khu vực (VD: K001)"
+                      disabled={!!selectedZone}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="tenKhuVuc">Tên Khu Vực *</label>
+                    <input
+                      type="text"
+                      id="tenKhuVuc"
+                      value={formData.tenKhuVuc}
+                      onChange={(e) => handleInputChange('tenKhuVuc', e.target.value)}
+                      placeholder="Nhập tên khu vực (VD: Khu A)"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="moTa">Mô Tả</label>
+                    <textarea
+                      id="moTa"
+                      value={formData.moTa}
+                      onChange={(e) => handleInputChange('moTa', e.target.value)}
+                      placeholder="Nhập mô tả về khu vực..."
+                      rows="3"
+                    />
+                  </div>
+                </div>
+              ) : selectedZone ? (
+                <div className="zone-details-enhanced">
+                  <div className="zone-info-card">
+                    <h4>{selectedZone.tenKhuVuc}</h4>
+                    <div className="zone-info-grid">
+                      <div className="info-item">
+                        <div className="info-label">Mã Khu Vực</div>
+                        <div className="info-value">{selectedZone.maKhuVuc}</div>
+                      </div>
+                      <div className="info-item">
+                        <div className="info-label">Mô Tả</div>
+                        <div className="info-value">{selectedZone.moTa || "Chưa có mô tả"}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="equipment-section">
+                    <h5>Camera Giám Sát</h5>
+                    <div className="equipment-list">
+                      {zoneCameras.length > 0 ? (
+                        zoneCameras.map(camera => (
+                          <div key={camera.maCamera} className="equipment-item">
+                            <span className="equipment-name">{camera.tenCamera}</span>
+                            <span className={`equipment-type ${camera.chucNangCamera?.toLowerCase()}`}>
+                              {camera.chucNangCamera}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="no-equipment">
+                          Chưa có camera nào được cấu hình
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="equipment-section">
+                    <h5>Cổng Ra Vào</h5>
+                    <div className="equipment-list">
+                      {zoneGates.length > 0 ? (
+                        zoneGates.map(gate => (
+                          <div key={gate.maCong} className="equipment-item">
+                            <span className="equipment-name">{gate.tenCong}</span>
+                            <span className={`equipment-type ${gate.loaiCong?.toLowerCase()}`}>
+                              {gate.loaiCong}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="no-equipment">
+                          Chưa có cổng nào được cấu hình
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="zone-management-section">
+                    <h5>Quản Lý Thiết Bị</h5>
+                    <div className="management-buttons">
+                      <button 
+                        className="btn btn-camera" 
+                        onClick={() => setShowAddCamera(true)}
+                        disabled={isLoading}
+                      >
+                        Quản lý Camera
+                      </button>
+                      <button 
+                        className="btn btn-gate" 
+                        onClick={() => setShowGateManagement(true)}
+                        disabled={isLoading}
+                      >
+                        Quản lý Cổng
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
                 <div className="no-selection">
-                  <p>Chọn một khu vực để xem chi tiết</p>
+                  <p>Chọn một khu vực từ danh sách để xem chi tiết</p>
                 </div>
               )}
 
@@ -414,21 +572,14 @@ const ParkingZoneDialog = ({ onClose }) => {
                 </button>
 
                 {selectedZone && !isEditing && (
-                  <button className="btn btn-secondary" onClick={handleEdit} disabled={isLoading}>
-                    Cập nhật
-                  </button>
-                )}
-
-                {selectedZone && !isEditing && (
-                  <button className="btn btn-danger" onClick={handleDelete} disabled={isLoading}>
-                    Xóa
-                  </button>
-                )}
-
-                {selectedZone && !isEditing && (
-                  <button className="btn btn-info" onClick={() => setShowAddCamera(true)} disabled={isLoading}>
-                    Quản lý Camera
-                  </button>
+                  <>
+                    <button className="btn btn-secondary" onClick={handleEdit} disabled={isLoading}>
+                      Chỉnh sửa
+                    </button>
+                    <button className="btn btn-danger" onClick={handleDelete} disabled={isLoading}>
+                      Xóa
+                    </button>
+                  </>
                 )}
 
                 {isEditing && (
@@ -464,13 +615,10 @@ const ParkingZoneDialog = ({ onClose }) => {
 
         {showGateManagement && selectedZone && (
           <GateManagementDialog
+            onClose={() => setShowGateManagement(false)}
+            onSave={async () => { await loadZones(); setShowGateManagement(false); }}
             zoneId={selectedZone.maKhuVuc}
             zoneName={selectedZone.tenKhuVuc}
-            onClose={() => setShowGateManagement(false)}
-            onSave={() => {
-              setShowGateManagement(false)
-              loadZoneStats() // Reload stats after gate changes
-            }}
           />
         )}
       </div>

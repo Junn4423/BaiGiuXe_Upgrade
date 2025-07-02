@@ -4,24 +4,26 @@ class pm_nc0001 extends lv_controler {
     public $lv001; // mã loại (PK)
     public $lv002; // tên loại
     public $lv003; // mô tả
+	public $lv004; // Loại xe nhiều bánh hay ít bánh (0: là xe ít bánh || 1 là xe nhiều bánh)
 	
-	function __construct($vCheckAdmin,$vUserID,$vright)
-	{
+	//Mo comment la mo quyen ben frontend phai truyen token sau khi dang nhap vao
+	// function __construct($vCheckAdmin,$vUserID,$vright)
+	// {
 		
-		$this->DateCurrent=GetServerDate()." ".GetServerTime();
-		$this->Set_User($vCheckAdmin,$vUserID,$vright);
+		// $this->DateCurrent=GetServerDate()." ".GetServerTime();
+		// $this->Set_User($vCheckAdmin,$vUserID,$vright);
 		
-		$this->isRel=1;		
-	 	$this->isHelp=1;	
-		$this->isConfig=0;
-		$this->isRpt=0;		
-	 	$this->isFil=1;	
-		$this->isApr=0;		
-		$this->isUnApr=0;
-		$this->lang=$_GET['lang'];
+		// $this->isRel=1;		
+	 	// $this->isHelp=1;	
+		// $this->isConfig=0;
+		// $this->isRpt=0;		
+	 	// $this->isFil=1;	
+		// $this->isApr=0;		
+		// $this->isUnApr=0;
+		// $this->lang=$_GET['lang'];
 		
 		
-	}
+	// }
 	
     // Lấy toàn bộ
     function LoadAll() {
@@ -32,14 +34,14 @@ class pm_nc0001 extends lv_controler {
 
     // Thêm mới
     function KB_Insert() {
-        $lvsql = "INSERT INTO pm_nc0001 (lv001, lv002, lv003) VALUES ('$this->lv001', '$this->lv002', '$this->lv003')";
+        $lvsql = "INSERT INTO pm_nc0001 (lv001, lv002, lv003, lv004) VALUES ('$this->lv001', '$this->lv002', '$this->lv003', '$this->lv004')";
         $vReturn = db_query($lvsql);
         return $vReturn;
     }
 
     // Sửa
     function KB_Update() {
-        $lvsql = "UPDATE pm_nc0001 SET lv002 = '$this->lv002', lv003 = '$this->lv003' WHERE lv001 = '$this->lv001'";
+        $lvsql = "UPDATE pm_nc0001 SET lv002 = '$this->lv002', lv003 = '$this->lv003', lv004 = '$this->lv004' WHERE lv001 = '$this->lv001'";
         $vReturn = db_query($lvsql);
         return $vReturn;
     }

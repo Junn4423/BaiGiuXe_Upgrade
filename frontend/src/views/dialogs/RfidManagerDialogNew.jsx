@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import "../../assets/styles/dialog-base.css"
 import "../../assets/styles/enhanced-dialogs.css"
+import "../../assets/styles/RfidManagerDialog.css"
 import { 
   layDanhSachThe, 
   themTheMobile,
@@ -426,7 +427,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
     return endDate
   }
   return (
-    <>
+    <div className="rfid-dialog">
       <div className="dialog-overlay">
         <div className="dialog-container extra-large">
           <div className="dialog-header">
@@ -551,7 +552,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                                 }}
                                 title="Chỉnh sửa"
                               >
-                                ✏️
+                                Sửa
                               </button>
                               <button 
                                 className="btn-small btn-warning"
@@ -561,7 +562,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                                 }}
                                 title="Xem lịch sử"
                               >
-                                📋
+                                Lịch sử
                               </button>
                               <button 
                                 className="btn-small btn-danger"
@@ -571,7 +572,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                                 }}
                                 title="Xóa"
                               >
-                                🗑️
+                                Xóa
                               </button>
                             </div>
                           </td>
@@ -855,8 +856,8 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                           const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
                           if (selectedPolicy) {
                             return selectedPolicy.tongNgay > 0 
-                              ? `📅 Chính sách VIP: ${selectedPolicy.tongNgay} ngày - ${selectedPolicy.loaiChinhSach}`
-                              : `⏰ Chính sách thường: ${selectedPolicy.thoiGian} phút`
+                              ? `Chính sách VIP: ${selectedPolicy.tongNgay} ngày - ${selectedPolicy.loaiChinhSach}`
+                              : `Chính sách thường: ${selectedPolicy.thoiGian} phút`
                           }
                           return ''
                         })()}
@@ -947,7 +948,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                   }}
                   style={{ marginBottom: '10px' }}
                 >
-                  🧪 Test Calculate End Date
+                  Test Calculate End Date
                 </button>
               </div>
             </div>
@@ -962,7 +963,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                   cursor: loading || !formData.uidThe.trim() ? 'not-allowed' : 'pointer'
                 }}
               >
-                {loading ? "⏳ Đang lưu..." : (editingCard ? "✅ Cập Nhật" : "➕ Thêm Mới")}
+                {loading ? "Đang lưu..." : (editingCard ? "Cập Nhật" : "Thêm Mới")}
               </button>
               <button 
                 className="dialog-btn dialog-btn-secondary" 
@@ -972,7 +973,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                 }}
                 disabled={loading}
               >
-                ❌ Hủy
+                Hủy
               </button>
             </div>
           </div>
@@ -989,7 +990,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
           }}
         />
       )}
-    </>
+    </div>
   )
 }
 

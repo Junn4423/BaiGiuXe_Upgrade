@@ -5,6 +5,25 @@ class pm_nc0004 extends lv_controler{
     public $lv002; // Tên khu vực
     public $lv003; // Mô tả
 
+
+//Mo comment la mo quyen ben frontend phai truyen token sau khi dang nhap vao
+	// function __construct($vCheckAdmin,$vUserID,$vright)
+	// {
+		
+		// $this->DateCurrent=GetServerDate()." ".GetServerTime();
+		// $this->Set_User($vCheckAdmin,$vUserID,$vright);
+		
+		// $this->isRel=1;		
+	 	// $this->isHelp=1;	
+		// $this->isConfig=0;
+		// $this->isRpt=0;		
+	 	// $this->isFil=1;	
+		// $this->isApr=0;		
+		// $this->isUnApr=0;
+		// $this->lang=$_GET['lang'];
+		
+		
+	// }
     // Lấy tất cả khu vực
     function LoadAll() {
         $sql = "SELECT * FROM pm_nc0004 ORDER BY lv001";

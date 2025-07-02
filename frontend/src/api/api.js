@@ -382,6 +382,20 @@ export async function timTheDangCoPhien(uidThe) {
   return callApiWithAuth(payload)
 }
 
+/**
+ * Xóa thẻ RFID
+ * @param {string} uidThe - UID của thẻ RFID cần xóa
+ * @returns {Promise<Object>} Kết quả xóa thẻ
+ */
+export async function xoaTheRFID(uidThe) {
+  const payload = {
+    table: "pm_nc0003",
+    func: "delete",
+    uidThe: uidThe
+  }
+  return callApiWithAuth(payload)
+}
+
 // -------------------- License Plate Recognition API --------------------
 
 /**
@@ -712,36 +726,7 @@ export async function xoaPhuongTien(bienSo) {
   return callApiWithAuth(payload)
 }
 
-// -------------------- Extended RFID Card Functions --------------------
-/**
- * Tìm thẻ từ UID
- * @param {string} uidThe - UID thẻ RFID
- * @returns {Promise<Array>} Thông tin thẻ
- */
-export async function timTheTuUID(uidThe) {
-  const payload = { 
-    table: "pm_nc0003", 
-    func: "timTheTuUID", 
-    uidThe: uidThe 
-  }
-  return callApiWithAuth(payload)
-}
-
-/**
- * Xóa thẻ RFID
- * @param {string} uidThe - UID thẻ RFID
- * @returns {Promise<Object>} Kết quả xóa
- */
-export async function xoaTheRFID(uidThe) {
-  const payload = { 
-    table: "pm_nc0003", 
-    func: "delete", 
-    uidThe: uidThe 
-  }
-  return callApiWithAuth(payload)
-}
-
-// -------------------- Advanced Pricing Functions --------------------
+// -------------------- Enhanced Pricing Policy Functions --------------------
 /**
  * Lấy danh sách chính sách giá theo table pm_nc0008 từ ngocchung.php
  * @returns {Promise<Array>} Danh sách chính sách giá
@@ -1706,3 +1691,42 @@ export async function phanLoaiCameraTheoTrangThai() {
     }
   }
 }
+
+/**
+ * Lấy danh sách phiên gửi xe với thông tin vị trí đỗ xe (lv004)
+ * @returns {Promise<Array>} Danh sách phiên gửi xe với vị trí đỗ
+ */
+export async function layPhienGuiXeCoViTri() {
+  const payload = { 
+    table: "pm_nc0009", 
+    func: "data",
+    includeViTri: true // Flag để đảm bảo lv004 được bao gồm
+  }
+  const result = await callApiWithAuth(payload)
+  
+  // Đảm bảo mapping đúng từ database response
+  if (Array.isArray(result)) {
+    return result.map(phien => ({
+      ...phien,
+      viTriGui: phien.lv004 || phien.viTriGui, // Map lv004 to viTriGui
+      // Các field khác giữ nguyên
+      maPhien: phien.maPhien || phien.lv001,
+      uidThe: phien.uidThe || phien.lv002,
+      bienSo: phien.bienSo || phien.lv003,
+      chinhSach: phien.chinhSach || phien.lv005,
+      congVao: phien.congVao || phien.lv006,
+      gioVao: phien.gioVao || phien.lv007,
+      anhVao: phien.anhVao || phien.lv008,
+      anhMatVao: phien.anhMatVao || phien.lv009,
+      congRa: phien.congRa || phien.lv010,
+      gioRa: phien.gioRa || phien.lv011,
+      anhRa: phien.anhRa || phien.lv012,
+      anhMatRa: phien.anhMatRa || phien.lv013,
+      trangThai: phien.trangThai || phien.lv014
+    }))
+  }
+  
+  return result
+}
+
+

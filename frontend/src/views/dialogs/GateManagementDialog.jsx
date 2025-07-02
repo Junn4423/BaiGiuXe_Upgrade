@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import "../../assets/styles/dialog-base.css"
+import "../../assets/styles/GateManagementDialog.css"
 import { layDanhSachCong, themCong, capNhatCong, xoaCong } from "../../api/api"
 
 const GateManagementDialog = ({ onClose, onSave, zoneId, zoneName }) => {
@@ -13,7 +13,7 @@ const GateManagementDialog = ({ onClose, onSave, zoneId, zoneName }) => {
     maCong: "",
     tenCong: "",
     loaiCong: "VAO", // VAO, RA
-    maKhuVuc: zoneId,
+    maKhuVuc: zoneId || "",
     trangThai: "HOAT_DONG",
     moTa: "",
     ipAddress: "",
@@ -21,8 +21,11 @@ const GateManagementDialog = ({ onClose, onSave, zoneId, zoneName }) => {
   })
 
   useEffect(() => {
-    loadGates()
-  }, [])
+    if (zoneId) {
+      setFormData(prev => ({ ...prev, maKhuVuc: zoneId }))
+      loadGates()
+    }
+  }, [zoneId])
 
   const loadGates = async () => {
     try {
@@ -179,10 +182,10 @@ const GateManagementDialog = ({ onClose, onSave, zoneId, zoneName }) => {
                       <div className="gate-name">{gate.tenCong}</div>
                       <div className="gate-details">
                         <span className={`gate-type ${gate.loaiCong.toLowerCase()}`}>
-                          {gate.loaiCong === 'VAO' ? '🚪 Vào' : '🚪 Ra'}
+                          {gate.loaiCong === 'VAO' ? 'Vào' : 'Ra'}
                         </span>
                         <span className={`gate-status ${gate.trangThai.toLowerCase().replace('_', '-')}`}>
-                          {gate.trangThai === 'HOAT_DONG' ? '✅ Hoạt động' : '❌ Tạm dừng'}
+                          {gate.trangThai === 'HOAT_DONG' ? 'Hoạt động' : 'Tạm dừng'}
                         </span>
                       </div>
                       {gate.ipAddress && (
@@ -196,21 +199,21 @@ const GateManagementDialog = ({ onClose, onSave, zoneId, zoneName }) => {
                         onClick={() => handleEdit(gate)}
                         title="Sửa"
                       >
-                        ✏️
+                        Sửa
                       </button>
                       <button 
                         className="btn-icon test" 
                         onClick={() => testGateConnection(gate.ipAddress, gate.port)}
                         title="Test kết nối"
                       >
-                        🔗
+                        Test
                       </button>
                       <button 
                         className="btn-icon delete" 
                         onClick={() => handleDelete(gate)}
                         title="Xóa"
                       >
-                        🗑️
+                        Xóa
                       </button>
                     </div>
                   </div>

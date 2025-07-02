@@ -1,0 +1,87 @@
+/* Global Dialog Color Fix - Apply Login Theme */
+
+/* Override any dialog that doesn't use the new color scheme */
+.workconfig-dialog-overlay,
+.biensoi-dialog .dialog-overlay,
+.startup-overlay {
+  background: linear-gradient(135deg, rgba(28, 49, 92, 0.95) 0%, rgba(42, 74, 124, 0.95) 25%, rgba(28, 49, 92, 0.95) 50%, rgba(61, 90, 156, 0.95) 75%, rgba(28, 49, 92, 0.95) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* WorkConfig Dialog */
+.workconfig-dialog {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-radius: 20px !important;
+  border: 2px solid rgba(28, 49, 92, 0.1) !important;
+  box-shadow: 0 30px 60px rgba(28, 49, 92, 0.4) !important;
+}
+
+.workconfig-title-bar {
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%) !important;
+}
+
+/* BienSoi Dialog */
+.biensoi-dialog {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-radius: 20px !important;
+  border: 2px solid rgba(28, 49, 92, 0.1) !important;
+  box-shadow: 0 30px 60px rgba(28, 49, 92, 0.4) !important;
+}
+
+.biensoi-dialog .dialog-header {
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%) !important;
+}
+
+/* Startup Dialog */
+.startup-dialog {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-radius: 20px !important;
+  border: 2px solid rgba(28, 49, 92, 0.1) !important;
+  box-shadow: 0 30px 60px rgba(28, 49, 92, 0.4) !important;
+}
+
+.startup-header {
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%) !important;
+  color: white !important;
+}
+
+/* Vehicle Management Dialog */
+.dialog-left-panel .dialog-title-bar {
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%) !important;
+}
+
+/* Pricing Policy Dialog */
+.pricing-policy-dialog .dialog-header {
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%) !important;
+}
+
+/* Card History Dialog */
+.card-history-dialog .dialog-header {
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%) !important;
+}
+
+/* Camera Config Dialog */
+.camera-config-dialog .dialog-header {
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%) !important;
+}
+
+/* Dialog Size Override for smaller dialogs */
+.workconfig-dialog,
+.biensoi-dialog,
+.startup-dialog,
+.card-history-dialog {
+  width: 90% !important;
+  max-width: 1200px !important;
+  height: auto !important;
+  min-height: 600px !important;
+}
+
+/* But keep management dialogs large */
+.dialog-container.extra-large,
+.parking-zone-dialog,
+.rfid-manager-dialog {
+  width: 98% !important;
+  max-width: 1800px !important;
+  height: 95vh !important;
+  min-height: 800px !important;
+}

@@ -13,6 +13,7 @@ class pm_nc0008 extends lv_controler{
 	public $lv006;
 	public $lv007;
 	public $lv008;
+//Mo comment la mo quyen ben frontend phai truyen token sau khi dang nhap vao
 	// function __construct($vCheckAdmin,$vUserID,$vright)
 	// {
 		

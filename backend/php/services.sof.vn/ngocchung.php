@@ -224,12 +224,14 @@ switch ($vtable) {
                         $vOutput = [];
                         while ($vrow = db_fetch_array($objEmp)) {
                             $vOutput[] = [
-                                'maChinhSach'      => $vrow['lv001'] ?? null,
-                                'maLoaiPT'       => $vrow['lv002'] ?? null,
-                                'thoiGian'       => $vrow['lv003'] ?? null,
-                                'donGia'     => $vrow['lv004'] ?? null,
-                                'quaGio'    => $vrow['lv005'] ?? null,
-                                'donGiaQuaGio'      => $vrow['lv006'] ?? null,
+                                'maChinhSach' => $vrow['lv001'],
+								'maLoaiPT' => $vrow['lv002'],
+								'thoiGian' => (int)$vrow['lv003'],
+								'donGia' => (float)$vrow['lv004'],
+								'quaGio' => (int)$vrow['lv005'], 
+								'donGiaQuaGio' => isset($vrow['lv006']) ? (float)$vrow['lv006'] : null,
+								'loaiChinhSach' => $vrow['lv007'],
+								'tongNgay' => (int)$vrow['lv008']
                             ];
                         }
                     } else {

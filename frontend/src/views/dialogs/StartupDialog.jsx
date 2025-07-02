@@ -5,6 +5,7 @@ import { layALLChinhSachGia } from "../../api/api"
 import PricingPolicyDialogNew from "./PricingPolicyDialogNew"
 import WorkConfigDialog from "./WorkConfigDialog"
 import "../../assets/styles/StartupDialog.css"
+import "../../assets/styles/global-dialog-theme.css"
 
 const StartupDialog = ({ isOpen, onClose, onResult }) => {
   const [showPricingDialog, setShowPricingDialog] = useState(false)

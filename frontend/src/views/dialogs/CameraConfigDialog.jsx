@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import "../../assets/styles/CameraConfigDialog.css"
+import "../../assets/styles/dialog-base.css"
+import "../../assets/styles/enhanced-dialogs.css"
 import { 
   layDanhSachCamera, 
   xoaCamera, 
@@ -101,7 +103,7 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
   const testCameraRTSP = async (camera) => {
     try {
       setTestingCamera(camera.maCamera)
-      console.log(`🔍 Testing RTSP for camera: ${camera.tenCamera}`)
+      console.log(`Testing RTSP for camera: ${camera.tenCamera}`)
       
       const rtspUrl = taoURLRTSP(camera)
       if (!rtspUrl) {
@@ -282,7 +284,7 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
 
   return (
     <div className="dialog-overlay">
-      <div className="camera-config-dialog">
+      <div className="dialog-container extra-large camera-config-dialog">
         <div className="dialog-header">
           <h2>Cấu Hình Camera</h2>
           <button className="close-button" onClick={onClose}>
@@ -301,19 +303,19 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
                   <span className="status-value">{cameraStatus.tongSo}</span>
                 </div>
                 <div className="status-item">
-                  <span className="status-label">🚪 Vào:</span>
+                  <span className="status-label">Vào:</span>
                   <span className="status-value">{cameraStatus.cameraVao.length}</span>
                 </div>
                 <div className="status-item">
-                  <span className="status-label">🚪 Ra:</span>
+                  <span className="status-label">Ra:</span>
                   <span className="status-value">{cameraStatus.cameraRa.length}</span>
                 </div>
                 <div className="status-item">
-                  <span className="status-label">🟢 Online:</span>
+                  <span className="status-label">Online:</span>
                   <span className="status-value">{cameraStatus.cameraOnline.length}</span>
                 </div>
                 <div className="status-item">
-                  <span className="status-label">🔴 Offline:</span>
+                  <span className="status-label">Offline:</span>
                   <span className="status-value">{cameraStatus.cameraOffline.length}</span>
                 </div>
               </div>

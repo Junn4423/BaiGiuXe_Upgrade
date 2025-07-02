@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import "../../assets/styles/WorkConfigDialog.css"
+import "../../assets/styles/global-dialog-theme.css"
 import { layDanhSachKhuVuc, layALLLoaiPhuongTien, refreshAuthToken } from "../../api/api"
 
 const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
@@ -122,7 +123,7 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
         <div className="workconfig-title-bar">
           <span className="workconfig-title">Cấu hình làm việc</span>
           <button className="workconfig-close" onClick={onClose}>
-            ✕
+            ×
           </button>
         </div>
 

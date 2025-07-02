@@ -5,7 +5,25 @@ class pm_nc0007 extends lv_controler{
     public $lv003; // loaiCong (VAO/RA)
     public $lv004; // viTriLapDat
     public $lv005; // maKhu
-
+	
+	//Mo comment la mo quyen ben frontend phai truyen token sau khi dang nhap vao
+	// function __construct($vCheckAdmin,$vUserID,$vright)
+	// {
+		
+		// $this->DateCurrent=GetServerDate()." ".GetServerTime();
+		// $this->Set_User($vCheckAdmin,$vUserID,$vright);
+		
+		// $this->isRel=1;		
+	 	// $this->isHelp=1;	
+		// $this->isConfig=0;
+		// $this->isRpt=0;		
+	 	// $this->isFil=1;	
+		// $this->isApr=0;		
+		// $this->isUnApr=0;
+		// $this->lang=$_GET['lang'];
+		
+		
+	// }
     function LoadAll() {
         $sql = "SELECT * FROM pm_nc0007 ORDER BY lv001";
         return db_query($sql);

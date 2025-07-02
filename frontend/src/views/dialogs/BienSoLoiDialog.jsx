@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import "../../assets/styles/BienSoLoiDialog.css"
+import "../../assets/styles/global-dialog-theme.css"
 
 const BienSoLoiDialog = ({
   onClose,

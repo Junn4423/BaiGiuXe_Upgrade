@@ -15,7 +15,8 @@ switch ($vtable) {
                     $vOutput[] = [
                         'maLoaiPT' => $vrow['lv001'],
                         'tenLoaiPT' => $vrow['lv002'],
-                        'moTa' => $vrow['lv003']
+                        'moTa' => $vrow['lv003'],
+						'loaiXe' => $vrow['lv004'],
                     ];
                 }
                 break;
@@ -23,6 +24,8 @@ switch ($vtable) {
                 $pm_nc0001->lv001 = $input['maLoaiPT'] ?? $_POST['lv001'] ?? null;
                 $pm_nc0001->lv002 = $input['tenLoaiPT'] ?? $_POST['lv002'] ?? null;
                 $pm_nc0001->lv003 = $input['moTa'] ?? $_POST['lv003'] ?? null;
+                $pm_nc0001->lv004 = $input['loaiXe'] ?? $_POST['lv004'] ?? null;
+				
                 $result = $pm_nc0001->KB_Insert();
                 $vOutput = $result ? ['success'=>true,'message'=>'Thêm mới thành công'] : ['success'=>false,'message'=>'Lỗi khi thêm mới'];
                 break;
@@ -41,6 +44,7 @@ switch ($vtable) {
                 $pm_nc0001->lv001 = $input['maLoaiPT'] ?? $_POST['lv001'] ?? null;
                 $pm_nc0001->lv002 = $input['tenLoaiPT'] ?? $_POST['lv002'] ?? null;
                 $pm_nc0001->lv003 = $input['moTa'] ?? $_POST['lv003'] ?? null;
+				$pm_nc0001->lv004 = $input['loaiXe'] ?? $_POST['lv004'] ?? null;
                 $result = $pm_nc0001->KB_Update();
                 $vOutput = $result ? ['success'=>true,'message'=>'Cập nhật thành công'] : ['success'=>false,'message'=>'Lỗi khi cập nhật'];
                 break;
@@ -172,7 +176,7 @@ switch ($vtable) {
                     ];
 				}
 				break;
-				break;
+
         }
         break;
 
@@ -275,6 +279,19 @@ switch ($vtable) {
                     ];
                 }
                 break;
+			case "loadChoDauXeTheoKhu":
+				$pm_nc0005->lv002 = $input['maKhuVuc'] ?? $_POST['lv002'] ?? null;
+				$objEmp = $pm_nc0005->LoadID($pm_nc0005->lv002);
+				$vOutput = [];
+				while ($vrow = db_fetch_array($objEmp)) {
+                    $vOutput[] = [
+                        'maChoDo' => $vrow['lv001'],
+                        'maKhuVuc' => $vrow['lv002'],
+                        'trangThai' => $vrow['lv003'],
+                        'tenKhuVuc' => $vrow['zone_name'] ?? ''
+                    ];
+                }
+				break;
             case "add":
                 $pm_nc0005->lv001 = $input['maChoDo'] ?? $_POST['lv001'] ?? null;
                 $pm_nc0005->lv002 = $input['maKhuVuc'] ?? $_POST['lv002'] ?? null;
@@ -304,6 +321,13 @@ switch ($vtable) {
                 $result = $pm_nc0005->KB_Update();
                 $vOutput = $result ? ['success'=>true,'message'=>'Cập nhật thành công'] : ['success'=>false,'message'=>'Lỗi khi cập nhật'];
                 break;
+				
+			case "chinhSuaTrangThai":
+				$pm_nc0005->lv001 = $input['maChoDo'] ?? $_POST['lv001'] ?? null;
+				$pm_nc0005->lv003 = $input['trangThai'] ?? $_POST['lv003'] ?? null;
+				$result = $pm_nc0005->KB_ChinhSuaTrangThai($pm_nc0005->lv001,$pm_nc0005->lv003);
+				$vOutput = $result ? ['success'=>true,'message'=>'Cập nhật thành công'] : ['success'=>false,'message'=>'Lỗi khi cập nhật'];
+				break;
         }
         break;    
          case "pm_nc0009":
