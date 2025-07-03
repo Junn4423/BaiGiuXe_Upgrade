@@ -1,84 +1,84 @@
 // api.js - Chuyển đổi các hàm Python sang React (JS)
 // Lưu ý: Cần chỉnh sửa urlApi cho đúng endpoint backend của bạn
 
-import { api_BienSo, url_api, url_login_api } from './url'
+import { api_BienSo, url_api, url_login_api } from "./url";
 
-const urlApi = url_api // Thay đổi cho đúng backend
-const urlLoginApi = url_login_api
+const urlApi = url_api; // Thay đổi cho đúng backend
+const urlLoginApi = url_login_api;
 
 // -------------------- Authentication helpers --------------------
-let authCache = null // Lưu token sau lần đăng nhập đầu tiên
+let authCache = null; // Lưu token sau lần đăng nhập đầu tiên
 
 async function getAuthToken(username = "admin", password = "1") {
   // Luôn lấy token mới để đảm bảo không bị expired
-  console.log("Getting fresh auth token...")
+  console.log("Getting fresh auth token...");
 
   const payload = {
     txtUserName: username,
     txtPassword: password,
-  }
+  };
 
   const res = await fetch(urlLoginApi, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  })
+  });
 
   if (!res.ok) {
-    throw new Error("Không thể đăng nhập để lấy token")
+    throw new Error("Không thể đăng nhập để lấy token");
   }
 
-  authCache = await res.json()
-  console.log("Got auth token:", authCache)
-  return authCache
+  authCache = await res.json();
+  console.log("Got auth token:", authCache);
+  return authCache;
 }
 
 async function getAuthHeaders() {
-  const authData = await getAuthToken()
+  const authData = await getAuthToken();
   return {
     "Content-Type": "application/json",
     "X-USER-CODE": authData.code,
     "X-USER-TOKEN": authData.token,
-  }
+  };
 }
 
 async function callApiWithAuth(payload) {
-  console.log("Calling API with auth:", payload)
-  const headers = await getAuthHeaders()
-  console.log("Using headers:", headers)
+  console.log("Calling API with auth:", payload);
+  const headers = await getAuthHeaders();
+  console.log("Using headers:", headers);
 
   const res = await fetch(urlApi, {
     method: "POST",
     headers,
     body: JSON.stringify(payload),
-  })
+  });
 
-  const result = await handleApiResponse(res)
-  console.log("API response:", result)
-  return result
+  const result = await handleApiResponse(res);
+  console.log("API response:", result);
+  return result;
 }
 
 function handleApiResponse(response) {
   if (!response.ok) {
-    console.error("API response not ok:", response.status, response.statusText)
-    throw new Error(`Network response was not ok: ${response.status}`)
+    console.error("API response not ok:", response.status, response.statusText);
+    throw new Error(`Network response was not ok: ${response.status}`);
   }
 
   return response.json().then((data) => {
-    console.log("Raw API response:", data)
+    console.log("Raw API response:", data);
 
     if (typeof data === "object" && data.success === false) {
-      throw new Error(data.message || "API error")
+      throw new Error(data.message || "API error");
     }
-    return data
-  })
+    return data;
+  });
 }
 
 // -------------------- API Functions --------------------
 
 export async function layALLLoaiPhuongTien() {
-  const payload = { table: "pm_nc0001", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0001", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 export async function themLoaiPhuongTien(loaiPhuongTien) {
@@ -88,8 +88,9 @@ export async function themLoaiPhuongTien(loaiPhuongTien) {
     maLoaiPT: loaiPhuongTien.maLoaiPT,
     tenLoaiPT: loaiPhuongTien.tenLoaiPT,
     moTa: loaiPhuongTien.moTa,
-  }
-  return callApiWithAuth(payload)
+    loaiXe: loaiPhuongTien.loaiXe || 0, // Mặc định là 0 nếu không có
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function capNhatLoaiPhuongTien(loaiPhuongTien) {
@@ -99,18 +100,18 @@ export async function capNhatLoaiPhuongTien(loaiPhuongTien) {
     maLoaiPT: loaiPhuongTien.maLoaiPT,
     tenLoaiPT: loaiPhuongTien.tenLoaiPT,
     moTa: loaiPhuongTien.moTa,
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function xoaLoaiPhuongTien(maLoaiPT) {
-  const payload = { table: "pm_nc0001", func: "delete", maLoaiPT }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0001", func: "delete", maLoaiPT };
+  return callApiWithAuth(payload);
 }
 
 export async function layDanhSachCamera() {
-  const payload = { table: "pm_nc0006_1", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0006_1", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 export async function themCamera(camera) {
@@ -123,8 +124,8 @@ export async function themCamera(camera) {
     chucNangCamera: camera.chucNangCamera,
     maKhuVuc: camera.maKhuVuc,
     linkRTSP: camera.linkRTSP,
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function capNhatCamera(camera) {
@@ -137,20 +138,20 @@ export async function capNhatCamera(camera) {
     chucNangCamera: camera.chucNangCamera,
     maKhuVuc: camera.maKhuVuc,
     linkRTSP: camera.linkRTSP,
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function xoaCamera(maCamera) {
-  const payload = { table: "pm_nc0006_1", func: "delete", maCamera }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0006_1", func: "delete", maCamera };
+  return callApiWithAuth(payload);
 }
 
 // --- Thêm các hàm API còn lại chuyển từ Python sang JS ---
 
 export async function layALLPhienGuiXe() {
-  const payload = { table: "pm_nc0009", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0009", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 export async function themPhienGuiXe(session) {
@@ -159,7 +160,6 @@ export async function themPhienGuiXe(session) {
     func: "add",
     uidThe: session.uidThe,
     bienSo: session.bienSo || "",
-    viTriGui: session.viTriGui,
     chinhSach: session.chinhSach,
     congVao: session.congVao,
     gioVao: session.gioVao,
@@ -168,16 +168,42 @@ export async function themPhienGuiXe(session) {
     trangThai: session.trangThai || "TRONG_BAI",
     camera_id: session.camera_id,
     plate_match: session.plate_match || 0,
-    plate: session.plate || ""
-  }
-  // Remove undefined/null values to avoid API issues
-  Object.keys(payload).forEach(key => {
-    if (payload[key] === undefined || payload[key] === null) {
-      delete payload[key]
+    plate: session.plate || "",
+  };
+
+  // Kiểm tra loại xe để xử lý vị trí gửi
+  // loaiXe = 0: không cần vị trí gửi (xe máy, xe đạp, ...)
+  // loaiXe = 1: yêu cầu vị trí gửi (ô tô, xe tải, ...)
+  if (session.loaiXe === "1") {
+    // Chỉ thêm viTriGui khi loaiXe = 1
+    payload.viTriGui = session.viTriGui;
+    console.log("🚗 Loại xe = 1: Yêu cầu vị trí gửi:", session.viTriGui);
+  } else if (session.loaiXe === "0") {
+    // Loại xe = 0: không cần vị trí gửi, không thêm field viTriGui vào payload
+    console.log("🏍️ Loại xe = 0: Không cần vị trí gửi");
+  } else {
+    // Trường hợp không xác định loaiXe, giữ logic cũ (backward compatibility)
+    if (session.viTriGui !== undefined && session.viTriGui !== null) {
+      payload.viTriGui = session.viTriGui;
     }
-  })
-  console.log("📤 Sending themPhienGuiXe payload:", payload)
-  return callApiWithAuth(payload)
+    console.log("⚠️ Loại xe không xác định, sử dụng logic mặc định");
+  }
+
+  // Remove undefined/null values to avoid API issues
+  Object.keys(payload).forEach((key) => {
+    if (payload[key] === undefined || payload[key] === null) {
+      delete payload[key];
+    }
+  });
+
+  console.log("📤 Sending themPhienGuiXe payload:", payload);
+  console.log(
+    "🔍 Loại xe:",
+    session.loaiXe,
+    "| Vị trí gửi:",
+    payload.viTriGui || "Không có"
+  );
+  return callApiWithAuth(payload);
 }
 
 export async function capNhatPhienGuiXe(session) {
@@ -192,45 +218,53 @@ export async function capNhatPhienGuiXe(session) {
     camera_id: session.camera_id,
     plate_match: session.plate_match,
     plate: session.plate,
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function loadPhienGuiXeTheoMaThe(maThe) {
-  const payload = { table: "pm_nc0009", func: "layPhienGuiXeTuUID", uidThe: maThe }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "layPhienGuiXeTuUID",
+    uidThe: maThe,
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function loadPhienGuiXeTheoMaThe_XeRa(maThe) {
-  const payload = { table: "pm_nc0009", func: "layPhienGuiXeTuUID_Da_Ra", uidThe: maThe }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "layPhienGuiXeTuUID_Da_Ra",
+    uidThe: maThe,
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function taoBangChoPhienLamViec() {
-  const payload = { table: "pm_nc0009", func: "taoBangChoPhienLamViec" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0009", func: "taoBangChoPhienLamViec" };
+  return callApiWithAuth(payload);
 }
 
 export async function tinhPhiGuiXe(maPhien) {
-  const payload = { table: "pm_nc0008", func: "tinhPhiGuiXe", maPhien }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0008", func: "tinhPhiGuiXe", maPhien };
+  return callApiWithAuth(payload);
 }
 
 export async function layChinhSachGiaTheoLoaiPT(maLoaiPT) {
-  const payload = { table: "pm_nc0008", func: "layChinhSachTuPT", maLoaiPT }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0008", func: "layChinhSachTuPT", maLoaiPT };
+  return callApiWithAuth(payload);
 }
 
 export async function themThe(uidThe, loaiThe, trangThai = "1") {
   // Wrapper function for backward compatibility
-  return themTheRFID({ uidThe, loaiThe, trangThai })
+  return themTheRFID({ uidThe, loaiThe, trangThai });
 }
 
 // -------------------- Pricing Policy Functions --------------------
 export async function layALLChinhSachGia() {
-  const payload = { table: "pm_nc0008", func: "getAllPolicies" }
-  const res = await callApiWithAuth(payload)
-  return res.data || []
+  const payload = { table: "pm_nc0008", func: "getAllPolicies" };
+  const res = await callApiWithAuth(payload);
+  return res.data || [];
 }
 // Alias for backward compatibility: original import in RfidManagerDialogClean.jsx expects layChinhSachGia
 export { layALLChinhSachGia as layChinhSachGia };
@@ -240,34 +274,46 @@ export { capNhatTheRFID as capNhatThe };
 export { xoaTheRFID as xoaThe };
 
 export async function themChinhSachGia(chinhSach) {
-  console.log("themChinhSachGia called with:", chinhSach)
-  const payload = { table: "pm_nc0008", func: "createPolicy", policyData: chinhSach }
-  return callApiWithAuth(payload)
+  console.log("themChinhSachGia called with:", chinhSach);
+  const payload = {
+    table: "pm_nc0008",
+    func: "createPolicy",
+    policyData: chinhSach,
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function capNhatChinhSachGia(maChinhSach, chinhSach) {
-  console.log("capNhatChinhSachGia called with:", maChinhSach, chinhSach)
-  const payload = { table: "pm_nc0008", func: "updatePolicy", policyId: maChinhSach, policyData: chinhSach }
-  return callApiWithAuth(payload)
+  console.log("capNhatChinhSachGia called with:", maChinhSach, chinhSach);
+  const payload = {
+    table: "pm_nc0008",
+    func: "updatePolicy",
+    policyId: maChinhSach,
+    policyData: chinhSach,
+  };
+  return callApiWithAuth(payload);
 }
 
-
 export async function xoaChinhSachGia(maChinhSach) {
-  console.log("xoaChinhSachGia called with:", maChinhSach)
-  const payload = { table: "pm_nc0008", func: "deletePolicy", policyId: maChinhSach }
-  return callApiWithAuth(payload)
+  console.log("xoaChinhSachGia called with:", maChinhSach);
+  const payload = {
+    table: "pm_nc0008",
+    func: "deletePolicy",
+    policyId: maChinhSach,
+  };
+  return callApiWithAuth(payload);
 }
 
 //lay danh sach cong
 export async function layDanhSachCong() {
-  const payload = { table: "pm_nc0007", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0007", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Zone Management Functions --------------------
 export async function layDanhSachKhuVuc() {
-  const payload = { table: "pm_nc0004_2", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0004_2", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 export async function themKhuVuc(khuVuc) {
@@ -277,8 +323,8 @@ export async function themKhuVuc(khuVuc) {
     maKhuVuc: khuVuc.maKhuVuc,
     tenKhuVuc: khuVuc.tenKhuVuc,
     moTa: khuVuc.moTa || "",
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function capNhatKhuVuc(khuVuc) {
@@ -288,32 +334,32 @@ export async function capNhatKhuVuc(khuVuc) {
     maKhuVuc: khuVuc.maKhuVuc,
     tenKhuVuc: khuVuc.tenKhuVuc,
     moTa: khuVuc.moTa,
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 export async function xoaKhuVuc(maKhuVuc) {
-  const payload = { table: "pm_nc0004_2", func: "delete", maKhuVuc }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0004_2", func: "delete", maKhuVuc };
+  return callApiWithAuth(payload);
 }
 
 export async function layDanhSachKhu() {
-  const payload = { table: "pm_nc0004_1", func: "khu_vuc_camera_cong" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0004_1", func: "khu_vuc_camera_cong" };
+  return callApiWithAuth(payload);
 }
 
 // --- Bổ sung các hàm API còn thiếu từ Python sang JS ---
 
 export async function xoaPhienGuiXe(maPhien) {
-  const payload = { table: "pm_nc0009", func: "delete", maPhien }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0009", func: "delete", maPhien };
+  return callApiWithAuth(payload);
 }
 
 // Force refresh auth token - để gọi khi cần làm mới token
 export async function refreshAuthToken() {
-  console.log("Forcing auth token refresh...")
-  authCache = null // Clear cache
-  return await getAuthToken()
+  console.log("Forcing auth token refresh...");
+  authCache = null; // Clear cache
+  return await getAuthToken();
 }
 
 // -------------------- RFID Card Management Functions --------------------
@@ -323,8 +369,8 @@ export async function refreshAuthToken() {
  * @returns {Promise<Array>} Danh sách thẻ RFID
  */
 export async function layDanhSachThe() {
-  const payload = { table: "pm_nc0003", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0003", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -343,8 +389,8 @@ export async function themTheRFID(theRFID) {
     loaiThe: theRFID.loaiThe,
     trangThai: theRFID.trangThai || "1",
     // ngayPhatHanh sẽ được set tự động ở backend
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -369,9 +415,9 @@ export async function capNhatTheRFID(theRFID) {
     ngayPhatHanh: theRFID.ngayPhatHanh,
     bienSoXe: theRFID.bienSoXe,
     maChinhSach: theRFID.maChinhSach,
-    ngayKetThucCS: theRFID.ngayKetThucCS
-  }
-  return callApiWithAuth(payload)
+    ngayKetThucCS: theRFID.ngayKetThucCS,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -382,10 +428,10 @@ export async function capNhatTheRFID(theRFID) {
 export async function timTheDangCoPhien(uidThe) {
   const payload = {
     table: "pm_nc0003",
-    func: "timTheDangCoPhien", 
+    func: "timTheDangCoPhien",
     uidThe: uidThe,
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -397,9 +443,9 @@ export async function xoaTheRFID(uidThe) {
   const payload = {
     table: "pm_nc0003",
     func: "delete",
-    uidThe: uidThe
-  }
-  return callApiWithAuth(payload)
+    uidThe: uidThe,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- License Plate Recognition API --------------------
@@ -415,15 +461,14 @@ export async function nhanDangBienSo(imageBlob) {
       blob: imageBlob,
       type: imageBlob.type,
       size: imageBlob.size,
-      name: imageBlob.name || 'license_plate.jpg'
-    })
-    
+      name: imageBlob.name || "license_plate.jpg",
+    });
+
     // Chỉ sử dụng FormData method vì server không hỗ trợ Base64
-    return await nhanDangBienSoFormData(imageBlob)
-    
+    return await nhanDangBienSoFormData(imageBlob);
   } catch (error) {
-    console.error("❌ Lỗi nhận dạng biển số:", error)
-    throw new Error(`Không thể nhận dạng biển số: ${error.message}`)
+    console.error("❌ Lỗi nhận dạng biển số:", error);
+    throw new Error(`Không thể nhận dạng biển số: ${error.message}`);
   }
 }
 
@@ -433,49 +478,59 @@ export async function nhanDangBienSo(imageBlob) {
  * @returns {Promise<Object>} - Kết quả nhận dạng biển số
  */
 async function nhanDangBienSoFormData(imageBlob) {
-  console.log("📤 Trying FormData method...")
-  
+  console.log("📤 Trying FormData method...");
+
   // Tạo FormData để gửi file - khớp với Postman
-  const formData = new FormData()
-  
+  const formData = new FormData();
+
   // Đảm bảo file có đúng định dạng như Postman
-  const file = new File([imageBlob], 'license_plate.jpg', {
-    type: 'image/jpeg',
-    lastModified: Date.now()
-  })
-  
+  const file = new File([imageBlob], "license_plate.jpg", {
+    type: "image/jpeg",
+    lastModified: Date.now(),
+  });
+
   // API server mong đợi field tên là 'file' chứ không phải 'image'
-  formData.append('file', file)
-  
+  formData.append("file", file);
+
   // Log FormData để debug
-  console.log("📤 FormData entries:")
+  console.log("📤 FormData entries:");
   for (const [key, value] of formData.entries()) {
-    console.log(`  ${key}:`, value instanceof File ? {
-      name: value.name,
-      type: value.type,
-      size: value.size
-    } : value)
+    console.log(
+      `  ${key}:`,
+      value instanceof File
+        ? {
+            name: value.name,
+            type: value.type,
+            size: value.size,
+          }
+        : value
+    );
   }
-  
+
   const response = await fetch(api_BienSo, {
-    method: 'POST',
+    method: "POST",
     body: formData,
     // Không set Content-Type để browser tự động thêm boundary cho multipart/form-data
-  })
-  
-  console.log("📡 Response status (FormData):", response.status)
-  console.log("📡 Response headers:", Object.fromEntries(response.headers.entries()))
-  
+  });
+
+  console.log("📡 Response status (FormData):", response.status);
+  console.log(
+    "📡 Response headers:",
+    Object.fromEntries(response.headers.entries())
+  );
+
   if (!response.ok) {
     // Log response text để debug lỗi 422
-    const errorText = await response.text()
-    console.error("❌ API Error Response (FormData):", errorText)
-    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+    const errorText = await response.text();
+    console.error("❌ API Error Response (FormData):", errorText);
+    throw new Error(
+      `HTTP error! status: ${response.status}, message: ${errorText}`
+    );
   }
-  
-  const result = await response.json()
-  console.log("✅ Kết quả nhận dạng biển số (FormData):", result)
-  return result
+
+  const result = await response.json();
+  console.log("✅ Kết quả nhận dạng biển số (FormData):", result);
+  return result;
 }
 
 /**
@@ -485,11 +540,11 @@ async function nhanDangBienSoFormData(imageBlob) {
  */
 export function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = reject
-    reader.readAsDataURL(blob)
-  })
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 // -------------------- Card History Management Functions --------------------
@@ -500,13 +555,13 @@ export function blobToBase64(blob) {
  * @returns {Promise<Object>} Nhật ký phiên gửi xe
  */
 export async function layNhatKyTheoThe(maThe, ngay = "all") {
-  const payload = { 
-    table: "pm_nc0010", 
+  const payload = {
+    table: "pm_nc0010",
     func: "layNhatKyTheoThe",
     maThe: maThe,
-    ngay: ngay
-  }
-  return callApiWithAuth(payload)
+    ngay: ngay,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Vehicle Search Functions --------------------
@@ -516,12 +571,12 @@ export async function layNhatKyTheoThe(maThe, ngay = "all") {
  * @returns {Promise<Array>} Danh sách phiên gửi xe
  */
 export async function timPhienTheoBienSo(bienSo) {
-  const payload = { 
-    table: "pm_nc0009", 
-    func: "timPhienTheoBienSo", 
-    bienSo: bienSo 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "timPhienTheoBienSo",
+    bienSo: bienSo,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Extended Parking Session Functions --------------------
@@ -531,12 +586,12 @@ export async function timPhienTheoBienSo(bienSo) {
  * @returns {Promise<Object>} Kết quả cập nhật
  */
 export async function capNhatTrangThaiDangGui(maPhien) {
-  const payload = { 
-    table: "pm_nc0009", 
-    func: "edit_TrangThai", 
-    maPhien: maPhien 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "edit_TrangThai",
+    maPhien: maPhien,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Gate Management Functions --------------------
@@ -553,9 +608,9 @@ export async function themCong(cong) {
     tenCong: cong.tenCong,
     loaiCong: cong.loaiCong,
     viTriLapDat: cong.viTriLapDat,
-    maKhuVuc: cong.maKhuVuc
-  }
-  return callApiWithAuth(payload)
+    maKhuVuc: cong.maKhuVuc,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -571,9 +626,9 @@ export async function capNhatCong(cong) {
     tenCong: cong.tenCong,
     loaiCong: cong.loaiCong,
     viTriLapDat: cong.viTriLapDat,
-    maKhuVuc: cong.maKhuVuc
-  }
-  return callApiWithAuth(payload)
+    maKhuVuc: cong.maKhuVuc,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -582,12 +637,12 @@ export async function capNhatCong(cong) {
  * @returns {Promise<Object>} Kết quả xóa
  */
 export async function xoaCong(maCong) {
-  const payload = { 
-    table: "pm_nc0007", 
-    func: "delete", 
-    maCong: maCong 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0007",
+    func: "delete",
+    maCong: maCong,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Extended Camera Functions --------------------
@@ -602,9 +657,9 @@ export async function capNhatRTSPCamera(maCamera, rtspUrl) {
     table: "pm_nc0006_2",
     func: "updateUrl",
     id: maCamera,
-    data: { rtsp_url: rtspUrl }
-  }
-  return callApiWithAuth(payload)
+    data: { rtsp_url: rtspUrl },
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Extended Zone Functions --------------------
@@ -617,9 +672,9 @@ export async function layKhuVucTheoMa(maKhuVuc) {
   const payload = {
     table: "pm_nc0004_2",
     func: "getById",
-    maKhuVuc: maKhuVuc
-  }
-  return callApiWithAuth(payload)
+    maKhuVuc: maKhuVuc,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Parking Spot Management Functions --------------------
@@ -628,8 +683,8 @@ export async function layKhuVucTheoMa(maKhuVuc) {
  * @returns {Promise<Array>} Danh sách chỗ đỗ xe
  */
 export async function layDanhSachChoDo() {
-  const payload = { table: "pm_nc0005", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0005", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -643,9 +698,9 @@ export async function themChoDo(choDo) {
     func: "add",
     maChoDo: choDo.maChoDo,
     maKhuVuc: choDo.maKhuVuc,
-    trangThai: choDo.trangThai || "TRONG"
-  }
-  return callApiWithAuth(payload)
+    trangThai: choDo.trangThai || "TRONG",
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -659,9 +714,9 @@ export async function capNhatChoDo(choDo) {
     func: "edit",
     maChoDo: choDo.maChoDo,
     maKhuVuc: choDo.maKhuVuc,
-    trangThai: choDo.trangThai
-  }
-  return callApiWithAuth(payload)
+    trangThai: choDo.trangThai,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -670,12 +725,12 @@ export async function capNhatChoDo(choDo) {
  * @returns {Promise<Object>} Kết quả xóa
  */
 export async function xoaChoDo(maChoDo) {
-  const payload = { 
-    table: "pm_nc0005", 
-    func: "delete", 
-    maChoDo: maChoDo 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0005",
+    func: "delete",
+    maChoDo: maChoDo,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Vehicle Management Functions --------------------
@@ -684,8 +739,8 @@ export async function xoaChoDo(maChoDo) {
  * @returns {Promise<Array>} Danh sách phương tiện
  */
 export async function layDanhSachPhuongTien() {
-  const payload = { table: "pm_nc0002", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0002", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -698,9 +753,9 @@ export async function themPhuongTien(phuongTien) {
     table: "pm_nc0002",
     func: "add",
     bienSo: phuongTien.bienSo,
-    maLoaiPT: phuongTien.maLoaiPT
-  }
-  return callApiWithAuth(payload)
+    maLoaiPT: phuongTien.maLoaiPT,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -713,9 +768,9 @@ export async function capNhatPhuongTien(phuongTien) {
     table: "pm_nc0002",
     func: "edit",
     bienSo: phuongTien.bienSo,
-    maLoaiPT: phuongTien.maLoaiPT
-  }
-  return callApiWithAuth(payload)
+    maLoaiPT: phuongTien.maLoaiPT,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -724,12 +779,12 @@ export async function capNhatPhuongTien(phuongTien) {
  * @returns {Promise<Object>} Kết quả xóa
  */
 export async function xoaPhuongTien(bienSo) {
-  const payload = { 
-    table: "pm_nc0002", 
-    func: "delete", 
-    bienSo: bienSo 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0002",
+    func: "delete",
+    bienSo: bienSo,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Enhanced Pricing Policy Functions --------------------
@@ -738,8 +793,8 @@ export async function xoaPhuongTien(bienSo) {
  * @returns {Promise<Array>} Danh sách chính sách giá
  */
 export async function layDanhSachChinhSachGia() {
-  const payload = { table: "pm_nc0008", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0008", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -758,9 +813,9 @@ export async function themChinhSachGiaKebao(chinhSach) {
     quaGio: chinhSach.quaGio,
     donGiaQuaGio: chinhSach.donGiaQuaGio,
     loaiChinhSach: chinhSach.loaiChinhSach,
-    tongNgay: chinhSach.tongNgay
-  }
-  return callApiWithAuth(payload)
+    tongNgay: chinhSach.tongNgay,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -779,9 +834,9 @@ export async function capNhatChinhSachGiaKebao(chinhSach) {
     quaGio: chinhSach.quaGio,
     donGiaQuaGio: chinhSach.donGiaQuaGio,
     loaiChinhSach: chinhSach.loaiChinhSach,
-    tongNgay: chinhSach.tongNgay
-  }
-  return callApiWithAuth(payload)
+    tongNgay: chinhSach.tongNgay,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -790,12 +845,12 @@ export async function capNhatChinhSachGiaKebao(chinhSach) {
  * @returns {Promise<Object>} Kết quả xóa
  */
 export async function xoaChinhSachGiaKebao(maChinhSach) {
-  const payload = { 
-    table: "pm_nc0008", 
-    func: "delete", 
-    maChinhSach: maChinhSach 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0008",
+    func: "delete",
+    maChinhSach: maChinhSach,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Camera Management Functions (kebao.php) --------------------
@@ -804,8 +859,8 @@ export async function xoaChinhSachGiaKebao(maChinhSach) {
  * @returns {Promise<Array>} Danh sách camera
  */
 export async function layDanhSachCameraKebao() {
-  const payload = { table: "pm_nc0006_1", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0006_1", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -822,9 +877,9 @@ export async function themCameraKebao(camera) {
     loaiCamera: camera.loaiCamera,
     chucNangCamera: camera.chucNangCamera,
     maKhuVuc: camera.maKhuVuc,
-    linkRTSP: camera.linkRTSP
-  }
-  return callApiWithAuth(payload)
+    linkRTSP: camera.linkRTSP,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -841,9 +896,9 @@ export async function capNhatCameraKebao(camera) {
     loaiCamera: camera.loaiCamera,
     chucNangCamera: camera.chucNangCamera,
     maKhuVuc: camera.maKhuVuc,
-    linkRTSP: camera.linkRTSP
-  }
-  return callApiWithAuth(payload)
+    linkRTSP: camera.linkRTSP,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -852,12 +907,12 @@ export async function capNhatCameraKebao(camera) {
  * @returns {Promise<Object>} Kết quả xóa
  */
 export async function xoaCameraKebao(maCamera) {
-  const payload = { 
-    table: "pm_nc0006_1", 
-    func: "delete", 
-    maCamera: maCamera 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0006_1",
+    func: "delete",
+    maCamera: maCamera,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Gate Management Functions (kebao.php) --------------------
@@ -866,8 +921,8 @@ export async function xoaCameraKebao(maCamera) {
  * @returns {Promise<Array>} Danh sách cổng
  */
 export async function layDanhSachCongKebao() {
-  const payload = { table: "pm_nc0007", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0007", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -883,9 +938,9 @@ export async function themCongKebao(cong) {
     tenCong: cong.tenCong,
     loaiCong: cong.loaiCong,
     viTriLapDat: cong.viTriLapDat,
-    maKhuVuc: cong.maKhuVuc
-  }
-  return callApiWithAuth(payload)
+    maKhuVuc: cong.maKhuVuc,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -901,9 +956,9 @@ export async function capNhatCongKebao(cong) {
     tenCong: cong.tenCong,
     loaiCong: cong.loaiCong,
     viTriLapDat: cong.viTriLapDat,
-    maKhuVuc: cong.maKhuVuc
-  }
-  return callApiWithAuth(payload)
+    maKhuVuc: cong.maKhuVuc,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -912,12 +967,12 @@ export async function capNhatCongKebao(cong) {
  * @returns {Promise<Object>} Kết quả xóa
  */
 export async function xoaCongKebao(maCong) {
-  const payload = { 
-    table: "pm_nc0007", 
-    func: "delete", 
-    maCong: maCong 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0007",
+    func: "delete",
+    maCong: maCong,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Parking Session Functions (kebao.php) --------------------
@@ -927,12 +982,12 @@ export async function xoaCongKebao(maCong) {
  * @returns {Promise<Array>} Danh sách phiên gửi xe
  */
 export async function layPhienGuiXeTheoUIDKebao(uidThe) {
-  const payload = { 
-    table: "pm_nc0009", 
-    func: "layPhienGuiXeTuUID", 
-    uidThe: uidThe 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "layPhienGuiXeTuUID",
+    uidThe: uidThe,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -941,12 +996,12 @@ export async function layPhienGuiXeTheoUIDKebao(uidThe) {
  * @returns {Promise<Array>} Danh sách phiên gửi xe đã hoàn thành
  */
 export async function layPhienGuiXeDaRaTheoUIDKebao(uidThe) {
-  const payload = { 
-    table: "pm_nc0009", 
-    func: "layPhienGuiXeTuUID_Da_Ra", 
-    uidThe: uidThe 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "layPhienGuiXeTuUID_Da_Ra",
+    uidThe: uidThe,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -955,12 +1010,12 @@ export async function layPhienGuiXeDaRaTheoUIDKebao(uidThe) {
  * @returns {Promise<Array>} Danh sách phiên gửi xe
  */
 export async function timPhienTheoBS(bienSo) {
-  const payload = { 
-    table: "pm_nc0009", 
-    func: "timPhienTheoBienSo", 
-    bienSo: bienSo 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "timPhienTheoBienSo",
+    bienSo: bienSo,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -968,11 +1023,11 @@ export async function timPhienTheoBS(bienSo) {
  * @returns {Promise<Object>} Kết quả tạo bảng
  */
 export async function taoBangChoPhienLamViecKebao() {
-  const payload = { 
-    table: "pm_nc0009", 
-    func: "taoBangChoPhienLamViec" 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "taoBangChoPhienLamViec",
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -981,12 +1036,12 @@ export async function taoBangChoPhienLamViecKebao() {
  * @returns {Promise<Object>} Kết quả cập nhật
  */
 export async function capNhatTrangThaiPhienKebao(maPhien) {
-  const payload = { 
-    table: "pm_nc0009", 
-    func: "edit_TrangThai", 
-    maPhien: maPhien 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0009",
+    func: "edit_TrangThai",
+    maPhien: maPhien,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Zone Management Functions (ngocchung.php) --------------------
@@ -996,12 +1051,12 @@ export async function capNhatTrangThaiPhienKebao(maPhien) {
  * @returns {Promise<Object>} Thông tin khu vực
  */
 export async function layKhuVucTheoID(maKhuVuc) {
-  const payload = { 
-    table: "pm_nc0004_2", 
-    func: "getById", 
-    maKhuVuc: maKhuVuc 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0004_2",
+    func: "getById",
+    maKhuVuc: maKhuVuc,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1015,9 +1070,9 @@ export async function themKhuVucNgocChung(khuVuc) {
     func: "add",
     maKhuVuc: khuVuc.maKhuVuc,
     tenKhuVuc: khuVuc.tenKhuVuc,
-    moTa: khuVuc.moTa
-  }
-  return callApiWithAuth(payload)
+    moTa: khuVuc.moTa,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1031,9 +1086,9 @@ export async function capNhatKhuVucNgocChung(khuVuc) {
     func: "edit",
     maKhuVuc: khuVuc.maKhuVuc,
     tenKhuVuc: khuVuc.tenKhuVuc,
-    moTa: khuVuc.moTa
-  }
-  return callApiWithAuth(payload)
+    moTa: khuVuc.moTa,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1042,12 +1097,12 @@ export async function capNhatKhuVucNgocChung(khuVuc) {
  * @returns {Promise<Object>} Kết quả xóa
  */
 export async function xoaKhuVucNgocChung(maKhuVuc) {
-  const payload = { 
-    table: "pm_nc0004_2", 
-    func: "delete", 
-    maKhuVuc: maKhuVuc 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0004_2",
+    func: "delete",
+    maKhuVuc: maKhuVuc,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Camera URL Update Functions (ngocchung.php) --------------------
@@ -1062,9 +1117,9 @@ export async function capNhatURLCamera(id, rtspUrl) {
     table: "pm_nc0006_2",
     func: "updateUrl",
     id: id,
-    data: { rtsp_url: rtspUrl }
-  }
-  return callApiWithAuth(payload)
+    data: { rtsp_url: rtspUrl },
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Pricing Policy Functions (ngocchung.php) --------------------
@@ -1073,11 +1128,11 @@ export async function capNhatURLCamera(id, rtspUrl) {
  * @returns {Promise<Array>} Danh sách chính sách giá
  */
 export async function layTatCaChinhSachGiaNgocChung() {
-  const payload = { 
-    table: "pm_nc0008", 
-    func: "getAllPolicies" 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0008",
+    func: "getAllPolicies",
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1089,9 +1144,9 @@ export async function taoChinhSachGiaNgocChung(policy) {
   const payload = {
     table: "pm_nc0008",
     func: "createPolicy",
-    ...policy
-  }
-  return callApiWithAuth(payload)
+    ...policy,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1103,9 +1158,9 @@ export async function capNhatChinhSachGiaNgocChung(policy) {
   const payload = {
     table: "pm_nc0008",
     func: "updatePolicy",
-    ...policy
-  }
-  return callApiWithAuth(payload)
+    ...policy,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1117,9 +1172,9 @@ export async function xoaChinhSachGiaNgocChung(policyId) {
   const payload = {
     table: "pm_nc0008",
     func: "deletePolicy",
-    policyId: policyId
-  }
-  return callApiWithAuth(payload)
+    policyId: policyId,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1131,9 +1186,9 @@ export async function tinhPhiGuiXeNgocChung(data) {
   const payload = {
     table: "pm_nc0008",
     func: "tinhPhiGuiXe",
-    ...data
-  }
-  return callApiWithAuth(payload)
+    ...data,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1145,9 +1200,9 @@ export async function layChinhSachTuPTNgocChung(maLoaiPT) {
   const payload = {
     table: "pm_nc0008",
     func: "layChinhSachTuPT",
-    maLoaiPT: maLoaiPT
-  }
-  return callApiWithAuth(payload)
+    maLoaiPT: maLoaiPT,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- History Functions (ngocchung.php) --------------------
@@ -1160,9 +1215,9 @@ export async function layNhatKyTheoTheNgocChung(uidThe) {
   const payload = {
     table: "pm_nc0010",
     func: "layNhatKyTheoThe",
-    uidThe: uidThe
-  }
-  return callApiWithAuth(payload)
+    uidThe: uidThe,
+  };
+  return callApiWithAuth(payload);
 }
 
 // -------------------- Enhanced RFID Card Functions (từ mobile app) --------------------
@@ -1177,7 +1232,14 @@ export async function layNhatKyTheoTheNgocChung(uidThe) {
  * @param {string} ngayKetThucCS - Ngày kết thúc chính sách (optional)
  * @returns {Promise<Object>} Kết quả thêm thẻ
  */
-export async function themTheMobile(uidThe, loaiThe, trangThai = "1", bienSoXe = "", maChinhSach = "", ngayKetThucCS = "") {
+export async function themTheMobile(
+  uidThe,
+  loaiThe,
+  trangThai = "1",
+  bienSoXe = "",
+  maChinhSach = "",
+  ngayKetThucCS = ""
+) {
   const payload = {
     table: "pm_nc0003",
     func: "add",
@@ -1186,9 +1248,9 @@ export async function themTheMobile(uidThe, loaiThe, trangThai = "1", bienSoXe =
     trangThai: trangThai,
     bienSoXe: bienSoXe,
     maChinhSach: maChinhSach,
-    ngayKetThucCS: ngayKetThucCS
-  }
-  return callApiWithAuth(payload)
+    ngayKetThucCS: ngayKetThucCS,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1197,12 +1259,12 @@ export async function themTheMobile(uidThe, loaiThe, trangThai = "1", bienSoXe =
  * @returns {Promise<Array>} Thông tin thẻ
  */
 export async function layTheRFIDTheoUID(uidThe) {
-  const payload = { 
-    table: "pm_nc0003", 
-    func: "timTheTuUID", 
-    uidThe: uidThe 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0003",
+    func: "timTheTuUID",
+    uidThe: uidThe,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1219,10 +1281,10 @@ export async function capNhatTheRFIDMobile(theRFID) {
     trangThai: theRFID.trangThai,
     bienSoXe: theRFID.bienSoXe || "",
     maChinhSach: theRFID.maChinhSach || "",
-    ngayKetThucCS: theRFID.ngayKetThucCS || ""
+    ngayKetThucCS: theRFID.ngayKetThucCS || "",
     // ngayPhatHanh sẽ được giữ nguyên ở backend
-  }
-  return callApiWithAuth(payload)
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1230,7 +1292,7 @@ export async function capNhatTheRFIDMobile(theRFID) {
  * @returns {Promise<Array>} Danh sách thẻ RFID
  */
 export async function layTatCaTheRFID() {
-  return layDanhSachThe() // Sử dụng function có sẵn
+  return layDanhSachThe(); // Sử dụng function có sẵn
 }
 
 /**
@@ -1239,7 +1301,7 @@ export async function layTatCaTheRFID() {
  * @returns {Promise<Array>} Thông tin thẻ và phiên gửi xe
  */
 export async function thongTinTheDangCoXeGui(uidThe) {
-  return timTheDangCoPhien(uidThe) // Sử dụng function có sẵn
+  return timTheDangCoPhien(uidThe); // Sử dụng function có sẵn
 }
 
 // -------------------- Enhanced Pricing Policy Functions (Mobile App Standard) --------------------
@@ -1248,8 +1310,8 @@ export async function thongTinTheDangCoXeGui(uidThe) {
  * @returns {Promise<Array>} Danh sách chính sách giá
  */
 export async function layAllChinhSach() {
-  const payload = { table: "pm_nc0008", func: "data" }
-  return callApiWithAuth(payload)
+  const payload = { table: "pm_nc0008", func: "data" };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1267,10 +1329,10 @@ export async function themChinhSach(chinhSach) {
     donGia: chinhSach.donGia,
     quaGio: chinhSach.quaGio || 0,
     donGiaQuaGio: chinhSach.donGiaQuaGio || 0,
-    loaiChinhSach: chinhSach.loaiChinhSach || '',
-    tongNgay: chinhSach.tongNgay || 0
-  }
-  return callApiWithAuth(payload)
+    loaiChinhSach: chinhSach.loaiChinhSach || "",
+    tongNgay: chinhSach.tongNgay || 0,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1288,10 +1350,10 @@ export async function suaChinhSach(chinhSach) {
     donGia: chinhSach.donGia,
     quaGio: chinhSach.quaGio || 0,
     donGiaQuaGio: chinhSach.donGiaQuaGio || 0,
-    loaiChinhSach: chinhSach.loaiChinhSach || '',
-    tongNgay: chinhSach.tongNgay || 0
-  }
-  return callApiWithAuth(payload)
+    loaiChinhSach: chinhSach.loaiChinhSach || "",
+    tongNgay: chinhSach.tongNgay || 0,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1300,12 +1362,12 @@ export async function suaChinhSach(chinhSach) {
  * @returns {Promise<Object>} Kết quả xóa
  */
 export async function xoaChinhSach(maChinhSach) {
-  const payload = { 
-    table: "pm_nc0008", 
-    func: "delete", 
-    maChinhSach: maChinhSach 
-  }
-  return callApiWithAuth(payload)
+  const payload = {
+    table: "pm_nc0008",
+    func: "delete",
+    maChinhSach: maChinhSach,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1316,18 +1378,18 @@ export async function xoaChinhSach(maChinhSach) {
  */
 export function tinhNgayKetThucChinhSach(startDate, tongNgay) {
   if (!startDate || !tongNgay || tongNgay <= 0) {
-    return ''
+    return "";
   }
-  
-  const start = new Date(startDate)
+
+  const start = new Date(startDate);
   if (isNaN(start.getTime())) {
-    return ''
+    return "";
   }
-  
-  const endDate = new Date(start)
-  endDate.setDate(start.getDate() + tongNgay - 1) // -1 vì bao gồm ngày bắt đầu
-  
-  return endDate.toISOString().split('T')[0] // Format YYYY-MM-DD
+
+  const endDate = new Date(start);
+  endDate.setDate(start.getDate() + tongNgay - 1); // -1 vì bao gồm ngày bắt đầu
+
+  return endDate.toISOString().split("T")[0]; // Format YYYY-MM-DD
 }
 
 /**
@@ -1339,19 +1401,20 @@ export function tinhNgayKetThucChinhSach(startDate, tongNgay) {
  */
 export function taoMaChinhSachTuDong(maLoaiPT, loaiChinhSach, soLuong) {
   if (!maLoaiPT || !loaiChinhSach || !soLuong) {
-    return ''
+    return "";
   }
-  
+
   // Đồng bộ với mobile app - sử dụng policyType value trực tiếp
-  const typeCode = {
-    'N': 'N',       // Ngày
-    'T': 'T',       // Tuần
-    'Th': 'Th',     // Tháng  
-    'NAM': 'NAM'    // Năm
-  }[loaiChinhSach] || 'N'
-  
-  const vehicleCode = maLoaiPT.toUpperCase().replace(/\s/g, '_')
-  return `CS_${vehicleCode}_${soLuong}${typeCode}`
+  const typeCode =
+    {
+      N: "N", // Ngày
+      T: "T", // Tuần
+      Th: "Th", // Tháng
+      NAM: "NAM", // Năm
+    }[loaiChinhSach] || "N";
+
+  const vehicleCode = maLoaiPT.toUpperCase().replace(/\s/g, "_");
+  return `CS_${vehicleCode}_${soLuong}${typeCode}`;
 }
 
 /**
@@ -1362,14 +1425,15 @@ export function taoMaChinhSachTuDong(maLoaiPT, loaiChinhSach, soLuong) {
  */
 export function tinhTongNgay(loaiChinhSach, soLuong) {
   // Đồng bộ với mobile app
-  const multiplier = {
-    'N': 1,      // Ngày
-    'T': 7,      // Tuần  
-    'Th': 30,    // Tháng
-    'NAM': 365   // Năm
-  }[loaiChinhSach] || 1
-  
-  return soLuong * multiplier
+  const multiplier =
+    {
+      N: 1, // Ngày
+      T: 7, // Tuần
+      Th: 30, // Tháng
+      NAM: 365, // Năm
+    }[loaiChinhSach] || 1;
+
+  return soLuong * multiplier;
 }
 
 /**
@@ -1377,26 +1441,26 @@ export function tinhTongNgay(loaiChinhSach, soLuong) {
  * @returns {Promise<Array>} Danh sách chính sách với đầy đủ thông tin
  */
 export async function layDanhSachChinhSachGiaV2() {
-  const payload = { table: "pm_nc0008", func: "getAllPolicies" }
+  const payload = { table: "pm_nc0008", func: "getAllPolicies" };
   try {
-    const response = await callApiWithAuth(payload)
+    const response = await callApiWithAuth(payload);
     if (response && response.success && response.data) {
       // Map data để đảm bảo format đúng
-      return response.data.map(policy => ({
+      return response.data.map((policy) => ({
         maChinhSach: policy.lv001,
         maLoaiPT: policy.lv002,
         thoiGian: parseInt(policy.lv003) || 0,
         donGia: parseFloat(policy.lv004) || 0,
         quaGio: parseInt(policy.lv005) || 0,
         donGiaQuaGio: parseFloat(policy.lv006) || 0,
-        loaiChinhSach: policy.lv007 || '',
-        tongNgay: parseInt(policy.lv008) || 0
-      }))
+        loaiChinhSach: policy.lv007 || "",
+        tongNgay: parseInt(policy.lv008) || 0,
+      }));
     }
-    return []
+    return [];
   } catch (error) {
-    console.error('Lỗi layDanhSachChinhSachGiaV2:', error)
-    throw error
+    console.error("Lỗi layDanhSachChinhSachGiaV2:", error);
+    throw error;
   }
 }
 
@@ -1417,12 +1481,17 @@ export async function themChinhSachV2(chinhSach) {
       lv005: chinhSach.quaGio,
       lv006: chinhSach.donGiaQuaGio,
       lv007: chinhSach.loaiChinhSach,
-      lv008: chinhSach.tongNgay
-    }
-  }
-  console.log("themChinhSachV2 - Payload gửi đi:", payload)
-  console.log("themChinhSachV2 - tongNgay value:", chinhSach.tongNgay, "type:", typeof chinhSach.tongNgay)
-  return callApiWithAuth(payload)
+      lv008: chinhSach.tongNgay,
+    },
+  };
+  console.log("themChinhSachV2 - Payload gửi đi:", payload);
+  console.log(
+    "themChinhSachV2 - tongNgay value:",
+    chinhSach.tongNgay,
+    "type:",
+    typeof chinhSach.tongNgay
+  );
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1443,12 +1512,17 @@ export async function suaChinhSachV2(chinhSach) {
       lv005: chinhSach.quaGio,
       lv006: chinhSach.donGiaQuaGio,
       lv007: chinhSach.loaiChinhSach,
-      lv008: chinhSach.tongNgay
-    }
-  }
-  console.log("suaChinhSachV2 - Payload gửi đi:", payload)
-  console.log("suaChinhSachV2 - tongNgay value:", chinhSach.tongNgay, "type:", typeof chinhSach.tongNgay)
-  return callApiWithAuth(payload)
+      lv008: chinhSach.tongNgay,
+    },
+  };
+  console.log("suaChinhSachV2 - Payload gửi đi:", payload);
+  console.log(
+    "suaChinhSachV2 - tongNgay value:",
+    chinhSach.tongNgay,
+    "type:",
+    typeof chinhSach.tongNgay
+  );
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1460,9 +1534,9 @@ export async function xoaChinhSachV2(maChinhSach) {
   const payload = {
     table: "pm_nc0008",
     func: "deletePolicy",
-    policyId: maChinhSach
-  }
-  return callApiWithAuth(payload)
+    policyId: maChinhSach,
+  };
+  return callApiWithAuth(payload);
 }
 
 // ==================== Camera Management Advanced Functions ====================
@@ -1476,9 +1550,9 @@ export async function kiemTraTrangThaiCamera(maCamera) {
   const payload = {
     table: "pm_nc0006_1",
     func: "checkStatus",
-    maCamera: maCamera
-  }
-  return callApiWithAuth(payload)
+    maCamera: maCamera,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1490,9 +1564,9 @@ export async function layDanhSachCameraTheoKhuVuc(maKhuVuc) {
   const payload = {
     table: "pm_nc0006_1",
     func: "getByArea",
-    maKhuVuc: maKhuVuc
-  }
-  return callApiWithAuth(payload)
+    maKhuVuc: maKhuVuc,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1506,9 +1580,9 @@ export async function capNhatLinkCamera(maCamera, linkRTSP) {
     table: "pm_nc0006_1",
     func: "updateRTSP",
     maCamera: maCamera,
-    linkRTSP: linkRTSP
-  }
-  return callApiWithAuth(payload)
+    linkRTSP: linkRTSP,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1520,9 +1594,9 @@ export async function layDanhSachCameraTheoLoai(chucNangCamera) {
   const payload = {
     table: "pm_nc0006_1",
     func: "getByFunction",
-    chucNangCamera: chucNangCamera
-  }
-  return callApiWithAuth(payload)
+    chucNangCamera: chucNangCamera,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1532,9 +1606,9 @@ export async function layDanhSachCameraTheoLoai(chucNangCamera) {
 export async function kiemTraTrangThaiTatCaCamera() {
   const payload = {
     table: "pm_nc0006_1",
-    func: "checkAllStatus"
-  }
-  return callApiWithAuth(payload)
+    func: "checkAllStatus",
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1543,15 +1617,15 @@ export async function kiemTraTrangThaiTatCaCamera() {
  * @returns {string} URL RTSP đầy đủ
  */
 export function taoURLRTSP(camera) {
-  if (!camera.linkRTSP) return ""
-  
+  if (!camera.linkRTSP) return "";
+
   // Nếu đã có protocol thì trả về như cũ
   if (camera.linkRTSP.startsWith("rtsp://")) {
-    return camera.linkRTSP
+    return camera.linkRTSP;
   }
-  
+
   // Tạo URL RTSP đầy đủ
-  return `rtsp://${camera.linkRTSP}`
+  return `rtsp://${camera.linkRTSP}`;
 }
 
 /**
@@ -1562,43 +1636,43 @@ export function taoURLRTSP(camera) {
 export async function testKetNoiRTSP(rtspUrl) {
   try {
     // Tạo một video element để test stream
-    const video = document.createElement('video')
-    video.src = rtspUrl
-    video.muted = true
-    
+    const video = document.createElement("video");
+    video.src = rtspUrl;
+    video.muted = true;
+
     return new Promise((resolve) => {
       const timeout = setTimeout(() => {
         resolve({
           success: false,
           message: "Timeout - không thể kết nối trong 5 giây",
-          url: rtspUrl
-        })
-      }, 5000)
-      
+          url: rtspUrl,
+        });
+      }, 5000);
+
       video.onloadstart = () => {
-        clearTimeout(timeout)
+        clearTimeout(timeout);
         resolve({
           success: true,
           message: "Kết nối RTSP thành công",
-          url: rtspUrl
-        })
-      }
-      
+          url: rtspUrl,
+        });
+      };
+
       video.onerror = (error) => {
-        clearTimeout(timeout)
+        clearTimeout(timeout);
         resolve({
           success: false,
-          message: `Lỗi kết nối RTSP: ${error.message || 'Unknown error'}`,
-          url: rtspUrl
-        })
-      }
-    })
+          message: `Lỗi kết nối RTSP: ${error.message || "Unknown error"}`,
+          url: rtspUrl,
+        });
+      };
+    });
   } catch (error) {
     return {
       success: false,
       message: `Lỗi test RTSP: ${error.message}`,
-      url: rtspUrl
-    }
+      url: rtspUrl,
+    };
   }
 }
 
@@ -1609,9 +1683,9 @@ export async function testKetNoiRTSP(rtspUrl) {
 export async function layThongKeCamera() {
   const payload = {
     table: "pm_nc0006_1",
-    func: "getStatistics"
-  }
-  return callApiWithAuth(payload)
+    func: "getStatistics",
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1625,9 +1699,9 @@ export async function capNhatCauHinhCamera(maCamera, cauHinh) {
     table: "pm_nc0006_1",
     func: "updateConfig",
     maCamera: maCamera,
-    ...cauHinh
-  }
-  return callApiWithAuth(payload)
+    ...cauHinh,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1643,9 +1717,9 @@ export async function layLichSuCamera(maCamera, tuNgay, denNgay) {
     func: "getHistory",
     maCamera: maCamera,
     tuNgay: tuNgay,
-    denNgay: denNgay
-  }
-  return callApiWithAuth(payload)
+    denNgay: denNgay,
+  };
+  return callApiWithAuth(payload);
 }
 
 /**
@@ -1654,47 +1728,55 @@ export async function layLichSuCamera(maCamera, tuNgay, denNgay) {
  */
 export async function phanLoaiCameraTheoTrangThai() {
   try {
-    const danhSachCamera = await layDanhSachCamera()
-    const trangThaiTatCa = await kiemTraTrangThaiTatCaCamera()
-    
+    const danhSachCamera = await layDanhSachCamera();
+    const trangThaiTatCa = await kiemTraTrangThaiTatCaCamera();
+
     const ketQua = {
       cameraVao: [],
       cameraRa: [],
       cameraOnline: [],
       cameraOffline: [],
-      tongSo: danhSachCamera.length || 0
-    }
-    
+      tongSo: danhSachCamera.length || 0,
+    };
+
     if (Array.isArray(danhSachCamera)) {
-      danhSachCamera.forEach(camera => {
+      danhSachCamera.forEach((camera) => {
         // Phân loại theo chức năng
-        if (camera.chucNangCamera === 'vào' || camera.chucNangCamera === 'Vào') {
-          ketQua.cameraVao.push(camera)
-        } else if (camera.chucNangCamera === 'ra' || camera.chucNangCamera === 'Ra') {
-          ketQua.cameraRa.push(camera)
+        if (
+          camera.chucNangCamera === "vào" ||
+          camera.chucNangCamera === "Vào"
+        ) {
+          ketQua.cameraVao.push(camera);
+        } else if (
+          camera.chucNangCamera === "ra" ||
+          camera.chucNangCamera === "Ra"
+        ) {
+          ketQua.cameraRa.push(camera);
         }
-        
+
         // Phân loại theo trạng thái (giả định có thông tin trạng thái)
-        const trangThai = trangThaiTatCa?.find(t => t.maCamera === camera.maCamera)
+        const trangThai = trangThaiTatCa?.find(
+          (t) => t.maCamera === camera.maCamera
+        );
         if (trangThai?.online) {
-          ketQua.cameraOnline.push(camera)
+          ketQua.cameraOnline.push(camera);
         } else {
-          ketQua.cameraOffline.push(camera)
+          ketQua.cameraOffline.push(camera);
         }
-      })
+      });
     }
-    
-    return ketQua
+
+    return ketQua;
   } catch (error) {
-    console.error("Lỗi phân loại camera:", error)
+    console.error("Lỗi phân loại camera:", error);
     return {
       cameraVao: [],
       cameraRa: [],
       cameraOnline: [],
       cameraOffline: [],
       tongSo: 0,
-      error: error.message
-    }
+      error: error.message,
+    };
   }
 }
 
@@ -1703,16 +1785,16 @@ export async function phanLoaiCameraTheoTrangThai() {
  * @returns {Promise<Array>} Danh sách phiên gửi xe với vị trí đỗ
  */
 export async function layPhienGuiXeCoViTri() {
-  const payload = { 
-    table: "pm_nc0009", 
+  const payload = {
+    table: "pm_nc0009",
     func: "data",
-    includeViTri: true // Flag để đảm bảo lv004 được bao gồm
-  }
-  const result = await callApiWithAuth(payload)
-  
+    includeViTri: true, // Flag để đảm bảo lv004 được bao gồm
+  };
+  const result = await callApiWithAuth(payload);
+
   // Đảm bảo mapping đúng từ database response
   if (Array.isArray(result)) {
-    return result.map(phien => ({
+    return result.map((phien) => ({
       ...phien,
       viTriGui: phien.lv004 || phien.viTriGui, // Map lv004 to viTriGui
       // Các field khác giữ nguyên
@@ -1728,11 +1810,9 @@ export async function layPhienGuiXeCoViTri() {
       gioRa: phien.gioRa || phien.lv011,
       anhRa: phien.anhRa || phien.lv012,
       anhMatRa: phien.anhMatRa || phien.lv013,
-      trangThai: phien.trangThai || phien.lv014
-    }))
+      trangThai: phien.trangThai || phien.lv014,
+    }));
   }
-  
-  return result
+
+  return result;
 }
-
-
