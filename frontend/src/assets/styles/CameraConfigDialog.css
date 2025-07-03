@@ -52,12 +52,18 @@
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.025em;
+  color: #ffffff;
+}
+
+/* Override dialog header title color to white */
+.camera-config-dialog .dialog-header h2 {
+  color: #ffffff !important;
 }
 
 .close-button {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  color: #ffffff;
   width: 36px;
   height: 36px;
   border-radius: 12px;

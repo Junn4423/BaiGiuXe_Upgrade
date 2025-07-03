@@ -309,6 +309,15 @@
   background: #dc2626;
 }
 
+.btn-danger-camera {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-danger-camera:hover {
+  background: #b91c1c;
+}
+
 /* Zone details section */
 .zone-details {
   padding: 20px;

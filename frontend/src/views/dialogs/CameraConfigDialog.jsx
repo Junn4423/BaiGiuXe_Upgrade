@@ -324,7 +324,7 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
                 onClick={handleRefreshStatus}
                 disabled={loading}
               >
-                🔄 Làm mới
+                Làm mới
               </button>
               <button 
                 className="toggle-status-button" 
@@ -365,10 +365,10 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
                 <label>Loại camera:</label>
                 <select value={filterType} onChange={handleFilterTypeChange}>
                   <option value="all">Tất cả</option>
-                  <option value="vao">🚪 Camera vào</option>
-                  <option value="ra">🚪 Camera ra</option>
-                  <option value="online">🟢 Online</option>
-                  <option value="offline">🔴 Offline</option>
+                  <option value="vao"> Camera vào</option>
+                  <option value="ra"> Camera ra</option>
+                  <option value="online"> Online </option>
+                  <option value="offline"> Offline </option>
                 </select>
               </div>
               

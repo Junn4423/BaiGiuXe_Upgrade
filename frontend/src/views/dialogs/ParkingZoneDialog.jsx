@@ -378,6 +378,60 @@ const ParkingZoneDialog = ({ onClose }) => {
     )
   }
 
+  // Hàm xử lý camera
+  const handleAddCamera = (zone) => {
+    console.log("Adding camera for zone:", zone)
+    setSelectedZone(zone)
+    setShowAddCamera(true)
+  }
+
+  const handleDeleteCameraDialog = (zone) => {
+    console.log("Delete camera for zone:", zone)
+    // Hiển thị dialog xác nhận hoặc danh sách camera để xóa
+    if (window.confirm(`Bạn có chắc muốn xóa camera cho khu vực "${zone.tenKhuVuc}"?`)) {
+      handleDeleteCamera(zone)
+    }
+  }
+
+  const handleDeleteCamera = async (zone) => {
+    try {
+      setIsLoading(true)
+      // Lấy danh sách camera của khu vực
+      const allCameras = await layDanhSachCamera()
+      const zoneCameras = allCameras.filter(c => c.maKhuVuc === zone.maKhuVuc)
+      
+      if (zoneCameras.length === 0) {
+        alert("Không có camera nào trong khu vực này")
+        return
+      }
+
+      // Hiển thị danh sách camera để chọn xóa
+      const cameraNames = zoneCameras.map(c => `${c.tenCamera} (${c.maCamera})`).join('\n')
+      const confirmDelete = window.confirm(`Khu vực "${zone.tenKhuVuc}" có ${zoneCameras.length} camera:\n${cameraNames}\n\nBạn có chắc muốn xóa tất cả camera này?`)
+      
+      if (confirmDelete) {
+        // Xóa tất cả camera của khu vực (giả sử có API xóa camera)
+        // await xoaCamera(zone.maKhuVuc)
+        alert("Chức năng xóa camera đang được phát triển")
+        // Reload data
+        await loadZones()
+      }
+    } catch (error) {
+      console.error("Error deleting cameras:", error)
+      alert("Lỗi xóa camera: " + error.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Đóng dialog camera
+  const handleCloseAddCamera = () => {
+    setShowAddCamera(false)
+    setSelectedZone(null)
+    // Reload zones để cập nhật số lượng camera
+    loadZones()
+  }
+
   return (
     <div className="dialog-overlay">
       <div className="dialog-container extra-large parking-zone-dialog">
@@ -412,12 +466,13 @@ const ParkingZoneDialog = ({ onClose }) => {
                         <th>Camera</th>
                         <th>Cổng</th>
                         <th>Mô Tả</th>
+                        <th>Quản lý Camera</th>
                         <th>Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
                       {zones.length === 0 ? (
-                        <tr><td colSpan="4" className="no-data">Không có khu vực</td></tr>
+                        <tr><td colSpan="7" className="no-data">Không có khu vực</td></tr>
                       ) : (
                         zones.map(zone => (
                           <tr key={zone.maKhuVuc} className={selectedZone?.maKhuVuc === zone.maKhuVuc ? 'selected' : ''}>
@@ -603,13 +658,9 @@ const ParkingZoneDialog = ({ onClose }) => {
 
         {showAddCamera && selectedZone && (
           <AddCameraDialog
-            zoneId={selectedZone.maKhuVuc}
-            zoneName={selectedZone.tenKhuVuc}
-            onClose={() => setShowAddCamera(false)}
-            onSave={() => {
-              setShowAddCamera(false)
-              loadZoneStats() // Reload stats after camera changes
-            }}
+            maKhuVuc={selectedZone.maKhuVuc}
+            onClose={handleCloseAddCamera}
+            onSave={handleCloseAddCamera}
           />
         )}
 

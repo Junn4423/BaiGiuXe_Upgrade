@@ -232,6 +232,12 @@ export async function layALLChinhSachGia() {
   const res = await callApiWithAuth(payload)
   return res.data || []
 }
+// Alias for backward compatibility: original import in RfidManagerDialogClean.jsx expects layChinhSachGia
+export { layALLChinhSachGia as layChinhSachGia };
+
+// Additional aliases for RFID card functions used in RfidManagerDialogClean.jsx
+export { capNhatTheRFID as capNhatThe };
+export { xoaTheRFID as xoaThe };
 
 export async function themChinhSachGia(chinhSach) {
   console.log("themChinhSachGia called with:", chinhSach)
