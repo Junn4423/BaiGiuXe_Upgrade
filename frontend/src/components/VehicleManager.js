@@ -19,7 +19,7 @@ class VehicleManager {
   }
 
   /**
-   * Xử lý xe vào - Dựa trên logic Python
+   * Xử lý xe vào - Lấy loại xe từ cấu hình, không dùng policy string
    */
   async processVehicleEntry(
     cardId,
@@ -28,17 +28,32 @@ class VehicleManager {
     policy,
     entryGate,
     cameraId,
-    faceImagePath = null
+    faceImagePath = null,
+    loaiXe = null
   ) {
     try {
-      // Tự động xác định chính sách nếu chưa có
+      console.log(
+        `🚗 DEBUG processVehicleEntry: loaiXe nhận vào = ${loaiXe} (type: ${typeof loaiXe})`
+      );
+
+      // Tự động xác định chính sách nếu chưa có - từ loaiXe thay vì currentVehicleType
+      if (!policy && loaiXe !== null) {
+        if (loaiXe === "0" || loaiXe === 0) {
+          policy = "CS_XEMAY_4H";
+          console.log(`📋 Auto policy từ loaiXe=0: ${policy}`);
+        } else if (loaiXe === "1" || loaiXe === 1) {
+          policy = "CS_OTO_4H";
+          console.log(`📋 Auto policy từ loaiXe=1: ${policy}`);
+        }
+      }
+
+      // Fallback chỉ khi loaiXe không có
       if (!policy && this.ui) {
-        if (this.ui.currentMode === "vao") {
-          if (this.ui.currentVehicleType === "xe_may") {
-            policy = "CS_XEMAY_4H";
-          } else if (this.ui.currentVehicleType === "oto") {
-            policy = "CS_OTO_4H";
-          }
+        console.log(`⚠️ FALLBACK: Không có loaiXe, dùng currentVehicleType`);
+        if (this.ui.currentVehicleType === "xe_may") {
+          policy = "CS_XEMAY_4H";
+        } else if (this.ui.currentVehicleType === "oto") {
+          policy = "CS_OTO_4H";
         }
       }
 
@@ -48,13 +63,16 @@ class VehicleManager {
         uidThe: cardId,
         bienSo: licensePlate || "",
         viTriGui: null,
-        chinhSach: policy || "CS_XEMAY_4H",
-        congVao: entryGate || "GATE01",
+        chinhSach: policy || null, // Không có default
+        congVao: entryGate || null, // Không có default
         gioVao: entryTime,
         anhVao: imagePath || "",
         anhMatVao: faceImagePath || "",
-        camera_id: cameraId,
+        camera_id: cameraId || null, // Không có default
+        loaiXe: loaiXe || null, // Từ cấu hình, không có default
       };
+
+      console.log(`🚗 DEBUG: Session data với loaiXe từ config:`, session);
 
       const apiResult = await themPhienGuiXe(session);
 
@@ -73,6 +91,20 @@ class VehicleManager {
       if (success) {
         this._activeParkingSessions.set(cardId, session);
 
+        // Xác định loại xe để hiển thị UI - CHÍNH XÁC từ loaiXe
+        let vehicleTypeDisplay = null;
+        if (loaiXe === "1" || loaiXe === 1) {
+          vehicleTypeDisplay = "oto";
+          console.log(`🚗 UI Display: Ô tô (loaiXe=${loaiXe})`);
+        } else if (loaiXe === "0" || loaiXe === 0) {
+          vehicleTypeDisplay = "xe_may";
+          console.log(`🏍️ UI Display: Xe máy (loaiXe=${loaiXe})`);
+        } else {
+          // Fallback để tương thích với UI cũ
+          vehicleTypeDisplay = this.ui?.currentVehicleType || null;
+          console.log(`⚠️ UI Display: Fallback to ${vehicleTypeDisplay}`);
+        }
+
         // Cập nhật thông tin xe vào UI
         if (this.ui) {
           const vehicleEntryData = {
@@ -86,7 +118,7 @@ class VehicleManager {
             cong_vao: entryGate,
             cong_ra: "",
             trang_thai: "Trong bãi",
-            loai_xe: this.ui.currentVehicleType || "xe_may",
+            loai_xe: vehicleTypeDisplay,
           };
           this.ui.updateVehicleInfo(vehicleEntryData);
         }
@@ -125,16 +157,18 @@ class VehicleManager {
   }
 
   /**
-   * Xử lý xe ra - Dựa trên logic Python
+   * Xử lý xe ra - Dựa trên logic Python với cải thiện tự động lấy cổng ra và camera
    */
   async processVehicleExit(
     cardId,
     exitImagePath,
-    exitGate,
-    cameraId,
+    exitGate = null,
+    cameraId = null,
     plateMatch = null,
     exitLicensePlate = null,
-    exitFaceImagePath = null
+    exitFaceImagePath = null,
+    zoneInfo = null,
+    workConfig = null
   ) {
     console.log(
       "🚗 Xử lý xe ra:",
@@ -196,6 +230,40 @@ class VehicleManager {
       }
 
       console.log(`🔍 DEBUG: Session object:`, session);
+
+      // Tự động xác định cổng ra và camera ID từ zoneInfo FIRST
+      console.log(
+        `🔍 DEBUG VehicleManager: Checking zoneInfo for exit gate/camera:`,
+        {
+          zoneInfo: zoneInfo,
+          hasCongRa: zoneInfo?.congRa ? true : false,
+          congRaCount: zoneInfo?.congRa?.length || 0,
+          hasCameraRa: zoneInfo?.cameraRa ? true : false,
+          cameraRaCount: zoneInfo?.cameraRa?.length || 0,
+          workConfig: workConfig,
+        }
+      );
+
+      if (!exitGate) {
+        exitGate = null; // Không có default
+        if (zoneInfo?.congRa && zoneInfo.congRa.length > 0) {
+          exitGate =
+            zoneInfo.congRa[0].maCong || zoneInfo.congRa[0].tenCong || null;
+        } else if (workConfig?.exit_gate) {
+          exitGate = workConfig.exit_gate;
+        }
+        console.log(`🚪 VehicleManager: Tự động xác định cổng ra: ${exitGate}`);
+      }
+
+      if (!cameraId) {
+        cameraId = null; // Không có default
+        if (zoneInfo?.cameraRa && zoneInfo.cameraRa.length > 0) {
+          cameraId = zoneInfo.cameraRa[0].maCamera || null;
+        }
+        console.log(
+          `📹 VehicleManager: Tự động xác định camera ID: ${cameraId}`
+        );
+      }
 
       // Lấy thông tin từ session object
       const entryLicensePlate = session.bienSo || "";
@@ -513,14 +581,35 @@ class VehicleManager {
         }
       }
 
-      // Xác định loại xe
+      // Xác định loại xe dựa trên loaiXe thay vì policy
+      // loaiXe = 0: xe máy, xe đạp, xe 2 bánh
+      // loaiXe = 1: ô tô, xe hơi, xe tải, xe lớn
       let vehicleType = "xe_may"; // mặc định
-      if (
-        policy.toLowerCase().includes("oto") ||
-        policy.toLowerCase().includes("xe_hoi") ||
-        policy.includes("CS_OTO")
-      ) {
+      const loaiXe = session.loaiXe;
+
+      console.log(
+        `🚗 DEBUG: loaiXe từ session = ${loaiXe} (type: ${typeof loaiXe})`
+      );
+
+      if (loaiXe === 1 || loaiXe === "1") {
         vehicleType = "oto";
+        console.log(`🚗 Phân loại: Ô tô/xe lớn (loaiXe = ${loaiXe})`);
+      } else if (loaiXe === 0 || loaiXe === "0") {
+        vehicleType = "xe_may";
+        console.log(`🏍️ Phân loại: Xe máy/2 bánh (loaiXe = ${loaiXe})`);
+      } else {
+        // Fallback: nếu không có loaiXe, dùng policy làm backup
+        if (
+          policy.toLowerCase().includes("oto") ||
+          policy.toLowerCase().includes("xe_hoi") ||
+          policy.includes("CS_OTO")
+        ) {
+          vehicleType = "oto";
+          console.log(`🚗 Fallback: Phân loại từ policy -> Ô tô`);
+        } else {
+          vehicleType = "xe_may";
+          console.log(`🏍️ Fallback: Phân loại từ policy -> Xe máy`);
+        }
       }
 
       // Tạo dữ liệu UI

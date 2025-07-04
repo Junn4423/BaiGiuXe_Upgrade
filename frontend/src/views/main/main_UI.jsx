@@ -85,6 +85,8 @@ const MainUI = () => {
   useEffect(() => {
     if (workConfig && workConfig.ma_khu_vuc) {
       loadZoneInfo(workConfig.ma_khu_vuc);
+    } else if (workConfig && workConfig.zone) {
+      loadZoneInfo(workConfig.zone);
     }
   }, [workConfig]);
 
@@ -94,7 +96,6 @@ const MainUI = () => {
       try {
         const envInfo = await getEnvironmentInfo();
         setEnvironmentInfo(envInfo);
-        console.log("🖥️ Environment info:", envInfo);
 
         if (envInfo.isElectron) {
           showToast(
@@ -110,7 +111,7 @@ const MainUI = () => {
       }
     };
     checkEnvironment();
-  }, []); // Empty dependency array - chỉ chạy 1 lần khi mount
+  }, []);
 
   // Card scanning effect
   useEffect(() => {
@@ -141,7 +142,6 @@ const MainUI = () => {
         // Test hotkey - simulate card scan
         event.preventDefault();
         const testCardId = "0002468477";
-        console.log(`🧪 Testing card scan with: ${testCardId}`);
         handleCardScanned(testCardId);
       }
     };
@@ -158,16 +158,12 @@ const MainUI = () => {
         const config = JSON.parse(savedConfig);
         setWorkConfig(config);
         setCurrentVehicleType(config.loai_xe || "xe_may");
-        // Set default mode from config
         setCurrentMode(config.default_mode || "vao");
-        console.log("✅ Loaded work config:", config);
       } else {
-        // Show work config dialog if no config exists
-        console.log("⚠️ No work config found, showing dialog");
         setShowWorkConfig(true);
       }
     } catch (error) {
-      console.error("❌ Error loading work config:", error);
+      console.error("Error loading work config:", error);
       setShowWorkConfig(true);
     }
   };
@@ -175,59 +171,24 @@ const MainUI = () => {
   // Load zone information with cameras
   const loadZoneInfo = async (zoneCode) => {
     try {
-      console.log(`🏢 Loading zone info for: ${zoneCode}`);
-
-      // Load all cameras
-      const camerasResponse = await layDanhSachCamera();
-      console.log("📹 All cameras:", camerasResponse);
-
-      // Load zone details
       const zonesResponse = await layDanhSachKhu();
-      console.log("🏢 All zones:", zonesResponse);
-
-      // Find current zone - use ma_khu_vuc from work config instead of zone name
       const actualZoneCode = workConfig?.ma_khu_vuc || zoneCode;
       const zone = zonesResponse.find((z) => z.maKhuVuc === actualZoneCode);
+
       if (!zone) {
-        console.error(`❌ Zone not found: ${actualZoneCode}`);
-        console.log(
-          "Available zones:",
-          zonesResponse.map((z) => ({
-            maKhuVuc: z.maKhuVuc,
-            tenKhuVuc: z.tenKhuVuc,
-          }))
-        );
+        console.error(`Zone not found: ${actualZoneCode}`);
         return;
       }
 
-      console.log(`✅ Found zone: ${zone.tenKhuVuc} (${zone.maKhuVuc})`);
-
-      // Filter cameras for this zone using the actual zone code
-      const zoneCameras = camerasResponse.filter(
-        (camera) => camera.maKhuVuc === actualZoneCode
-      );
-      console.log(`📹 Cameras for zone ${actualZoneCode}:`, zoneCameras);
-
-      // Group cameras by type
-      const cameraVao = zoneCameras.filter(
-        (camera) => camera.loaiCamera === "VAO"
-      );
-      const cameraRa = zoneCameras.filter(
-        (camera) => camera.loaiCamera === "RA"
-      );
-
       const zoneInfoData = {
         ...zone,
-        cameraVao,
-        cameraRa,
-        allCameras: zoneCameras,
+        allCameras: [...(zone.cameraVao || []), ...(zone.cameraRa || [])],
       };
 
-      console.log("🏢 Zone info loaded:", zoneInfoData);
       setZoneInfo(zoneInfoData);
       setCurrentZone(zoneInfoData);
     } catch (error) {
-      console.error("❌ Error loading zone info:", error);
+      console.error("Error loading zone info:", error);
     }
   };
 
@@ -322,7 +283,6 @@ const MainUI = () => {
 
       // Utility methods
       showNotification: (title, message) => {
-        console.log(`📢 ${title}: ${message}`);
         // Show as toast warning for camera fallback issues
         if (title.includes("Camera") || message.includes("camera")) {
           showToast(`⚠️ ${message}`, "warning", 6000);
@@ -379,9 +339,6 @@ const MainUI = () => {
         setCurrentMode((prev) => {
           const newMode = prev === "vao" ? "ra" : "vao";
           currentModeRef.current = newMode; // Update ref immediately
-          console.log(
-            `🔄 Mode changed from ${prev} to ${newMode} (via Space key)`
-          );
           return newMode;
         });
       }
@@ -392,7 +349,6 @@ const MainUI = () => {
 
   // Handle mode change
   const handleModeChange = (mode, vehicleType) => {
-    console.log(`🔄 Mode changed to ${mode}, vehicle type: ${vehicleType}`);
     setCurrentMode(mode);
     currentModeRef.current = mode; // Update ref immediately
     setCurrentVehicleType(vehicleType);
@@ -454,7 +410,7 @@ const MainUI = () => {
         cardReaderRef.current.stopCardReader();
       }
     } catch (error) {
-      console.error("❌ Error during cleanup:", error);
+      console.error("Error during cleanup:", error);
     }
   };
 
@@ -463,18 +419,15 @@ const MainUI = () => {
     setWorkConfig(config);
     setCurrentVehicleType(config.loai_xe || "xe_may");
     setShowWorkConfig(false);
-    console.log("✅ Work config updated:", config);
   };
 
   // Handle card scanning
   const handleCardScanned = async (cardId) => {
-    const actualMode = currentModeRef.current; // Use ref to get latest mode
-    console.log(`🎯 Card scanned: ${cardId} in mode: ${actualMode}`);
+    const actualMode = currentModeRef.current;
     setScannedCardId(cardId);
 
     // Step 1: Check if card exists in database
     try {
-      console.log(`🔍 Checking if card ${cardId} exists in database...`);
       if (vehicleInfoComponentRef.current) {
         vehicleInfoComponentRef.current.updateCardReaderStatus(
           "ĐANG KIỂM TRA THẺ...",
@@ -482,7 +435,6 @@ const MainUI = () => {
         );
       }
 
-      // Load all cards to check existence
       const { layDanhSachThe, timTheDangCoPhien } = await import(
         "../../api/api"
       );
@@ -495,9 +447,6 @@ const MainUI = () => {
       const cardExists = cardList.find((card) => card.uidThe === cardId);
 
       if (!cardExists) {
-        console.log(
-          `❌ Card ${cardId} not found in database - opening add card dialog`
-        );
         if (vehicleInfoComponentRef.current) {
           vehicleInfoComponentRef.current.updateCardReaderStatus(
             "THẺ CHƯA ĐĂNG KÝ",
@@ -505,7 +454,6 @@ const MainUI = () => {
           );
         }
 
-        // Open add card dialog with scanned card ID
         setShowAddCard({ show: true, cardId: cardId });
         showToast(
           `🔔 Thẻ ${cardId} chưa được đăng ký. Vui lòng thêm thẻ mới.`,
@@ -515,13 +463,8 @@ const MainUI = () => {
         return;
       }
 
-      console.log(`✅ Card ${cardId} found in database:`, cardExists);
-
       // Step 2: Check if card has active parking session (only for "vao" mode)
       if (actualMode === "vao") {
-        console.log(
-          `🔍 Checking if card ${cardId} has active parking session...`
-        );
         if (vehicleInfoComponentRef.current) {
           vehicleInfoComponentRef.current.updateCardReaderStatus(
             "KIỂM TRA PHIÊN GỬI XE...",
@@ -532,10 +475,6 @@ const MainUI = () => {
         const activeSession = await timTheDangCoPhien(cardId);
 
         if (activeSession && activeSession.length > 0) {
-          console.log(
-            `❌ Card ${cardId} already has active parking session:`,
-            activeSession
-          );
           if (vehicleInfoComponentRef.current) {
             vehicleInfoComponentRef.current.updateCardReaderStatus(
               "THẺ ĐÃ CÓ PHIÊN GỬI XE",
@@ -551,13 +490,8 @@ const MainUI = () => {
         }
       }
 
-      console.log(`✅ Card ${cardId} is valid and ready for processing`);
-
       // Update vehicle info with scanned card
       if (vehicleInfoComponentRef.current) {
-        console.log(
-          `📝 Updating vehicle info with card: ${cardId} and mode: ${actualMode}`
-        );
         vehicleInfoComponentRef.current.updateVehicleInfo({
           ma_the: cardId,
           trang_thai: `Xe ${actualMode === "vao" ? "vào" : "ra"}`,
@@ -571,25 +505,8 @@ const MainUI = () => {
       // Step 3: Capture images from camera
       if (cameraManagerRef.current) {
         try {
-          console.log(
-            `📸 Capturing images for card ${cardId} in ${actualMode} mode`
-          );
-
           const [plateImage, licensePlate, faceImage] =
             await cameraManagerRef.current.captureImage(cardId, actualMode);
-
-          console.log(`📷 Capture results:`, {
-            plateImage: plateImage
-              ? {
-                  url: plateImage.url || plateImage,
-                  hasBlob: !!plateImage.blob,
-                }
-              : null,
-            faceImage: faceImage
-              ? { url: faceImage.url || faceImage, hasBlob: !!faceImage.blob }
-              : null,
-            mode: actualMode,
-          });
 
           setCapturedImages({
             plateImage: plateImage?.url || plateImage,
@@ -600,14 +517,7 @@ const MainUI = () => {
 
           // Display captured images on camera panels
           if (cameraComponentRef.current) {
-            console.log(
-              `📺 Displaying images on camera panels for card ${cardId}`
-            );
             if (plateImage?.url || plateImage) {
-              console.log(
-                `📺 Displaying plate image on panel 1:`,
-                plateImage?.url || plateImage
-              );
               cameraComponentRef.current.displayCapturedImage(
                 plateImage?.url || plateImage,
                 1
@@ -615,10 +525,6 @@ const MainUI = () => {
             }
 
             if (faceImage?.url || faceImage) {
-              console.log(
-                `📺 Displaying face image on panel 2:`,
-                faceImage?.url || faceImage
-              );
               cameraComponentRef.current.displayCapturedFaceImage(
                 faceImage?.url || faceImage
               );
@@ -636,10 +542,6 @@ const MainUI = () => {
           // Auto recognize license plate after capture
           let recognizedLicensePlate = null;
           if (plateImage?.blob || capturedImages.plateImageBlob) {
-            console.log(
-              `🚗 Starting automatic license plate recognition for ${actualMode} mode...`
-            );
-
             if (vehicleInfoComponentRef.current) {
               vehicleInfoComponentRef.current.updateCardReaderStatus(
                 "ĐANG NHẬN DẠNG BIỂN SỐ...",
@@ -650,15 +552,7 @@ const MainUI = () => {
             try {
               const blob = plateImage?.blob || capturedImages.plateImageBlob;
               if (blob) {
-                console.log(
-                  `📤 Sending image for recognition, blob size: ${blob.size} bytes`
-                );
                 const recognitionResult = await nhanDangBienSo(blob);
-                console.log(
-                  `✅ License plate recognition result:`,
-                  recognitionResult
-                );
-
                 let confidence = 0;
 
                 if (
@@ -667,7 +561,6 @@ const MainUI = () => {
                   recognitionResult.ket_qua.length > 0
                 ) {
                   const firstResult = recognitionResult.ket_qua[0];
-                  console.log(`🔍 Processing OCR result:`, firstResult);
 
                   if (firstResult.ocr) {
                     if (typeof firstResult.ocr === "string") {
@@ -683,10 +576,6 @@ const MainUI = () => {
                     }
                   }
                 }
-
-                console.log(
-                  `🏷️ Extracted license plate: ${recognizedLicensePlate}, confidence: ${confidence}`
-                );
 
                 if (recognizedLicensePlate && cameraComponentRef.current) {
                   const direction = actualMode === "vao" ? "in" : "out";
@@ -721,7 +610,7 @@ const MainUI = () => {
               }
             } catch (recognitionError) {
               console.error(
-                "❌ Error recognizing license plate:",
+                "Error recognizing license plate:",
                 recognitionError
               );
               if (vehicleInfoComponentRef.current) {
@@ -740,8 +629,6 @@ const MainUI = () => {
 
           // Step 4: Save parking session for "vao" mode
           if (actualMode === "vao") {
-            console.log(`💾 Saving parking session for card ${cardId}...`);
-
             if (vehicleInfoComponentRef.current) {
               vehicleInfoComponentRef.current.updateCardReaderStatus(
                 "ĐANG LƯU PHIÊN GỬI XE...",
@@ -750,10 +637,6 @@ const MainUI = () => {
             }
 
             try {
-              // Get dynamic data from APIs
-              console.log(`🔍 Loading dynamic configuration data...`);
-
-              // Import APIs and validation utilities
               const { layChinhSachGiaTheoLoaiPT } = await import(
                 "../../api/api"
               );
@@ -763,76 +646,93 @@ const MainUI = () => {
               } = await import("../../utils/sessionValidation");
 
               // Determine vehicle type based on work config
-              let vehicleTypeCode = "XE_MAY"; // default
+              let vehicleTypeCode = null;
               if (workConfig?.loai_xe) {
-                // Map display names to codes
                 const vehicleTypeMapping = {
                   xe_may: "XE_MAY",
                   oto: "OT",
                 };
                 vehicleTypeCode =
-                  vehicleTypeMapping[workConfig.loai_xe] || "XE_MAY";
+                  vehicleTypeMapping[workConfig.loai_xe] || null;
               }
 
-              console.log(`🚗 Vehicle type determined: ${vehicleTypeCode}`);
+              // Get pricing policy
+              let rawPricingPolicy = null;
+              if (vehicleTypeCode) {
+                rawPricingPolicy = await layChinhSachGiaTheoLoaiPT(
+                  vehicleTypeCode
+                );
+              }
 
-              // Get pricing policy using helper function (logic from python-example)
-              console.log(
-                `🔍 Getting pricing policy for workConfig.loai_xe: ${workConfig?.loai_xe}, vehicleTypeCode: ${vehicleTypeCode}`
-              );
-              const rawPricingPolicy = await layChinhSachGiaTheoLoaiPT(
-                vehicleTypeCode
-              );
-              console.log(
-                `✅ Raw pricing policy from helper: ${rawPricingPolicy}`
-              );
-
-              // Apply validation middleware to ensure policy is always valid
               const pricingPolicy = validateAndEnsurePricingPolicy(
                 rawPricingPolicy,
                 workConfig?.loai_xe,
                 vehicleTypeCode
               );
-              console.log(
-                `✅ Final validated pricing policy: ${pricingPolicy}`
-              );
 
-              // Extra validation to ensure we have a valid policy
-              if (
-                !pricingPolicy ||
-                pricingPolicy === "" ||
-                pricingPolicy === null ||
-                pricingPolicy === undefined
-              ) {
-                console.error(
-                  `❌ CRITICAL: Got invalid pricing policy after validation: ${pricingPolicy}`
-                );
-                console.error(`❌ workConfig:`, workConfig);
-                console.error(`❌ vehicleTypeCode:`, vehicleTypeCode);
-                console.error(`❌ rawPricingPolicy:`, rawPricingPolicy);
+              if (!pricingPolicy) {
                 throw new Error(
-                  "Không thể xác định chính sách giá phù hợp. Vui lòng kiểm tra cấu hình."
+                  "Chưa cấu hình loại xe. Vui lòng mở Cấu Hình Làm Việc và chọn loại xe."
                 );
               }
 
-              // Get entry gate from zone info, work config, or API (pm_nc0007)
+              // Get entry gate by calling API directly
               let entryGate = null;
-              if (zoneInfo?.cameraVao && zoneInfo.cameraVao.length > 0) {
-                // Use first available entry camera as gate identifier
-                entryGate =
-                  zoneInfo.cameraVao[0].tenCamera ||
-                  zoneInfo.cameraVao[0].maCamera;
-              } else if (workConfig?.entry_gate) {
+              let apiSuccess = false;
+
+              try {
+                const { layDanhSachKhu } = await import("../../api/api");
+                const zonesResponse = await layDanhSachKhu();
+
+                if (zonesResponse && Array.isArray(zonesResponse)) {
+                  let actualZoneCode = null;
+
+                  if (typeof workConfig === "object" && workConfig) {
+                    actualZoneCode =
+                      workConfig.ma_khu_vuc ||
+                      workConfig.maKhuVuc ||
+                      workConfig.zone_code ||
+                      workConfig.zone;
+                  } else if (typeof workConfig === "string") {
+                    actualZoneCode = workConfig;
+                  }
+
+                  if (!actualZoneCode && zonesResponse.length > 0) {
+                    actualZoneCode = zonesResponse[0].maKhuVuc;
+                  }
+
+                  const currentZone = zonesResponse.find(
+                    (z) => z.maKhuVuc === actualZoneCode
+                  );
+
+                  if (currentZone?.congVao?.length > 0) {
+                    const congVaoFirst = currentZone.congVao[0];
+                    entryGate = congVaoFirst.maCong || congVaoFirst.tenCong;
+                    apiSuccess = true;
+                  }
+                }
+              } catch (apiError) {
+                console.error("Error calling layDanhSachKhu:", apiError);
+              }
+
+              // Fallback to workConfig if API failed
+              if (!apiSuccess && workConfig?.entry_gate) {
                 entryGate = workConfig.entry_gate;
               }
-              // Nếu vẫn chưa có entryGate, lấy từ bảng pm_nc0007
+
+              if (!entryGate) {
+                console.warn(
+                  "WARNING: entryGate is null. Will proceed without gate info."
+                );
+              }
+
+              // Fallback: get from pm_nc0007 if no gate found
               if (!entryGate) {
                 try {
                   const { layDanhSachCong } = await import("../../api/api");
                   const gateRes = await layDanhSachCong();
                   let gates = gateRes?.data || gateRes || [];
                   if (Array.isArray(gates) && gates.length > 0) {
-                    // Ưu tiên cổng thuộc zone hiện tại nếu có
                     if (zoneInfo?.maKhuVuc) {
                       const zoneGate = gates.find(
                         (g) => g.maKhuVuc === zoneInfo.maKhuVuc
@@ -840,147 +740,105 @@ const MainUI = () => {
                       if (zoneGate)
                         entryGate = zoneGate.maCong || zoneGate.tenCong;
                     }
-                    // Nếu vẫn chưa có, lấy cổng đầu tiên
                     if (!entryGate)
                       entryGate = gates[0].maCong || gates[0].tenCong;
-                  } else {
-                    entryGate = "GATE_UNKNOWN";
                   }
-                  console.log("🔑 Entry gate lấy từ pm_nc0007:", entryGate);
                 } catch (err) {
-                  console.error(
-                    "❌ Không lấy được danh sách cổng từ pm_nc0007:",
-                    err
-                  );
-                  entryGate = "GATE_UNKNOWN";
+                  console.error("Error getting gates from pm_nc0007:", err);
                 }
               }
-              if (!entryGate) entryGate = "GATE_UNKNOWN";
 
-              // Get parking spot from work config or generate based on zone
-              let parkingSpot = "A01"; // default
-              if (workConfig?.parking_spot) {
-                parkingSpot = workConfig.parking_spot;
-              } else if (zoneInfo?.maKhuVuc) {
-                // Generate parking spot based on zone code and timestamp
-                const timestamp = new Date().getTime().toString().slice(-3);
-                parkingSpot = `${zoneInfo.maKhuVuc}-${timestamp}`;
-              }
+              // Get parking spot from work config ONLY IF vehicle type requires it
+              let parkingSpot = null;
+              let loaiXe = null;
 
-              // Get camera ID
-              let cameraId = "CAM001"; // default
-              if (zoneInfo?.cameraVao && zoneInfo.cameraVao.length > 0) {
-                cameraId = zoneInfo.cameraVao[0].maCamera;
-              }
-
-              console.log(`📋 Dynamic configuration loaded:`, {
-                vehicleTypeCode,
-                pricingPolicy,
-                entryGate,
-                parkingSpot,
-                cameraId,
-                zoneCode: zoneInfo?.maKhuVuc,
-              });
-
-              // Prepare session data with dynamic values
-              const currentTime = new Date();
-
-              // Final safety check for pricing policy
-              let finalPricingPolicy = pricingPolicy;
-              if (!finalPricingPolicy || finalPricingPolicy.trim() === "") {
-                console.error(
-                  `❌ CRITICAL: pricingPolicy is invalid: ${finalPricingPolicy}`
-                );
-                // Emergency fallback based on vehicleTypeCode
-                finalPricingPolicy =
-                  vehicleTypeCode === "OT" ? "CS_OTO_4H" : "CS_XEMAY_4H";
-                console.log(
-                  `🚨 Emergency fallback policy: ${finalPricingPolicy}`
-                );
-              }
-
-              // Determine loaiXe numeric value for API
-              // loaiXe = "0": xe máy (không cần vị trí gửi)
-              // loaiXe = "1": ô tô (cần vị trí gửi)
-              let loaiXe = "0"; // default to xe máy
               if (vehicleTypeCode === "OT") {
                 loaiXe = "1";
               } else if (vehicleTypeCode === "XE_MAY") {
                 loaiXe = "0";
               }
 
-              console.log(
-                `🚗 Loại xe xác định: ${loaiXe} (${
-                  loaiXe === "1"
-                    ? "Ô tô - cần vị trí"
-                    : "Xe máy - không cần vị trí"
-                })`
-              );
-
-              // Conditionally include parkingSpot based on vehicle type
-              let finalParkingSpot = null;
+              // Only get parking spot for cars (loaiXe = "1")
               if (loaiXe === "1") {
-                // Ô tô: cần vị trí gửi
-                finalParkingSpot = parkingSpot;
-                console.log(`🅿️ Ô tô: Sử dụng vị trí gửi: ${finalParkingSpot}`);
-              } else {
-                // Xe máy: không cần vị trí gửi
-                finalParkingSpot = null;
-                console.log(`🏍️ Xe máy: Không cần vị trí gửi`);
+                if (workConfig?.parking_spot) {
+                  parkingSpot = workConfig.parking_spot;
+                } else if (zoneInfo?.maKhuVuc) {
+                  const timestamp = new Date().getTime().toString().slice(-3);
+                  parkingSpot = `${zoneInfo.maKhuVuc}-${timestamp}`;
+                }
               }
 
+              // Get entry camera by calling API directly
+              let cameraId = null;
+
+              try {
+                const { layDanhSachKhu } = await import("../../api/api");
+                const zonesResponse = await layDanhSachKhu();
+
+                if (zonesResponse && Array.isArray(zonesResponse)) {
+                  let actualZoneCode = null;
+
+                  if (typeof workConfig === "object" && workConfig) {
+                    actualZoneCode =
+                      workConfig.ma_khu_vuc ||
+                      workConfig.maKhuVuc ||
+                      workConfig.zone_code ||
+                      workConfig.zone;
+                  } else if (typeof workConfig === "string") {
+                    actualZoneCode = workConfig;
+                  }
+
+                  if (!actualZoneCode && zonesResponse.length > 0) {
+                    actualZoneCode = zonesResponse[0].maKhuVuc;
+                  }
+
+                  const currentZone = zonesResponse.find(
+                    (z) => z.maKhuVuc === actualZoneCode
+                  );
+
+                  if (currentZone?.cameraVao?.length > 0) {
+                    cameraId = currentZone.cameraVao[0].maCamera;
+                  }
+                }
+              } catch (apiError) {
+                console.error(
+                  "Error calling layDanhSachKhu for camera:",
+                  apiError
+                );
+              }
+
+              if (!cameraId) {
+                console.warn(
+                  "WARNING: cameraId is null. Camera data may be missing in API payload."
+                );
+              }
+
+              // Prepare session data
+              const currentTime = new Date();
               const sessionData = {
                 uidThe: cardId,
                 bienSo: recognizedLicensePlate || "",
-                chinhSach: finalPricingPolicy,
+                chinhSach: pricingPolicy,
                 congVao: entryGate,
                 gioVao: currentTime
                   .toISOString()
                   .slice(0, 19)
-                  .replace("T", " "), // Format: YYYY-MM-DD HH:mm:ss
+                  .replace("T", " "),
                 anhVao: plateImage?.url || plateImage || "",
                 anhMatVao: faceImage?.url || faceImage || "",
-                trangThai: "TRONG_BAI", // Explicitly set status
+                trangThai: "TRONG_BAI",
                 camera_id: cameraId,
-                plate_match: recognizedLicensePlate ? 1 : 0, // 1 if license plate recognized, 0 otherwise
+                plate_match: recognizedLicensePlate ? 1 : 0,
                 plate: recognizedLicensePlate || "",
-                loaiXe: loaiXe, // Thêm thông tin loại xe
+                loaiXe: loaiXe,
               };
 
-              // Chỉ thêm viTriGui nếu là ô tô (loaiXe = "1")
-              if (loaiXe === "1" && finalParkingSpot) {
-                sessionData.viTriGui = finalParkingSpot;
+              // Add parking spot only for cars
+              if (loaiXe === "1" && parkingSpot) {
+                sessionData.viTriGui = parkingSpot;
               }
 
-              console.log(
-                `💾 Session data to save (with dynamic config):`,
-                sessionData
-              );
-
-              // Extra detailed logging for debugging
-              console.log(`🔍 DEBUGGING SESSION DATA:`);
-              console.log(
-                `  - uidThe: "${
-                  sessionData.uidThe
-                }" (type: ${typeof sessionData.uidThe})`
-              );
-              console.log(
-                `  - chinhSach: "${
-                  sessionData.chinhSach
-                }" (type: ${typeof sessionData.chinhSach})`
-              );
-              console.log(
-                `  - congVao: "${
-                  sessionData.congVao
-                }" (type: ${typeof sessionData.congVao})`
-              );
-              console.log(
-                `  - gioVao: "${
-                  sessionData.gioVao
-                }" (type: ${typeof sessionData.gioVao})`
-              );
-
-              // Validate required fields before sending
+              // Validate required fields
               const requiredFields = [
                 "uidThe",
                 "chinhSach",
@@ -988,31 +846,19 @@ const MainUI = () => {
                 "gioVao",
               ];
               const missingFields = requiredFields.filter(
-                (field) =>
-                  !sessionData[field] ||
-                  sessionData[field] === "" ||
-                  sessionData[field] === null ||
-                  sessionData[field] === undefined
+                (field) => !sessionData[field]
               );
 
               if (missingFields.length > 0) {
-                console.error(`❌ MISSING FIELDS DETECTED:`, missingFields);
-                console.error(`❌ FULL SESSION DATA:`, sessionData);
                 throw new Error(
                   `Thiếu thông tin bắt buộc: ${missingFields.join(", ")}`
                 );
               }
 
-              console.log(`✅ All required fields present, sending to API...`);
-
-              // Use enhanced API call with built-in validation
+              // Save session
               const result = await themPhienGuiXeWithValidation(sessionData);
 
-              console.log(`📥 API Response:`, result);
-
               if (result && result.success) {
-                console.log(`✅ Parking session saved successfully:`, result);
-
                 if (vehicleInfoComponentRef.current) {
                   vehicleInfoComponentRef.current.updateCardReaderStatus(
                     "XE VÀO THÀNH CÔNG",
@@ -1022,7 +868,6 @@ const MainUI = () => {
                     "XE ĐÃ VÀO BÃI",
                     "#10b981"
                   );
-                  // Update parking info
                   vehicleInfoComponentRef.current.updateVehicleInfo({
                     ma_the: cardId,
                     bien_so: recognizedLicensePlate || "Chưa nhận dạng",
@@ -1033,21 +878,17 @@ const MainUI = () => {
                   });
                 }
 
-                // Tạo thông báo thành công dựa trên loại xe
                 let successMessage = `✅ Xe vào thành công! Thẻ: ${cardId}`;
-                if (loaiXe === "1" && finalParkingSpot) {
-                  // Chỉ hiển thị vị trí gửi nếu là ô tô và có vị trí
-                  successMessage += ` | Vị trí: ${finalParkingSpot}`;
+                if (loaiXe === "1" && parkingSpot) {
+                  successMessage += ` | Vị trí: ${parkingSpot}`;
                 }
 
                 showToast(successMessage, "success", 5000);
 
-                // Show success info for 3 seconds before clearing
                 setTimeout(() => {
                   if (vehicleInfoComponentRef.current) {
                     vehicleInfoComponentRef.current.clearVehicleInfo();
                   }
-                  // Restore camera feeds
                   if (cameraComponentRef.current) {
                     cameraComponentRef.current.restoreCaptureFeeds();
                   }
@@ -1073,8 +914,6 @@ const MainUI = () => {
             }
           } else {
             // For "ra" mode, process vehicle exit
-            console.log(`🚪 Processing vehicle exit for card ${cardId}...`);
-
             if (vehicleInfoComponentRef.current) {
               vehicleInfoComponentRef.current.updateCardReaderStatus(
                 "ĐANG XỬ LÝ XE RA...",
@@ -1084,13 +923,7 @@ const MainUI = () => {
 
             try {
               // Find active parking session for this card
-              const {
-                loadPhienGuiXeTheoMaThe,
-                capNhatPhienGuiXe,
-                tinhPhiGuiXe,
-              } = await import("../../api/api");
-
-              console.log(`🔍 Loading active session for card ${cardId}...`);
+              const { loadPhienGuiXeTheoMaThe } = await import("../../api/api");
               const activeSessions = await loadPhienGuiXeTheoMaThe(cardId);
 
               if (!activeSessions || activeSessions.length === 0) {
@@ -1099,59 +932,112 @@ const MainUI = () => {
 
               // Get the most recent active session
               const activeSession = activeSessions[0];
-              console.log(`✅ Found active session:`, activeSession);
 
-              // Get exit gate from zone info or work config
-              let exitGate = "GATE01"; // default
-              if (zoneInfo?.cameraRa && zoneInfo.cameraRa.length > 0) {
-                exitGate =
-                  zoneInfo.cameraRa[0].tenCamera ||
-                  zoneInfo.cameraRa[0].maCamera ||
-                  "GATE01";
-              } else if (workConfig?.exit_gate) {
-                exitGate = workConfig.exit_gate;
+              // Get exit gate and camera by calling API directly
+              let exitGate = null;
+              let exitCameraId = null;
+
+              try {
+                const { layDanhSachKhu } = await import("../../api/api");
+                const zonesResponse = await layDanhSachKhu();
+
+                // Find current zone using workConfig
+                let actualZoneCode = null;
+
+                if (typeof workConfig === "object" && workConfig) {
+                  // Try common field names
+                  actualZoneCode =
+                    workConfig.ma_khu_vuc ||
+                    workConfig.maKhuVuc ||
+                    workConfig.zone_code ||
+                    workConfig.zone;
+                } else if (typeof workConfig === "string") {
+                  actualZoneCode = workConfig;
+                }
+
+                // Fallback: use first available zone if nothing found
+                if (!actualZoneCode && zonesResponse?.length > 0) {
+                  actualZoneCode = zonesResponse[0].maKhuVuc;
+                }
+
+                // Debug available zones
+                if (zonesResponse && Array.isArray(zonesResponse)) {
+                  console.log(
+                    `🔍 DEBUG XE RA: Available zones:`,
+                    zonesResponse.map((z) => ({
+                      maKhuVuc: z.maKhuVuc,
+                      tenKhuVuc: z.tenKhuVuc,
+                    }))
+                  );
+                }
+
+                const currentZone = zonesResponse.find(
+                  (z) => z.maKhuVuc === actualZoneCode
+                );
+
+                if (currentZone) {
+                  // Get exit gate
+                  if (currentZone.congRa && currentZone.congRa.length > 0) {
+                    const congRaFirst = currentZone.congRa[0];
+                    exitGate =
+                      congRaFirst.maCong || congRaFirst.tenCong || null;
+                  }
+
+                  // Get exit camera
+                  if (currentZone.cameraRa && currentZone.cameraRa.length > 0) {
+                    const cameraRaFirst = currentZone.cameraRa[0];
+                    exitCameraId = cameraRaFirst.maCamera || null;
+                    console.log(
+                      `� XE RA: Exit camera từ API cameraRa[0]: ${exitCameraId}`
+                    );
+                  }
+                } else {
+                  console.log(
+                    `❌ XE RA: Không tìm thấy zone ${actualZoneCode} trong API response`
+                  );
+                }
+              } catch (apiError) {
+                console.error(
+                  `❌ XE RA: Lỗi gọi API layDanhSachKhu:`,
+                  apiError
+                );
+
+                // Fallback to workConfig if API fails
+                if (workConfig?.exit_gate) {
+                  exitGate = workConfig.exit_gate;
+                  console.log(
+                    `🚪 XE RA: Fallback exit gate từ workConfig: ${exitGate}`
+                  );
+                }
               }
 
-              // Get exit camera ID
-              let exitCameraId = "CAM002"; // default
-              if (zoneInfo?.cameraRa && zoneInfo.cameraRa.length > 0) {
-                exitCameraId = zoneInfo.cameraRa[0].maCamera;
+              console.log(
+                `🔍 XE RA: Final Exit Values: exitGate=${exitGate}, exitCameraId=${exitCameraId}`
+              );
+
+              // Log warning if values are null but allow processing to continue
+              if (!exitGate) {
+                console.warn(
+                  `⚠️ XE RA: WARNING - exitGate is null. API payload will have null congRa.`
+                );
               }
 
-              // Kiểm tra biển số xe ra so với xe vào
+              if (!exitCameraId) {
+                console.warn(
+                  `⚠️ XE RA: WARNING - exitCameraId is null. Camera data may be missing in API payload.`
+                );
+              }
+
+              // Check license plates between entry and exit
               const entryPlate = activeSession.bienSo || "";
               const exitPlate = recognizedLicensePlate || "";
 
-              console.log(
-                `🔍 Comparing license plates - Entry: "${entryPlate}", Exit: "${exitPlate}"`
-              );
-
-              // Nếu biển số khác nhau hoặc không nhận dạng được, hiển thị modal xác nhận
               const shouldShowConfirmDialog =
-                (entryPlate && exitPlate && entryPlate !== exitPlate) || // Biển số khác nhau
-                (entryPlate && !exitPlate) || // Không nhận dạng được biển số xe ra
-                (!entryPlate && exitPlate); // Có biển số xe ra nhưng không có biển số xe vào
+                (entryPlate && exitPlate && entryPlate !== exitPlate) ||
+                (entryPlate && !exitPlate) ||
+                (!entryPlate && exitPlate);
 
               if (shouldShowConfirmDialog) {
-                console.log(
-                  `⚠️ License plate mismatch detected, showing confirmation dialog`
-                );
-
-                console.log(`🖼️ Active session image data:`, {
-                  anhVao: activeSession.anhVao,
-                  anhMatVao: activeSession.anhMatVao,
-                  bienSo: activeSession.bienSo,
-                  fullSession: activeSession,
-                });
-
-                console.log(`🖼️ Current capture image data:`, {
-                  plateImageUrl: plateImage?.url,
-                  plateImageDirect: plateImage,
-                  faceImageUrl: faceImage?.url,
-                  faceImageDirect: faceImage,
-                });
-
-                // Hiển thị modal so sánh biển số
                 setShowLicensePlateConfirm({
                   show: true,
                   entryData: {
@@ -1169,7 +1055,7 @@ const MainUI = () => {
                   faceImage,
                 });
 
-                return; // Dừng xử lý, chờ user xác nhận trong modal
+                return;
               }
 
               // Nếu biển số khớp hoặc không có vấn đề, tiếp tục xử lý bình thường
@@ -1180,7 +1066,8 @@ const MainUI = () => {
                 plateImage,
                 faceImage,
                 recognizedLicensePlate,
-                cardId
+                cardId,
+                workConfig
               );
             } catch (exitError) {
               console.error("❌ Error processing vehicle exit:", exitError);
@@ -1239,12 +1126,12 @@ const MainUI = () => {
     plateImage,
     faceImage,
     recognizedLicensePlate,
-    cardId
+    cardId,
+    workConfig = null
   ) => {
     try {
       const { capNhatPhienGuiXe, tinhPhiGuiXe } = await import("../../api/api");
 
-      // Update session with exit information
       const exitSessionData = {
         maPhien: activeSession.maPhien,
         congRa: exitGate,
@@ -1256,22 +1143,11 @@ const MainUI = () => {
         plate: recognizedLicensePlate || "",
       };
 
-      console.log(`💾 Exit session data to update:`, exitSessionData);
-
-      // Update parking session with exit data
       const updateResult = await capNhatPhienGuiXe(exitSessionData);
 
       if (updateResult && updateResult.success) {
-        console.log(`✅ Exit session updated successfully:`, updateResult);
-
         // Calculate parking fee
         try {
-          console.log(
-            `💰 Calculating parking fee for session ${activeSession.maPhien}...`
-          );
-          const feeResult = await tinhPhiGuiXe(activeSession.maPhien);
-          console.log(`💰 Fee calculation result:`, feeResult);
-
           let parkingFee = 0;
           let parkingDuration = 0;
 
@@ -1298,11 +1174,9 @@ const MainUI = () => {
                 recognizedLicensePlate ||
                 activeSession.bienSo ||
                 "Chưa nhận dạng",
-              vi_tri: activeSession.viTriGui || "N/A",
+              vi_tri: activeSession.viTriGui || null, // Không có default
               cong_ra: exitGate,
-              thoi_gian_gui: parkingDuration
-                ? `${parkingDuration} phút`
-                : "N/A",
+              thoi_gian_gui: parkingDuration ? `${parkingDuration} phút` : null, // Không có default
               phi_gui_xe: parkingFee,
               trang_thai: "Xe đã ra khỏi bãi",
             });
@@ -1330,8 +1204,7 @@ const MainUI = () => {
             5000
           );
         } catch (feeError) {
-          console.error("❌ Error calculating parking fee:", feeError);
-          // Still show success for exit, just without fee info
+          console.error("Error calculating parking fee:", feeError);
           if (vehicleInfoComponentRef.current) {
             vehicleInfoComponentRef.current.updateCardReaderStatus(
               "XE RA THÀNH CÔNG (CHƯA TÍNH PHÍ)",
@@ -1378,21 +1251,15 @@ const MainUI = () => {
 
   // Handle license plate confirmation from modal
   const handleLicensePlateConfirm = async (result) => {
-    console.log("🔍 License plate confirmation result:", result);
-
     const { activeSession, exitGate, exitCameraId, plateImage, faceImage } =
       showLicensePlateConfirm;
     const cardId = activeSession.uidThe;
 
-    // Close modal first
     setShowLicensePlateConfirm(false);
 
     if (result.confirmed) {
-      // Use the corrected license plate from modal
       const correctedLicensePlate = result.licensePlate;
-      console.log(`✅ Using corrected license plate: ${correctedLicensePlate}`);
 
-      // Continue with exit processing using corrected plate
       await processVehicleExit(
         activeSession,
         exitGate,
@@ -1400,13 +1267,12 @@ const MainUI = () => {
         plateImage,
         faceImage,
         correctedLicensePlate,
-        cardId
+        cardId,
+        workConfig
       );
     } else {
-      console.log("❌ User cancelled license plate confirmation");
       showToast("Đã hủy xử lý xe ra", "info", 3000);
 
-      // Restore camera feeds
       if (cameraComponentRef.current) {
         cameraComponentRef.current.restoreCaptureFeeds();
       }
@@ -1415,7 +1281,6 @@ const MainUI = () => {
 
   // Close image capture modal
   const handleCloseImageModal = () => {
-    console.log("🔒 Closing image capture modal");
     setShowImageCaptureModal(false);
     setCapturedImages({
       plateImage: null,
@@ -1425,7 +1290,6 @@ const MainUI = () => {
     });
     setScannedCardId("");
 
-    // Cleanup object URLs to prevent memory leaks
     cleanupObjectUrls();
   };
 
@@ -1528,7 +1392,11 @@ const MainUI = () => {
       {/* Hidden Logic Components */}
       <div style={{ display: "none" }}>
         <QuanLyCamera ref={cameraManagerRef} />
-        <QuanLyXe ref={vehicleManagerRef} />
+        <QuanLyXe
+          ref={vehicleManagerRef}
+          loaiXe={workConfig?.loai_xe || currentVehicleType === "oto" ? 1 : 0}
+          workConfig={workConfig}
+        />
         <DauDocThe ref={cardReaderRef} />
       </div>
 
