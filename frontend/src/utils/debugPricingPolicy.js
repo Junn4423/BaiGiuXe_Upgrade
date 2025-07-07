@@ -1,7 +1,7 @@
 // Debug script để kiểm tra hàm layChinhSachMacDinhChoLoaiPT
 // Chạy trong browser console để debug
 
-console.log("🧪 Testing layChinhSachMacDinhChoLoaiPT function...");
+console.log(" Testing layChinhSachMacDinhChoLoaiPT function...");
 
 // Test cases
 const testCases = [
