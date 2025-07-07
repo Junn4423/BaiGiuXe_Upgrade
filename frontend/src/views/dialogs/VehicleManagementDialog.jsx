@@ -258,7 +258,7 @@ const VehicleManagementDialog = ({ onClose }) => {
                     onClick={loadData}
                     disabled={isLoading || isSubmitting}
                   >
-                    🔄 Làm mới
+                    ↻ Làm mới
                   </button>
                 </div>
               </div>

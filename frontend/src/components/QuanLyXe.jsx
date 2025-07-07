@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useVehicleManager } from "../hooks/useVehicleManager";
+import { useVehicleManager } from "../utils/useVehicleManager";
 import LicensePlateErrorDialog from "./LicensePlateErrorDialog";
 import VehicleStatusNotification, {
   VehicleNotificationContainer,

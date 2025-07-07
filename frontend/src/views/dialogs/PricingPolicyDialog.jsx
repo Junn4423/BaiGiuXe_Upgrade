@@ -646,7 +646,7 @@ const PricingPolicyDialog = ({ onClose }) => {
                     onClick={clearForm} 
                     disabled={isLoading}
                   >
-                    Làm mới
+                    ↻ Làm mới
                   </button>
                 </div>
               </div>

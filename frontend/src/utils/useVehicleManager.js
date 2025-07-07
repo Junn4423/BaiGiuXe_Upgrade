@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import VehicleManager from '../components/VehicleManager';
+import VehicleManager from './VehicleManager';
 
 export const useVehicleManager = () => {
   const vehicleManagerRef = useRef(null);

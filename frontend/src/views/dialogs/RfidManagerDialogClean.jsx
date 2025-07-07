@@ -566,7 +566,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
 
           <div className="dialog-footer">
             <button className="refresh-button" onClick={loadCards}>
-              Làm mới
+              ↻ Làm mới
             </button>
             <button className="cancel-button" onClick={onClose}>
               Đóng

@@ -302,7 +302,7 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
                     onClick={handleRefreshStatus}
                     disabled={loading}
                   >
-                    Làm mới
+                    ↻ Làm mới
                   </button>
                   <button 
                     className="btn btn-secondary" 

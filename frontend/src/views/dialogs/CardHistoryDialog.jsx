@@ -134,7 +134,7 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
             </div>
 
             <button className="refresh-button" onClick={loadHistory} disabled={loading}>
-              🔄 Làm mới
+              ↻ Làm mới
             </button>
           </div>
 
