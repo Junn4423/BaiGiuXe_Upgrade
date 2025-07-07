@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react"
 import "../../assets/styles/CameraConfigDialog.css"
-import "../../assets/styles/dialog-base.css"
-import "../../assets/styles/enhanced-dialogs.css"
 import { 
   layDanhSachCamera, 
   xoaCamera, 
@@ -284,9 +282,9 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
 
   return (
     <div className="dialog-overlay">
-      <div className="dialog-container extra-large camera-config-dialog">
+      <div className="camera-config-dialog">
         <div className="dialog-header">
-          <h2>Cấu Hình Camera</h2>
+          <h3>Cấu Hình Camera</h3>
           <button className="close-button" onClick={onClose}>
             ×
           </button>
@@ -296,7 +294,24 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
           {/* Status Panel */}
           {showStatusPanel && (
             <div className="status-panel">
-              <h3>Trạng Thái Camera</h3>
+              <div className="panel-header">
+                <h4>Trạng Thái Camera</h4>
+                <div className="status-controls">
+                  <button 
+                    className="btn btn-refresh" 
+                    onClick={handleRefreshStatus}
+                    disabled={loading}
+                  >
+                    Làm mới
+                  </button>
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={() => setShowStatusPanel(false)}
+                  >
+                    ▲ Ẩn
+                  </button>
+                </div>
+              </div>
               <div className="status-summary">
                 <div className="status-item">
                   <span className="status-label">Tổng số:</span>
@@ -319,26 +334,13 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
                   <span className="status-value">{cameraStatus.cameraOffline.length}</span>
                 </div>
               </div>
-              <button 
-                className="refresh-button" 
-                onClick={handleRefreshStatus}
-                disabled={loading}
-              >
-                Làm mới
-              </button>
-              <button 
-                className="toggle-status-button" 
-                onClick={() => setShowStatusPanel(false)}
-              >
-                ▲ Ẩn
-              </button>
             </div>
           )}
           
           {!showStatusPanel && (
             <div className="status-toggle">
               <button 
-                className="toggle-status-button" 
+                className="btn btn-secondary" 
                 onClick={() => setShowStatusPanel(true)}
               >
                 ▼ Hiện trạng thái
@@ -346,8 +348,11 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
             </div>
           )}
 
-          {/* Enhanced Filter Section */}
+          {/* Filter Section */}
           <div className="filter-section">
+            <div className="panel-header">
+              <h4>Bộ Lọc</h4>
+            </div>
             <div className="filter-row">
               <div className="filter-group">
                 <label>Khu vực:</label>
@@ -365,104 +370,109 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
                 <label>Loại camera:</label>
                 <select value={filterType} onChange={handleFilterTypeChange}>
                   <option value="all">Tất cả</option>
-                  <option value="vao"> Camera vào</option>
-                  <option value="ra"> Camera ra</option>
-                  <option value="online"> Online </option>
-                  <option value="offline"> Offline </option>
+                  <option value="vao">Camera vào</option>
+                  <option value="ra">Camera ra</option>
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
                 </select>
               </div>
               
-              <button className="add-button" onClick={handleAddCamera}>
+              <button className="btn btn-primary add-button" onClick={handleAddCamera}>
                 + Thêm Camera
               </button>
             </div>
           </div>
 
           {/* Camera List */}
-          <div className="camera-list">
-            {loading ? (
-              <div className="loading">Đang tải...</div>
-            ) : (
-              <table className="camera-table">
-                <thead>
-                  <tr>
-                    <th>Trạng thái</th>
-                    <th>Mã Camera</th>
-                    <th>Tên Camera</th>
-                    <th>Loại</th>
-                    <th>Chức năng</th>
-                    <th>Khu vực</th>
-                    <th>Link RTSP</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCameras.map((camera) => (
-                    <tr key={camera.maCamera}>
-                      <td className="status-cell">
-                        <span className="status-icon" title={getCameraStatusText(camera)}>
-                          {getCameraStatusIcon(camera)}
-                        </span>
-                        <small>{getCameraStatusText(camera)}</small>
-                      </td>
-                      <td>{camera.maCamera}</td>
-                      <td>{camera.tenCamera}</td>
-                      <td>{getCameraTypeText(camera.loaiCamera)}</td>
-                      <td>{getCameraFunctionText(camera.chucNangCamera)}</td>
-                      <td>{camera.maKhuVuc}</td>
-                      <td className="rtsp-link" title={camera.linkRTSP}>
-                        {camera.linkRTSP?.length > 20 
-                          ? camera.linkRTSP.substring(0, 20) + "..." 
-                          : camera.linkRTSP
-                        }
-                      </td>
-                      <td className="actions-cell">
-                        <button 
-                          className="test-button" 
-                          onClick={() => testCameraRTSP(camera)}
-                          disabled={testingCamera === camera.maCamera}
-                          title="Test kết nối RTSP"
-                        >
-                          {testingCamera === camera.maCamera ? "⏳" : "🔍"}
-                        </button>
-                        <button 
-                          className="edit-button" 
-                          onClick={() => handleEditCamera(camera)}
-                          title="Chỉnh sửa camera"
-                        >
-                          ✏️
-                        </button>
-                        <button 
-                          className="delete-button" 
-                          onClick={() => handleDeleteCamera(camera)}
-                          title="Xóa camera"
-                        >
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredCameras.length === 0 && (
+          <div className="camera-list-panel">
+            <div className="panel-header">
+              <h4>Danh Sách Camera</h4>
+            </div>
+            <div className="camera-table-container">
+              {loading ? (
+                <div className="loading">Đang tải...</div>
+              ) : (
+                <table className="camera-table">
+                  <thead>
                     <tr>
-                      <td colSpan="8" className="no-data">
-                        {filterType === "all" 
-                          ? "Không có camera nào" 
-                          : `Không có camera ${filterType === "vao" ? "vào" : filterType === "ra" ? "ra" : filterType}`
-                        }
-                      </td>
+                      <th>Trạng thái</th>
+                      <th>Mã Camera</th>
+                      <th>Tên Camera</th>
+                      <th>Loại</th>
+                      <th>Chức năng</th>
+                      <th>Khu vực</th>
+                      <th>Link RTSP</th>
+                      <th>Thao tác</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
+                  </thead>
+                  <tbody>
+                    {filteredCameras.map((camera) => (
+                      <tr key={camera.maCamera}>
+                        <td className="status-cell">
+                          <span className="status-icon" title={getCameraStatusText(camera)}>
+                            {getCameraStatusIcon(camera)}
+                          </span>
+                          <small>{getCameraStatusText(camera)}</small>
+                        </td>
+                        <td>{camera.maCamera}</td>
+                        <td>{camera.tenCamera}</td>
+                        <td>{getCameraTypeText(camera.loaiCamera)}</td>
+                        <td>{getCameraFunctionText(camera.chucNangCamera)}</td>
+                        <td>{camera.maKhuVuc}</td>
+                        <td className="rtsp-link" title={camera.linkRTSP}>
+                          {camera.linkRTSP?.length > 20 
+                            ? camera.linkRTSP.substring(0, 20) + "..." 
+                            : camera.linkRTSP
+                          }
+                        </td>
+                        <td className="actions-cell">
+                          <button 
+                            className="btn btn-primary test-button" 
+                            onClick={() => testCameraRTSP(camera)}
+                            disabled={testingCamera === camera.maCamera}
+                            title="Test kết nối RTSP"
+                          >
+                            {testingCamera === camera.maCamera ? "⏳" : "🔍"}
+                          </button>
+                          <button 
+                            className="btn btn-secondary edit-button" 
+                            onClick={() => handleEditCamera(camera)}
+                            title="Chỉnh sửa camera"
+                          >
+                            ✏️
+                          </button>
+                          <button 
+                            className="btn btn-danger delete-button" 
+                            onClick={() => handleDeleteCamera(camera)}
+                            title="Xóa camera"
+                          >
+                            🗑️
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredCameras.length === 0 && (
+                      <tr>
+                        <td colSpan="8" className="no-data">
+                          {filterType === "all" 
+                            ? "Không có camera nào" 
+                            : `Không có camera ${filterType === "vao" ? "vào" : filterType === "ra" ? "ra" : filterType}`
+                          }
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="dialog-footer">
-          <button className="save-button" onClick={handleSave}>
+          <button className="btn btn-success save-button" onClick={handleSave}>
             Lưu
           </button>
-          <button className="cancel-button" onClick={onClose}>
+          <button className="btn btn-cancel cancel-button" onClick={onClose}>
             Hủy
           </button>
         </div>
