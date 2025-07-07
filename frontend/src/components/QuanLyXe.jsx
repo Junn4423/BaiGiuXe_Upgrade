@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useVehicleManager } from "../utils/useVehicleManager";
+import { getCurrentDateTime } from "../utils/timeUtils";
 import LicensePlateErrorDialog from "./LicensePlateErrorDialog";
 import VehicleStatusNotification, {
   VehicleNotificationContainer,
@@ -50,7 +51,7 @@ const QuanLyXe = () => {
       }
     }
 
-    const entryTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const entryTime = getCurrentDateTime();
     const session = {
       uidThe: cardId,
       bienSo: licensePlate || "",
@@ -228,7 +229,7 @@ const QuanLyXe = () => {
         anhMatVao: session.anhMatVao || "",
         trangThai: "DA_RA",
         congRa: exitGate,
-        gioRa: currentTime.toISOString().slice(0, 19).replace("T", " "),
+        gioRa: getCurrentDateTime(),
         anhRa: exitImagePath,
         anhMatRa: exitFaceImagePath || "",
         camera_id: cameraId,

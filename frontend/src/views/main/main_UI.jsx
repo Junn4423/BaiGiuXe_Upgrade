@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getCurrentDateTime } from "../../utils/timeUtils";
 import "../../assets/styles/main_UI.css";
 import CameraComponent from "../../components/CameraComponent";
 import VehicleInfoComponent from "../../components/VehicleInfoComponent";
@@ -820,16 +821,12 @@ const MainUI = () => {
               }
 
               // Prepare session data
-              const currentTime = new Date();
               const sessionData = {
                 uidThe: cardId,
                 bienSo: recognizedLicensePlate || "",
                 chinhSach: pricingPolicy,
                 congVao: entryGate,
-                gioVao: currentTime
-                  .toISOString()
-                  .slice(0, 19)
-                  .replace("T", " "),
+                gioVao: getCurrentDateTime(), // Sử dụng utility function để lấy thời gian hệ thống
                 anhVao: plateImage?.url || plateImage || "",
                 anhMatVao: faceImage?.url || faceImage || "",
                 trangThai: "TRONG_BAI",
@@ -1146,7 +1143,7 @@ const MainUI = () => {
       const exitSessionData = {
         maPhien: activeSession.maPhien,
         congRa: exitGate,
-        gioRa: new Date().toISOString(),
+        gioRa: getCurrentDateTime(), // Sử dụng utility function để lấy thời gian hệ thống
         anhRa: plateImage?.url || plateImage || "",
         anhMatRa: faceImage?.url || faceImage || "",
         camera_id: exitCameraId,

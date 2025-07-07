@@ -1861,3 +1861,28 @@ export async function layPhienGuiXeCoViTri() {
 
   return result;
 }
+
+/**
+ * Tạo nhật ký quét thẻ với thời gian từ frontend
+ * @param {Object} scanLogData - Dữ liệu nhật ký quét thẻ
+ * @param {string} scanLogData.sessionId - Mã phiên gửi xe
+ * @param {string} scanLogData.cameraId - Mã camera
+ * @param {string} scanLogData.scanTime - Thời gian quét (từ client)
+ * @param {string} scanLogData.imagePath - Đường dẫn ảnh
+ * @param {number} scanLogData.plateMatch - Khớp biển số (0/1)
+ * @param {string} scanLogData.direction - Hướng quét ('entry'/'exit')
+ * @returns {Promise<Object>} Kết quả tạo nhật ký
+ */
+export async function themNhatKyQuetTheVoiThoiGian(scanLogData) {
+  const payload = {
+    table: "pm_nc0010",
+    func: "addWithClientTime",
+    sessionId: scanLogData.sessionId,
+    cameraId: scanLogData.cameraId,
+    clientTime: scanLogData.scanTime,
+    imagePath: scanLogData.imagePath,
+    plateMatch: scanLogData.plateMatch || 0,
+    direction: scanLogData.direction || 'entry'
+  };
+  return callApiWithAuth(payload);
+}

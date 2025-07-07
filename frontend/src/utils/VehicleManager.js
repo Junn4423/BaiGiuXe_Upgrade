@@ -6,6 +6,7 @@ import {
   tinhPhiGuiXe,
   loadPhienGuiXeTheoMaThe_XeRa,
 } from "../api/api";
+import { getCurrentDateTime } from "./timeUtils";
 
 class VehicleManager {
   constructor() {
@@ -57,7 +58,7 @@ class VehicleManager {
         }
       }
 
-      const entryTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+      const entryTime = getCurrentDateTime();
 
       const session = {
         uidThe: cardId,
@@ -331,7 +332,7 @@ class VehicleManager {
         anhMatVao: session.anhMatVao || "",
         trangThai: "DA_RA",
         congRa: exitGate,
-        gioRa: currentTime.toISOString().slice(0, 19).replace("T", " "),
+        gioRa: getCurrentDateTime(),
         anhRa: exitImagePath,
         anhMatRa: exitFaceImagePath || "",
         camera_id: cameraId,
