@@ -128,6 +128,15 @@ switch ($vtable) {
 
 }
 
+// Endpoint đặc biệt để đồng bộ trạng thái chỗ đỗ
+if ($vtable == 'sync_parking_status' && $vfun == 'sync') {
+    include("pm_nc0005.php");
+    $spotManager = new pm_nc0005();
+    $result = $spotManager->SyncParkingSpotStatus();
+    echo json_encode($result);
+    exit();
+}
+
 include("kebao.php");
 include("ngocchung.php");
 

@@ -23,11 +23,18 @@ class pm_nc0005 extends lv_controler{
 		
 		
 	// }
-    // Lấy tất cả chỗ đỗ (có tên khu vực)
+    // Lấy tất cả chỗ đỗ (có tên khu vực) với trạng thái thực tế
     function LoadAll() {
-        $sql = "SELECT s.*, z.lv002 as zone_name
+        // Sử dụng LEFT JOIN với pm_nc0009 để kiểm tra xe đang gửi thực tế
+        // Trạng thái = 1 nếu có xe đang gửi (lv014 = 'DANG_GUI'), ngược lại = 0
+        $sql = "SELECT s.lv001, s.lv002, z.lv002 as zone_name,
+                       CASE 
+                           WHEN p.lv004 IS NOT NULL THEN '1'
+                           ELSE '0'
+                       END as lv003
                 FROM pm_nc0005 s
-                JOIN pm_nc0004 z ON s.lv002 = z.lv001";
+                JOIN pm_nc0004 z ON s.lv002 = z.lv001
+                LEFT JOIN pm_nc0009 p ON s.lv001 = p.lv004 AND p.lv014 = 'DANG_GUI'";
         return db_query($sql);
     }
 
@@ -91,6 +98,85 @@ class pm_nc0005 extends lv_controler{
                 JOIN pm_nc0004 z ON s.lv002 = z.lv001
                 WHERE s.lv003 = 'TRONG'";
         return db_query($sql);
+    }
+
+    // Đồng bộ trạng thái chỗ đỗ trong database dựa trên thực tế
+    function SyncParkingSpotStatus() {
+        // Cập nhật tất cả chỗ đỗ thành TRONG trước
+        $sqlResetAll = "UPDATE pm_nc0005 SET lv003 = '0'";
+        db_query($sqlResetAll);
+        
+        // Cập nhật những chỗ đỗ có xe đang gửi thành DA_DAT
+        $sqlUpdateOccupied = "UPDATE pm_nc0005 s 
+                              SET s.lv003 = '1'
+                              WHERE EXISTS (
+                                  SELECT 1 FROM pm_nc0009 p 
+                                  WHERE p.lv004 = s.lv001 
+                                  AND p.lv014 = 'DANG_GUI'
+                              )";
+        $result = db_query($sqlUpdateOccupied);
+        
+        if ($result) {
+            return [
+                'success' => true,
+                'message' => 'Đã đồng bộ trạng thái chỗ đỗ thành công'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Lỗi khi đồng bộ trạng thái chỗ đỗ'
+            ];
+        }
+    }
+
+    // Hàm tự động đồng bộ trạng thái khi có thay đổi
+    function AutoSyncStatus() {
+        return $this->SyncParkingSpotStatus();
+    }
+
+    // Hàm đồng bộ dữ liệu cho API (gọi bằng table=pm_nc0005&func=sync_data)
+    function sync_data() {
+        try {
+            // Cập nhật tất cả chỗ đỗ thành TRONG (0) trước
+            $sqlResetAll = "UPDATE pm_nc0005 SET lv003 = '0'";
+            db_query($sqlResetAll);
+            
+            // Cập nhật những chỗ đỗ có xe đang gửi thành DA_DAT (1)
+            $sqlUpdateOccupied = "UPDATE pm_nc0005 s 
+                                  SET s.lv003 = '1'
+                                  WHERE EXISTS (
+                                      SELECT 1 FROM pm_nc0009 p 
+                                      WHERE p.lv004 = s.lv001 
+                                      AND p.lv014 = 'DANG_GUI'
+                                  )";
+            $result = db_query($sqlUpdateOccupied);
+            
+            if ($result) {
+                // Đếm số chỗ đỗ đã được cập nhật
+                $countOccupied = db_fetch_array(db_query("SELECT COUNT(*) as total FROM pm_nc0005 WHERE lv003 = '1'"));
+                $countAvailable = db_fetch_array(db_query("SELECT COUNT(*) as total FROM pm_nc0005 WHERE lv003 = '0'"));
+                
+                return [
+                    'success' => true,
+                    'message' => 'Đồng bộ hóa trạng thái chỗ đỗ thành công!',
+                    'data' => [
+                        'occupied_spots' => $countOccupied['total'],
+                        'available_spots' => $countAvailable['total'],
+                        'sync_time' => date('Y-m-d H:i:s')
+                    ]
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Lỗi khi đồng bộ hóa trạng thái chỗ đỗ'
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Exception: ' . $e->getMessage()
+            ];
+        }
     }
 }
 ?>

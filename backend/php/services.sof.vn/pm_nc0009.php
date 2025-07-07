@@ -148,6 +148,12 @@ class pm_nc0009 extends lv_controler{
         if ($result) {
             // Lấy AUTO_INCREMENT id vừa insert
             $this->lv001 = sof_insert_id();
+            
+            // Đồng bộ trạng thái chỗ đỗ
+            require_once 'pm_nc0005.php';
+            $spotManager = new pm_nc0005();
+            $spotManager->AutoSyncStatus();
+            
             return [
                 'success' => true,
                 'message' => 'Thêm phiên gửi xe thành công.'
@@ -188,7 +194,16 @@ class pm_nc0009 extends lv_controler{
                     lv014='DA_RA',
                     lv016='{$this->lv016}' || 'chưa có'
                 WHERE lv001='{$this->lv001}'";
-        return db_query($sql) ? true : false;
+        
+        $result = db_query($sql);
+        if ($result) {
+            // Đồng bộ trạng thái chỗ đỗ khi xe ra
+            require_once 'pm_nc0005.php';
+            $spotManager = new pm_nc0005();
+            $spotManager->AutoSyncStatus();
+        }
+        
+        return $result ? true : false;
     }
 	function KB_UpdateTrangThai_DangGui(){
 		if (!$this->lv001) {
@@ -210,7 +225,15 @@ class pm_nc0009 extends lv_controler{
 					lv016=NULL
 				WHERE lv001='{$this->lv001}'";
 
-		return db_query($sql) ? true : false;
+		$result = db_query($sql);
+		if ($result) {
+			// Đồng bộ trạng thái chỗ đỗ khi xe vào lại
+			require_once 'pm_nc0005.php';
+			$spotManager = new pm_nc0005();
+			$spotManager->AutoSyncStatus();
+		}
+		
+		return $result ? true : false;
 	}
     function LoadAll() {
         $sql = "Select * from pm_nc0009";

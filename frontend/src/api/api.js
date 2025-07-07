@@ -736,6 +736,48 @@ export async function xoaChoDo(maChoDo) {
   return callApiWithAuth(payload);
 }
 
+/**
+ * Lấy danh sách chỗ đỗ xe theo khu vực
+ * @param {string} maKhuVuc - Mã khu vực
+ * @returns {Promise<Array>} Danh sách chỗ đỗ xe trong khu vực
+ */
+export async function layChoDauXeTheoKhu(maKhuVuc) {
+  const payload = {
+    table: "pm_nc0005",
+    func: "loadChoDauXeTheoKhu",
+    maKhuVuc: maKhuVuc,
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Đồng bộ hóa trạng thái chỗ đỗ xe
+ * @returns {Promise<Object>} Kết quả đồng bộ
+ */
+export async function dongBoTrangThaiChoDo() {
+  const payload = {
+    table: "pm_nc0005",
+    func: "sync_data",
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Thay đổi trạng thái chỗ đỗ
+ * @param {string} maChoDo - Mã chỗ đỗ
+ * @param {string} trangThai - Trạng thái mới (0/1)
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatTrangThaiChoDo(maChoDo, trangThai) {
+  const payload = {
+    table: "pm_nc0005",
+    func: "chinhSuaTrangThai",
+    maChoDo: maChoDo,
+    trangThai: trangThai,
+  };
+  return callApiWithAuth(payload);
+}
+
 // -------------------- Vehicle Management Functions --------------------
 /**
  * Lấy danh sách phương tiện
