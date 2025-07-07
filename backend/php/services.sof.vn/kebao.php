@@ -328,6 +328,11 @@ switch ($vtable) {
 				$result = $pm_nc0005->KB_ChinhSuaTrangThai($pm_nc0005->lv001,$pm_nc0005->lv003);
 				$vOutput = $result ? ['success'=>true,'message'=>'Cập nhật thành công'] : ['success'=>false,'message'=>'Lỗi khi cập nhật'];
 				break;
+				
+			case "sync_data":
+				$result = $pm_nc0005->sync_data();
+				$vOutput = $result;
+				break;
         }
         break;    
          case "pm_nc0009":

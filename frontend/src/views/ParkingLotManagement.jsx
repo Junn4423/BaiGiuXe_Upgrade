@@ -7,6 +7,9 @@ import {
   layPhienGuiXeCoViTri,
   layDanhSachKhuVuc, 
   layDanhSachChoDo,
+  layChoDauXeTheoKhu,
+  dongBoTrangThaiChoDo,
+  capNhatTrangThaiChoDo,
   themChoDo,
   capNhatChoDo,
   xoaChoDo
@@ -44,21 +47,25 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
     try {
       setLoading(true)
       
-      // Load areas
+      // Load areas first
       const areasData = await layDanhSachKhuVuc()
+      console.log("📍 Areas loaded:", areasData)
       setAreas(areasData || [])
       
-      // Load parking sessions with position info
-      const sessionsData = await layPhienGuiXeCoViTri()
+      // Load all parking spots from pm_nc0005
+      const spotsData = await layDanhSachChoDo()
+      console.log("🅿️ Parking spots loaded:", spotsData)
+      
+      // Load active parking sessions from pm_nc0009
+      const sessionsData = await layALLPhienGuiXe()
+      console.log("📋 Sessions loaded:", sessionsData)
       setSessions(sessionsData || [])
       
-      // Load parking spots
-      const spotsData = await layDanhSachChoDo()
+      // Transform spots data to match UI format
+      const transformedSpots = transformParkingSpotsData(areasData, spotsData, sessionsData)
+      setParkingSpots(transformedSpots)
       
-      // Generate parking spots based on areas and sessions
-      const generatedSpots = generateParkingSpotsFromData(areasData, spotsData, sessionsData)
-      setParkingSpots(generatedSpots)
-      
+      // Set default selected area
       if (areasData && areasData.length > 0) {
         setSelectedArea(areasData[0].maKhuVuc)
       }
@@ -68,6 +75,52 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const transformParkingSpotsData = (areas, spots, sessions) => {
+    const transformedSpots = []
+    
+    // Create area name mapping
+    const areaMap = {}
+    areas.forEach(area => {
+      areaMap[area.maKhuVuc] = area.tenKhuVuc
+    })
+    
+    // Transform spots from pm_nc0005 format
+    spots.forEach(spot => {
+      const spotData = {
+        id: spot.maChoDo,
+        position: spot.maChoDo,
+        area: spot.maKhuVuc,
+        areaName: spot.tenKhuVuc || areaMap[spot.maKhuVuc] || spot.maKhuVuc,
+        status: spot.trangThai === "1" ? "occupied" : "available"
+      }
+      
+      // Find corresponding session for this spot
+      const activeSession = sessions.find(session => 
+        session.viTriGui === spot.maChoDo && 
+        session.trangThai === "DANG_GUI"
+      )
+      
+      if (activeSession) {
+        spotData.status = "occupied"
+        spotData.licensePlate = activeSession.bienSo
+        spotData.cardId = activeSession.uidThe
+        spotData.customerName = `Khách hàng ${activeSession.uidThe}`
+        spotData.entryTime = activeSession.gioVao
+        spotData.sessionId = activeSession.maPhien
+        
+        // Determine vehicle type from policy
+        if (activeSession.chinhSach) {
+          spotData.vehicleType = activeSession.chinhSach.toLowerCase().includes("oto") ? "oto" : "xe_may"
+        }
+      }
+      
+      transformedSpots.push(spotData)
+    })
+    
+    console.log("🔄 Transformed spots:", transformedSpots)
+    return transformedSpots
   }
 
   const generateParkingSpotsFromData = (areas, spots, sessions) => {
@@ -166,32 +219,28 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
   const handleReleaseSpot = async () => {
     if (!selectedSpot) return
 
+    if (!window.confirm(`Bạn có chắc muốn giải phóng vị trí ${selectedSpot.position}?`)) {
+      return
+    }
+
     try {
       setLoading(true)
       
-      // Cập nhật trạng thái spot
-      const updatedSpots = parkingSpots.map(spot => {
-        if (spot.id === selectedSpot.id) {
-          return {
-            ...spot,
-            status: "available",
-            licensePlate: undefined,
-            cardId: undefined,
-            customerName: undefined,
-            entryTime: undefined,
-            exitTime: new Date().toISOString(),
-            sessionId: undefined,
-            vehicleType: undefined
-          }
-        }
-        return spot
-      })
-
-      setParkingSpots(updatedSpots)
-      setIsDialogOpen(false)
+      // Update spot status to available (0)
+      const result = await capNhatTrangThaiChoDo(selectedSpot.id, "0")
       
-      // Reload data để đảm bảo đồng bộ
-      await loadInitialData()
+      if (result && result.success) {
+        // Sync database status
+        await dongBoTrangThaiChoDo()
+        
+        // Reload all data to ensure sync
+        await loadInitialData()
+        
+        setIsDialogOpen(false)
+        alert("Đã giải phóng vị trí thành công!")
+      } else {
+        throw new Error(result?.message || "Không thể giải phóng vị trí")
+      }
       
     } catch (error) {
       console.error("❌ Error releasing spot:", error)
@@ -201,13 +250,34 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
     }
   }
 
+  const handleSyncStatus = async () => {
+    try {
+      setLoading(true)
+      
+      const result = await dongBoTrangThaiChoDo()
+      
+      if (result && result.success) {
+        console.log("🔄 Sync result:", result)
+        await loadInitialData()
+        alert(`Đồng bộ thành công!\n${result.message}`)
+      } else {
+        throw new Error(result?.message || "Không thể đồng bộ")
+      }
+      
+    } catch (error) {
+      console.error("❌ Error syncing status:", error)
+      alert("Lỗi đồng bộ: " + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const getAreaStats = () => {
     const areaSpots = parkingSpots.filter(spot => spot.area === selectedArea)
     const occupied = areaSpots.filter(spot => spot.status === "occupied").length
-    const reserved = areaSpots.filter(spot => spot.status === "reserved").length
     const available = areaSpots.filter(spot => spot.status === "available").length
 
-    return { occupied, reserved, available, total: areaSpots.length }
+    return { occupied, available, total: areaSpots.length }
   }
 
   const filteredSpots = parkingSpots
@@ -238,6 +308,14 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
             <p>Hệ thống quản lý vị trí đỗ xe ô tô</p>
           </div>
           <div className="header-actions">
+            <button 
+              className="sync-btn"
+              onClick={handleSyncStatus}
+              disabled={loading}
+              title="Đồng bộ trạng thái chỗ đỗ"
+            >
+              🔄 Đồng bộ
+            </button>
             <div className="current-time">
               {new Date().toLocaleString("vi-VN")}
             </div>
@@ -317,16 +395,6 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
             </div>
           </div>
 
-          <div className="stat-card reserved">
-            <div className="stat-content">
-              <div className="stat-info">
-                <span className="stat-label">Đã đặt</span>
-                <span className="stat-value">{stats.reserved}</span>
-              </div>
-              <div className="stat-indicator reserved"></div>
-            </div>
-          </div>
-
           <div className="stat-card available">
             <div className="stat-content">
               <div className="stat-info">
@@ -334,6 +402,16 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
                 <span className="stat-value">{stats.available}</span>
               </div>
               <div className="stat-indicator available"></div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <span className="stat-label">Tỉ lệ sử dụng</span>
+                <span className="stat-value">{stats.total > 0 ? Math.round((stats.occupied / stats.total) * 100) : 0}%</span>
+              </div>
+              <div className="stat-icon">📊</div>
             </div>
           </div>
         </div>
@@ -388,10 +466,6 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
                   <div className="legend-item">
                     <div className="legend-color available"></div>
                     <span>Trống ({stats.available})</span>
-                  </div>
-                  <div className="legend-item">
-                    <div className="legend-color reserved"></div>
-                    <span>Đã đặt ({stats.reserved})</span>
                   </div>
                   <div className="legend-item">
                     <div className="legend-color occupied"></div>
