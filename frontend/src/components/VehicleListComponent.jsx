@@ -18,42 +18,60 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
   const [sortBy, setSortBy] = useState("time_in")
   const [sortOrder, setSortOrder] = useState("desc")
   const [now, setNow] = useState(Date.now())
+  const [lastUpdated, setLastUpdated] = useState(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   
   // State for parking lot management
   const [showParkingManagement, setShowParkingManagement] = useState(false)
   const [selectedVehicleForParking, setSelectedVehicleForParking] = useState(null)
 
-  // Load vehicle data from API
-  useEffect(() => {
-    async function fetchVehicles() {
-      try {
-        const apiData = await layALLPhienGuiXe()
-        // Map API data to component format
-        const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => ({
-          id: item.maPhien || idx,
-          licensePlate: item.bienSo || "",
-          cardId: item.uidThe || "",
-          vehicleType: item.chinhSach && item.chinhSach.toLowerCase().includes("oto") ? "oto" : "xe_may",
-          timeIn: item.gioVao || null,
-          timeOut: item.gioRa || null,
-          duration: item.phutGui ? `${Math.floor(item.phutGui/60)}h ${item.phutGui%60}m` : "---",
-          fee: item.phi || 0,
-          status: item.trangThai === "DANG_GUI" ? "Trong bãi" : "Đã ra",
-          zone: item.viTriGui || "",
-        }))
-        setVehicles(mappedVehicles)
-        // Update statistics
-        const motorcycles = mappedVehicles.filter(v => v.vehicleType === "xe_may" && v.status === "Trong bãi").length
-        const cars = mappedVehicles.filter(v => v.vehicleType === "oto" && v.status === "Trong bãi").length
-        const totalVehicles = motorcycles + cars
-        const totalRevenue = mappedVehicles.reduce((sum, v) => sum + (v.fee || 0), 0)
-        setStatistics({ totalVehicles, motorcycles, cars, totalRevenue })
-      } catch (error) {
-        setVehicles([])
-        setStatistics({ totalVehicles: 0, motorcycles: 0, cars: 0, totalRevenue: 0 })
-      }
+  // Load vehicle data from API with realtime updates
+  const fetchVehicles = async () => {
+    try {
+      setIsRefreshing(true)
+      console.log('🔄 Refreshing vehicle list...')
+      const apiData = await layALLPhienGuiXe()
+      // Map API data to component format
+      const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => ({
+        id: item.maPhien || idx,
+        licensePlate: item.bienSo || "",
+        cardId: item.uidThe || "",
+        vehicleType: item.chinhSach && item.chinhSach.toLowerCase().includes("oto") ? "oto" : "xe_may",
+        timeIn: item.gioVao || null,
+        timeOut: item.gioRa || null,
+        duration: item.phutGui ? `${Math.floor(item.phutGui/60)}h ${item.phutGui%60}m` : "---",
+        fee: item.phi || 0,
+        status: item.trangThai === "DANG_GUI" ? "Trong bãi" : "Đã ra",
+        zone: item.viTriGui || "",
+      }))
+      setVehicles(mappedVehicles)
+      // Update statistics
+      const motorcycles = mappedVehicles.filter(v => v.vehicleType === "xe_may" && v.status === "Trong bãi").length
+      const cars = mappedVehicles.filter(v => v.vehicleType === "oto" && v.status === "Trong bãi").length
+      const totalVehicles = motorcycles + cars
+      const totalRevenue = mappedVehicles.reduce((sum, v) => sum + (v.fee || 0), 0)
+      setStatistics({ totalVehicles, motorcycles, cars, totalRevenue })
+      setLastUpdated(new Date())
+      console.log(`✅ Vehicle list updated: ${totalVehicles} vehicles in parking`)
+    } catch (error) {
+      console.error('❌ Error fetching vehicles:', error)
+      setVehicles([])
+      setStatistics({ totalVehicles: 0, motorcycles: 0, cars: 0, totalRevenue: 0 })
+    } finally {
+      setIsRefreshing(false)
     }
+  }
+
+  // Initial load and setup realtime updates
+  useEffect(() => {
     fetchVehicles()
+    
+    // Set up auto-refresh every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchVehicles()
+    }, 30000) // 30 seconds
+    
+    return () => clearInterval(refreshInterval)
   }, [])
 
   // Update 'now' every second for realtime duration
@@ -62,9 +80,15 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
     return () => clearInterval(timer)
   }, [])
 
-  // Update vehicle list
+  // Update vehicle list with external data
   const updateVehicleList = (newVehicles) => {
     setVehicles(Array.isArray(newVehicles) ? newVehicles : [])
+  }
+
+  // Force refresh from API
+  const refreshVehicleList = () => {
+    console.log('🔄 Manual refresh triggered')
+    fetchVehicles()
   }
 
   // Update statistics
@@ -170,6 +194,8 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
     () => ({
       updateVehicleList,
       updateStatistics,
+      refreshVehicleList,
+      fetchVehicles,
     }),
   )
 
@@ -228,9 +254,24 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
               className="parking-management-btn"
               title="Xem sơ đồ bãi đỗ xe"
             >
-              🅿️ Sơ đồ bãi đỗ
+              Sơ đồ bãi đỗ
+            </button>
+            
+            <button 
+              onClick={refreshVehicleList} 
+              className="refresh-btn"
+              disabled={isRefreshing}
+              title="Làm mới danh sách"
+            >
+              {isRefreshing ? "Đang tải..." : "Làm mới"}
             </button>
           </div>
+          
+          {lastUpdated && (
+            <div className="last-updated">
+              Cập nhật lần cuối: {lastUpdated.toLocaleTimeString('vi-VN')}
+            </div>
+          )}
         </div>
 
       {/* Vehicle Table */}
@@ -280,7 +321,7 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
                           }}
                           title="Xem vị trí đỗ xe"
                         >
-                          🅿️
+                          Xem
                         </button>
                       )}
                     </td>
