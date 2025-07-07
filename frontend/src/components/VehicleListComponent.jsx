@@ -15,7 +15,8 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
   })
   const [searchTerm, setSearchTerm] = useState("")
   const [filterType, setFilterType] = useState("all")
-  const [sortBy, setSortBy] = useState("time_in")
+  const [filterStatus, setFilterStatus] = useState("all") // Add status filter
+  const [sortBy, setSortBy] = useState("timeIn")
   const [sortOrder, setSortOrder] = useState("desc")
   const [now, setNow] = useState(Date.now())
   const [lastUpdated, setLastUpdated] = useState(null)
@@ -31,28 +32,74 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
       setIsRefreshing(true)
       console.log('🔄 Refreshing vehicle list...')
       const apiData = await layALLPhienGuiXe()
-      // Map API data to component format
-      const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => ({
-        id: item.maPhien || idx,
-        licensePlate: item.bienSo || "",
-        cardId: item.uidThe || "",
-        vehicleType: item.chinhSach && item.chinhSach.toLowerCase().includes("oto") ? "oto" : "xe_may",
-        timeIn: item.gioVao || null,
-        timeOut: item.gioRa || null,
-        duration: item.phutGui ? `${Math.floor(item.phutGui/60)}h ${item.phutGui%60}m` : "---",
-        fee: item.phi || 0,
-        status: item.trangThai === "DANG_GUI" ? "Trong bãi" : "Đã ra",
-        zone: item.viTriGui || "",
-      }))
+      
+      // Map API data to component format based on pm_nc0009 structure
+      const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => {
+        // Determine vehicle type from policy name
+        let vehicleType = "xe_may" // default
+        if (item.chinhSach) {
+          if (item.chinhSach.toLowerCase().includes("oto") || 
+              item.chinhSach.toLowerCase().includes("car") ||
+              item.chinhSach.toLowerCase().includes("auto")) {
+            vehicleType = "oto"
+          }
+        }
+
+        // Format duration from phutGui (minutes)
+        let duration = "---"
+        if (item.phutGui && item.phutGui > 0) {
+          const hours = Math.floor(item.phutGui / 60)
+          const minutes = item.phutGui % 60
+          duration = `${hours}h ${minutes}m`
+        }
+
+        // Map status from trangThai
+        let status = "Đã ra" // default
+        if (item.trangThai === "DANG_GUI") {
+          status = "Trong bãi"
+        } else if (item.trangThai === "DA_RA") {
+          status = "Đã ra"
+        }
+
+        // Format fee
+        let fee = 0
+        if (item.phi && typeof item.phi === 'number') {
+          fee = item.phi
+        }
+
+        return {
+          id: item.maPhien || `temp_${idx}`,
+          sessionId: item.maPhien,
+          licensePlate: item.bienSo || "---",
+          cardId: item.uidThe || "---",
+          vehicleType: vehicleType,
+          timeIn: item.gioVao || null,
+          timeOut: item.gioRa || null,
+          duration: duration,
+          fee: fee,
+          status: status,
+          zone: item.viTriGui || "---",
+          // Additional fields for reference
+          policy: item.chinhSach || "---",
+          gateIn: item.congVao || "---",
+          gateOut: item.congRa || "---",
+          // Note: Intentionally exclude image fields (anhVao, anhRa)
+        }
+      })
+
       setVehicles(mappedVehicles)
-      // Update statistics
+      
+      // Update statistics based on current status
       const motorcycles = mappedVehicles.filter(v => v.vehicleType === "xe_may" && v.status === "Trong bãi").length
       const cars = mappedVehicles.filter(v => v.vehicleType === "oto" && v.status === "Trong bãi").length
       const totalVehicles = motorcycles + cars
-      const totalRevenue = mappedVehicles.reduce((sum, v) => sum + (v.fee || 0), 0)
+      const totalRevenue = mappedVehicles
+        .filter(v => v.status === "Đã ra") // Only count completed sessions
+        .reduce((sum, v) => sum + (v.fee || 0), 0)
+      
       setStatistics({ totalVehicles, motorcycles, cars, totalRevenue })
       setLastUpdated(new Date())
-      console.log(`✅ Vehicle list updated: ${totalVehicles} vehicles in parking`)
+      console.log(`✅ Vehicle list updated: ${totalVehicles} vehicles in parking, ${mappedVehicles.length} total sessions`)
     } catch (error) {
       console.error('❌ Error fetching vehicles:', error)
       setVehicles([])
@@ -102,8 +149,9 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
       const matchesSearch =
         vehicle.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.cardId.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesFilter = filterType === "all" || vehicle.vehicleType === filterType
-      return matchesSearch && matchesFilter
+      const matchesTypeFilter = filterType === "all" || vehicle.vehicleType === filterType
+      const matchesStatusFilter = filterStatus === "all" || vehicle.status === filterStatus
+      return matchesSearch && matchesTypeFilter && matchesStatusFilter
     })
     .sort((a, b) => {
       let aValue = a[sortBy]
@@ -238,11 +286,18 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
               <option value="oto">Ô tô</option>
             </select>
 
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="filter-select">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="Trong bãi">Trong bãi</option>
+              <option value="Đã ra">Đã ra</option>
+            </select>
+
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
               <option value="timeIn">Thời gian vào</option>
               <option value="licensePlate">Biển số</option>
               <option value="fee">Phí gửi xe</option>
               <option value="duration">Thời gian đỗ</option>
+              <option value="status">Trạng thái</option>
             </select>
 
             <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} className="sort-order-btn">
