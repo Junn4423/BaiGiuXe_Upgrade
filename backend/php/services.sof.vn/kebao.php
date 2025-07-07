@@ -373,13 +373,17 @@ switch ($vtable) {
                     
                     // Gán dữ liệu phiên gửi xe
                     $pm_nc0009->lv002 = $uidThe;
-                    $pm_nc0009->lv003 = $input['bienSo'] ?? $_POST['lv003'] ?? null;
+                    $pm_nc0009->lv003 = $input['bienSo'] ?? $_POST['lv003'] ?? "";
                     $pm_nc0009->lv004 = $input['viTriGui'] ?? $_POST['lv004'] ?? null;
                     $pm_nc0009->lv005 = $input['chinhSach'] ?? $_POST['lv005'] ?? null;
                     $pm_nc0009->lv006 = $input['congVao'] ?? $_POST['lv006'] ?? null;
                     $pm_nc0009->lv008 = $input['gioVao'] ?? $_POST['lv008'] ?? null;
-                    $pm_nc0009->lv011 = str_replace("\\", "/", $input['anhVao'] ?? $_POST['lv011'] ?? null);
-                    $pm_nc0009->lv015 = str_replace("\\", "/", $input['anhMatVao'] ?? $_POST['lv015'] ?? null);
+                    // Xử lý ảnh vào - đảm bảo có giá trị mặc định
+                    $anhVao = $input['anhVao'] ?? $_POST['lv011'] ?? "";
+                    $pm_nc0009->lv011 = $anhVao ?: "placeholder_image.jpg";
+                    // Xử lý ảnh mặt vào - đảm bảo có giá trị mặc định  
+                    $anhMatVao = $input['anhMatVao'] ?? $_POST['lv015'] ?? "";
+                    $pm_nc0009->lv015 = $anhMatVao ?: "placeholder_face.jpg";
 
                     // Thêm mới phiên gửi xe
                     $result = $pm_nc0009->KB_Insert();
