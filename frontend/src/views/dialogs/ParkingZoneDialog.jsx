@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import "../../assets/styles/ParkingZoneDialog.css"
-import "../../assets/styles/enhanced-dialogs.css"
 import { layDanhSachKhuVuc, themKhuVuc, capNhatKhuVuc, xoaKhuVuc, layDanhSachCamera, layDanhSachCong } from "../../api/api"
 import AddCameraDialog from "./AddCameraDialog"
 import GateManagementDialog from "./GateManagementDialog" 
@@ -434,7 +433,7 @@ const ParkingZoneDialog = ({ onClose }) => {
 
   return (
     <div className="dialog-overlay">
-      <div className="dialog-container extra-large parking-zone-dialog">
+      <div className="parking-zone-dialog">
         {/* Header */}
         <div className="dialog-header">
           <h3>Quản Lý Khu Vực Đỗ Xe</h3>

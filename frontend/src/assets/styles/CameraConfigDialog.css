@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   animation: fadeIn 0.3s ease;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .dialog-header {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%);
   color: white;
   padding: 24px 28px;
   display: flex;
@@ -48,7 +48,7 @@
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
-.dialog-header h2 {
+.dialog-header h3 {
   margin: 0;
   font-size: 20px;
   font-weight: 600;

@@ -88,11 +88,11 @@ export async function themLoaiPhuongTien(loaiPhuongTien) {
     maLoaiPT: loaiPhuongTien.maLoaiPT,
     tenLoaiPT: loaiPhuongTien.tenLoaiPT,
     moTa: loaiPhuongTien.moTa,
-    loaiXe: loaiPhuongTien.loaiXe, // Không có default, phải được cung cấp
+    loaiXe: loaiPhuongTien.loaiXe, 
   };
   return callApiWithAuth(payload);
 }
-
+// Cập nhật loại phương tiện
 export async function capNhatLoaiPhuongTien(loaiPhuongTien) {
   const payload = {
     table: "pm_nc0001",
@@ -100,10 +100,12 @@ export async function capNhatLoaiPhuongTien(loaiPhuongTien) {
     maLoaiPT: loaiPhuongTien.maLoaiPT,
     tenLoaiPT: loaiPhuongTien.tenLoaiPT,
     moTa: loaiPhuongTien.moTa,
+    loaiXe: loaiPhuongTien.loaiXe, 
   };
   return callApiWithAuth(payload);
 }
 
+// Xóa loại phương tiện
 export async function xoaLoaiPhuongTien(maLoaiPT) {
   const payload = { table: "pm_nc0001", func: "delete", maLoaiPT };
   return callApiWithAuth(payload);
@@ -178,16 +180,16 @@ export async function themPhienGuiXe(session) {
     // Chỉ thêm viTriGui khi loaiXe = 1 VÀ có dữ liệu viTriGui
     if (session.viTriGui !== undefined && session.viTriGui !== null) {
       payload.viTriGui = session.viTriGui;
-      console.log("🚗 Loại xe = 1: Yêu cầu vị trí gửi:", session.viTriGui);
+      console.log("Loại xe = 1: Yêu cầu vị trí gửi:", session.viTriGui);
     } else {
-      console.log("🚗 Loại xe = 1: Không có vị trí gửi được cung cấp");
+      console.log("Loại xe = 1: Không có vị trí gửi được cung cấp");
     }
   } else if (session.loaiXe === "0" || session.loaiXe === 0) {
     // Loại xe = 0: không cần vị trí gửi, không thêm field viTriGui vào payload
-    console.log("🏍️ Loại xe = 0: Không cần vị trí gửi");
+    console.log("Loại xe = 0: Không cần vị trí gửi");
   } else {
     // Trường hợp không xác định loaiXe, không thêm viTriGui
-    console.log("⚠️ Loại xe không xác định, không thêm vị trí gửi");
+    console.log("Loại xe không xác định, không thêm vị trí gửi");
   }
 
   // Remove undefined/null values to avoid API issues
