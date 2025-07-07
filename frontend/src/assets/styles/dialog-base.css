@@ -51,7 +51,7 @@
   align-items: center;
   padding: 24px 32px;
   background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 50%, #3d5a9c 100%);
-  color: white;
+  color: white !important;
   position: relative;
   border: none;
 }

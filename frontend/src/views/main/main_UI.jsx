@@ -16,6 +16,8 @@ import PricingPolicyDialog from "../dialogs/PricingPolicyDialog";
 import RfidManagerDialog from "../dialogs/RfidManagerDialogClean";
 import ThemTheDialog from "../dialogs/ThemTheDialog";
 import WorkConfigDialog from "../dialogs/WorkConfigDialog";
+import VehicleManagementDialog from "../dialogs/VehicleManagementDialog";
+import VehicleTypeDialog from "../dialogs/VehicleTypeDialog";
 import ImageCaptureModal from "../../components/ImageCaptureModal";
 import LicensePlateConfirmDialog from "../../components/LicensePlateConfirmDialog";
 import { useToast } from "../../components/Toast";
@@ -56,6 +58,8 @@ const MainUI = () => {
   const [showLicensePlateError, setShowLicensePlateError] = useState(false);
   const [showRfidManager, setShowRfidManager] = useState(false);
   const [showLicensePlateConfirm, setShowLicensePlateConfirm] = useState(false);
+  const [showVehicleManagement, setShowVehicleManagement] = useState(false);
+  const [showVehicleType, setShowVehicleType] = useState(false);
 
   // Card scanning and image capture
   const [showImageCaptureModal, setShowImageCaptureModal] = useState(false);
@@ -388,6 +392,8 @@ const MainUI = () => {
   const openParkingZoneManagement = () => setShowParkingZone(true);
   const openWorkConfig = () => setShowWorkConfig(true);
   const openRfidManager = () => setShowRfidManager(true);
+  const openVehicleManagement = () => setShowVehicleManagement(true);
+  const openVehicleType = () => setShowVehicleType(true);
 
   const reloadMainUI = () => {
     window.location.reload();
@@ -1333,6 +1339,12 @@ const MainUI = () => {
           <button className="toolbar-btn" onClick={openParkingZoneManagement}>
             KHU VỰC
           </button>
+          <button className="toolbar-btn" onClick={openVehicleManagement}>
+            PHƯƠNG TIỆN
+          </button>
+          <button className="toolbar-btn" onClick={openVehicleType}>
+            LOẠI XE
+          </button>
           <button className="toolbar-btn" onClick={openRfidManager}>
             THẺ RFID
           </button>
@@ -1447,6 +1459,18 @@ const MainUI = () => {
             console.log("RFID cards updated");
             setShowRfidManager(false);
           }}
+        />
+      )}
+
+      {showVehicleManagement && (
+        <VehicleManagementDialog
+          onClose={() => setShowVehicleManagement(false)}
+        />
+      )}
+
+      {showVehicleType && (
+        <VehicleTypeDialog
+          onClose={() => setShowVehicleType(false)}
         />
       )}
 
