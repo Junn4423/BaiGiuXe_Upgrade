@@ -86,6 +86,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .filter-select,
@@ -98,6 +99,7 @@
   background: white;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 120px;
 }
 
 .filter-select:focus,
