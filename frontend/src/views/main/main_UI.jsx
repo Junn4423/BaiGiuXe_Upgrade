@@ -878,6 +878,11 @@ const MainUI = () => {
                   });
                 }
 
+                // Refresh vehicle list to show new entry
+                if (vehicleListComponentRef.current && vehicleListComponentRef.current.refreshVehicleList) {
+                  vehicleListComponentRef.current.refreshVehicleList();
+                }
+
                 let successMessage = `✅ Xe vào thành công! Thẻ: ${cardId}`;
                 if (loaiXe === "1" && parkingSpot) {
                   successMessage += ` | Vị trí: ${parkingSpot}`;
@@ -1180,6 +1185,11 @@ const MainUI = () => {
               phi_gui_xe: parkingFee,
               trang_thai: "Xe đã ra khỏi bãi",
             });
+          }
+
+          // Refresh vehicle list to show updated exit
+          if (vehicleListComponentRef.current && vehicleListComponentRef.current.refreshVehicleList) {
+            vehicleListComponentRef.current.refreshVehicleList();
           }
 
           // Update license plate display with fee
