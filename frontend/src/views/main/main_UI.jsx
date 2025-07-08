@@ -204,10 +204,11 @@ const MainUI = () => {
   // Setup connections between components
   const setupConnections = () => {
     const uiInterface = {
-      currentMode,
-      currentVehicleType,
-      currentZone,
-      workConfig,
+      // Dynamic getters for current state
+      get currentMode() { return currentMode; },
+      get currentVehicleType() { return currentVehicleType; },
+      get currentZone() { return currentZone; },
+      get workConfig() { return workConfig; },
 
       // Camera methods
       displayCapturedImage: (imagePath, panelNumber) => {
@@ -301,6 +302,12 @@ const MainUI = () => {
         console.error(`❌ Error: ${title} - ${message}`);
         showToast(`❌ ${title}: ${message}`, "error", 5000);
       },
+      
+      // Card handling
+      handleCardScanned: (cardId) => {
+        console.log(`↻ UI Interface handleCardScanned called with: ${cardId}`);
+        handleCardScanned(cardId);
+      },
     };
 
     // Set UI references in components
@@ -381,6 +388,10 @@ const MainUI = () => {
     if (cameraComponentRef.current) {
       cameraComponentRef.current.restoreCaptureFeeds();
     }
+
+    // Re-setup connections to ensure all components have updated UI interface
+    console.log(`🔄 Mode changed to ${mode}, re-setting up connections`);
+    setupConnections();
   };
 
   // Handle zone change
@@ -413,6 +424,54 @@ const MainUI = () => {
 
   // Cleanup resources
   const cleanup = () => {
+    try {
+      if (cameraManagerRef.current) {
+        cameraManagerRef.current.stopCamera();
+      }
+      if (cardReaderRef.current) {
+        cardReaderRef.current.stopCardReader();
+      }
+    } catch (error) {
+      console.error("Error during cleanup:", error);
+    }
+  };
+
+  // Debug function to check card session status
+  const debugCheckCardSession = async (cardId) => {
+    try {
+      console.log(`🔍 DEBUG: Checking session status for card ${cardId}`);
+      const { loadPhienGuiXeTheoMaThe, layDanhSachThe } = await import("../../api/api");
+      
+      // Check if card exists
+      const cardList = await layDanhSachThe();
+      const cardExists = cardList?.find(card => card.uidThe === cardId);
+      console.log(`🔍 DEBUG: Card exists:`, cardExists);
+      
+      // Check active sessions
+      const activeSessions = await loadPhienGuiXeTheoMaThe(cardId);
+      console.log(`🔍 DEBUG: Active sessions:`, activeSessions);
+      
+      return {
+        cardExists: !!cardExists,
+        activeSessions: activeSessions,
+        hasActiveSession: activeSessions && activeSessions.length > 0
+      };
+    } catch (error) {
+      console.error(`🔍 DEBUG: Error checking card session:`, error);
+      return { error: error.message };
+    }
+  };
+
+  // Make debug function available globally for console testing
+  useEffect(() => {
+    window.debugCheckCardSession = debugCheckCardSession;
+    return () => {
+      delete window.debugCheckCardSession;
+    };
+  }, []);
+
+  // Cleanup resources
+  const cleanupOld = () => {
     try {
       if (cameraManagerRef.current) {
         cameraManagerRef.current.stopCamera();
@@ -1010,10 +1069,64 @@ const MainUI = () => {
             try {
               // Find active parking session for this card
               const { loadPhienGuiXeTheoMaThe } = await import("../../api/api");
-              const activeSessions = await loadPhienGuiXeTheoMaThe(cardId);
+              console.log(`🔍 Searching for active session for card: ${cardId}`);
+              
+              let activeSessions;
+              try {
+                activeSessions = await loadPhienGuiXeTheoMaThe(cardId);
+                console.log(`🔍 Active sessions result:`, {
+                  type: typeof activeSessions,
+                  isArray: Array.isArray(activeSessions),
+                  length: activeSessions?.length,
+                  content: activeSessions
+                });
+              } catch (apiError) {
+                console.error(`❌ API Error loading sessions for card ${cardId}:`, apiError);
+                if (vehicleInfoComponentRef.current) {
+                  vehicleInfoComponentRef.current.updateCardReaderStatus(
+                    "LỖI TẢI DỮ LIỆU",
+                    "#ef4444"
+                  );
+                }
+                showToast(
+                  `❌ Lỗi tải dữ liệu phiên gửi xe: ${apiError.message}`,
+                  "error",
+                  5000
+                );
+                return;
+              }
 
               if (!activeSessions || activeSessions.length === 0) {
-                throw new Error("Không tìm thấy phiên gửi xe cho thẻ này");
+                // No active session found - this card is not currently parked
+                console.log(`❌ No active session found for card ${cardId}`);
+                console.log(`🔍 API Response:`, activeSessions);
+                console.log(`💡 Possible reasons:`);
+                console.log(`   1. Card never entered parking lot`);
+                console.log(`   2. Card already exited parking lot`);
+                console.log(`   3. Database inconsistency`);
+                console.log(`🔧 Debug: Run debugCheckCardSession("${cardId}") in console for details`);
+                
+                if (vehicleInfoComponentRef.current) {
+                  vehicleInfoComponentRef.current.updateCardReaderStatus(
+                    "THẺ CHƯA CÓ PHIÊN GỬI XE",
+                    "#ef4444"
+                  );
+                  vehicleInfoComponentRef.current.updateVehicleStatus(
+                    "KHÔNG TÌM THẤY XE TRONG BÃI",
+                    "#ef4444"
+                  );
+                  vehicleInfoComponentRef.current.updateVehicleInfo({
+                    ma_the: cardId,
+                    trang_thai: "Thẻ chưa có xe trong bãi",
+                    ghi_chu: "Kiểm tra: 1) Thẻ đã vào bãi? 2) Thẻ đã ra bãi rồi?"
+                  });
+                }
+                showToast(
+                  `❌ Thẻ ${cardId} không có xe trong bãi. Kiểm tra: đã vào bãi chưa hoặc đã ra rồi?`,
+                  "error",
+                  10000
+                );
+                return;
               }
 
               // Get the most recent active session
@@ -1234,7 +1347,7 @@ const MainUI = () => {
       if (updateResult && updateResult.success) {
         // Calculate parking fee
         try {
-          const feeResult = await tinhPhiGuiXe(activeSession.maPhien);
+          const feeResult = await tinhPhiGuiXe(activeSession.maPhien, cardId);
           let parkingFee = 0;
           let parkingDuration = 0;
 
@@ -1252,12 +1365,13 @@ const MainUI = () => {
               "XE ĐÃ RA KHỎI BÃI",
               "#10b981"
             );
-            
             // Format and update parking fee
             const formattedFee = parkingFee > 0 ? `${parkingFee.toLocaleString()} VNĐ` : "0 VNĐ";
+            console.log(`💰 Main flow: Updating parking fee to ${formattedFee} (raw: ${parkingFee})`);
             vehicleInfoComponentRef.current.updateParkingFee(formattedFee);
 
             // Update vehicle info with exit details
+            console.log(`📝 Main flow: Updating vehicle info with exit details`);
             vehicleInfoComponentRef.current.updateVehicleInfo({
               ma_the: cardId,
               ma_phien: activeSession.maPhien, // Add session ID for fee calculation
@@ -1499,7 +1613,10 @@ const MainUI = () => {
           loaiXe={workConfig?.loai_xe || currentVehicleType === "oto" ? 1 : 0}
           workConfig={workConfig}
         />
-        <DauDocThe ref={cardReaderRef} />
+        <DauDocThe 
+          ref={cardReaderRef} 
+          currentMode={currentMode}
+        />
       </div>
 
       {/* Dialogs */}

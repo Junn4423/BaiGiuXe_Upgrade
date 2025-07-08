@@ -248,10 +248,10 @@ export async function taoBangChoPhienLamViec() {
   return callApiWithAuth(payload);
 }
 
-export async function tinhPhiGuiXe(maPhien) {
-  const payload = { table: "pm_nc0008", func: "tinhPhiGuiXe", maPhien };
-  return callApiWithAuth(payload);
-}
+// export async function tinhPhiGuiXe(maPhien) {
+//   const payload = { table: "pm_nc0008", func: "tinhPhiGuiXe", maPhien };
+//   return callApiWithAuth(payload);
+// }
 
 export async function layChinhSachGiaTheoLoaiPT(maLoaiPT) {
   const payload = { table: "pm_nc0008", func: "layChinhSachTuPT", maLoaiPT };
@@ -1886,3 +1886,84 @@ export async function themNhatKyQuetTheVoiThoiGian(scanLogData) {
   };
   return callApiWithAuth(payload);
 }
+
+// Hàm mới để kiểm tra xem thẻ có được miễn phí không
+export const kiemTraMienPhiTheoThe = async (uidThe) => {
+    if (!uidThe) {
+        console.error("UID thẻ là bắt buộc");
+        return false; // Giả định không được miễn phí nếu không có UID
+    }
+    try {
+        // Gọi API để lấy thông tin thẻ theo UID
+        const response = await callApiWithAuth({
+            table: 'pm_nc0003',
+            func: 'timTheTuUID',
+            uidThe: uidThe
+        });
+        // API trả về một mảng, ta lấy phần tử đầu tiên
+        if (response.data && response.data.length > 0) {
+            const cardInfo = response.data[0];
+            // Nếu loaiThe không phải là "KHACH" thì miễn phí
+            return cardInfo.loaiThe !== 'KHACH';
+        }
+        return false; // Mặc định không miễn phí nếu không tìm thấy thẻ
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra miễn phí theo thẻ:', error);
+        // Trong trường hợp lỗi, an toàn nhất là giả định không được miễn phí
+        return false;
+    }
+};
+
+
+// Hàm tính phí gửi xe
+export const tinhPhiGuiXe = async (maPhien, uidThe = null) => {
+    try {
+        // B1: Nếu có uidThe, kiểm tra xem thẻ có được miễn phí không
+        if (uidThe) {
+            const isFree = await kiemTraMienPhiTheoThe(uidThe);
+            
+            // B2: Nếu được miễn phí, trả về phí là 0
+            if (isFree) {
+                console.log(`Thẻ ${uidThe} được miễn phí.`);
+                return {
+                    success: true,
+                    phi: 0,
+                    tongPhut: 0,
+                    message: "Thẻ thuộc đối tượng miễn phí."
+                };
+            }
+            console.log(`Thẻ ${uidThe} không được miễn phí, tiến hành tính phí cho phiên ${maPhien}.`);
+        } else {
+            console.log(`Không có uidThe, tiến hành tính phí trực tiếp cho phiên ${maPhien}.`);
+        }
+
+        // B3: Tiếp tục quy trình tính phí từ backend
+        const payload = { table: "pm_nc0008", func: "tinhPhiGuiXe", maPhien };
+        const response = await callApiWithAuth(payload);
+        
+        // Ensure response format matches what VehicleInfoComponent expects
+        if (response && response.data) {
+            return {
+                success: true,
+                phi: response.data.phi || response.data.fee || 0,
+                tongPhut: response.data.tongPhut || response.data.totalMinutes || 0,
+                message: response.data.message || "Tính phí thành công"
+            };
+        } else {
+            return {
+                success: false,
+                phi: 0,
+                tongPhut: 0,
+                message: "Không có dữ liệu phí từ server"
+            };
+        }
+    } catch (error) {
+        console.error('Lỗi khi tính phí gửi xe:', error);
+        return {
+            success: false,
+            phi: 0,
+            tongPhut: 0,
+            message: error.message || "Lỗi tính phí"
+        };
+    }
+};

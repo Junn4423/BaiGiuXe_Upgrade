@@ -159,64 +159,69 @@ switch ($vtable) {
                 $vOutput = $pm_nc0008->deletePolicy($policyId);
                 break;
             case "tinhPhiGuiXe":
-                $maPhien = $input['maPhien'] ?? $_POST['maPhien'] ?? null;
-                if (!$maPhien) {
-                    $vOutput = ['success'=>false, 'message'=>'Thiếu mã phiên'];
-                    break;
-                }
+				$maPhien = $input['maPhien'] ?? $_POST['maPhien'] ?? null;
+				if (!$maPhien) {
+					$vOutput = ['success'=>false, 'message'=>'Thiếu mã phiên'];
+					break;
+				}
 
-                // Lấy thông tin phiên gửi xe
-                $phienQuery = "SELECT p.lv001, p.lv005, p.lv010, p.lv008, p.lv009
-                             FROM pm_nc0009 p
-                             WHERE p.lv001 = '$maPhien'";
-                $phienResult = db_query($phienQuery);
-                $phien = db_fetch_array($phienResult);
+				// Lấy thông tin phiên gửi xe
+				$phienQuery = "SELECT p.lv001, p.lv005, p.lv010, p.lv008, p.lv009
+							 FROM pm_nc0009 p
+							 WHERE p.lv001 = '$maPhien'";
+				$phienResult = db_query($phienQuery);
+				$phien = db_fetch_array($phienResult);
 
-                if (!$phien) {
-                    $vOutput = ['success'=>false, 'message'=>'Không tìm thấy phiên gửi xe'];
-                    break;
-                }
+				if (!$phien) {
+					$vOutput = ['success'=>false, 'message'=>'Không tìm thấy phiên gửi xe'];
+					break;
+				}
 
-                // Lấy thông tin chính sách giá
-                $csQuery = "SELECT * FROM pm_nc0008 WHERE lv001 = '{$phien['lv005']}'";
-                $csResult = db_query($csQuery);
-                $chinhSach = db_fetch_array($csResult);
+				// Lấy thông tin chính sách giá
+				$csQuery = "SELECT * FROM pm_nc0008 WHERE lv001 = '{$phien['lv005']}'";
+				$csResult = db_query($csQuery);
+				$chinhSach = db_fetch_array($csResult);
 
-                if (!$chinhSach) {
-                    $vOutput = ['success'=>false, 'message'=>'Không tìm thấy chính sách giá'];
-                    break;
-                }
+				if (!$chinhSach) {
+					$vOutput = ['success'=>false, 'message'=>'Không tìm thấy c	hính sách giá'];
+					break;
+				}
 
-                // Tính phí
-                $tongPhut = $phien['lv010'];
-                $phi = (float)$chinhSach['lv004']; // Phí cơ bản (5000 VND)
-                $thoiGianCoBan = (int)$chinhSach['lv003']; // Thời gian cơ bản (ví dụ: 240 phút cho 4 tiếng)
-                $coTinhPhiQuaGio = (int)$chinhSach['lv005']; // Cờ tính phí quá giờ
-                $donGiaQuaGioBlock = (float)$chinhSach['lv006']; // Đơn giá cho mỗi block quá giờ (ví dụ: 5000 VND)
+				// Kiểm tra ưu đãi đặc biệt
+				$laUuDaiDacBiet = ((int)$chinhSach['lv008'] === 1) || (!empty($chinhSach['lv007']));
 
-                // Nếu có tính phí quá giờ và tổng thời gian vượt quá thời gian cơ bản
-                if ($coTinhPhiQuaGio == 1 && $tongPhut > $thoiGianCoBan) {
-                    $phutQuaGio = $tongPhut - $thoiGianCoBan;
-                    // Tính số block quá giờ, làm tròn lên. Mỗi block là 'thoiGianCoBan' phút.
-                    $soBlockQuaGio = ceil($phutQuaGio / $thoiGianCoBan); 
-                    $phi += $soBlockQuaGio * $donGiaQuaGioBlock;
-                }
+				if ($laUuDaiDacBiet) {
+					$phi = 0;
+				} else {
+					$tongPhut = (int)$phien['lv010'];
+					$phi = (float)$chinhSach['lv004']; // Phí cơ bản
+					$thoiGianCoBan = (int)$chinhSach['lv003']; // Thời gian quy định (phút)
+					$coTinhPhiQuaGio = (int)$chinhSach['lv005']; // Có tính phí quá giờ không
+					$donGiaQuaGioBlock = (float)$chinhSach['lv006']; // Phí mỗi block quá giờ
 
-                // Cập nhật phí vào phiên gửi xe
-                $updateQuery = "UPDATE pm_nc0009 SET lv013 = $phi WHERE lv001 = '$maPhien'";
-                $updateResult = db_query($updateQuery);
+					if ($coTinhPhiQuaGio === 1 && $tongPhut > $thoiGianCoBan) {
+						$phutQuaGio = $tongPhut - $thoiGianCoBan;
+						$soBlockQuaGio = ceil($phutQuaGio / $thoiGianCoBan); 
+						$phi += $soBlockQuaGio * $donGiaQuaGioBlock;
+					}
+				}
 
-                if ($updateResult) {
-                    $vOutput = [
-                        'success' => true,
-                        'message' => 'Tính phí thành công',
-                        'phi' => $phi,
-                        'tongPhut' => $tongPhut
-                    ];
-                } else {
-                    $vOutput = ['success'=>false, 'message'=>'Lỗi khi cập nhật phí'];
-                }
-                break;
+				// Cập nhật phí vào phiên gửi xe
+				$updateQuery = "UPDATE pm_nc0009 SET lv013 = $phi WHERE lv001 = '$maPhien'";
+				$updateResult = db_query($updateQuery);
+
+				if ($updateResult) {
+					$vOutput = [
+						'success' => true,
+						'message' => 'Tính phí thành công',
+						'phi' => $phi,
+						'tongPhut' => $phien['lv010']
+					];
+				} else {
+					$vOutput = ['success'=>false, 'message'=>'Lỗi khi cập nhật phí'];
+				}
+				break;
+
 			case "layChinhSachTuPT":
 				$maLoaiPT = $input['maLoaiPT'] ?? $_POST['lv002'] ?? null;
 				if ($maLoaiPT) {

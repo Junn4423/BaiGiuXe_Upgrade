@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
 
-const DauDocThe = React.forwardRef((props, ref) => {
+const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
   const [isRunning, setIsRunning] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
   const isRunningRef = useRef(false)
@@ -218,9 +218,22 @@ const DauDocThe = React.forwardRef((props, ref) => {
           ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Đang xử lý thẻ: ${cardId}...`, "#FF9800")
         }
 
-        // Determine current mode (vao/ra) from UI
-        const currentMode = ui?.currentMode || "vao"
+        // Validate UI reference
+        if (!ui) {
+          console.error(`❌ UI reference is null, cannot proceed with card processing`)
+          return
+        }
+
+        // Determine current mode (vao/ra) - prioritize UI reference as it's more reliable
+        const currentMode = ui.currentMode || propCurrentMode || "vao"
         console.log(`🎯 Processing card ${cardId} in mode: ${currentMode}`)
+        console.log(`🔍 Mode source: ui.currentMode=${ui.currentMode}, propCurrentMode=${propCurrentMode}`)
+        console.log(`🔍 Mode detection priority: ui.currentMode (${ui.currentMode}) -> propCurrentMode (${propCurrentMode}) -> default (vao)`)
+        
+        // Additional validation for mode consistency
+        if (ui.currentMode && propCurrentMode && ui.currentMode !== propCurrentMode) {
+          console.warn(`⚠️ Mode mismatch detected! UI mode: ${ui.currentMode}, Prop mode: ${propCurrentMode}`)
+        }
 
         // Check if card exists in database
         const cardExists = await checkCardExists(cardId)
@@ -269,6 +282,11 @@ const DauDocThe = React.forwardRef((props, ref) => {
           }
           
           // Validate required UI data for entry
+          if (!ui) {
+            console.error(`❌ UI reference is null, cannot proceed with entry`)
+            return
+          }
+          
           if (!ui.currentVehicleType) {
             console.warn(`⚠️ Missing vehicle type, using default`)
           }
@@ -278,9 +296,9 @@ const DauDocThe = React.forwardRef((props, ref) => {
           
           // Log work configuration for debugging
           console.log(`📋 Work Config for entry:`, {
-            vehicleType: ui.currentVehicleType,
-            zone: ui.workConfig?.zone,
-            zoneData: ui.workConfig?.zone_data
+            vehicleType: ui?.currentVehicleType || 'unknown',
+            zone: ui?.workConfig?.zone || 'unknown',
+            zoneData: ui?.workConfig?.zone_data || 'unknown'
           })
           
         } else if (currentMode === "ra") {
