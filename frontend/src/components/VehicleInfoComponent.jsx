@@ -35,7 +35,8 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
       setIsCalculatingFee(true)
       console.log(`💰 Đang tính phí cho mã phiên: ${maPhien}`)
       
-      const result = await tinhPhiGuiXe(maPhien)
+      // Pass card ID if available for free card checking
+      const result = await tinhPhiGuiXe(maPhien, vehicleInfo.ma_the)
       console.log(`💰 Kết quả tính phí:`, result)
       
       if (result && result.success) {
@@ -68,6 +69,7 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
   // Update vehicle info
   const updateVehicleInfo = (newInfo) => {
     console.log(`📝 VehicleInfoComponent.updateVehicleInfo called with:`, newInfo)
+    console.log(`📝 Current parking fee before vehicle info update:`, parkingFee)
     setVehicleInfo((prev) => ({
       ...prev,
       ma_the: newInfo.ma_the || prev.ma_the,
@@ -75,17 +77,29 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
       ma_phien: newInfo.ma_phien || newInfo.sessionId || prev.ma_phien,
     }))
 
-    // Auto calculate fee if session ID is provided and we're in exit mode
+    // Don't auto-calculate fee here - let the main flow handle it
+    // This prevents duplicate fee calculations that can overwrite correct results
     if ((newInfo.ma_phien || newInfo.sessionId) && currentMode === "ra") {
       const sessionId = newInfo.ma_phien || newInfo.sessionId
-      console.log(`🔄 Tự động tính phí cho xe ra, mã phiên: ${sessionId}`)
-      calculateParkingFee(sessionId)
+      console.log(`� Session ID received for exit mode: ${sessionId} (fee calculation handled by main flow)`)
     }
 
-    if (newInfo.phi) {
-      setParkingFee(newInfo.phi)
-    }
+    // Don't set fee from updateVehicleInfo - let main flow handle it explicitly
+    // This prevents overriding the correct fee set by updateParkingFee
+    // if (newInfo.phi || newInfo.phi_gui_xe) {
+    //   const fee = newInfo.phi || newInfo.phi_gui_xe;
+    //   console.log(`💰 Setting parking fee from vehicle info: ${fee}`);
+    //   
+    //   // Format the fee if it's a number (not already formatted)
+    //   if (typeof fee === 'number') {
+    //     const formattedFee = fee > 0 ? `${fee.toLocaleString()} VNĐ` : "0 VNĐ";
+    //     setParkingFee(formattedFee);
+    //   } else {
+    //     setParkingFee(fee);
+    //   }
+    // }
     console.log(`📝 Vehicle info updated - mã thẻ: ${newInfo.ma_the}`)
+    console.log(`📝 Parking fee after vehicle info update:`, parkingFee)
   }
 
   // Update vehicle info with session data for fee calculation
@@ -139,7 +153,9 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
   // Update parking fee
   const updateParkingFee = (fee) => {
     console.log(`💰 VehicleInfoComponent.updateParkingFee called with:`, fee)
+    console.log(`💰 Current parking fee before update:`, parkingFee)
     setParkingFee(fee)
+    console.log(`💰 Parking fee updated to:`, fee)
   }
 
   // Clear vehicle info

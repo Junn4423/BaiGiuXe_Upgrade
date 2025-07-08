@@ -251,7 +251,7 @@ const QuanLyXe = () => {
 
       if (success) {
         // Step 3: Calculate parking fee
-        const feeResult = await tinhPhiGuiXe(sessionId);
+        const feeResult = await tinhPhiGuiXe(sessionId, cardId);
 
         let calculatedFee = null;
         if (feeResult && feeResult.success) {

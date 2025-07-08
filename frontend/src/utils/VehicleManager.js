@@ -358,7 +358,7 @@ class VehicleManager {
 
         // Bước 3: Tính phí gửi xe
         console.log(`🔍 DEBUG: Gọi tinhPhiGuiXe cho mã phiên: ${sessionId}`);
-        const feeResult = await tinhPhiGuiXe(sessionId);
+        const feeResult = await tinhPhiGuiXe(sessionId, cardId);
         console.log(`🔍 DEBUG: Kết quả tinhPhiGuiXe:`, feeResult);
 
         let calculatedFee = null;
