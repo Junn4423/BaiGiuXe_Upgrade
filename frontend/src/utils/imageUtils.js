@@ -29,20 +29,44 @@ export const saveImageToAssets = async (blob, fileName, type) => {
     const objectUrl = URL.createObjectURL(blob)
     createdUrls.add(objectUrl)
     
-    // Convert blob to base64 for localStorage backup
-    const base64 = await blobToBase64(blob)
-    const storageKey = `captured_image_${fileName}`
-    localStorage.setItem(storageKey, base64)
+    // AUTO SAVE: Try to save automatically (PRIORITY: Electron first)
+    const savedPath = await autoSaveImage(blob, fileName, folderName)
     
-    // AUTO SAVE: Try to save automatically
-    await autoSaveImage(blob, fileName, folderName)
+    // Only try localStorage as absolute last resort
+    if (!savedPath && window.localStorage) {
+      try {
+        const base64 = await blobToBase64(blob)
+        const storageKey = `captured_image_${fileName}`
+        localStorage.setItem(storageKey, base64)
+        console.log(`💾 Emergency fallback: Saved to localStorage: ${storageKey}`)
+      } catch (storageError) {
+        console.warn('⚠️ localStorage save failed (quota exceeded):', storageError.message)
+        // Try to clear old localStorage data and retry once
+        clearOldStorageData()
+        try {
+          localStorage.setItem(storageKey, base64)
+          console.log(`💾 Retry successful after cleanup: ${storageKey}`)
+        } catch (retryError) {
+          console.error('❌ localStorage save failed even after cleanup:', retryError.message)
+          // At this point, we're out of options but continue - image is still in memory
+        }
+      }
+    }
+    
+    if (savedPath) {
+      console.log(`✅ Image successfully saved to: ${savedPath}`)
+    } else {
+      console.log(`⚠️ Image saved in memory only (not persistent)`)
+    }
     
     console.log(`🔗 Object URL created: ${objectUrl}`)
+    console.log(`📁 File saved to: ${savedPath || 'localStorage fallback'}`)
     
-    // Return both URL and blob for API calls
+    // Return both URL, blob and file path for API calls
     return {
       url: objectUrl,
-      blob: blob
+      blob: blob,
+      filePath: savedPath || objectUrl // Use file path if available, else object URL
     }
     
   } catch (error) {
@@ -55,22 +79,37 @@ export const saveImageToAssets = async (blob, fileName, type) => {
  * Auto save image - tries multiple methods silently
  */
 const autoSaveImage = async (blob, fileName, folderName) => {
+  console.log(`🔄 Auto-saving: ${fileName} to ${folderName}`)
+  console.log(`🔍 Electron API available:`, !!window.electronAPI)
+  console.log(`🔍 Save function available:`, !!(window.electronAPI && window.electronAPI.saveImage))
+  
   try {
     // Method 1: Check if running in Electron (PRIORITY)
     if (window.electronAPI && window.electronAPI.saveImage) {
       try {
+        console.log(`⚡ Attempting Electron save...`)
         const arrayBuffer = await blob.arrayBuffer()
         const uint8Array = new Uint8Array(arrayBuffer)
         
-        const filePath = await window.electronAPI.saveImage({
+        console.log(`📊 Image data size: ${uint8Array.length} bytes`)
+        
+        const saveData = {
           data: Array.from(uint8Array),
           fileName: fileName,
           folder: `assets/imgAnhChup/${folderName}`
+        }
+        
+        console.log(`📦 Save data prepared:`, {
+          dataLength: saveData.data.length,
+          fileName: saveData.fileName,
+          folder: saveData.folder
         })
+        
+        const filePath = await window.electronAPI.saveImage(saveData)
         
         console.log(`✅ Auto-saved via Electron to: ${filePath}`)
         
-        // Show success notification with option to open folder
+        // Verify file exists by trying to show in explorer
         if (window.electronAPI.showInExplorer) {
           console.log(`📂 File saved to: ${filePath}`)
           // Optionally show in explorer - uncomment if needed
@@ -79,17 +118,25 @@ const autoSaveImage = async (blob, fileName, folderName) => {
         
         return filePath
       } catch (electronError) {
-        console.warn('⚠️ Electron auto-save failed:', electronError.message)
+        console.error('❌ Electron auto-save failed:', electronError)
+        console.error('📋 Error details:', {
+          name: electronError.name,
+          message: electronError.message,
+          stack: electronError.stack
+        })
       }
+    } else {
+      console.log(`ℹ️ Not running in Electron or API not available`)
     }
     
     // Method 2: Fallback to browser download for web version
+    console.log(`🌐 Trying browser download fallback...`)
     const downloadPath = await silentAutoDownload(blob, fileName, folderName)
     console.log(`📥 Auto-downloaded: ${downloadPath}`)
     return downloadPath
     
   } catch (error) {
-    console.warn('⚠️ Auto-save failed:', error.message)
+    console.error('❌ Auto-save completely failed:', error)
     // Don't throw - this is best effort
     return null
   }
@@ -424,4 +471,126 @@ export const openImageFolder = async (filePath) => {
     }
   }
   return false
+}
+
+/**
+ * Clear old localStorage data to free up space
+ */
+export const clearOldStorageData = () => {
+  if (!window.localStorage) return
+  
+  const keysToRemove = []
+  
+  try {
+    // Find all captured image keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('captured_image_')) {
+        keysToRemove.push(key)
+      }
+    }
+    
+    // Remove oldest items first (keep only last 5 items to save space)
+    if (keysToRemove.length > 5) {
+      keysToRemove.sort() // Sort by timestamp in filename
+      const toRemove = keysToRemove.slice(0, keysToRemove.length - 5)
+      toRemove.forEach(key => {
+        localStorage.removeItem(key)
+        console.log(`🗑️ Removed old localStorage item: ${key}`)
+      })
+      console.log(`✅ Cleaned ${toRemove.length} old items from localStorage`)
+    }
+    
+    // Also clear if total size is too large (> 50MB)
+    const storageInfo = getStorageInfo()
+    if (storageInfo.totalSize > 50 * 1024 * 1024) { // 50MB limit
+      // Clear all but the last 2 items
+      if (keysToRemove.length > 2) {
+        keysToRemove.sort()
+        const toRemove = keysToRemove.slice(0, keysToRemove.length - 2)
+        toRemove.forEach(key => {
+          localStorage.removeItem(key)
+        })
+        console.log(`🧹 Storage cleanup: removed ${toRemove.length} items due to size limit`)
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ Error cleaning localStorage:', error)
+    // If cleanup fails, try nuclear option
+    try {
+      keysToRemove.forEach(key => localStorage.removeItem(key))
+      console.log('🧹 Emergency cleanup completed')
+    } catch (nuclearError) {
+      console.error('❌ Emergency cleanup failed:', nuclearError)
+    }
+  }
+}
+
+/**
+ * Initialize storage cleanup on app start
+ */
+export const initializeStorageCleanup = () => {
+  console.log('🔧 Initializing storage cleanup...')
+  
+  // Get current storage info
+  const storageInfo = getStorageInfo()
+  console.log('📊 Current storage:', storageInfo)
+  
+  // Auto cleanup on startup if needed
+  if (storageInfo.capturedImageCount > 10 || storageInfo.totalSize > 10 * 1024 * 1024) {
+    console.log('🧹 Auto-cleaning localStorage on startup...')
+    clearOldStorageData()
+    
+    // Show updated info
+    const newInfo = getStorageInfo()
+    console.log('📊 After cleanup:', newInfo)
+  }
+}
+
+/**
+ * Force clear all captured images from localStorage (debug utility)
+ */
+export const clearAllCapturedImages = () => {
+  if (!window.localStorage) return
+  
+  const keysToRemove = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith('captured_image_')) {
+      keysToRemove.push(key)
+    }
+  }
+  
+  keysToRemove.forEach(key => localStorage.removeItem(key))
+  console.log(`🧹 Cleared ${keysToRemove.length} captured images from localStorage`)
+  return keysToRemove.length
+}
+
+/**
+ * Get localStorage usage info
+ */
+export const getStorageInfo = () => {
+  if (!window.localStorage) return { supported: false }
+  
+  const keys = []
+  let totalSize = 0
+  
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith('captured_image_')) {
+      const value = localStorage.getItem(key)
+      const size = value ? value.length : 0
+      keys.push({ key, size })
+      totalSize += size
+    }
+  }
+  
+  return {
+    supported: true,
+    capturedImageCount: keys.length,
+    totalSize: totalSize,
+    totalSizeMB: (totalSize / 1024 / 1024).toFixed(2),
+    items: keys.sort((a, b) => b.size - a.size) // Sort by size desc
+  }
 }

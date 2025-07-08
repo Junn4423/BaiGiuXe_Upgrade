@@ -23,7 +23,7 @@ import ImageCaptureModal from "../../components/ImageCaptureModal";
 import LicensePlateConfirmDialog from "../../components/LicensePlateConfirmDialog";
 import { useToast } from "../../components/Toast";
 import { layDanhSachCamera, layDanhSachKhu } from "../../api/api";
-import { cleanupObjectUrls, getEnvironmentInfo } from "../../utils/imageUtils";
+import { cleanupObjectUrls, getEnvironmentInfo, initializeStorageCleanup } from "../../utils/imageUtils";
 
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
@@ -76,6 +76,9 @@ const MainUI = () => {
 
   // Initialize components and connections
   useEffect(() => {
+    // Initialize storage cleanup on app start
+    initializeStorageCleanup();
+    
     loadWorkConfig();
     setupConnections();
     startServices();
@@ -147,6 +150,7 @@ const MainUI = () => {
         // Test hotkey - simulate card scan
         event.preventDefault();
         const testCardId = "0002468477";
+        console.log("🔥 F2 pressed - testing card scan with ID:", testCardId);
         handleCardScanned(testCardId);
       }
     };
@@ -430,6 +434,9 @@ const MainUI = () => {
 
   // Handle card scanning
   const handleCardScanned = async (cardId) => {
+    console.log("🔥 handleCardScanned called with cardId:", cardId);
+    console.log("🔥 currentModeRef.current:", currentModeRef.current);
+    
     const actualMode = currentModeRef.current;
     setScannedCardId(cardId);
 
@@ -510,10 +517,30 @@ const MainUI = () => {
       }
 
       // Step 3: Capture images from camera
+      let plateImage = null;
+      let faceImage = null;
+      let licensePlate = null;
+
       if (cameraManagerRef.current) {
         try {
-          const [plateImage, licensePlate, faceImage] =
-            await cameraManagerRef.current.captureImage(cardId, actualMode);
+          console.log("🔥 About to call captureImage - cameraManagerRef.current:", !!cameraManagerRef.current);
+          console.log("🔥 Available methods:", Object.keys(cameraManagerRef.current || {}));
+          
+          const captureResult = await cameraManagerRef.current.captureImage(cardId, actualMode);
+          
+          plateImage = captureResult[0];
+          licensePlate = captureResult[1]; 
+          faceImage = captureResult[2];
+
+          console.log("📸 Image capture result:", {
+            plateImage: plateImage ? "có" : "không có",
+            plateImageType: typeof plateImage,
+            plateImageUrl: plateImage?.url,
+            faceImage: faceImage ? "có" : "không có", 
+            faceImageType: typeof faceImage,
+            faceImageUrl: faceImage?.url,
+            licensePlate
+          });
 
           setCapturedImages({
             plateImage: plateImage?.url || plateImage,
@@ -525,16 +552,22 @@ const MainUI = () => {
           // Display captured images on camera panels
           if (cameraComponentRef.current) {
             if (plateImage?.url || plateImage) {
+              console.log("📺 Displaying plate image:", plateImage?.url || plateImage);
               cameraComponentRef.current.displayCapturedImage(
                 plateImage?.url || plateImage,
                 1
               );
+            } else {
+              console.warn("❌ No plate image to display");
             }
 
             if (faceImage?.url || faceImage) {
+              console.log("📺 Displaying face image:", faceImage?.url || faceImage);
               cameraComponentRef.current.displayCapturedFaceImage(
                 faceImage?.url || faceImage
               );
+            } else {
+              console.warn("❌ No face image to display");
             }
           }
 
@@ -835,6 +868,18 @@ const MainUI = () => {
                 plate: recognizedLicensePlate || "",
                 loaiXe: loaiXe,
               };
+
+              // Debug log to check image data
+              console.log("🔍 DEBUG sessionData images:", {
+                plateImageType: typeof plateImage,
+                plateImageValue: plateImage,
+                plateImageUrl: plateImage?.url,
+                faceImageType: typeof faceImage,
+                faceImageValue: faceImage,
+                faceImageUrl: faceImage?.url,
+                anhVaoInSession: sessionData.anhVao,
+                anhMatVaoInSession: sessionData.anhMatVao
+              });
 
               // Add parking spot only for cars
               if (loaiXe === "1" && parkingSpot) {
