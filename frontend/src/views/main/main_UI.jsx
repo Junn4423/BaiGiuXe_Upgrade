@@ -432,6 +432,29 @@ const MainUI = () => {
     setShowWorkConfig(false);
   };
 
+  // Calculate estimated parking fee based on pricing policy
+  const calculateEstimatedFee = (pricingPolicy) => {
+    try {
+      if (!pricingPolicy || !pricingPolicy.maChinhSach) {
+        return 0;
+      }
+
+      // Phí cơ bản từ chính sách
+      let baseFee = 0;
+      if (typeof pricingPolicy === 'object') {
+        baseFee = pricingPolicy.donGia || pricingPolicy.phi || 0;
+      } else if (typeof pricingPolicy === 'string') {
+        // Fallback for string policy - will need to fetch from API
+        baseFee = 5000; // Default fee
+      }
+
+      return baseFee;
+    } catch (error) {
+      console.error("Error calculating estimated fee:", error);
+      return 0;
+    }
+  };
+
   // Handle card scanning
   const handleCardScanned = async (cardId) => {
     console.log("🔥 handleCardScanned called with cardId:", cardId);
@@ -907,6 +930,9 @@ const MainUI = () => {
               const result = await themPhienGuiXeWithValidation(sessionData);
 
               if (result && result.success) {
+                // Calculate estimated parking fee
+                const estimatedFee = calculateEstimatedFee(pricingPolicy);
+
                 if (vehicleInfoComponentRef.current) {
                   vehicleInfoComponentRef.current.updateCardReaderStatus(
                     "XE VÀO THÀNH CÔNG",
@@ -916,6 +942,12 @@ const MainUI = () => {
                     "XE ĐÃ VÀO BÃI",
                     "#10b981"
                   );
+                  
+                  // Update estimated parking fee
+                  if (estimatedFee > 0) {
+                    vehicleInfoComponentRef.current.updateParkingFee(`${estimatedFee.toLocaleString()} VNĐ (dự kiến)`);
+                  }
+
                   vehicleInfoComponentRef.current.updateVehicleInfo({
                     ma_the: cardId,
                     bien_so: recognizedLicensePlate || "Chưa nhận dạng",
@@ -923,6 +955,7 @@ const MainUI = () => {
                     chinh_sach: pricingPolicy,
                     cong_vao: entryGate,
                     trang_thai: "Xe đã vào bãi",
+                    phi_du_kien: estimatedFee,
                   });
                 }
 
@@ -1201,6 +1234,7 @@ const MainUI = () => {
       if (updateResult && updateResult.success) {
         // Calculate parking fee
         try {
+          const feeResult = await tinhPhiGuiXe(activeSession.maPhien);
           let parkingFee = 0;
           let parkingDuration = 0;
 
@@ -1218,11 +1252,15 @@ const MainUI = () => {
               "XE ĐÃ RA KHỎI BÃI",
               "#10b981"
             );
-            vehicleInfoComponentRef.current.updateParkingFee(parkingFee);
+            
+            // Format and update parking fee
+            const formattedFee = parkingFee > 0 ? `${parkingFee.toLocaleString()} VNĐ` : "0 VNĐ";
+            vehicleInfoComponentRef.current.updateParkingFee(formattedFee);
 
             // Update vehicle info with exit details
             vehicleInfoComponentRef.current.updateVehicleInfo({
               ma_the: cardId,
+              ma_phien: activeSession.maPhien, // Add session ID for fee calculation
               bien_so:
                 recognizedLicensePlate ||
                 activeSession.bienSo ||
