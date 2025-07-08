@@ -619,6 +619,7 @@ class VehicleManager {
         gio_vao: entryTimeStr,
         gio_ra: exitTimeStr,
         ma_the: cardId,
+        ma_phien: session.maPhien || session.sessionId || "", // Add session ID for fee calculation
         thoi_gian_do: parkingDurationFormatted,
         phi: feeFormatted,
         cong_vao: entryGate,
@@ -642,6 +643,7 @@ class VehicleManager {
         gio_vao: session.gioVao || "",
         gio_ra: session.gioRa || "",
         ma_the: session.uidThe || "",
+        ma_phien: session.maPhien || session.sessionId || "", // Add session ID for fee calculation
         thoi_gian_do: "",
         phi: "",
         cong_vao: session.congVao || "",

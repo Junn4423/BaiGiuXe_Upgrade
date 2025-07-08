@@ -2,11 +2,13 @@
 
 import React, { useState } from "react"
 import "../assets/styles/VehicleInfoComponent.css"
+import { tinhPhiGuiXe } from "../api/api"
 
 const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType, onModeChange, workConfig }, ref) => {
   const [vehicleInfo, setVehicleInfo] = useState({
     ma_the: "",
     trang_thai: "",
+    ma_phien: "", // Thêm mã phiên để tính phí
   })
 
   const [cardReaderStatus, setCardReaderStatus] = useState({
@@ -20,6 +22,48 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
   })
 
   const [parkingFee, setParkingFee] = useState("")
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false)
+
+  // Calculate parking fee using tinhPhiGuiXe API
+  const calculateParkingFee = async (maPhien) => {
+    if (!maPhien) {
+      console.log("❌ Không có mã phiên để tính phí")
+      return
+    }
+
+    try {
+      setIsCalculatingFee(true)
+      console.log(`💰 Đang tính phí cho mã phiên: ${maPhien}`)
+      
+      const result = await tinhPhiGuiXe(maPhien)
+      console.log(`💰 Kết quả tính phí:`, result)
+      
+      if (result && result.success) {
+        const phi = result.phi || 0
+        const tongPhut = result.tongPhut || 0
+        
+        // Format fee display
+        const feeFormatted = phi > 0 ? `${phi.toLocaleString()} VNĐ` : "0 VNĐ"
+        const durationText = tongPhut > 0 ? ` (${Math.floor(tongPhut / 60)}h ${tongPhut % 60}m)` : ""
+        
+        setParkingFee(feeFormatted + durationText)
+        console.log(`✅ Đã cập nhật phí: ${feeFormatted}`)
+        
+        return { success: true, phi, tongPhut }
+      } else {
+        const errorMsg = result?.message || "Lỗi tính phí"
+        setParkingFee(`Lỗi: ${errorMsg}`)
+        console.log(`❌ Lỗi tính phí: ${errorMsg}`)
+        return { success: false, message: errorMsg }
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi tính phí gửi xe:", error)
+      setParkingFee("Lỗi tính phí")
+      return { success: false, message: error.message }
+    } finally {
+      setIsCalculatingFee(false)
+    }
+  }
 
   // Update vehicle info
   const updateVehicleInfo = (newInfo) => {
@@ -28,12 +72,58 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
       ...prev,
       ma_the: newInfo.ma_the || prev.ma_the,
       trang_thai: newInfo.trang_thai || prev.trang_thai,
+      ma_phien: newInfo.ma_phien || newInfo.sessionId || prev.ma_phien,
     }))
+
+    // Auto calculate fee if session ID is provided and we're in exit mode
+    if ((newInfo.ma_phien || newInfo.sessionId) && currentMode === "ra") {
+      const sessionId = newInfo.ma_phien || newInfo.sessionId
+      console.log(`🔄 Tự động tính phí cho xe ra, mã phiên: ${sessionId}`)
+      calculateParkingFee(sessionId)
+    }
 
     if (newInfo.phi) {
       setParkingFee(newInfo.phi)
     }
     console.log(`📝 Vehicle info updated - mã thẻ: ${newInfo.ma_the}`)
+  }
+
+  // Update vehicle info with session data for fee calculation
+  const updateVehicleInfoWithSession = (vehicleData, sessionData = null) => {
+    console.log(`📝 VehicleInfoComponent.updateVehicleInfoWithSession called:`, { vehicleData, sessionData })
+    
+    const newInfo = {
+      ma_the: vehicleData.ma_the || vehicleData.cardId,
+      trang_thai: vehicleData.trang_thai || vehicleData.status,
+      ma_phien: sessionData?.maPhien || sessionData?.sessionId || vehicleData.ma_phien || vehicleData.sessionId,
+    }
+    
+    updateVehicleInfo(newInfo)
+  }
+
+  // Manual fee calculation trigger
+  const triggerFeeCalculation = async () => {
+    if (!vehicleInfo.ma_phien) {
+      console.log("❌ Không có mã phiên để tính phí")
+      updateCardReaderStatus("THIẾU MÃ PHIÊN", "#ef4444")
+      setTimeout(() => {
+        updateCardReaderStatus("SẴN SÀNG ĐỌC THẺ", "#10b981")
+      }, 2000)
+      return
+    }
+
+    updateCardReaderStatus("ĐANG TÍNH PHÍ...", "#f59e0b")
+    const result = await calculateParkingFee(vehicleInfo.ma_phien)
+    
+    if (result.success) {
+      updateCardReaderStatus("TÍNH PHÍ THÀNH CÔNG", "#10b981")
+    } else {
+      updateCardReaderStatus("LỖI TÍNH PHÍ", "#ef4444")
+    }
+    
+    setTimeout(() => {
+      updateCardReaderStatus("SẴN SÀNG ĐỌC THẺ", "#10b981")
+    }, 2000)
   }
 
   // Update card reader status
@@ -48,6 +138,7 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
 
   // Update parking fee
   const updateParkingFee = (fee) => {
+    console.log(`💰 VehicleInfoComponent.updateParkingFee called with:`, fee)
     setParkingFee(fee)
   }
 
@@ -56,8 +147,10 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
     setVehicleInfo({
       ma_the: "",
       trang_thai: "",
+      ma_phien: "",
     })
     setParkingFee("")
+    setIsCalculatingFee(false)
     setCardReaderStatus({ text: "SẴN SÀNG ĐỌC THẺ", color: "#10b981" })
     setVehicleStatus({ text: "CHỜ XE VÀO/RA", color: "#6b7280" })
   }
@@ -106,6 +199,7 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
   // Expose methods to parent component
   React.useImperativeHandle(ref, () => ({
     updateVehicleInfo,
+    updateVehicleInfoWithSession,
     updateCardReaderStatus,
     updateVehicleStatus,
     updateParkingFee,
@@ -114,6 +208,8 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
     displayPlaceholderEntryImage,
     restoreOriginalConfirmationFrame,
     showButtonsForVehicleType,
+    calculateParkingFee,
+    triggerFeeCalculation,
   }))
 
   return (
@@ -184,14 +280,34 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
               {vehicleInfo.trang_thai || "---"}
             </span>
           </div>
+          {vehicleInfo.ma_phien && (
+            <div className="vehicle-item">
+              <span className="vehicle-label">MÃ PHIÊN:</span>
+              <span className="vehicle-value session-id">{vehicleInfo.ma_phien}</span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Parking Fee Display */}
       <div className="fee-section">
-        <div className="fee-header">PHÍ GỬI XE</div>
+        <div className="fee-header">
+          PHÍ GỬI XE
+          {currentMode === "ra" && vehicleInfo.ma_phien && (
+            <button
+              className="fee-calculate-btn"
+              onClick={triggerFeeCalculation}
+              disabled={isCalculatingFee}
+              title="Tính lại phí gửi xe"
+            >
+              {isCalculatingFee ? "⏳" : "🔄"}
+            </button>
+          )}
+        </div>
         <div className="fee-display">
-          <span className="fee-amount">{parkingFee ? parkingFee : "0 VNĐ"}</span>
+          <span className={`fee-amount ${parkingFee && parkingFee.includes('dự kiến') ? 'estimated' : 'final'} ${isCalculatingFee ? 'calculating' : ''}`}>
+            {isCalculatingFee ? "Đang tính..." : parkingFee || "0 VNĐ"}
+          </span>
         </div>
       </div>
     </div>
