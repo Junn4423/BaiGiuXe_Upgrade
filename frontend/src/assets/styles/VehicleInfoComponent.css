@@ -200,11 +200,23 @@
   letter-spacing: 1px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fee-amount.calculating {
   color: #f59e0b;
   animation: pulse-calculating 1.5s ease-in-out infinite;
+}
+
+.fee-amount.final {
+  color: #10b981;
+}
+
+.fee-amount.estimated {
+  color: #f59e0b;
 }
 
 @keyframes pulse-calculating {

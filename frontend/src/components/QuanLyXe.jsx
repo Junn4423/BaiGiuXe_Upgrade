@@ -311,7 +311,7 @@ const QuanLyXe = () => {
           return;
         }
       } else {
-        const msg = "Không có response từ server hoặc format không đúng";
+        const msg = "Không có response từ server hoặc format không đ��ng";
         if (ui) {
           ui.updateVehicleExitStatus(cardId, "", false, msg);
         }

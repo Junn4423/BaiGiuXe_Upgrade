@@ -571,12 +571,12 @@ class VehicleManager {
         }
       }
 
-      // Format phí
+      // Format phí for display
       let feeFormatted = "";
       if (feeValue) {
         try {
           const fee = parseInt(feeValue);
-          feeFormatted = `${fee.toLocaleString()} VND`;
+          feeFormatted = `${fee.toLocaleString()} VNĐ`;
         } catch {
           feeFormatted = String(feeValue);
         }
@@ -622,6 +622,7 @@ class VehicleManager {
         ma_phien: session.maPhien || session.sessionId || "", // Add session ID for fee calculation
         thoi_gian_do: parkingDurationFormatted,
         phi: feeFormatted,
+        phi_gui_xe: feeValue, // Pass raw fee value for calculations
         cong_vao: entryGate,
         cong_ra: exitGate,
         chinh_sach: policy,
@@ -646,6 +647,7 @@ class VehicleManager {
         ma_phien: session.maPhien || session.sessionId || "", // Add session ID for fee calculation
         thoi_gian_do: "",
         phi: "",
+        phi_gui_xe: session.phi || 0, // Pass raw fee for fallback
         cong_vao: session.congVao || "",
         cong_ra: session.congRa || "",
         chinh_sach: session.chinhSach || "",

@@ -84,20 +84,31 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
       console.log(`� Session ID received for exit mode: ${sessionId} (fee calculation handled by main flow)`)
     }
 
-    // Don't set fee from updateVehicleInfo - let main flow handle it explicitly
-    // This prevents overriding the correct fee set by updateParkingFee
-    // if (newInfo.phi || newInfo.phi_gui_xe) {
-    //   const fee = newInfo.phi || newInfo.phi_gui_xe;
-    //   console.log(`💰 Setting parking fee from vehicle info: ${fee}`);
-    //   
-    //   // Format the fee if it's a number (not already formatted)
-    //   if (typeof fee === 'number') {
-    //     const formattedFee = fee > 0 ? `${fee.toLocaleString()} VNĐ` : "0 VNĐ";
-    //     setParkingFee(formattedFee);
-    //   } else {
-    //     setParkingFee(fee);
-    //   }
-    // }
+    // Update fee display if fee is provided in the vehicle info
+    if (newInfo.phi || newInfo.phi_gui_xe) {
+      const fee = newInfo.phi || newInfo.phi_gui_xe;
+      console.log(`💰 Setting parking fee from vehicle info: ${fee}`);
+      
+      // Handle different fee formats (number, formatted string, etc.)
+      let formattedFee = "";
+      if (typeof fee === 'number') {
+        formattedFee = fee > 0 ? `${fee.toLocaleString()} VNĐ` : "0 VNĐ";
+      } else if (typeof fee === 'string') {
+        // If already formatted (contains VND, VNĐ), use as is
+        if (fee.includes('VND') || fee.includes('VNĐ')) {
+          formattedFee = fee.replace('VND', 'VNĐ'); // Normalize to VNĐ
+        } else {
+          // Try to parse as number and format
+          const numericFee = parseInt(fee.replace(/[^\d]/g, ''));
+          formattedFee = numericFee > 0 ? `${numericFee.toLocaleString()} VNĐ` : "0 VNĐ";
+        }
+      } else {
+        formattedFee = "0 VNĐ";
+      }
+      
+      setParkingFee(formattedFee);
+      console.log(`💰 Parking fee updated to: ${formattedFee}`);
+    }
     console.log(`📝 Vehicle info updated - mã thẻ: ${newInfo.ma_the}`)
     console.log(`📝 Parking fee after vehicle info update:`, parkingFee)
   }
@@ -154,8 +165,26 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
   const updateParkingFee = (fee) => {
     console.log(`💰 VehicleInfoComponent.updateParkingFee called with:`, fee)
     console.log(`💰 Current parking fee before update:`, parkingFee)
-    setParkingFee(fee)
-    console.log(`💰 Parking fee updated to:`, fee)
+    
+    // Ensure fee is properly formatted
+    let formattedFee = "";
+    if (typeof fee === 'number') {
+      formattedFee = fee > 0 ? `${fee.toLocaleString()} VNĐ` : "0 VNĐ";
+    } else if (typeof fee === 'string') {
+      // If already contains VND or VNĐ, normalize it
+      if (fee.includes('VND') || fee.includes('VNĐ')) {
+        formattedFee = fee.replace('VND', 'VNĐ'); // Normalize to VNĐ
+      } else {
+        // Try to parse as number and format
+        const numericFee = parseInt(fee.replace(/[^\d]/g, ''));
+        formattedFee = numericFee > 0 ? `${numericFee.toLocaleString()} VNĐ` : "0 VNĐ";
+      }
+    } else {
+      formattedFee = fee || "0 VNĐ";
+    }
+    
+    setParkingFee(formattedFee)
+    console.log(`💰 Parking fee updated to:`, formattedFee)
   }
 
   // Clear vehicle info

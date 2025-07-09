@@ -316,14 +316,14 @@ const VehicleManagementDialog = ({ onClose }) => {
                       onClick={handleEdit}
                       disabled={isSubmitting}
                     >
-                      ✏️ Sửa
+                      Sửa
                     </button>
                     <button 
                       className="btn btn-danger" 
                       onClick={handleDelete}
                       disabled={isSubmitting}
                     >
-                      🗑️ Xóa
+                      Xóa
                     </button>
                   </div>
                 )}
@@ -404,14 +404,14 @@ const VehicleManagementDialog = ({ onClose }) => {
                     onClick={handleSave}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Đang lưu..." : "💾 Lưu"}
+                    {isSubmitting ? "Đang lưu..." : "Lưu"}
                   </button>
                   <button 
                     className="btn btn-cancel" 
                     onClick={handleCancel}
                     disabled={isSubmitting}
                   >
-                    ❌ Hủy
+                    Hủy
                   </button>
                 </div>
               )}

@@ -239,7 +239,7 @@ const VehicleTypeDialog = ({ onClose }) => {
                   </div>
                 ) : (
                   <div className="empty-state">
-                    <div className="empty-icon">📋</div>
+                    <div className="empty-icon"></div>
                     <h4>Chưa có loại phương tiện</h4>
                     <p>Tạo loại phương tiện đầu tiên bằng form bên phải</p>
                   </div>
