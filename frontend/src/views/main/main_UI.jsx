@@ -759,44 +759,63 @@ const MainUI = () => {
             }
 
             try {
-              const { layChinhSachGiaTheoLoaiPT } = await import(
-                "../../api/api"
-              );
-              const {
-                validateAndEnsurePricingPolicy,
-                themPhienGuiXeWithValidation,
-              } = await import("../../utils/sessionValidation");
               const { 
+                layChinhSachGiaTheoLoaiPT,
+                layDanhSachThe,
                 layThongTinLoaiXeTuBienSo, 
                 laySlotTrongChoXeLon,
                 capNhatTrangThaiChoDo,
                 themPhienGuiXeVoiViTri 
               } = await import("../../api/api");
+              const {
+                validateAndEnsurePricingPolicy,
+                themPhienGuiXeWithValidation,
+              } = await import("../../utils/sessionValidation");
 
-              // Determine vehicle type based on work config
-              let vehicleTypeCode = null;
-              if (workConfig?.loai_xe) {
-                const vehicleTypeMapping = {
-                  xe_may: "XE_MAY",
-                  oto: "OT",
-                };
-                vehicleTypeCode =
-                  vehicleTypeMapping[workConfig.loai_xe] || null;
+              // B1: Lấy thông tin thẻ để kiểm tra chính sách đã gán
+              let pricingPolicy = null;
+              try {
+                const cardList = await layDanhSachThe();
+                const currentCard = cardList.find(card => card.uidThe === cardId);
+                
+                if (currentCard && currentCard.maChinhSach && currentCard.maChinhSach.trim() !== '') {
+                  // Ưu tiên sử dụng chính sách đã gán cho thẻ
+                  pricingPolicy = currentCard.maChinhSach.trim();
+                  console.log(`🎯 Sử dụng chính sách từ thẻ: ${pricingPolicy}`);
+                } else {
+                  console.log(`⚠️ Thẻ ${cardId} chưa có chính sách gán sẵn, sử dụng fallback`);
+                }
+              } catch (cardError) {
+                console.error("Lỗi khi lấy thông tin thẻ:", cardError);
               }
 
-              // Get pricing policy
-              let rawPricingPolicy = null;
-              if (vehicleTypeCode) {
-                rawPricingPolicy = await layChinhSachGiaTheoLoaiPT(
+              // B2: Nếu thẻ chưa có chính sách, sử dụng logic cũ (fallback)
+              if (!pricingPolicy) {
+                // Determine vehicle type based on work config
+                let vehicleTypeCode = null;
+                if (workConfig?.loai_xe) {
+                  const vehicleTypeMapping = {
+                    xe_may: "XE_MAY",
+                    oto: "OT",
+                  };
+                  vehicleTypeCode =
+                    vehicleTypeMapping[workConfig.loai_xe] || null;
+                }
+
+                // Get pricing policy from vehicle type
+                let rawPricingPolicy = null;
+                if (vehicleTypeCode) {
+                  rawPricingPolicy = await layChinhSachGiaTheoLoaiPT(
+                    vehicleTypeCode
+                  );
+                }
+
+                pricingPolicy = validateAndEnsurePricingPolicy(
+                  rawPricingPolicy,
+                  workConfig?.loai_xe,
                   vehicleTypeCode
                 );
               }
-
-              const pricingPolicy = validateAndEnsurePricingPolicy(
-                rawPricingPolicy,
-                workConfig?.loai_xe,
-                vehicleTypeCode
-              );
 
               if (!pricingPolicy) {
                 throw new Error(
@@ -876,7 +895,7 @@ const MainUI = () => {
                 }
               }
 
-              // Lấy thông tin loại xe từ biển số thay vì work config
+              // Ưu tiên lấy loại xe từ workConfig, fallback về biển số
               let loaiXe = "0"; // Mặc định xe nhỏ
               let parkingSpot = null;
               let maKhuVuc = null;
@@ -887,16 +906,29 @@ const MainUI = () => {
                           workConfig.zone_code || workConfig.zone;
               }
 
-              if (recognizedLicensePlate) {
-                console.log(`🚗 Đang kiểm tra loại xe từ biển số: ${recognizedLicensePlate}`);
+              // Bước 1: Kiểm tra loại xe từ workConfig trước
+              if (workConfig?.loai_xe) {
+                if (workConfig.loai_xe === "oto") {
+                  loaiXe = "1"; // Xe lớn
+                  console.log(`🚗 Loại xe từ workConfig: Ô tô (loaiXe = 1)`);
+                } else if (workConfig.loai_xe === "xe_may") {
+                  loaiXe = "0"; // Xe nhỏ
+                  console.log(`🏍️ Loại xe từ workConfig: Xe máy (loaiXe = 0)`);
+                }
+              } 
+              // Bước 2: Nếu không có workConfig, fallback về biển số
+              else if (recognizedLicensePlate) {
+                console.log(`🚗 WorkConfig không có loại xe, đang kiểm tra từ biển số: ${recognizedLicensePlate}`);
                 const thongTinLoaiXe = await layThongTinLoaiXeTuBienSo(recognizedLicensePlate);
                 
                 if (thongTinLoaiXe.success) {
                   loaiXe = thongTinLoaiXe.loaiXe;
                   console.log(`✅ Loại xe từ biển số: ${loaiXe} (0=xe nhỏ, 1=xe lớn)`);
                 } else {
-                  console.log(`⚠️ Không tìm thấy loại xe, mặc định là xe nhỏ`);
+                  console.log(`⚠️ Không tìm thấy loại xe từ biển số, mặc định là xe nhỏ`);
                 }
+              } else {
+                console.log(`⚠️ Không có workConfig và biển số, mặc định là xe nhỏ`);
               }
 
               // Nếu là xe lớn (loaiXe = "1"), tìm và đặt slot

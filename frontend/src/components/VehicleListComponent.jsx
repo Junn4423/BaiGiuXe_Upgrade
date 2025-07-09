@@ -33,15 +33,43 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
       console.log('🔄 Refreshing vehicle list...')
       const apiData = await layALLPhienGuiXe()
       
+      // Debug: Log sample data to check loaiXe field
+      if (Array.isArray(apiData) && apiData.length > 0) {
+        console.log('🔍 DEBUG: Sample vehicle data from API:', {
+          sampleCount: Math.min(3, apiData.length),
+          samples: apiData.slice(0, 3).map(item => ({
+            bienSo: item.bienSo,
+            loaiXe: item.loaiXe,
+            loaiXeType: typeof item.loaiXe,
+            chinhSach: item.chinhSach
+          }))
+        })
+      }
+      
       // Map API data to component format based on pm_nc0009 structure
       const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => {
-        // Determine vehicle type from policy name
+        // Determine vehicle type from loaiXe field (PRIORITIZED) hoặc fallback to policy name
         let vehicleType = "xe_may" // default
-        if (item.chinhSach) {
+        
+        // Bước 1: Kiểm tra trường loaiXe trước (từ database)
+        if (item.loaiXe !== undefined && item.loaiXe !== null) {
+          if (item.loaiXe === 1 || item.loaiXe === "1") {
+            vehicleType = "oto"
+            console.log(`🚗 Vehicle ${item.bienSo}: loaiXe = ${item.loaiXe} -> Ô tô`)
+          } else if (item.loaiXe === 0 || item.loaiXe === "0") {
+            vehicleType = "xe_may"
+            console.log(`🏍️ Vehicle ${item.bienSo}: loaiXe = ${item.loaiXe} -> Xe máy`)
+          }
+        }
+        // Bước 2: Fallback - nếu không có loaiXe, dùng policy name
+        else if (item.chinhSach) {
           if (item.chinhSach.toLowerCase().includes("oto") || 
               item.chinhSach.toLowerCase().includes("car") ||
               item.chinhSach.toLowerCase().includes("auto")) {
             vehicleType = "oto"
+            console.log(`🚗 Vehicle ${item.bienSo}: Fallback từ policy ${item.chinhSach} -> Ô tô`)
+          } else {
+            console.log(`🏍️ Vehicle ${item.bienSo}: Fallback từ policy ${item.chinhSach} -> Xe máy`)
           }
         }
 
