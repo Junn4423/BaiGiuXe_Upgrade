@@ -766,6 +766,12 @@ const MainUI = () => {
                 validateAndEnsurePricingPolicy,
                 themPhienGuiXeWithValidation,
               } = await import("../../utils/sessionValidation");
+              const { 
+                layThongTinLoaiXeTuBienSo, 
+                laySlotTrongChoXeLon,
+                capNhatTrangThaiChoDo,
+                themPhienGuiXeVoiViTri 
+              } = await import("../../api/api");
 
               // Determine vehicle type based on work config
               let vehicleTypeCode = null;
@@ -870,24 +876,54 @@ const MainUI = () => {
                 }
               }
 
-              // Get parking spot from work config ONLY IF vehicle type requires it
+              // Lấy thông tin loại xe từ biển số thay vì work config
+              let loaiXe = "0"; // Mặc định xe nhỏ
               let parkingSpot = null;
-              let loaiXe = null;
+              let maKhuVuc = null;
 
-              if (vehicleTypeCode === "OT") {
-                loaiXe = "1";
-              } else if (vehicleTypeCode === "XE_MAY") {
-                loaiXe = "0";
+              // Lấy mã khu vực hiện tại
+              if (typeof workConfig === "object" && workConfig) {
+                maKhuVuc = workConfig.ma_khu_vuc || workConfig.maKhuVuc || 
+                          workConfig.zone_code || workConfig.zone;
               }
 
-              // Only get parking spot for cars (loaiXe = "1")
-              if (loaiXe === "1") {
-                if (workConfig?.parking_spot) {
-                  parkingSpot = workConfig.parking_spot;
-                } else if (zoneInfo?.maKhuVuc) {
-                  const timestamp = new Date().getTime().toString().slice(-3);
-                  parkingSpot = `${zoneInfo.maKhuVuc}-${timestamp}`;
+              if (recognizedLicensePlate) {
+                console.log(`🚗 Đang kiểm tra loại xe từ biển số: ${recognizedLicensePlate}`);
+                const thongTinLoaiXe = await layThongTinLoaiXeTuBienSo(recognizedLicensePlate);
+                
+                if (thongTinLoaiXe.success) {
+                  loaiXe = thongTinLoaiXe.loaiXe;
+                  console.log(`✅ Loại xe từ biển số: ${loaiXe} (0=xe nhỏ, 1=xe lớn)`);
+                } else {
+                  console.log(`⚠️ Không tìm thấy loại xe, mặc định là xe nhỏ`);
                 }
+              }
+
+              // Nếu là xe lớn (loaiXe = "1"), tìm và đặt slot
+              if (loaiXe === "1") {
+                console.log(`🚗 Xe lớn - đang tìm slot trống...`);
+                const slotResult = await laySlotTrongChoXeLon(maKhuVuc);
+                
+                if (slotResult.success) {
+                  parkingSpot = slotResult.maChoDo;
+                  console.log(`✅ Đã tìm thấy slot: ${parkingSpot}`);
+                  
+                  // Cập nhật trạng thái slot thành đã dùng
+                  await capNhatTrangThaiChoDo(parkingSpot, "1");
+                  console.log(`✅ Đã cập nhật trạng thái slot ${parkingSpot} thành đã dùng`);
+                } else {
+                  // Không còn slot cho xe lớn
+                  if (vehicleInfoComponentRef.current) {
+                    vehicleInfoComponentRef.current.updateCardReaderStatus(
+                      "KHÔNG CÒN CHỖ ĐỖ CHO XE LỚN",
+                      "#ef4444"
+                    );
+                  }
+                  showToast("❌ Không còn chỗ đỗ cho xe lớn!", "error", 5000);
+                  return;
+                }
+              } else {
+                console.log(`🏍️ Xe nhỏ - không cần slot cụ thể`);
               }
 
               // Get entry camera by calling API directly
@@ -949,6 +985,7 @@ const MainUI = () => {
                 plate_match: recognizedLicensePlate ? 1 : 0,
                 plate: recognizedLicensePlate || "",
                 loaiXe: loaiXe,
+                viTriGui: parkingSpot, // null cho xe nhỏ, có giá trị cho xe lớn
               };
 
               // Debug log to check image data
@@ -962,11 +999,6 @@ const MainUI = () => {
                 anhVaoInSession: sessionData.anhVao,
                 anhMatVaoInSession: sessionData.anhMatVao
               });
-
-              // Add parking spot only for cars
-              if (loaiXe === "1" && parkingSpot) {
-                sessionData.viTriGui = parkingSpot;
-              }
 
               // Validate required fields
               const requiredFields = [

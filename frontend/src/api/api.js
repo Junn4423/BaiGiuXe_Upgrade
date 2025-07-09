@@ -1882,32 +1882,7 @@ export async function themNhatKyQuetTheVoiThoiGian(scanLogData) {
   return callApiWithAuth(payload);
 }
 
-// Hàm mới để kiểm tra xem thẻ có được miễn phí không
-export const kiemTraMienPhiTheoThe = async (uidThe) => {
-    if (!uidThe) {
-        console.error("UID thẻ là bắt buộc");
-        return false; // Giả định không được miễn phí nếu không có UID
-    }
-    try {
-        // Gọi API để lấy thông tin thẻ theo UID
-        const response = await callApiWithAuth({
-            table: 'pm_nc0003',
-            func: 'timTheTuUID',
-            uidThe: uidThe
-        });
-        // API trả về một mảng, ta lấy phần tử đầu tiên
-        if (response.data && response.data.length > 0) {
-            const cardInfo = response.data[0];
-            // Nếu loaiThe không phải là "KHACH" thì miễn phí
-            return cardInfo.loaiThe !== 'KHACH';
-        }
-        return false; // Mặc định không miễn phí nếu không tìm thấy thẻ
-    } catch (error) {
-        console.error('Lỗi khi kiểm tra miễn phí theo thẻ:', error);
-        // Trong trường hợp lỗi, an toàn nhất là giả định không được miễn phí
-        return false;
-    }
-};
+
 
 
 /**
@@ -1932,11 +1907,11 @@ export const tinhPhiGuiXe = async (maPhien, uidThe = null) => {
         // B1: Nếu có uidThe, kiểm tra xem thẻ có được miễn phí không
         if (uidThe) {
             try {
-                const isFree = await kiemTraMienPhiTheoThe(uidThe);
+                const isFree = await kiemTraTheMienPhi(uidThe);
                 
                 // B2: Nếu được miễn phí, trả về phí là 0
                 if (isFree) {
-                    console.log(`✅ Thẻ ${uidThe} được miễn phí.`);
+                    console.log(`✅ Thẻ ${uidThe} được miễn phí (không phải thẻ KHACH).`);
                     return {
                         success: true,
                         phi: 0,
@@ -1944,7 +1919,7 @@ export const tinhPhiGuiXe = async (maPhien, uidThe = null) => {
                         message: "Thẻ thuộc đối tượng miễn phí"
                     };
                 }
-                console.log(`💰 Thẻ ${uidThe} không được miễn phí, tiến hành tính phí.`);
+                console.log(`💰 Thẻ ${uidThe} là thẻ KHACH, tiến hành tính phí.`);
             } catch (freeCheckError) {
                 console.warn(`⚠️ Lỗi kiểm tra miễn phí, tiếp tục tính phí:`, freeCheckError);
             }
@@ -2008,3 +1983,195 @@ export const tinhPhiGuiXe = async (maPhien, uidThe = null) => {
         };
     }
 };
+
+/**
+ * Lấy thông tin loại xe từ biển số
+ * @param {string} bienSo - Biển số xe
+ * @returns {Promise<Object>} Thông tin loại xe
+ */
+export async function layThongTinLoaiXeTuBienSo(bienSo) {
+  try {
+    // Lấy thông tin xe từ pm_nc0002
+    const danhSachXe = await layDanhSachPhuongTien()
+    const xe = danhSachXe.find(x => x.bienSo === bienSo)
+    
+    if (xe && xe.maLoaiPT) {
+      // Lấy thông tin loại xe từ pm_nc0001
+      const danhSachLoaiPT = await layALLLoaiPhuongTien()
+      const loaiPT = danhSachLoaiPT.find(l => l.maLoaiPT === xe.maLoaiPT)
+      
+      if (loaiPT) {
+        return {
+          success: true,
+          loaiXe: loaiPT.loaiXe || "0", // lv004: 0=xe nhỏ, 1=xe lớn
+          maLoaiPT: loaiPT.maLoaiPT,
+          tenLoaiPT: loaiPT.tenLoaiPT
+        }
+      }
+    }
+    
+    // Nếu không tìm thấy, mặc định là xe nhỏ
+    return {
+      success: false,
+      loaiXe: "0",
+      message: "Không tìm thấy thông tin loại xe"
+    }
+  } catch (error) {
+    console.error("Lỗi lấy thông tin loại xe:", error)
+    return {
+      success: false,
+      loaiXe: "0",
+      message: error.message
+    }
+  }
+}
+
+/**
+ * Lấy slot trống cho xe lớn từ pm_nc0005
+ * @param {string} maKhuVuc - Mã khu vực (optional)
+ * @returns {Promise<Object>} Thông tin slot trống
+ */
+export async function laySlotTrongChoXeLon(maKhuVuc = null) {
+  try {
+    // Lấy danh sách tất cả chỗ đỗ
+    let danhSachChoDo
+    if (maKhuVuc) {
+      danhSachChoDo = await layChoDauXeTheoKhu(maKhuVuc)
+    } else {
+      danhSachChoDo = await layDanhSachChoDo()
+    }
+    
+    // Tìm slot trống (trangThai = "0" hoặc "TRONG")
+    const slotTrong = danhSachChoDo.find(
+      slot => slot.trangThai === "0" || slot.trangThai === "TRONG"
+    )
+    
+    if (slotTrong) {
+      return {
+        success: true,
+        maChoDo: slotTrong.maChoDo,
+        maKhuVuc: slotTrong.maKhuVuc,
+        tenKhuVuc: slotTrong.tenKhuVuc
+      }
+    }
+    
+    return {
+      success: false,
+      message: "Không còn slot trống cho xe lớn"
+    }
+  } catch (error) {
+    console.error("Lỗi tìm slot trống:", error)
+    return {
+      success: false,
+      message: error.message
+    }
+  }
+}
+
+/**
+ * Kiểm tra loại thẻ để xác định miễn phí
+ * @param {string} uidThe - UID thẻ
+ * @returns {Promise<boolean>} true nếu được miễn phí
+ */
+export async function kiemTraTheMienPhi(uidThe) {
+  try {
+    const danhSachThe = await layDanhSachThe()
+    const the = danhSachThe.find(t => t.uidThe === uidThe)
+    
+    if (the) {
+      // Chỉ thẻ KHACH mới phải trả phí
+      return the.loaiThe !== "KHACH"
+    }
+    
+    return false
+  } catch (error) {
+    console.error("Lỗi kiểm tra thẻ miễn phí:", error)
+    return false
+  }
+}
+
+/**
+ * Lấy thông tin thẻ theo UID với thông tin chi tiết
+ * @param {string} uidThe - UID thẻ
+ * @returns {Promise<Object>} Thông tin thẻ
+ */
+export async function layThongTinTheChiTiet(uidThe) {
+  const payload = {
+    table: "pm_nc0003",
+    func: "timTheTuUID",
+    uidThe: uidThe
+  }
+  const result = await callApiWithAuth(payload)
+  
+  if (result && result.length > 0) {
+    const the = result[0]
+    return {
+      success: true,
+      data: {
+        uidThe: the.uidThe,
+        loaiThe: the.loaiThe,
+        trangThai: the.trangThai,
+        ngayPhatHanh: the.ngayPhatHanh,
+        bienSoXe: the.bienSoXe,
+        maChinhSach: the.maChinhSach,
+        ngayKetThucCS: the.ngayKetThucCS,
+        laMienPhi: the.loaiThe !== "KHACH" // Chỉ thẻ KHACH phải trả phí
+      }
+    }
+  }
+  
+  return {
+    success: false,
+    message: "Không tìm thấy thẻ"
+  }
+}
+
+/**
+ * Thêm phiên gửi xe với logic xử lý vị trí theo loại xe
+ * @param {Object} session - Thông tin phiên gửi xe
+ * @returns {Promise<Object>} Kết quả thêm phiên
+ */
+export async function themPhienGuiXeVoiViTri(session) {
+  try {
+    // Lấy thông tin loại xe từ biển số
+    let loaiXe = "0" // Mặc định xe nhỏ
+    let viTriGui = null
+    
+    if (session.bienSo) {
+      const thongTinLoaiXe = await layThongTinLoaiXeTuBienSo(session.bienSo)
+      loaiXe = thongTinLoaiXe.loaiXe || "0"
+      
+      // Nếu là xe lớn (loaiXe = "1"), tìm slot trống
+      if (loaiXe === "1") {
+        const slotResult = await laySlotTrongChoXeLon(session.maKhuVuc)
+        if (slotResult.success) {
+          viTriGui = slotResult.maChoDo
+          
+          // Cập nhật trạng thái slot thành đã dùng
+          await capNhatTrangThaiChoDo(viTriGui, "1")
+        } else {
+          return {
+            success: false,
+            message: "Không còn chỗ đỗ cho xe lớn"
+          }
+        }
+      }
+      // Xe nhỏ không cần vị trí đỗ cụ thể
+    }
+    
+    // Tạo phiên gửi xe
+    const sessionData = {
+      ...session,
+      viTriGui: viTriGui, // null cho xe nhỏ, có giá trị cho xe lớn
+      loaiXe: loaiXe
+    }
+    
+    return await themPhienGuiXe(sessionData)
+  } catch (error) {
+    console.error("Lỗi thêm phiên gửi xe:", error)
+    return {
+      success: false,
+      message: error.message
+    }
+  }
+}
