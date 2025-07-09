@@ -24,7 +24,6 @@ import LicensePlateConfirmDialog from "../../components/LicensePlateConfirmDialo
 import { useToast } from "../../components/Toast";
 import { layDanhSachCamera, layDanhSachKhu } from "../../api/api";
 import { cleanupObjectUrls, getEnvironmentInfo, initializeStorageCleanup } from "../../utils/imageUtils";
-
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
 
@@ -290,6 +289,20 @@ const MainUI = () => {
       openAddCardDialog: (cardId) => setShowAddCard({ show: true, cardId }),
       openLicensePlateErrorDialog: (data) =>
         setShowLicensePlateError({ show: true, ...data }),
+      showLicensePlateErrorDialog: (data) => {
+        return new Promise((resolve) => {
+          const handleDialogConfirm = (result) => {
+            setShowLicensePlateError(false);
+            resolve(result);
+          };
+          
+          setShowLicensePlateError({ 
+            show: true, 
+            ...data,
+            onConfirm: handleDialogConfirm
+          });
+        });
+      },
 
       // Utility methods
       showNotification: (title, message) => {
@@ -344,7 +357,6 @@ const MainUI = () => {
       )
         return;
 
-      // Tab: toggle between management <-> vehicle list
       if (event.key === "Tab") {
         event.preventDefault();
         setActiveTab((prev) => (prev === "management" ? "list" : "management"));
@@ -1754,7 +1766,11 @@ const MainUI = () => {
           onClose={() => setShowLicensePlateError(false)}
           onConfirm={(result) => {
             console.log("License plate error result:", result);
-            setShowLicensePlateError(false);
+            if (showLicensePlateError.onConfirm) {
+              showLicensePlateError.onConfirm(result);
+            } else {
+              setShowLicensePlateError(false);
+            }
           }}
         />
       )}

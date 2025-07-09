@@ -546,6 +546,163 @@ export function blobToBase64(blob) {
   });
 }
 
+// -------------------- MinIO Image Upload API --------------------
+
+/**
+ * Upload image to MinIO servers with automatic filename generation
+ * @param {Blob|File} imageBlob - Image file to upload
+ * @param {string} prefix - Filename prefix (license_plate, license_plate_out, khuon_mat, etc.)
+ * @returns {Promise<Object>} - Upload results from all MinIO servers
+ */
+export async function uploadImageToMinIO(imageBlob, prefix = 'image') {
+  try {
+    console.log('🔄 Starting MinIO image upload...', {
+      blob: imageBlob,
+      type: imageBlob.type,
+      size: imageBlob.size,
+      prefix: prefix
+    });
+
+    // Generate timestamp-based filename
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', 'T').slice(0, -1) + 'Z';
+    const extension = getFileExtension(imageBlob);
+    const filename = `${prefix}_${timestamp}.${extension}`;
+
+    // Create FormData
+    const formData = new FormData();
+    
+    // Ensure file has proper format
+    const file = new File([imageBlob], filename, {
+      type: imageBlob.type || 'image/jpeg',
+      lastModified: Date.now()
+    });
+
+    formData.append('image', file);
+    formData.append('filename', filename);
+
+    // Log FormData for debugging
+    console.log('📤 MinIO Upload FormData:', {
+      filename: filename,
+      fileSize: file.size,
+      fileType: file.type
+    });
+
+    // Upload to MinIO backend
+    const uploadUrl = url_api.replace('/index.php', '/upload.php');
+    
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      body: formData
+      // Don't set Content-Type to let browser set multipart/form-data boundary
+    });
+
+    console.log('📡 MinIO Upload Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ MinIO Upload Error:', errorText);
+      throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ MinIO Upload Success:', result);
+    
+    return {
+      success: true,
+      filename: filename,
+      results: result,
+      // Extract URLs for easy access
+      urls: result.map(r => r.url).filter(url => url),
+      primaryUrl: result.find(r => r.status === 'success')?.url
+    };
+
+  } catch (error) {
+    console.error('❌ MinIO Upload Error:', error);
+    throw new Error(`MinIO upload failed: ${error.message}`);
+  }
+}
+
+/**
+ * Upload license plate image (entry)
+ * @param {Blob|File} imageBlob - License plate image
+ * @returns {Promise<Object>} - Upload results
+ */
+export async function uploadLicensePlateImage(imageBlob) {
+  return uploadImageToMinIO(imageBlob, 'license_plate');
+}
+
+/**
+ * Upload license plate image (exit)
+ * @param {Blob|File} imageBlob - License plate image
+ * @returns {Promise<Object>} - Upload results
+ */
+export async function uploadLicensePlateOutImage(imageBlob) {
+  return uploadImageToMinIO(imageBlob, 'license_plate_out');
+}
+
+/**
+ * Upload face/driver image
+ * @param {Blob|File} imageBlob - Face/driver image
+ * @returns {Promise<Object>} - Upload results
+ */
+export async function uploadFaceImage(imageBlob) {
+  return uploadImageToMinIO(imageBlob, 'khuon_mat');
+}
+
+/**
+ * Get full MinIO image URL from filename
+ * @param {string} filename - Image filename stored in database
+ * @returns {string} - Full MinIO URL
+ */
+export function getImageUrl(filename) {
+  if (!filename) return '';
+  
+  // If it's already a full URL, return as is
+  if (filename.startsWith('http://') || filename.startsWith('https://')) {
+    return filename;
+  }
+  
+  // Construct MinIO URL from filename
+  return `http://localhost:8012/minio/parking-images/${filename}`;
+}
+
+/**
+ * Get file extension from blob/file
+ * @param {Blob|File} file - File object
+ * @returns {string} - File extension
+ */
+function getFileExtension(file) {
+  if (file.name) {
+    const extension = file.name.split('.').pop();
+    if (extension && extension !== file.name) {
+      return extension.toLowerCase();
+    }
+  }
+  
+  // Fallback based on MIME type
+  if (file.type) {
+    if (file.type.includes('jpeg') || file.type.includes('jpg')) {
+      return 'jpg';
+    } else if (file.type.includes('png')) {
+      return 'png';
+    }
+  }
+  
+  // Default fallback
+  return 'jpg';
+}
+
+/**
+ * Utility function to generate parking lot image filename
+ * @param {string} prefix - Image type prefix
+ * @param {string} extension - File extension
+ * @returns {string} - Generated filename
+ */
+export function generateParkingImageFilename(prefix = 'image', extension = 'jpg') {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', 'T').slice(0, -1) + 'Z';
+  return `${prefix}_${timestamp}.${extension}`;
+}
+
 // -------------------- Card History Management Functions --------------------
 /**
  * Lấy nhật ký theo thẻ từ bảng pm_nc0010

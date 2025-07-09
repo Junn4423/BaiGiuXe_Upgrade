@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../assets/styles/LicensePlateConfirmDialog.css"; 
+import { getImageUrl } from "../api/api"; 
 
 const LicensePlateConfirmDialog = ({
   isOpen,
@@ -94,7 +95,7 @@ const LicensePlateConfirmDialog = ({
                   <span className="image-label">Khuôn mặt vào</span>
                   {entryData.faceImage ? (
                     <img
-                      src={entryData.faceImage}
+                      src={getImageUrl(entryData.faceImage)}
                       alt="Khuôn mặt xe vào"
                       className="comparison-image"
                     />
@@ -112,7 +113,7 @@ const LicensePlateConfirmDialog = ({
                   <span className="image-label">Khuôn mặt ra</span>
                   {exitData.faceImage ? (
                     <img
-                      src={exitData.faceImage}
+                      src={getImageUrl(exitData.faceImage)}
                       alt="Khuôn mặt xe ra"
                       className="comparison-image"
                     />
