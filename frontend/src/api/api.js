@@ -171,6 +171,7 @@ export async function themPhienGuiXe(session) {
     camera_id: session.camera_id,
     plate_match: session.plate_match || 0,
     plate: session.plate || "",
+    loaiXe: session.loaiXe || "0", // Thêm loaiXe vào payload
   };
 
   // Kiểm tra loại xe để xử lý vị trí gửi
