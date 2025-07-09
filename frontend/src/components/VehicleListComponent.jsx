@@ -45,25 +45,18 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
             chinhSach: item.chinhSach
           }))
         })
+        console.log('🔍 DEBUG: workConfig.vehicle_type:', workConfig?.vehicle_type)
+        console.log('📋 NOTE: Ưu tiên dữ liệu từ database (loaiXe) thay vì workConfig để tính phí chính xác')
+        console.log('📋 HƯỚNG DẪN: WorkConfig chỉ ảnh hưởng xe MỚI vào. Xe cũ giữ nguyên loại xe và chính sách khi vào.')
       }
       
       // Map API data to component format based on pm_nc0009 structure
       const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => {
-        // Determine vehicle type - ĐỒNG BỘ VỚI WORKCONFIG TRƯỚC
+        // Determine vehicle type - ƯU TIÊN DỮ LIỆU THỰC TẾ TỪ DATABASE
         let vehicleType = "xe_may" // default
         
-        // Bước 1: Ưu tiên workConfig.vehicle_type (đồng bộ đơn giản)
-        if (workConfig?.vehicle_type) {
-          if (workConfig.vehicle_type === "oto") {
-            vehicleType = "oto"
-            console.log(`🚗 Vehicle ${item.bienSo}: Từ workConfig -> Ô tô`)
-          } else if (workConfig.vehicle_type === "xe_may") {
-            vehicleType = "xe_may"
-            console.log(`🏍️ Vehicle ${item.bienSo}: Từ workConfig -> Xe máy`)
-          }
-        }
-        // Bước 2: Fallback - nếu không có workConfig, dùng loaiXe từ database
-        else if (item.loaiXe !== undefined && item.loaiXe !== null) {
+        // Bước 1: Ưu tiên loaiXe từ database (dữ liệu thực tế đã lưu)
+        if (item.loaiXe !== undefined && item.loaiXe !== null) {
           if (item.loaiXe === 1 || item.loaiXe === "1") {
             vehicleType = "oto"
             console.log(`🚗 Vehicle ${item.bienSo}: loaiXe = ${item.loaiXe} -> Ô tô`)
@@ -72,15 +65,26 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
             console.log(`🏍️ Vehicle ${item.bienSo}: loaiXe = ${item.loaiXe} -> Xe máy`)
           }
         }
-        // Bước 3: Fallback cuối - dùng policy name
+        // Bước 2: Fallback - dùng policy name từ chính sách giá
         else if (item.chinhSach) {
           if (item.chinhSach.toLowerCase().includes("oto") || 
               item.chinhSach.toLowerCase().includes("car") ||
               item.chinhSach.toLowerCase().includes("auto")) {
             vehicleType = "oto"
-            console.log(`🚗 Vehicle ${item.bienSo}: Fallback từ policy ${item.chinhSach} -> Ô tô`)
+            console.log(`🚗 Vehicle ${item.bienSo}: Từ policy ${item.chinhSach} -> Ô tô`)
           } else {
-            console.log(`🏍️ Vehicle ${item.bienSo}: Fallback từ policy ${item.chinhSach} -> Xe máy`)
+            console.log(`🏍️ Vehicle ${item.bienSo}: Từ policy ${item.chinhSach} -> Xe máy`)
+          }
+        }
+        // Bước 3: CHỈ KHI TẠO MỚI - dùng workConfig để xác định loại xe cho xe chưa có dữ liệu
+        else if (workConfig?.vehicle_type && item.trangThai === "DANG_GUI") {
+          // Chỉ áp dụng workConfig cho xe đang trong bãi (mới tạo)
+          if (workConfig.vehicle_type === "oto") {
+            vehicleType = "oto"
+            console.log(`🚗 Vehicle ${item.bienSo}: Xe mới từ workConfig -> Ô tô`)
+          } else if (workConfig.vehicle_type === "xe_may") {
+            vehicleType = "xe_may"
+            console.log(`🏍️ Vehicle ${item.bienSo}: Xe mới từ workConfig -> Xe máy`)
           }
         }
 
@@ -122,11 +126,30 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
           policy: item.chinhSach || "---",
           gateIn: item.congVao || "---",
           gateOut: item.congRa || "---",
+          // Debug: Thêm thông tin debug
+          _debug: {
+            originalLoaiXe: item.loaiXe,
+            workConfigType: workConfig?.vehicle_type,
+            policyName: item.chinhSach,
+            determinedType: vehicleType,
+            feeValue: item.phi,
+            status: item.trangThai
+          },
           // Note: Intentionally exclude image fields (anhVao, anhRa)
         }
       })
 
       console.log(`🔄 Vehicle type mapping summary: WorkConfig=${workConfig?.vehicle_type}, Total vehicles=${mappedVehicles.length}`)
+      
+      // Debug: Log pricing issues if any
+      const pricingIssues = mappedVehicles.filter(v => v._debug && v._debug.feeValue !== undefined && v._debug.feeValue > 0 && v._debug.determinedType !== workConfig?.vehicle_type && v._debug.status === 'DA_RA')
+      if (pricingIssues.length > 0) {
+        console.warn(`💰 Phát hiện ${pricingIssues.length} xe ĐÃ RA có khác biệt loại xe so với WorkConfig:`)
+        pricingIssues.forEach(v => {
+          console.warn(`  - ${v.licensePlate}: WorkConfig=${workConfig?.vehicle_type}, Thực tế=${v._debug.determinedType}, Phí=${v._debug.feeValue}, Policy=${v._debug.policyName}`)
+        })
+        console.info(`📋 NOTE: Điều này bình thường vì xe đã vào trước khi thay đổi WorkConfig. Chỉ xe mới vào mới áp dụng WorkConfig hiện tại.`)
+      }
       
       setVehicles(mappedVehicles)
       
