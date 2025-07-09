@@ -1365,13 +1365,9 @@ const MainUI = () => {
               "XE ĐÃ RA KHỎI BÃI",
               "#10b981"
             );
-            // Format and update parking fee
-            const formattedFee = parkingFee > 0 ? `${parkingFee.toLocaleString()} VNĐ` : "0 VNĐ";
-            console.log(`💰 Main flow: Updating parking fee to ${formattedFee} (raw: ${parkingFee})`);
-            vehicleInfoComponentRef.current.updateParkingFee(formattedFee);
-
-            // Update vehicle info with exit details
-            console.log(`📝 Main flow: Updating vehicle info with exit details`);
+            
+            // Update vehicle info with exit details INCLUDING fee
+            console.log(`📝 Main flow: Updating vehicle info with exit details and fee`);
             vehicleInfoComponentRef.current.updateVehicleInfo({
               ma_the: cardId,
               ma_phien: activeSession.maPhien, // Add session ID for fee calculation
@@ -1382,9 +1378,14 @@ const MainUI = () => {
               vi_tri: activeSession.viTriGui || null, // Không có default
               cong_ra: exitGate,
               thoi_gian_gui: parkingDuration ? `${parkingDuration} phút` : null, // Không có default
-              phi_gui_xe: parkingFee,
+              phi_gui_xe: parkingFee, // This will be handled by updateVehicleInfo
               trang_thai: "Xe đã ra khỏi bãi",
             });
+            
+            // Also explicitly update parking fee display for extra safety
+            const formattedFee = parkingFee > 0 ? `${parkingFee.toLocaleString()} VNĐ` : "0 VNĐ";
+            console.log(`💰 Main flow: Also explicitly updating parking fee display to ${formattedFee}`);
+            vehicleInfoComponentRef.current.updateParkingFee(formattedFee);
           }
 
           // Refresh vehicle list to show updated exit

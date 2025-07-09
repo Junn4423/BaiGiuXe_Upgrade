@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import "../../assets/styles/PricingPolicyDialog.css"
-import { 
-  layDanhSachChinhSachGiaV2, 
-  themChinhSachV2, 
-  suaChinhSachV2, 
+import "../../assets/styles/dialog-base.css"
+import {
+  layDanhSachChinhSachGiaV2,
+  themChinhSachV2,
+  suaChinhSachV2,
   xoaChinhSachV2,
   layALLLoaiPhuongTien,
   taoMaChinhSachTuDong,
-  tinhTongNgay
+  tinhTongNgay,
 } from "../../api/api"
 
 const PricingPolicyDialog = ({ onClose }) => {
@@ -22,28 +22,28 @@ const PricingPolicyDialog = ({ onClose }) => {
 
   // Form data state - cập nhật theo mobile app
   const [formData, setFormData] = useState({
-    maChinhSach: '',
-    maLoaiPT: '',
+    maChinhSach: "",
+    maLoaiPT: "",
     thoiGian: 0,
     donGia: 0,
     quaGio: 0,
     donGiaQuaGio: 0,
-    loaiChinhSach: '',
+    loaiChinhSach: "",
     tongNgay: 0,
   })
 
   // Enhanced states theo mobile app
   const [errors, setErrors] = useState({})
-  const [policyType, setPolicyType] = useState('N') // Đồng bộ với mobile: 'N' cho Ngày
+  const [policyType, setPolicyType] = useState("N") // Đồng bộ với mobile: 'N' cho Ngày
   const [policyCount, setPolicyCount] = useState(1)
   const [isSpecialOffer, setIsSpecialOffer] = useState(false)
 
   // Policy type options - đồng bộ với mobile app
   const POLICY_TYPE_OPTIONS = [
-    { label: 'Ngày', value: 'N', days: 1 },
-    { label: 'Tuần', value: 'T', days: 7 },
-    { label: 'Tháng', value: 'Th', days: 30 },
-    { label: 'Năm', value: 'NAM', days: 365 },
+    { label: "Ngày", value: "N", days: 1 },
+    { label: "Tuần", value: "T", days: 7 },
+    { label: "Tháng", value: "Th", days: 30 },
+    { label: "Năm", value: "NAM", days: 365 },
   ]
 
   // Load policies when component mounts
@@ -59,27 +59,27 @@ const PricingPolicyDialog = ({ onClose }) => {
     } else if (formData.maLoaiPT && !isSpecialOffer) {
       return `CS_${formData.maLoaiPT.toUpperCase()}_BASE`
     }
-    return ''
+    return ""
   }, [formData.maLoaiPT, policyType, policyCount, isSpecialOffer])
 
   // Tự động tính tổng ngày (realtime update)
   useEffect(() => {
     if (isSpecialOffer) {
       const totalDays = tinhTongNgay(policyType, policyCount)
-      const typeOption = POLICY_TYPE_OPTIONS.find(t => t.value === policyType)
-      const newLoaiChinhSach = `${policyCount} ${typeOption?.label || ''}`
-      
-      setFormData(prev => ({
+      const typeOption = POLICY_TYPE_OPTIONS.find((t) => t.value === policyType)
+      const newLoaiChinhSach = `${policyCount} ${typeOption?.label || ""}`
+
+      setFormData((prev) => ({
         ...prev,
         tongNgay: totalDays,
-        loaiChinhSach: newLoaiChinhSach
+        loaiChinhSach: newLoaiChinhSach,
       }))
       console.log(`Đã cập nhật tongNgay: ${totalDays}, loaiChinhSach: "${newLoaiChinhSach}" cho chính sách VIP`)
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         tongNgay: 0,
-        loaiChinhSach: policyType // Dùng policyType thay vì để trống
+        loaiChinhSach: policyType, // Dùng policyType thay vì để trống
       }))
       console.log(`Đã reset tongNgay về 0 và loaiChinhSach về "${policyType}" cho chính sách thường`)
     }
@@ -87,25 +87,22 @@ const PricingPolicyDialog = ({ onClose }) => {
 
   // Cập nhật mã chính sách tự động (realtime update)
   useEffect(() => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      maChinhSach: maChinhSach
+      maChinhSach: maChinhSach,
     }))
   }, [maChinhSach])
 
   const loadData = async () => {
     try {
       setIsLoading(true)
-      const [policyData, vehicleData] = await Promise.all([
-        layDanhSachChinhSachGiaV2(),
-        layALLLoaiPhuongTien()
-      ])
+      const [policyData, vehicleData] = await Promise.all([layDanhSachChinhSachGiaV2(), layALLLoaiPhuongTien()])
 
       setPolicies(Array.isArray(policyData) ? policyData : [])
       setVehicleTypes(Array.isArray(vehicleData) ? vehicleData : [])
     } catch (error) {
-      console.error('Lỗi load dữ liệu:', error)
-      alert('Lỗi tải dữ liệu: ' + error.message)
+      console.error("Lỗi load dữ liệu:", error)
+      alert("Lỗi tải dữ liệu: " + error.message)
     } finally {
       setIsLoading(false)
     }
@@ -114,39 +111,41 @@ const PricingPolicyDialog = ({ onClose }) => {
   const handleSelectPolicy = (policy) => {
     console.log("Selected policy:", policy)
     setSelectedPolicy(policy)
-    
+
     // Parse policy data
     const isVIP = policy.tongNgay > 0
     setIsSpecialOffer(isVIP)
-    
+
     if (isVIP) {
       // Parse loaiChinhSach to extract type and count
       const match = policy.loaiChinhSach?.match(/(\d+)\s*(\w+)/)
       if (match) {
-        const count = parseInt(match[1])
+        const count = Number.parseInt(match[1])
         const typeLabel = match[2]
-        const typeOption = POLICY_TYPE_OPTIONS.find(opt => opt.label === typeLabel)
+        const typeOption = POLICY_TYPE_OPTIONS.find((opt) => opt.label === typeLabel)
         if (typeOption) {
           setPolicyType(typeOption.value)
           setPolicyCount(count)
-          console.log(`Parsed VIP policy - type: ${typeOption.value}, count: ${count}, loaiChinhSach: "${policy.loaiChinhSach}", tongNgay: ${policy.tongNgay}`)
+          console.log(
+            `Parsed VIP policy - type: ${typeOption.value}, count: ${count}, loaiChinhSach: "${policy.loaiChinhSach}", tongNgay: ${policy.tongNgay}`,
+          )
         }
       }
     } else {
       // Reset về giá trị mặc định cho chính sách thường
-      setPolicyType('N')
+      setPolicyType("N")
       setPolicyCount(1)
-      console.log('Selected normal policy - reset policyType: N, policyCount: 1')
+      console.log("Selected normal policy - reset policyType: N, policyCount: 1")
     }
 
     setFormData({
-      maChinhSach: policy.maChinhSach || '',
-      maLoaiPT: policy.maLoaiPT || '',
+      maChinhSach: policy.maChinhSach || "",
+      maLoaiPT: policy.maLoaiPT || "",
       thoiGian: policy.thoiGian || 0,
       donGia: policy.donGia || 0,
       quaGio: policy.quaGio || 0,
       donGiaQuaGio: policy.donGiaQuaGio || 0,
-      loaiChinhSach: policy.loaiChinhSach || '',
+      loaiChinhSach: policy.loaiChinhSach || "",
       tongNgay: policy.tongNgay || 0,
     })
     setIsEditing(false)
@@ -158,16 +157,16 @@ const PricingPolicyDialog = ({ onClose }) => {
     setSelectedPolicy(null)
     setIsEditing(true)
     setIsSpecialOffer(false)
-    setPolicyType('N')
+    setPolicyType("N")
     setPolicyCount(1)
     setFormData({
-      maChinhSach: '',
-      maLoaiPT: '',
+      maChinhSach: "",
+      maLoaiPT: "",
       thoiGian: 240, // 4 tiếng mặc định
       donGia: 5000,
       quaGio: 0,
       donGiaQuaGio: 2000,
-      loaiChinhSach: '',
+      loaiChinhSach: "",
       tongNgay: 0,
     })
     setErrors({})
@@ -187,29 +186,29 @@ const PricingPolicyDialog = ({ onClose }) => {
     const newErrors = {}
 
     if (!formData.maChinhSach.trim()) {
-      newErrors.maChinhSach = 'Mã chính sách không được để trống'
+      newErrors.maChinhSach = "Mã chính sách không được để trống"
     }
 
     if (!formData.maLoaiPT) {
-      newErrors.maLoaiPT = 'Vui lòng chọn loại phương tiện'
+      newErrors.maLoaiPT = "Vui lòng chọn loại phương tiện"
     }
 
     if (isSpecialOffer) {
       if (policyCount <= 0) {
-        newErrors.policyCount = 'Số lượng phải lớn hơn 0'
+        newErrors.policyCount = "Số lượng phải lớn hơn 0"
       }
       if (formData.donGia <= 0) {
-        newErrors.donGia = 'Giá gói phải lớn hơn 0'
+        newErrors.donGia = "Giá gói phải lớn hơn 0"
       }
     } else {
       if (formData.thoiGian <= 0) {
-        newErrors.thoiGian = 'Thời gian phải lớn hơn 0'
+        newErrors.thoiGian = "Thời gian phải lớn hơn 0"
       }
       if (formData.donGia <= 0) {
-        newErrors.donGia = 'Đơn giá phải lớn hơn 0'
+        newErrors.donGia = "Đơn giá phải lớn hơn 0"
       }
       if (formData.quaGio === 1 && formData.donGiaQuaGio <= 0) {
-        newErrors.donGiaQuaGio = 'Đơn giá quá giờ phải lớn hơn 0'
+        newErrors.donGiaQuaGio = "Đơn giá quá giờ phải lớn hơn 0"
       }
     }
 
@@ -223,15 +222,15 @@ const PricingPolicyDialog = ({ onClose }) => {
 
     try {
       setIsLoading(true)
-      
+
       // Đảm bảo dữ liệu submit có đầy đủ thông tin từ state hiện tại
-      const submitData = { 
+      const submitData = {
         ...formData,
         // Tính toán lại tongNgay và loaiChinhSach để đảm bảo chính xác tại thời điểm submit
         tongNgay: isSpecialOffer ? tinhTongNgay(policyType, policyCount) : 0,
-        loaiChinhSach: isSpecialOffer 
-          ? `${policyCount} ${POLICY_TYPE_OPTIONS.find(t => t.value === policyType)?.label || ''}` 
-          : policyType // Nếu không ưu đãi, dùng policyType
+        loaiChinhSach: isSpecialOffer
+          ? `${policyCount} ${POLICY_TYPE_OPTIONS.find((t) => t.value === policyType)?.label || ""}`
+          : policyType, // Nếu không ưu đãi, dùng policyType
       }
 
       console.log("=== DEBUG SUBMIT DATA ===")
@@ -251,15 +250,15 @@ const PricingPolicyDialog = ({ onClose }) => {
       }
 
       if (result?.success) {
-        alert(selectedPolicy ? 'Cập nhật chính sách thành công!' : 'Thêm chính sách thành công!')
+        alert(selectedPolicy ? "Cập nhật chính sách thành công!" : "Thêm chính sách thành công!")
         setIsEditing(false)
         await loadData()
       } else {
-        alert(result?.message || 'Không thể lưu chính sách')
+        alert(result?.message || "Không thể lưu chính sách")
       }
     } catch (error) {
-      console.error('Lỗi submit form:', error)
-      alert('Có lỗi xảy ra: ' + error.message)
+      console.error("Lỗi submit form:", error)
+      alert("Có lỗi xảy ra: " + error.message)
     } finally {
       setIsLoading(false)
     }
@@ -275,17 +274,17 @@ const PricingPolicyDialog = ({ onClose }) => {
       try {
         setIsLoading(true)
         const result = await xoaChinhSachV2(selectedPolicy.maChinhSach)
-        
+
         if (result?.success) {
-          alert('Xóa chính sách thành công!')
+          alert("Xóa chính sách thành công!")
           await loadData()
           clearForm()
         } else {
-          alert(result?.message || 'Không thể xóa chính sách')
+          alert(result?.message || "Không thể xóa chính sách")
         }
       } catch (error) {
-        console.error('Lỗi xóa:', error)
-        alert('Có lỗi xảy ra khi xóa: ' + error.message)
+        console.error("Lỗi xóa:", error)
+        alert("Có lỗi xảy ra khi xóa: " + error.message)
       } finally {
         setIsLoading(false)
       }
@@ -294,19 +293,19 @@ const PricingPolicyDialog = ({ onClose }) => {
 
   const clearForm = () => {
     setFormData({
-      maChinhSach: '',
-      maLoaiPT: '',
+      maChinhSach: "",
+      maLoaiPT: "",
       thoiGian: 240,
       donGia: 5000,
       quaGio: 0,
       donGiaQuaGio: 2000,
-      loaiChinhSach: '',
+      loaiChinhSach: "",
       tongNgay: 0,
     })
     setSelectedPolicy(null)
     setIsEditing(false)
     setIsSpecialOffer(false)
-    setPolicyType('N')
+    setPolicyType("N")
     setPolicyCount(1)
     setErrors({})
   }
@@ -321,12 +320,12 @@ const PricingPolicyDialog = ({ onClose }) => {
   }
 
   const updateField = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }))
     if (errors[field]) {
-      setErrors(prev => ({...prev, [field]: ''}))
+      setErrors((prev) => ({ ...prev, [field]: "" }))
     }
   }
 
@@ -337,321 +336,330 @@ const PricingPolicyDialog = ({ onClose }) => {
     }).format(amount)
   }
 
-  const getSelectedVehicleTypeLabel = () => {
-    const selected = vehicleTypes.find(vt => vt.maLoaiPT === formData.maLoaiPT)
-    return selected ? selected.tenLoaiPT : 'Chọn loại phương tiện'
-  }
-
   return (
     <div className="dialog-overlay">
-      <div className="pricing-policy-dialog">
-        {/* Header */}
+      <div className="dialog-container large">
         <div className="dialog-header">
-          <h3>Quản Lý Chính Sách Giá</h3>
-          <button className="close-button" onClick={onClose}>×</button>
+          <h3 className="dialog-title">Quản Lý Chính Sách Giá</h3>
+          <button className="dialog-close" onClick={onClose}>
+            ×
+          </button>
         </div>
 
-        <div className="dialog-content">
+        <div className="dialog-body">
           <div className="content-layout">
             {/* Left Panel - Policy List */}
-            <div className="policy-list-panel">
+            <div className="panel list-panel">
               <div className="panel-header">
-                <h4>Danh Sách Chính Sách ({policies.length})</h4>
+                <h4 className="panel-title">Danh Sách Chính Sách ({policies.length})</h4>
+                <div className="header-actions">
+                  <button className="refresh-button" onClick={loadData} disabled={isLoading}>
+                    ↻ Làm mới
+                  </button>
+                </div>
               </div>
 
-              <div className="policy-table-container">
+              <div className="panel-content">
                 {isLoading ? (
-                  <div className="loading-message">Đang tải dữ liệu...</div>
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <p>Đang tải dữ liệu...</p>
+                  </div>
+                ) : policies.length === 0 ? (
+                  <div className="empty-state">
+                    <div className="empty-icon">💰</div>
+                    <h4>Chưa có chính sách</h4>
+                    <p>Thêm chính sách giá đầu tiên</p>
+                  </div>
                 ) : (
-                  <table className="policy-table">
-                    <thead>
-                      <tr>
-                        <th>Mã chính sách</th>
-                        <th>Loại xe</th>
-                        <th>Loại CS</th>
-                        <th>Thời gian/Ngày</th>
-                        <th>Đơn giá</th>
-                        <th>Quá giờ</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {policies.length === 0 ? (
-                        <tr>
-                          <td colSpan="6" className="no-data">
-                            Chưa có chính sách nào
-                          </td>
-                        </tr>
-                      ) : (
-                        policies.map((policy, index) => (
-                          <tr
-                            key={policy.maChinhSach || index}
-                            className={selectedPolicy?.maChinhSach === policy.maChinhSach ? "selected" : ""}
-                            onClick={() => handleSelectPolicy(policy)}
-                          >
-                            <td>{policy.maChinhSach}</td>
-                            <td>{policy.maLoaiPT}</td>
-                            <td>
-                              {policy.tongNgay > 0 ? (
-                                <span className="vip-badge">
-                                  {policy.loaiChinhSach}
-                                </span>
-                              ) : (
-                                <span className="normal-badge">Thường</span>
-                              )}
-                            </td>
-                            <td>
-                              {policy.tongNgay > 0 ? 
-                                `${policy.tongNgay} ngày` : 
-                                `${policy.thoiGian} phút`
-                              }
-                            </td>
-                            <td>{formatCurrency(policy.donGia)}</td>
-                            <td>
-                              <span className={`status ${policy.quaGio ? "active" : "inactive"}`}>
-                                {policy.quaGio ? "Có" : "Không"}
+                  <div className="item-list">
+                    {policies.map((policy, index) => (
+                      <div
+                        key={policy.maChinhSach || index}
+                        className={`item-card ${selectedPolicy?.maChinhSach === policy.maChinhSach ? "selected" : ""}`}
+                        onClick={() => handleSelectPolicy(policy)}
+                      >
+                        <div className="item-header">
+                          <div>
+                            <span className="item-code">{policy.maChinhSach}</span>
+                            <span className="item-name">{policy.maLoaiPT}</span>
+                          </div>
+                          <div>
+                            {policy.tongNgay > 0 ? (
+                              <span
+                                style={{
+                                  background: "#10b981",
+                                  color: "white",
+                                  padding: "0.25rem 0.5rem",
+                                  borderRadius: "4px",
+                                  fontSize: "0.75rem",
+                                }}
+                              >
+                                VIP
                               </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                            ) : (
+                              <span
+                                style={{
+                                  background: "#6b7280",
+                                  color: "white",
+                                  padding: "0.25rem 0.5rem",
+                                  borderRadius: "4px",
+                                  fontSize: "0.75rem",
+                                }}
+                              >
+                                Thường
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="item-details">
+                          <div>
+                            {policy.tongNgay > 0
+                              ? `${policy.loaiChinhSach} (${policy.tongNgay} ngày)`
+                              : `${policy.thoiGian} phút`}
+                          </div>
+                          <div style={{ fontWeight: "600", color: "#10b981" }}>{formatCurrency(policy.donGia)}</div>
+                          <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                            Quá giờ: {policy.quaGio ? "Có" : "Không"}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
 
             {/* Right Panel - Policy Form */}
-            <div className="policy-form-panel">
+            <div className="panel form-panel">
               <div className="panel-header">
-                <h4>{isEditing ? (selectedPolicy ? 'Sửa chính sách' : 'Thêm chính sách mới') : 'Chi tiết chính sách'}</h4>
+                <h4 className="panel-title">
+                  {isEditing ? (selectedPolicy ? "Sửa chính sách" : "Thêm chính sách mới") : "Chi tiết chính sách"}
+                </h4>
               </div>
 
-              <div className="form-container">
-                <div className="form-group">
-                  <label>Mã chính sách *</label>
-                  <input
-                    type="text"
-                    value={formData.maChinhSach}
-                    onChange={(e) => updateField('maChinhSach', e.target.value)}
-                    disabled={!isEditing}
-                    className={errors.maChinhSach ? 'error' : ''}
-                    placeholder="Mã chính sách sẽ tự động sinh"
-                  />
-                  {errors.maChinhSach && <span className="error-message">{errors.maChinhSach}</span>}
-                </div>
-
-                <div className="form-group">
-                  <label>Loại phương tiện *</label>
-                  <select
-                    value={formData.maLoaiPT}
-                    onChange={(e) => updateField('maLoaiPT', e.target.value)}
-                    disabled={!isEditing}
-                    className={errors.maLoaiPT ? 'error' : ''}
-                  >
-                    <option value="">Chọn loại phương tiện</option>
-                    {vehicleTypes.map(vt => (
-                      <option key={vt.maLoaiPT} value={vt.maLoaiPT}>
-                        {vt.tenLoaiPT}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.maLoaiPT && <span className="error-message">{errors.maLoaiPT}</span>}
-                </div>
-
-                <div className="form-group checkbox-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={isSpecialOffer}
-                      onChange={(e) => setIsSpecialOffer(e.target.checked)}
-                      disabled={!isEditing}
-                    />
-                    <span className="checkmark"></span>
-                    Chính sách ưu đãi đặc biệt (VIP)
-                  </label>
-                </div>
-
-                {isSpecialOffer ? (
-                  // Form cho chính sách VIP
-                  <>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Loại chính sách *</label>
-                        <select
-                          value={policyType}
-                          onChange={(e) => setPolicyType(e.target.value)}
-                          disabled={!isEditing}
-                        >
-                          {POLICY_TYPE_OPTIONS.map(type => (
-                            <option key={type.value} value={type.value}>
-                              {type.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label>Số lượng *</label>
-                        <input
-                          type="number"
-                          value={policyCount}
-                          onChange={(e) => setPolicyCount(parseInt(e.target.value) || 1)}
-                          disabled={!isEditing}
-                          min="1"
-                          className={errors.policyCount ? 'error' : ''}
-                        />
-                        {errors.policyCount && <span className="error-message">{errors.policyCount}</span>}
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Tổng số ngày</label>
-                      <input
-                        type="number"
-                        value={formData.tongNgay}
-                        disabled
-                        style={{ backgroundColor: '#f5f5f5' }}
-                      />
-                      <small className="form-help">
-                        Tự động tính từ loại chính sách và số lượng
-                      </small>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Giá gói ({policyCount} {POLICY_TYPE_OPTIONS.find(t => t.value === policyType)?.label.toLowerCase()}) *</label>
-                      <input
-                        type="number"
-                        value={formData.donGia}
-                        onChange={(e) => updateField('donGia', parseInt(e.target.value) || 0)}
-                        disabled={!isEditing}
-                        min="0"
-                        step="1000"
-                        className={errors.donGia ? 'error' : ''}
-                      />
-                      {errors.donGia && <span className="error-message">{errors.donGia}</span>}
-                    </div>
-                  </>
+              <div className="panel-content">
+                {!selectedPolicy && !isEditing ? (
+                  <div className="empty-state">
+                    <div className="empty-icon"></div>
+                    <h4>Thêm chính sách</h4>
+                    <p>Tạo chính sách giá mới cho hệ thống</p>
+                    <button className="btn btn-primary" onClick={handleNewPolicy}>
+                      + Thêm Chính Sách Mới
+                    </button>
+                  </div>
                 ) : (
-                  // Form cho chính sách thường
-                  <>
+                  <div className="form-container">
                     <div className="form-group">
-                      <label>Thời gian (phút) *</label>
+                      <label className="form-label">Mã chính sách *</label>
                       <input
-                        type="number"
-                        value={formData.thoiGian}
-                        onChange={(e) => updateField('thoiGian', parseInt(e.target.value) || 0)}
+                        type="text"
+                        className={`form-input ${errors.maChinhSach ? "error" : ""}`}
+                        value={formData.maChinhSach}
+                        onChange={(e) => updateField("maChinhSach", e.target.value)}
                         disabled={!isEditing}
-                        min="1"
-                        className={errors.thoiGian ? 'error' : ''}
+                        placeholder="Mã chính sách sẽ tự động sinh"
                       />
-                      {errors.thoiGian && <span className="error-message">{errors.thoiGian}</span>}
+                      {errors.maChinhSach && <span className="error-message">{errors.maChinhSach}</span>}
                     </div>
 
                     <div className="form-group">
-                      <label>Đơn giá cơ bản (VNĐ) *</label>
-                      <input
-                        type="number"
-                        value={formData.donGia}
-                        onChange={(e) => updateField('donGia', parseInt(e.target.value) || 0)}
+                      <label className="form-label">Loại phương tiện *</label>
+                      <select
+                        className={`form-select ${errors.maLoaiPT ? "error" : ""}`}
+                        value={formData.maLoaiPT}
+                        onChange={(e) => updateField("maLoaiPT", e.target.value)}
                         disabled={!isEditing}
-                        min="0"
-                        step="1000"
-                        className={errors.donGia ? 'error' : ''}
-                      />
-                      {errors.donGia && <span className="error-message">{errors.donGia}</span>}
+                      >
+                        <option value="">Chọn loại phương tiện</option>
+                        {vehicleTypes.map((vt) => (
+                          <option key={vt.maLoaiPT} value={vt.maLoaiPT}>
+                            {vt.tenLoaiPT}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.maLoaiPT && <span className="error-message">{errors.maLoaiPT}</span>}
                     </div>
 
-                    <div className="form-group checkbox-group">
-                      <label className="checkbox-label">
-                        <input
-                          type="checkbox"
-                          checked={formData.quaGio === 1}
-                          onChange={(e) => updateField('quaGio', e.target.checked ? 1 : 0)}
-                          disabled={!isEditing}
-                        />
-                        <span className="checkmark"></span>
-                        Có tính phí quá giờ
-                      </label>
-                    </div>
-
-                    {formData.quaGio === 1 && (
+                    {isEditing && (
                       <div className="form-group">
-                        <label>Đơn giá quá giờ (VNĐ) *</label>
-                        <input
-                          type="number"
-                          value={formData.donGiaQuaGio}
-                          onChange={(e) => updateField('donGiaQuaGio', parseInt(e.target.value) || 0)}
-                          disabled={!isEditing}
-                          min="0"
-                          step="1000"
-                          className={errors.donGiaQuaGio ? 'error' : ''}
-                        />
-                        {errors.donGiaQuaGio && <span className="error-message">{errors.donGiaQuaGio}</span>}
+                        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <input
+                            type="checkbox"
+                            checked={isSpecialOffer}
+                            onChange={(e) => setIsSpecialOffer(e.target.checked)}
+                          />
+                          <span className="form-label" style={{ margin: 0 }}>
+                            Chính sách ưu đãi đặc biệt (VIP)
+                          </span>
+                        </label>
                       </div>
                     )}
-                  </>
+
+                    {isSpecialOffer ? (
+                      // Form cho chính sách VIP
+                      <>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                          <div className="form-group">
+                            <label className="form-label">Loại chính sách *</label>
+                            <select
+                              className="form-select"
+                              value={policyType}
+                              onChange={(e) => setPolicyType(e.target.value)}
+                              disabled={!isEditing}
+                            >
+                              {POLICY_TYPE_OPTIONS.map((type) => (
+                                <option key={type.value} value={type.value}>
+                                  {type.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Số lượng *</label>
+                            <input
+                              type="number"
+                              className={`form-input ${errors.policyCount ? "error" : ""}`}
+                              value={policyCount}
+                              onChange={(e) => setPolicyCount(Number.parseInt(e.target.value) || 1)}
+                              disabled={!isEditing}
+                              min="1"
+                            />
+                            {errors.policyCount && <span className="error-message">{errors.policyCount}</span>}
+                          </div>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Tổng số ngày</label>
+                          <input
+                            type="number"
+                            className="form-input"
+                            value={formData.tongNgay}
+                            disabled
+                            style={{ backgroundColor: "#f3f4f6" }}
+                          />
+                          <small style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                            Tự động tính từ loại chính sách và số lượng
+                          </small>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">
+                            Giá gói ({policyCount}{" "}
+                            {POLICY_TYPE_OPTIONS.find((t) => t.value === policyType)?.label.toLowerCase()}) *
+                          </label>
+                          <input
+                            type="number"
+                            className={`form-input ${errors.donGia ? "error" : ""}`}
+                            value={formData.donGia}
+                            onChange={(e) => updateField("donGia", Number.parseInt(e.target.value) || 0)}
+                            disabled={!isEditing}
+                            min="0"
+                            step="1000"
+                          />
+                          {errors.donGia && <span className="error-message">{errors.donGia}</span>}
+                        </div>
+                      </>
+                    ) : (
+                      // Form cho chính sách thường
+                      <>
+                        <div className="form-group">
+                          <label className="form-label">Thời gian (phút) *</label>
+                          <input
+                            type="number"
+                            className={`form-input ${errors.thoiGian ? "error" : ""}`}
+                            value={formData.thoiGian}
+                            onChange={(e) => updateField("thoiGian", Number.parseInt(e.target.value) || 0)}
+                            disabled={!isEditing}
+                            min="1"
+                          />
+                          {errors.thoiGian && <span className="error-message">{errors.thoiGian}</span>}
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Đơn giá cơ bản (VNĐ) *</label>
+                          <input
+                            type="number"
+                            className={`form-input ${errors.donGia ? "error" : ""}`}
+                            value={formData.donGia}
+                            onChange={(e) => updateField("donGia", Number.parseInt(e.target.value) || 0)}
+                            disabled={!isEditing}
+                            min="0"
+                            step="1000"
+                          />
+                          {errors.donGia && <span className="error-message">{errors.donGia}</span>}
+                        </div>
+
+                        {isEditing && (
+                          <div className="form-group">
+                            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              <input
+                                type="checkbox"
+                                checked={formData.quaGio === 1}
+                                onChange={(e) => updateField("quaGio", e.target.checked ? 1 : 0)}
+                              />
+                              <span className="form-label" style={{ margin: 0 }}>
+                                Có tính phí quá giờ
+                              </span>
+                            </label>
+                          </div>
+                        )}
+
+                        {formData.quaGio === 1 && (
+                          <div className="form-group">
+                            <label className="form-label">Đơn giá quá giờ (VNĐ) *</label>
+                            <input
+                              type="number"
+                              className={`form-input ${errors.donGiaQuaGio ? "error" : ""}`}
+                              value={formData.donGiaQuaGio}
+                              onChange={(e) => updateField("donGiaQuaGio", Number.parseInt(e.target.value) || 0)}
+                              disabled={!isEditing}
+                              min="0"
+                              step="1000"
+                            />
+                            {errors.donGiaQuaGio && <span className="error-message">{errors.donGiaQuaGio}</span>}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Action Buttons */}
+                    {isEditing ? (
+                      <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
+                        <button className="btn btn-primary" onClick={handleSave} disabled={isLoading}>
+                          {isLoading ? "Đang lưu..." : "Lưu"}
+                        </button>
+                        <button className="btn btn-secondary" onClick={handleCancel} disabled={isLoading}>
+                          Hủy
+                        </button>
+                      </div>
+                    ) : selectedPolicy ? (
+                      <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
+                        <button className="btn btn-primary" onClick={handleEdit} disabled={isLoading}>
+                          Sửa
+                        </button>
+                        <button className="btn btn-danger" onClick={handleDelete} disabled={isLoading}>
+                          Xóa
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
                 )}
-
-                {/* Action Buttons */}
-                <div className="button-group">
-                  <button 
-                    className="btn btn-primary" 
-                    onClick={handleNewPolicy} 
-                    disabled={isLoading}
-                  >
-                    Thêm mới
-                  </button>
-
-                  {selectedPolicy && !isEditing && (
-                    <button 
-                      className="btn btn-secondary" 
-                      onClick={handleEdit} 
-                      disabled={isLoading}
-                    >
-                      Sửa
-                    </button>
-                  )}
-
-                  {selectedPolicy && !isEditing && (
-                    <button 
-                      className="btn btn-danger" 
-                      onClick={handleDelete} 
-                      disabled={isLoading}
-                    >
-                      Xóa
-                    </button>
-                  )}
-
-                  {isEditing && (
-                    <>
-                      <button 
-                        className="btn btn-success" 
-                        onClick={handleSave} 
-                        disabled={isLoading}
-                      >
-                        {isLoading ? "Đang lưu..." : "Lưu"}
-                      </button>
-                      <button 
-                        className="btn btn-cancel" 
-                        onClick={handleCancel} 
-                        disabled={isLoading}
-                      >
-                        Hủy
-                      </button>
-                    </>
-                  )}
-
-                  <button 
-                    className="btn btn-refresh" 
-                    onClick={clearForm} 
-                    disabled={isLoading}
-                  >
-                    ↻ Làm mới
-                  </button>
-                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="dialog-footer">
+          <button className="btn btn-secondary" onClick={onClose}>
+            Đóng
+          </button>
+          {!isEditing && (
+            <button className="btn btn-primary" onClick={handleNewPolicy}>
+              + Thêm Chính Sách
+            </button>
+          )}
         </div>
       </div>
     </div>

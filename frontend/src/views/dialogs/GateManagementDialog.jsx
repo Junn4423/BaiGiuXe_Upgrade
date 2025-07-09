@@ -385,14 +385,12 @@ const GateManagementDialog = ({ onClose, onSave, selectedZone = null }) => {
                           onClick={() => handleEditGate(gate)}
                           title="Sửa cổng"
                         >
-                          ✏️
                         </button>
                         <button 
                           className="btn btn-sm btn-danger"
                           onClick={() => handleDeleteGate(gate)}
                           title="Xóa cổng"
                         >
-                          🗑️
                         </button>
                       </div>
                     </div>

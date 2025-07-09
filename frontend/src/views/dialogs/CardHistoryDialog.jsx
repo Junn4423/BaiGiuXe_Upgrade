@@ -250,13 +250,13 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                                       {formatDateTime(log.thoiGianQuet)}
                                     </div>
                                     <div className="log-camera">
-                                      📹 {log.tenCamera || `Camera ${log.maCamera}`}
+                                      {log.tenCamera || `Camera ${log.maCamera}`}
                                     </div>
                                     <div className="log-direction">
                                       {log.huongQuet === "VAO" ? "🔵 Vào" : "🔴 Ra"}
                                     </div>
                                     <div className="log-match">
-                                      {log.khopBienSo ? "✅ Khớp biển số" : "❌ Không khớp"}
+                                      {log.khopBienSo ? "Khớp biển số" : "Không khớp"}
                                     </div>
                                     {log.anhQuet && (
                                       <div className="log-image">
