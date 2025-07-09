@@ -3,6 +3,7 @@
 import { useState } from "react"
 import "../../assets/styles/BienSoLoiDialog.css"
 import "../../assets/styles/global-dialog-theme.css"
+import { getImageUrl } from "../../api/api"
 
 const BienSoLoiDialog = ({
   onClose,
@@ -73,14 +74,14 @@ const BienSoLoiDialog = ({
               <div className="image-container">
                 <div className="image-title">Ảnh xe vào</div>
                 <img
-                  src={entryImage || "/placeholder.svg?height=200&width=300"}
+                  src={entryImage ? getImageUrl(entryImage) : "/placeholder.svg?height=200&width=300"}
                   alt="Xe vào"
                   className="vehicle-image"
                 />
               </div>
               <div className="image-container">
                 <div className="image-title">Ảnh xe ra</div>
-                <img src={exitImage || "/placeholder.svg?height=200&width=300"} alt="Xe ra" className="vehicle-image" />
+                <img src={exitImage ? getImageUrl(exitImage) : "/placeholder.svg?height=200&width=300"} alt="Xe ra" className="vehicle-image" />
               </div>
             </div>
 
@@ -89,7 +90,7 @@ const BienSoLoiDialog = ({
                 <div className="image-container">
                   <div className="image-title">Ảnh mặt vào</div>
                   <img
-                    src={entryFaceImage || "/placeholder.svg?height=150&width=150"}
+                    src={entryFaceImage ? getImageUrl(entryFaceImage) : "/placeholder.svg?height=150&width=150"}
                     alt="Mặt vào"
                     className="face-image"
                   />
@@ -97,7 +98,7 @@ const BienSoLoiDialog = ({
                 <div className="image-container">
                   <div className="image-title">Ảnh mặt ra</div>
                   <img
-                    src={exitFaceImage || "/placeholder.svg?height=150&width=150"}
+                    src={exitFaceImage ? getImageUrl(exitFaceImage) : "/placeholder.svg?height=150&width=150"}
                     alt="Mặt ra"
                     className="face-image"
                   />

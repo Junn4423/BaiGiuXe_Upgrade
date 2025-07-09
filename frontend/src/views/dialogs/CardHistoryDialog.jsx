@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import "../../assets/styles/CardHistoryDialog.css"
-import { layNhatKyTheoThe } from "../../api/api"
+import { layNhatKyTheoThe, getImageUrl } from "../../api/api"
 
 const CardHistoryDialog = ({ cardId, onClose }) => {
   const [history, setHistory] = useState([])
@@ -226,13 +226,13 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                                 {session.anhVao && (
                                   <div className="image-item">
                                     <label>Ảnh vào:</label>
-                                    <img src={session.anhVao} alt="Ảnh vào" className="session-image" />
+                                    <img src={getImageUrl(session.anhVao)} alt="Ảnh vào" className="session-image" />
                                   </div>
                                 )}
                                 {session.anhRa && (
                                   <div className="image-item">
                                     <label>Ảnh ra:</label>
-                                    <img src={session.anhRa} alt="Ảnh ra" className="session-image" />
+                                    <img src={getImageUrl(session.anhRa)} alt="Ảnh ra" className="session-image" />
                                   </div>
                                 )}
                               </div>
@@ -260,7 +260,7 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                                     </div>
                                     {log.anhQuet && (
                                       <div className="log-image">
-                                        <img src={log.anhQuet} alt="Ảnh quét" className="log-scan-image" />
+                                        <img src={getImageUrl(log.anhQuet)} alt="Ảnh quét" className="log-scan-image" />
                                       </div>
                                     )}
                                   </div>

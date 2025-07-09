@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { saveImageToAssets, createPlaceholderImage, captureVideoFrame } from "../utils/imageUtils"
+import { createPlaceholderImage, captureVideoFrame } from "../utils/imageUtils"
+import { uploadLicensePlateImage, uploadLicensePlateOutImage, uploadFaceImage } from "../api/api"
 
 const QuanLyCamera = React.forwardRef((props, ref) => {
   const [isRunning, setIsRunning] = useState(false)
@@ -181,11 +182,45 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
     // Capture frame from video
     console.log(`📸 Capturing frame from video...`)
     const blob = await captureVideoFrame(videoElement)
-    const fileName = `${cardId}_${timestamp}_${type}_${mode}.jpg`
-    const result = await saveImageToAssets(blob, fileName, type)
     
-    console.log(`💾 Image saved: ${result.url}`)
-    return result // Return object with url and blob
+    try {
+      // Upload to MinIO instead of saving locally
+      console.log(`☁️ Uploading ${type} image to MinIO...`)
+      let uploadResult
+      
+      if (type === 'plate') {
+        if (mode === 'ra') {
+          uploadResult = await uploadLicensePlateOutImage(blob)
+        } else {
+          uploadResult = await uploadLicensePlateImage(blob)
+        }
+      } else if (type === 'face') {
+        uploadResult = await uploadFaceImage(blob)
+      }
+
+      if (uploadResult && uploadResult.success) {
+        console.log(`✅ Image uploaded to MinIO: ${uploadResult.primaryUrl}`)
+        return {
+          url: uploadResult.primaryUrl,
+          blob: blob,
+          filename: uploadResult.filename,
+          backupUrls: uploadResult.urls
+        }
+      } else {
+        throw new Error('Upload failed to all MinIO servers')
+      }
+    } catch (error) {
+      console.error(`❌ MinIO upload failed for ${type} image:`, error)
+      // Fallback: Create object URL for immediate display
+      const objectUrl = URL.createObjectURL(blob)
+      console.log(`⚠️ Using local fallback URL: ${objectUrl}`)
+      return {
+        url: objectUrl,
+        blob: blob,
+        filename: `${cardId}_${timestamp}_${type}_${mode}.jpg`,
+        error: error.message
+      }
+    }
   }
 
   // Update camera configuration

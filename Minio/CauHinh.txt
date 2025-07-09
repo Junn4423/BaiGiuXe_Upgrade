@@ -1,0 +1,26 @@
+YÊU CẦU CÓ 2 FILE mc.exe và minio.exe trong thư mục minio-data(tự tạo)
+
+B1: Mở cmd trong thư mục có chứa 2 file minio.exe và mc.exe
+
+ 	minio.exe server D:\minio-data
+
+D:\minio-data: nơi chứa file của bạn
+
+:9000: API S3-compatible (dùng trong PHP/AWS SDK)
+
+:9001: giao diện web
+
+ Mặc định user/pass: minioadmin / minioadmin
+
+
+CẤU HÌNH CHO PHÉP TRUY XUẤT HÌNH ẢNH QUA URL
+Chạy lệnh sau khi cài mc
+
+mc alias set myminio http://192.168.1.xx minioadmin minioadmin
+mc anonymous set download myminio/parking-lot-images
+
+– Lệnh này sẽ cấp quyền s3:GetObject cho bất cứ ai (anonymous) để đọc file trong bucket.(Có thể cấu hình 1 trong 1 máy nhưng yêu cầu cả 3 máy phải cài minio)
+
+
+
+ 
