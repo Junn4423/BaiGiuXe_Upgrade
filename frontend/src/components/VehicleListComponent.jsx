@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import "../assets/styles/VehicleListComponent.css"
-import { layALLPhienGuiXe } from "../api/api"
+import { layALLPhienGuiXe, layALLLoaiPhuongTien } from "../api/api"
 import ParkingLotManagement from "../views/ParkingLotManagement"
 
 const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
@@ -25,6 +25,170 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
   // State for parking lot management
   const [showParkingManagement, setShowParkingManagement] = useState(false)
   const [selectedVehicleForParking, setSelectedVehicleForParking] = useState(null)
+
+  // State for vehicle type mapping
+  const [vehicleTypeMapping, setVehicleTypeMapping] = useState(new Map())
+  const [availableVehicleTypes, setAvailableVehicleTypes] = useState([])
+
+  // Load vehicle type mapping from API
+  const loadVehicleTypeMapping = async () => {
+    try {
+      console.log('🔄 Loading vehicle type mapping from API...')
+      const vehicleTypes = await layALLLoaiPhuongTien()
+      
+      if (Array.isArray(vehicleTypes)) {
+        const mapping = new Map()
+        const typesList = []
+        
+        vehicleTypes.forEach(type => {
+          const maLoaiPT = type.maLoaiPT
+          const tenLoaiPT = type.tenLoaiPT
+          const loaiXe = type.loaiXe // 0 = xe nhỏ, 1 = xe lớn
+          
+          mapping.set(maLoaiPT, {
+            name: tenLoaiPT,
+            loaiXe: loaiXe,
+            isLargeVehicle: loaiXe === 1 || loaiXe === "1"
+          })
+          
+          typesList.push({
+            code: maLoaiPT,
+            name: tenLoaiPT,
+            loaiXe: loaiXe
+          })
+        })
+        
+        setVehicleTypeMapping(mapping)
+        setAvailableVehicleTypes(typesList)
+        
+        console.log('✅ Vehicle type mapping loaded:', {
+          totalTypes: vehicleTypes.length,
+          mapping: Object.fromEntries(mapping),
+          typesList
+        })
+      }
+    } catch (error) {
+      console.error('❌ Error loading vehicle type mapping:', error)
+      // Fallback to basic mapping
+      const fallbackMapping = new Map([
+        ['XE_MAY', { name: 'Xe máy', loaiXe: 0, isLargeVehicle: false }],
+        ['OT', { name: 'Ô tô', loaiXe: 1, isLargeVehicle: true }],
+        ['XE_BUS', { name: 'Xe bus', loaiXe: 1, isLargeVehicle: true }],
+        ['XE_16CHO', { name: 'Xe 16 chỗ', loaiXe: 1, isLargeVehicle: true }],
+        ['XE_12CHO', { name: 'Xe 12 chỗ', loaiXe: 1, isLargeVehicle: true }]
+      ])
+      setVehicleTypeMapping(fallbackMapping)
+      console.log('⚠️ Using fallback vehicle type mapping')
+    }
+  }
+
+  // Helper function to determine vehicle type from various sources
+  const determineVehicleType = (item) => {
+    let vehicleTypeCode = null
+    let vehicleTypeName = "Xe máy" // default fallback
+    let isLargeVehicle = false
+
+    // Bước 1: Ưu tiên loaiXe từ database nếu nó là mã loại phương tiện
+    if (item.loaiXe && typeof item.loaiXe === 'string' && vehicleTypeMapping.has(item.loaiXe)) {
+      vehicleTypeCode = item.loaiXe
+      const typeInfo = vehicleTypeMapping.get(vehicleTypeCode)
+      vehicleTypeName = typeInfo.name
+      isLargeVehicle = typeInfo.isLargeVehicle
+      console.log(`🚗 Vehicle ${item.bienSo}: Từ loaiXe DB = ${vehicleTypeCode} -> ${vehicleTypeName}`)
+    }
+    // Bước 2: Nếu loaiXe là số (0/1), mapping theo cách cũ nhưng ưu tiên xe lớn từ policy
+    else if (item.loaiXe !== undefined && item.loaiXe !== null) {
+      if (item.loaiXe === 1 || item.loaiXe === "1") {
+        // Kiểm tra policy để xác định loại xe lớn cụ thể
+        if (item.chinhSach) {
+          vehicleTypeCode = extractVehicleTypeFromPolicy(item.chinhSach)
+          if (vehicleTypeCode && vehicleTypeMapping.has(vehicleTypeCode)) {
+            const typeInfo = vehicleTypeMapping.get(vehicleTypeCode)
+            vehicleTypeName = typeInfo.name
+            isLargeVehicle = typeInfo.isLargeVehicle
+            console.log(`🚗 Vehicle ${item.bienSo}: loaiXe=1 + policy ${item.chinhSach} -> ${vehicleTypeName}`)
+          } else {
+            vehicleTypeName = "Ô tô"
+            isLargeVehicle = true
+            console.log(`🚗 Vehicle ${item.bienSo}: loaiXe=1 fallback -> Ô tô`)
+          }
+        } else {
+          vehicleTypeName = "Ô tô"
+          isLargeVehicle = true
+          console.log(`🚗 Vehicle ${item.bienSo}: loaiXe=1 -> Ô tô`)
+        }
+      } else if (item.loaiXe === 0 || item.loaiXe === "0") {
+        vehicleTypeName = "Xe máy"
+        isLargeVehicle = false
+        console.log(`🏍️ Vehicle ${item.bienSo}: loaiXe=0 -> Xe máy`)
+      }
+    }
+    // Bước 3: Fallback - parse từ policy name
+    else if (item.chinhSach) {
+      vehicleTypeCode = extractVehicleTypeFromPolicy(item.chinhSach)
+      if (vehicleTypeCode && vehicleTypeMapping.has(vehicleTypeCode)) {
+        const typeInfo = vehicleTypeMapping.get(vehicleTypeCode)
+        vehicleTypeName = typeInfo.name
+        isLargeVehicle = typeInfo.isLargeVehicle
+        console.log(`🚗 Vehicle ${item.bienSo}: Từ policy ${item.chinhSach} -> ${vehicleTypeName}`)
+      } else {
+        // Fallback detection từ policy name
+        if (item.chinhSach.toLowerCase().includes("oto") || 
+            item.chinhSach.toLowerCase().includes("car") ||
+            item.chinhSach.toLowerCase().includes("auto")) {
+          vehicleTypeName = "Ô tô"
+          isLargeVehicle = true
+        } else {
+          vehicleTypeName = "Xe máy"
+          isLargeVehicle = false
+        }
+        console.log(`🔍 Vehicle ${item.bienSo}: Policy fallback ${item.chinhSach} -> ${vehicleTypeName}`)
+      }
+    }
+    // Bước 4: CHỈ KHI TẠO MỚI - dùng workConfig
+    else if (workConfig?.vehicle_type && item.trangThai === "DANG_GUI") {
+      if (workConfig.vehicle_type === "oto") {
+        vehicleTypeName = "Ô tô"
+        isLargeVehicle = true
+        console.log(`🚗 Vehicle ${item.bienSo}: Xe mới từ workConfig -> Ô tô`)
+      } else if (workConfig.vehicle_type === "xe_may") {
+        vehicleTypeName = "Xe máy"
+        isLargeVehicle = false
+        console.log(`🏍️ Vehicle ${item.bienSo}: Xe mới từ workConfig -> Xe máy`)
+      }
+    }
+
+    return {
+      code: vehicleTypeCode,
+      name: vehicleTypeName,
+      isLargeVehicle: isLargeVehicle,
+      // For backward compatibility
+      vehicleType: isLargeVehicle ? "oto" : "xe_may"
+    }
+  }
+
+  // Helper function to extract vehicle type code from policy name
+  const extractVehicleTypeFromPolicy = (policyName) => {
+    if (!policyName) return null
+    
+    // Parse pattern: CS_[VEHICLE_TYPE]_[TIME]
+    // Examples: CS_XE_BUS_10N, CS_XE_16CHO_4H, CS_OTO_4H, CS_XEMAY_4H
+    const match = policyName.match(/^CS_(.+?)_\d+[HN]?$/i)
+    if (match) {
+      let vehicleType = match[1].toUpperCase()
+      
+      // Handle special cases and aliases
+      if (vehicleType === 'XEMAY') {
+        vehicleType = 'XE_MAY'
+      } else if (vehicleType === 'OTO') {
+        vehicleType = 'OT'
+      }
+      
+      return vehicleType
+    }
+    
+    return null
+  }
 
   // Load vehicle data from API with realtime updates
   const fetchVehicles = async () => {
@@ -52,41 +216,8 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
       
       // Map API data to component format based on pm_nc0009 structure
       const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => {
-        // Determine vehicle type - ƯU TIÊN DỮ LIỆU THỰC TẾ TỪ DATABASE
-        let vehicleType = "xe_may" // default
-        
-        // Bước 1: Ưu tiên loaiXe từ database (dữ liệu thực tế đã lưu)
-        if (item.loaiXe !== undefined && item.loaiXe !== null) {
-          if (item.loaiXe === 1 || item.loaiXe === "1") {
-            vehicleType = "oto"
-            console.log(`🚗 Vehicle ${item.bienSo}: loaiXe = ${item.loaiXe} -> Ô tô`)
-          } else if (item.loaiXe === 0 || item.loaiXe === "0") {
-            vehicleType = "xe_may"
-            console.log(`🏍️ Vehicle ${item.bienSo}: loaiXe = ${item.loaiXe} -> Xe máy`)
-          }
-        }
-        // Bước 2: Fallback - dùng policy name từ chính sách giá
-        else if (item.chinhSach) {
-          if (item.chinhSach.toLowerCase().includes("oto") || 
-              item.chinhSach.toLowerCase().includes("car") ||
-              item.chinhSach.toLowerCase().includes("auto")) {
-            vehicleType = "oto"
-            console.log(`🚗 Vehicle ${item.bienSo}: Từ policy ${item.chinhSach} -> Ô tô`)
-          } else {
-            console.log(`🏍️ Vehicle ${item.bienSo}: Từ policy ${item.chinhSach} -> Xe máy`)
-          }
-        }
-        // Bước 3: CHỈ KHI TẠO MỚI - dùng workConfig để xác định loại xe cho xe chưa có dữ liệu
-        else if (workConfig?.vehicle_type && item.trangThai === "DANG_GUI") {
-          // Chỉ áp dụng workConfig cho xe đang trong bãi (mới tạo)
-          if (workConfig.vehicle_type === "oto") {
-            vehicleType = "oto"
-            console.log(`🚗 Vehicle ${item.bienSo}: Xe mới từ workConfig -> Ô tô`)
-          } else if (workConfig.vehicle_type === "xe_may") {
-            vehicleType = "xe_may"
-            console.log(`🏍️ Vehicle ${item.bienSo}: Xe mới từ workConfig -> Xe máy`)
-          }
-        }
+        // Determine vehicle type using the enhanced logic
+        const vehicleTypeInfo = determineVehicleType(item)
 
         // Format duration from phutGui (minutes)
         let duration = "---"
@@ -115,7 +246,10 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
           sessionId: item.maPhien,
           licensePlate: item.bienSo || "---",
           cardId: item.uidThe || "---",
-          vehicleType: vehicleType,
+          vehicleType: vehicleTypeInfo.vehicleType, // For backward compatibility (xe_may/oto)
+          vehicleTypeName: vehicleTypeInfo.name, // New field for display name
+          vehicleTypeCode: vehicleTypeInfo.code, // New field for type code
+          isLargeVehicle: vehicleTypeInfo.isLargeVehicle, // New field for size classification
           timeIn: item.gioVao || null,
           timeOut: item.gioRa || null,
           duration: duration,
@@ -131,7 +265,8 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
             originalLoaiXe: item.loaiXe,
             workConfigType: workConfig?.vehicle_type,
             policyName: item.chinhSach,
-            determinedType: vehicleType,
+            determinedType: vehicleTypeInfo.name,
+            determinedCode: vehicleTypeInfo.code,
             feeValue: item.phi,
             status: item.trangThai
           },
@@ -140,6 +275,14 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
       })
 
       console.log(`🔄 Vehicle type mapping summary: WorkConfig=${workConfig?.vehicle_type}, Total vehicles=${mappedVehicles.length}`)
+      
+      // Debug: Log vehicle type distribution
+      const typeDistribution = {}
+      mappedVehicles.forEach(v => {
+        const typeName = v.vehicleTypeName || v.vehicleType
+        typeDistribution[typeName] = (typeDistribution[typeName] || 0) + 1
+      })
+      console.log('📊 Vehicle type distribution:', typeDistribution)
       
       // Debug: Log pricing issues if any
       const pricingIssues = mappedVehicles.filter(v => v._debug && v._debug.feeValue !== undefined && v._debug.feeValue > 0 && v._debug.determinedType !== workConfig?.vehicle_type && v._debug.status === 'DA_RA')
@@ -153,9 +296,9 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
       
       setVehicles(mappedVehicles)
       
-      // Update statistics based on current status and vehicle types from workConfig sync
-      const motorcycles = mappedVehicles.filter(v => v.vehicleType === "xe_may" && v.status === "Trong bãi").length
-      const cars = mappedVehicles.filter(v => v.vehicleType === "oto" && v.status === "Trong bãi").length
+      // Update statistics based on current status and vehicle types
+      const motorcycles = mappedVehicles.filter(v => !v.isLargeVehicle && v.status === "Trong bãi").length
+      const cars = mappedVehicles.filter(v => v.isLargeVehicle && v.status === "Trong bãi").length
       const totalVehicles = motorcycles + cars
       const totalRevenue = mappedVehicles
         .filter(v => v.status === "Đã ra") // Only count completed sessions
@@ -175,7 +318,10 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
 
   // Initial load and setup realtime updates
   useEffect(() => {
-    fetchVehicles()
+    // Load vehicle type mapping first
+    loadVehicleTypeMapping().then(() => {
+      fetchVehicles()
+    })
     
     // Set up auto-refresh every 30 seconds
     const refreshInterval = setInterval(() => {
@@ -221,7 +367,14 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
       const matchesSearch =
         vehicle.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.cardId.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesTypeFilter = filterType === "all" || vehicle.vehicleType === filterType
+      
+      // Enhanced type filter with support for all vehicle types
+      const matchesTypeFilter = filterType === "all" || 
+        filterType === vehicle.vehicleType || // Backward compatibility (xe_may/oto)
+        filterType === vehicle.vehicleTypeCode || // Match by type code (XE_BUS, XE_16CHO, etc.)
+        (filterType === "large" && vehicle.isLargeVehicle) || // Filter large vehicles
+        (filterType === "small" && !vehicle.isLargeVehicle) // Filter small vehicles
+        
       const matchesStatusFilter = filterStatus === "all" || vehicle.status === filterStatus
       return matchesSearch && matchesTypeFilter && matchesStatusFilter
     })
@@ -328,11 +481,11 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
           <div className="stat-value">{statistics.totalVehicles}</div>
         </div>
         <div className="stat-card">
-          <div className="stat-header">XE MÁY</div>
+          <div className="stat-header">XE NHỎ</div>
           <div className="stat-value">{statistics.motorcycles}</div>
         </div>
         <div className="stat-card">
-          <div className="stat-header">Ô TÔ</div>
+          <div className="stat-header">XE LỚN</div>
           <div className="stat-value">{statistics.cars}</div>
         </div>
         <div className="stat-card revenue">
@@ -354,8 +507,15 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
           <div className="filter-controls">
             <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="filter-select">
               <option value="all">Tất cả loại xe</option>
+              <option value="small">Xe nhỏ (xe máy, xe đạp, ...)</option>
+              <option value="large">Xe lớn (ô tô, xe bus, ...)</option>
               <option value="xe_may">Xe máy</option>
               <option value="oto">Ô tô</option>
+              {availableVehicleTypes.map(type => (
+                <option key={type.code} value={type.code}>
+                  {type.name}
+                </option>
+              ))}
             </select>
 
             <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="filter-select">
@@ -431,7 +591,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
                   <tr key={vehicle.id} onClick={() => handleVehicleSelect(vehicle)} className="vehicle-row">
                     <td className="license-plate">{vehicle.licensePlate}</td>
                     <td className="card-id">{vehicle.cardId}</td>
-                    <td className="vehicle-type">{vehicle.vehicleType === "xe_may" ? "Xe máy" : "Ô tô"}</td>
+                    <td className="vehicle-type">{vehicle.vehicleTypeName || vehicle.vehicleType}</td>
                     <td className="time-in">{formatTime(vehicle.timeIn)}</td>
                     <td className="time-out">{formatTime(vehicle.timeOut)}</td>
                     <td className="duration">{getDuration(vehicle)}</td>
