@@ -5,7 +5,7 @@ import "../assets/styles/VehicleListComponent.css"
 import { layALLPhienGuiXe } from "../api/api"
 import ParkingLotManagement from "../views/ParkingLotManagement"
 
-const VehicleListComponent = ({ onVehicleSelect }) => {
+const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
   const [vehicles, setVehicles] = useState([])
   const [statistics, setStatistics] = useState({
     totalVehicles: 0,
@@ -31,6 +31,7 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
     try {
       setIsRefreshing(true)
       console.log('🔄 Refreshing vehicle list...')
+      console.log('📋 Current workConfig:', workConfig) // Debug log
       const apiData = await layALLPhienGuiXe()
       
       // Debug: Log sample data to check loaiXe field
@@ -48,11 +49,21 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
       
       // Map API data to component format based on pm_nc0009 structure
       const mappedVehicles = (Array.isArray(apiData) ? apiData : []).map((item, idx) => {
-        // Determine vehicle type from loaiXe field (PRIORITIZED) hoặc fallback to policy name
+        // Determine vehicle type - ĐỒNG BỘ VỚI WORKCONFIG TRƯỚC
         let vehicleType = "xe_may" // default
         
-        // Bước 1: Kiểm tra trường loaiXe trước (từ database)
-        if (item.loaiXe !== undefined && item.loaiXe !== null) {
+        // Bước 1: Ưu tiên workConfig.vehicle_type (đồng bộ đơn giản)
+        if (workConfig?.vehicle_type) {
+          if (workConfig.vehicle_type === "oto") {
+            vehicleType = "oto"
+            console.log(`🚗 Vehicle ${item.bienSo}: Từ workConfig -> Ô tô`)
+          } else if (workConfig.vehicle_type === "xe_may") {
+            vehicleType = "xe_may"
+            console.log(`🏍️ Vehicle ${item.bienSo}: Từ workConfig -> Xe máy`)
+          }
+        }
+        // Bước 2: Fallback - nếu không có workConfig, dùng loaiXe từ database
+        else if (item.loaiXe !== undefined && item.loaiXe !== null) {
           if (item.loaiXe === 1 || item.loaiXe === "1") {
             vehicleType = "oto"
             console.log(`🚗 Vehicle ${item.bienSo}: loaiXe = ${item.loaiXe} -> Ô tô`)
@@ -61,7 +72,7 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
             console.log(`🏍️ Vehicle ${item.bienSo}: loaiXe = ${item.loaiXe} -> Xe máy`)
           }
         }
-        // Bước 2: Fallback - nếu không có loaiXe, dùng policy name
+        // Bước 3: Fallback cuối - dùng policy name
         else if (item.chinhSach) {
           if (item.chinhSach.toLowerCase().includes("oto") || 
               item.chinhSach.toLowerCase().includes("car") ||
@@ -115,9 +126,11 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
         }
       })
 
+      console.log(`🔄 Vehicle type mapping summary: WorkConfig=${workConfig?.vehicle_type}, Total vehicles=${mappedVehicles.length}`)
+      
       setVehicles(mappedVehicles)
       
-      // Update statistics based on current status
+      // Update statistics based on current status and vehicle types from workConfig sync
       const motorcycles = mappedVehicles.filter(v => v.vehicleType === "xe_may" && v.status === "Trong bãi").length
       const cars = mappedVehicles.filter(v => v.vehicleType === "oto" && v.status === "Trong bãi").length
       const totalVehicles = motorcycles + cars
@@ -148,6 +161,14 @@ const VehicleListComponent = ({ onVehicleSelect }) => {
     
     return () => clearInterval(refreshInterval)
   }, [])
+
+  // Re-fetch when workConfig changes to update vehicle types
+  useEffect(() => {
+    if (workConfig) {
+      console.log('📋 WorkConfig changed, refreshing vehicle list for type sync...')
+      fetchVehicles()
+    }
+  }, [workConfig?.vehicle_type])
 
   // Update 'now' every second for realtime duration
   useEffect(() => {

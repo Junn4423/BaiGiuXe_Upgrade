@@ -345,7 +345,7 @@ const VehicleInfoComponent = React.forwardRef(({ currentMode, currentVehicleType
               disabled={isCalculatingFee}
               title="Tính lại phí gửi xe"
             >
-              {isCalculatingFee ? "⏳" : "🔄"}
+              {isCalculatingFee ? "⏳" : ""}
             </button>
           )}
         </div>

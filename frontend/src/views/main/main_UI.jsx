@@ -1431,7 +1431,7 @@ const MainUI = () => {
             );
             
             // Update vehicle info with exit details INCLUDING fee
-            console.log(`📝 Main flow: Updating vehicle info with exit details and fee`);
+            console.log(`Main flow: Updating vehicle info with exit details and fee`);
             vehicleInfoComponentRef.current.updateVehicleInfo({
               ma_the: cardId,
               ma_phien: activeSession.maPhien, // Add session ID for fee calculation
@@ -1448,7 +1448,7 @@ const MainUI = () => {
             
             // Also explicitly update parking fee display for extra safety
             const formattedFee = parkingFee > 0 ? `${parkingFee.toLocaleString()} VNĐ` : "0 VNĐ";
-            console.log(`💰 Main flow: Also explicitly updating parking fee display to ${formattedFee}`);
+            console.log(`Main flow: Also explicitly updating parking fee display to ${formattedFee}`);
             vehicleInfoComponentRef.current.updateParkingFee(formattedFee);
           }
 
@@ -1663,6 +1663,7 @@ const MainUI = () => {
         >
           <VehicleListComponent
             ref={vehicleListComponentRef}
+            workConfig={workConfig}
             onVehicleSelect={(vehicle) => {
               console.log("Selected vehicle:", vehicle);
             }}
