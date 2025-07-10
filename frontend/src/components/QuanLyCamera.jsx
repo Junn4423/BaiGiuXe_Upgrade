@@ -200,10 +200,15 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
 
       if (uploadResult && uploadResult.success) {
         console.log(`✅ Image uploaded to MinIO: ${uploadResult.primaryUrl}`)
+        
+        // Tách filename từ URL để lưu vào database
+        const imageFilename = uploadResult.filename || uploadResult.primaryUrl.split('/').pop()
+        console.log(`📎 Extracted filename for database: ${imageFilename}`)
+        
         return {
-          url: uploadResult.primaryUrl,
+          url: uploadResult.primaryUrl, // URL đầy đủ để hiển thị ngay
+          filename: imageFilename, // Chỉ filename để lưu vào database
           blob: blob,
-          filename: uploadResult.filename,
           backupUrls: uploadResult.urls
         }
       } else {

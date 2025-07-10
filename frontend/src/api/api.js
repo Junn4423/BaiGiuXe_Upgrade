@@ -311,13 +311,13 @@ export async function layDanhSachCong() {
 
 // -------------------- Zone Management Functions --------------------
 export async function layDanhSachKhuVuc() {
-  const payload = { table: "pm_nc0004_2", func: "data" };
+  const payload = { table: "pm_nc0004_1", func: "data" };
   return callApiWithAuth(payload);
 }
 
 export async function themKhuVuc(khuVuc) {
   const payload = {
-    table: "pm_nc0004_2",
+    table: "pm_nc0004_1",
     func: "add",
     maKhuVuc: khuVuc.maKhuVuc,
     tenKhuVuc: khuVuc.tenKhuVuc,
@@ -328,7 +328,7 @@ export async function themKhuVuc(khuVuc) {
 
 export async function capNhatKhuVuc(khuVuc) {
   const payload = {
-    table: "pm_nc0004_2",
+    table: "pm_nc0004_1",
     func: "edit",
     maKhuVuc: khuVuc.maKhuVuc,
     tenKhuVuc: khuVuc.tenKhuVuc,
@@ -338,7 +338,7 @@ export async function capNhatKhuVuc(khuVuc) {
 }
 
 export async function xoaKhuVuc(maKhuVuc) {
-  const payload = { table: "pm_nc0004_2", func: "delete", maKhuVuc };
+  const payload = { table: "pm_nc0004_1", func: "delete", maKhuVuc };
   return callApiWithAuth(payload);
 }
 
@@ -662,8 +662,26 @@ export function getImageUrl(filename) {
     return filename;
   }
   
-  // Construct MinIO URL from filename
-  return `http://localhost:8012/minio/parking-images/${filename}`;
+  // Construct MinIO URL from filename - sử dụng server đầu tiên làm primary
+  return `http://192.168.1.19:9000/parking-lot-images/${filename}`;
+}
+
+/**
+ * Get backup MinIO URLs from filename for redundancy
+ * @param {string} filename - Image filename stored in database
+ * @returns {Array<string>} - Array of backup MinIO URLs
+ */
+export function getBackupImageUrls(filename) {
+  if (!filename) return [];
+  
+  // If it's already a full URL, return as single item array
+  if (filename.startsWith('http://') || filename.startsWith('https://')) {
+    return [filename];
+  }
+  
+  // Construct URLs for all MinIO servers
+  const servers = ['192.168.1.19:9000', '192.168.1.90:9000', '192.168.1.94:9000'];
+  return servers.map(server => `http://${server}/parking-lot-images/${filename}`);
 }
 
 /**
@@ -921,15 +939,15 @@ export async function dongBoTrangThaiChoDo() {
  * @param {string} trangThai - Trạng thái mới (0/1)
  * @returns {Promise<Object>} Kết quả cập nhật
  */
-export async function capNhatTrangThaiChoDo(maChoDo, trangThai) {
-  const payload = {
-    table: "pm_nc0005",
-    func: "chinhSuaTrangThai",
-    maChoDo: maChoDo,
-    trangThai: trangThai,
-  };
-  return callApiWithAuth(payload);
-}
+// export async function capNhatTrangThaiChoDo(maChoDo, trangThai) {
+//   const payload = {
+//     table: "pm_nc0005",
+//     func: "chinhSuaTrangThai",
+//     maChoDo: maChoDo,
+//     trangThai: trangThai,
+//   };
+//   return callApiWithAuth(payload);
+// }
 
 // -------------------- Vehicle Management Functions --------------------
 /**
@@ -1568,27 +1586,27 @@ export async function xoaChinhSach(maChinhSach) {
   return callApiWithAuth(payload);
 }
 
-/**
- * Tính toán ngày kết thúc chính sách VIP
- * @param {string} startDate - Ngày bắt đầu (YYYY-MM-DD)
- * @param {number} tongNgay - Tổng số ngày
- * @returns {string} Ngày kết thúc (YYYY-MM-DD)
- */
-export function tinhNgayKetThucChinhSach(startDate, tongNgay) {
-  if (!startDate || !tongNgay || tongNgay <= 0) {
-    return "";
-  }
+// /**
+//  * Tính toán ngày kết thúc chính sách VIP
+//  * @param {string} startDate - Ngày bắt đầu (YYYY-MM-DD)
+//  * @param {number} tongNgay - Tổng số ngày
+//  * @returns {string} Ngày kết thúc (YYYY-MM-DD)
+//  */
+// export function tinhNgayKetThucChinhSach(startDate, tongNgay) {
+//   if (!startDate || !tongNgay || tongNgay <= 0) {
+//     return "";
+//   }
 
-  const start = new Date(startDate);
-  if (isNaN(start.getTime())) {
-    return "";
-  }
+//   const start = new Date(startDate);
+//   if (isNaN(start.getTime())) {
+//     return "";
+//   }
 
-  const endDate = new Date(start);
-  endDate.setDate(start.getDate() + tongNgay - 1); // -1 vì bao gồm ngày bắt đầu
+//   const endDate = new Date(start);
+//   endDate.setDate(start.getDate() + tongNgay - 1); // -1 vì bao gồm ngày bắt đầu
 
-  return endDate.toISOString().split("T")[0]; // Format YYYY-MM-DD
-}
+//   return endDate.toISOString().split("T")[0]; // Format YYYY-MM-DD
+// }
 
 /**
  * Tạo mã chính sách tự động theo cấu hình
@@ -2143,90 +2161,6 @@ export const tinhPhiGuiXe = async (maPhien, uidThe = null) => {
 };
 
 /**
- * Lấy thông tin loại xe từ biển số
- * @param {string} bienSo - Biển số xe
- * @returns {Promise<Object>} Thông tin loại xe
- */
-export async function layThongTinLoaiXeTuBienSo(bienSo) {
-  try {
-    // Lấy thông tin xe từ pm_nc0002
-    const danhSachXe = await layDanhSachPhuongTien()
-    const xe = danhSachXe.find(x => x.bienSo === bienSo)
-    
-    if (xe && xe.maLoaiPT) {
-      // Lấy thông tin loại xe từ pm_nc0001
-      const danhSachLoaiPT = await layALLLoaiPhuongTien()
-      const loaiPT = danhSachLoaiPT.find(l => l.maLoaiPT === xe.maLoaiPT)
-      
-      if (loaiPT) {
-        return {
-          success: true,
-          loaiXe: loaiPT.loaiXe || "0", // lv004: 0=xe nhỏ, 1=xe lớn
-          maLoaiPT: loaiPT.maLoaiPT,
-          tenLoaiPT: loaiPT.tenLoaiPT
-        }
-      }
-    }
-    
-    // Nếu không tìm thấy, mặc định là xe nhỏ
-    return {
-      success: false,
-      loaiXe: "0",
-      message: "Không tìm thấy thông tin loại xe"
-    }
-  } catch (error) {
-    console.error("Lỗi lấy thông tin loại xe:", error)
-    return {
-      success: false,
-      loaiXe: "0",
-      message: error.message
-    }
-  }
-}
-
-/**
- * Lấy slot trống cho xe lớn từ pm_nc0005
- * @param {string} maKhuVuc - Mã khu vực (optional)
- * @returns {Promise<Object>} Thông tin slot trống
- */
-export async function laySlotTrongChoXeLon(maKhuVuc = null) {
-  try {
-    // Lấy danh sách tất cả chỗ đỗ
-    let danhSachChoDo
-    if (maKhuVuc) {
-      danhSachChoDo = await layChoDauXeTheoKhu(maKhuVuc)
-    } else {
-      danhSachChoDo = await layDanhSachChoDo()
-    }
-    
-    // Tìm slot trống (trangThai = "0" hoặc "TRONG")
-    const slotTrong = danhSachChoDo.find(
-      slot => slot.trangThai === "0" || slot.trangThai === "TRONG"
-    )
-    
-    if (slotTrong) {
-      return {
-        success: true,
-        maChoDo: slotTrong.maChoDo,
-        maKhuVuc: slotTrong.maKhuVuc,
-        tenKhuVuc: slotTrong.tenKhuVuc
-      }
-    }
-    
-    return {
-      success: false,
-      message: "Không còn slot trống cho xe lớn"
-    }
-  } catch (error) {
-    console.error("Lỗi tìm slot trống:", error)
-    return {
-      success: false,
-      message: error.message
-    }
-  }
-}
-
-/**
  * Kiểm tra loại thẻ để xác định miễn phí
  * @param {string} uidThe - UID thẻ
  * @returns {Promise<boolean>} true nếu được miễn phí
@@ -2331,5 +2265,409 @@ export async function themPhienGuiXeVoiViTri(session) {
       success: false,
       message: error.message
     }
+  }
+}
+
+// Lấy thông tin quyền hạn người dùng từ lv_lv0007
+export async function layThongTinQuyenHanNguoiDung(userCode) {
+  try {
+    console.log(`🔐 Đang lấy thông tin quyền hạn cho người dùng: ${userCode}`);
+    
+    const payload = {
+      table: "pm_nc0011",
+      func: "select",
+      code: userCode
+    };
+
+    const result = await callApiWithAuth(payload);
+    
+    if (result && result.success && result.data) {
+      console.log(`✅ Lấy thông tin quyền hạn thành công:`, result.data);
+      return {
+        success: true,
+        ...result.data
+      };
+    } else {
+      console.error(`❌ Lỗi lấy thông tin quyền hạn:`, result?.message || "Unknown error");
+      return {
+        success: false,
+        message: result?.message || "Không thể lấy thông tin quyền hạn",
+        isAdmin: false,
+        permissions: {
+          canAccessConfig: false,
+          canAccessCamera: false,
+          canAccessPricing: false,
+          canAccessZone: false,
+          canAccessVehicle: false,
+          canAccessVehicleType: false,
+          canAccessRfid: false
+        }
+      };
+    }
+  } catch (error) {
+    console.error(`❌ Exception khi lấy thông tin quyền hạn:`, error);
+    return {
+      success: false,
+      message: `Lỗi hệ thống: ${error.message}`,
+      isAdmin: false,
+      permissions: {
+        canAccessConfig: false,
+        canAccessCamera: false,
+        canAccessPricing: false,
+        canAccessZone: false,
+        canAccessVehicle: false,
+        canAccessVehicleType: false,
+        canAccessRfid: false
+      }
+    };
+  }
+}
+
+// Kiểm tra quyền hạn người dùng (helper function)
+export async function kiemTraQuyenHanNguoiDung(userCode) {
+  const userPermissions = await layThongTinQuyenHanNguoiDung(userCode);
+  return userPermissions;
+}
+
+// Lấy danh sách thẻ RFID từ bảng pm_nc0003
+
+// -------------------- Image URL Helpers --------------------
+
+// Tách filename từ URL ảnh để lưu vào database
+export function extractFilenameFromImageUrl(imageUrl) {
+  try {
+    if (!imageUrl || typeof imageUrl !== 'string') {
+      return '';
+    }
+    
+    // Extract filename from URL pattern: http://192.168.1.19:9000/parking-lot-images/license_plate_2025-07-10T03-04-54-531Z.jpg
+    const urlParts = imageUrl.split('/');
+    const filename = urlParts[urlParts.length - 1];
+    
+    console.log(`🖼️ Tách filename từ URL: ${imageUrl} -> ${filename}`);
+    return filename;
+  } catch (error) {
+    console.error(`❌ Lỗi tách filename từ URL: ${error.message}`);
+    return '';
+  }
+}
+
+// Tạo URL đầy đủ từ filename để hiển thị ảnh
+export function constructImageUrlFromFilename(filename, serverIndex = 0) {
+  try {
+    if (!filename || typeof filename !== 'string') {
+      return '';
+    }
+    
+    // Nếu đã là URL đầy đủ thì return luôn
+    if (filename.startsWith('http://') || filename.startsWith('https://')) {
+      return filename;
+    }
+    
+    // Tạo URL từ filename với các MinIO servers
+    const minioServers = [
+      'http://192.168.1.19:9000',
+      'http://192.168.1.90:9000', 
+      'http://192.168.1.94:9000'
+    ];
+    
+    const baseUrl = minioServers[serverIndex] || minioServers[0];
+    const fullUrl = `${baseUrl}/parking-lot-images/${filename}`;
+    
+    console.log(`🖼️ Tạo URL từ filename: ${filename} -> ${fullUrl}`);
+    return fullUrl;
+  } catch (error) {
+    console.error(`❌ Lỗi tạo URL từ filename: ${error.message}`);
+    return '';
+  }
+}
+
+// =============================================================================
+// PHÂN QUYỀN & XÁC THỰC
+// =============================================================================
+
+// Lấy thông tin quyền hạn người dùng theo token
+// export async function layThongTinQuyenHanNhanVien(token) {
+//   try {
+//     const payload = {
+//       table: 'lv_lv0007',
+//       func: 'layThongTinTaiKhoanTheoToken',
+//       token: token // đổi từ lv097 ➜ token để backend nhận đúng
+//     };
+//     const data = await callApiWithAuth(payload);
+
+//     if (Array.isArray(data) && data.length > 0) {
+//       const userInfo = data[0];
+//       const isAdmin = userInfo.quyenHan === '0';
+//       return {
+//         success: true,
+//         data: {
+//           taiKhoanDN: userInfo.taiKhoanDN,
+//           ten: userInfo.ten,
+//           roleQuyen: userInfo.roleQuyen,
+//           quyenHan: userInfo.quyenHan,
+//           isAdmin,
+//           permissions: {
+//             canAccessConfig: isAdmin,
+//             canAccessCamera: isAdmin,
+//             canAccessPricing: isAdmin,
+//             canAccessZone: isAdmin,
+//             canAccessVehicle: isAdmin,
+//             canAccessVehicleType: isAdmin,
+//             canAccessRfid: isAdmin
+//           }
+//         }
+//       };
+//     }
+//     return { success: false, message: 'Không tìm thấy thông tin người dùng' };
+//   } catch (error) {
+//     console.error('❌ [API Error] Lỗi lấy thông tin quyền hạn:', error);
+//     return { success: false, message: `Lỗi kết nối: ${error.message}` };
+//   }
+// }
+
+// =============================================================================
+// QUẢN LÝ SLOT ĐỖ XE
+// =============================================================================
+
+// Lấy slot trống cho xe lớn
+export async function laySlotTrongChoXeLon(maKhuVuc = null) {
+  try {
+    const payload = {
+      table: 'pm_nc0012',
+      func: 'laySlotTrong'
+    };
+    if (maKhuVuc) payload.maKhuVuc = maKhuVuc;
+
+    const result = await callApiWithAuth(payload);
+    if (result && result.success) {
+      return { success: true, ...result };
+    }
+    return { success: false, message: result?.message || 'Không còn chỗ đỗ trống' };
+  } catch (error) {
+    console.error('❌ [API Error] Lỗi lấy slot trống:', error);
+    return { success: false, message: `Lỗi kết nối: ${error.message}` };
+  }
+}
+
+// Cập nhật trạng thái chỗ đỗ
+export async function capNhatTrangThaiChoDo(maChoDo, trangThai) {
+  try {
+    const payload = {
+      table: 'pm_nc0005',
+      func: 'chinhSuaTrangThai',
+      maChoDo,
+      trangThai
+    };
+    return await callApiWithAuth(payload);
+  } catch (error) {
+    console.error('❌ [API Error] Lỗi cập nhật slot:', error);
+    return { success: false, message: `Lỗi kết nối: ${error.message}` };
+  }
+}
+
+// =============================================================================
+// NHẬN DIỆN LOẠI XE
+// =============================================================================
+
+// Lấy thông tin loại xe từ biển số
+export async function layThongTinLoaiXeTuBienSo(bienSo) {
+  try {
+    console.log(`🚗 [API] Tìm loại xe từ biển số: ${bienSo}`);
+    
+    // Gọi API lấy thông tin phương tiện
+    const response = await fetch(`${getBaseUrl()}/kebao.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        table: 'pm_nc0002',
+        func: 'data'
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const vehicles = await response.json();
+    console.log(`🚗 [API Response] Danh sách phương tiện:`, vehicles);
+    
+    if (Array.isArray(vehicles)) {
+      const foundVehicle = vehicles.find(v => 
+        v.bienSo === bienSo || v.lv001 === bienSo
+      );
+      
+      if (foundVehicle) {
+        // Lấy thông tin loại xe từ pm_nc0001
+        const vehicleTypes = await layALLLoaiPhuongTien();
+        if (Array.isArray(vehicleTypes)) {
+          const vehicleType = vehicleTypes.find(vt => 
+            vt.maLoaiPT === foundVehicle.maLoaiPT || vt.lv001 === foundVehicle.maLoaiPT
+          );
+          
+          if (vehicleType) {
+            console.log(`✅ [API] Tìm thấy loại xe từ biển số:`, vehicleType);
+            return {
+              success: true,
+              data: {
+                maLoaiPT: vehicleType.maLoaiPT,
+                tenLoaiPT: vehicleType.tenLoaiPT,
+                loaiXe: vehicleType.loaiXe // 0 = xe nhỏ, 1 = xe lớn
+              }
+            };
+          }
+        }
+      }
+      
+      console.log(`⚠️ [API] Không tìm thấy thông tin loại xe từ biển số`);
+      return {
+        success: false,
+        message: 'Không tìm thấy thông tin loại xe từ biển số'
+      };
+    } else {
+      throw new Error('Dữ liệu phương tiện không hợp lệ');
+    }
+  } catch (error) {
+    console.error(`❌ [API Error] Lỗi tìm loại xe:`, error);
+    return {
+      success: false,
+      message: `Lỗi kết nối: ${error.message}`
+    };
+  }
+}
+
+// =============================================================================
+// TÍNH TOÁN CHÍNH SÁCH RFID
+// =============================================================================
+
+// Tính ngày kết thúc chính sách từ tên chính sách và ngày bắt đầu
+export function tinhNgayKetThucChinhSach(tenChinhSach, ngayBatDau) {
+  try {
+    console.log(`📅 [API] Tính ngày kết thúc cho chính sách: ${tenChinhSach}, từ ngày: ${ngayBatDau}`);
+    
+    if (!tenChinhSach || !ngayBatDau) {
+      throw new Error('Thiếu tên chính sách hoặc ngày bắt đầu');
+    }
+    
+    const startDate = new Date(ngayBatDau);
+    if (isNaN(startDate.getTime())) {
+      throw new Error('Ngày bắt đầu không hợp lệ');
+    }
+    
+    // Parse pattern: CS_[VEHICLE_TYPE]_[DURATION][UNIT]
+    // Improved regex to handle various formats
+    const match = tenChinhSach.match(/(\d+)(T|TH|THANG|N|NAM|H)$/i);
+    
+    if (!match) {
+      console.warn(`⚠️ [API] Không thể parse chính sách: ${tenChinhSach}`);
+      return null;
+    }
+    
+    const duration = parseInt(match[1]);
+    const unit = match[2].toUpperCase();
+    
+    console.log(`📅 [API] Parsed: ${duration} ${unit}`);
+    
+    const endDate = new Date(startDate);
+    
+    switch (unit) {
+      case 'T':
+        endDate.setDate(endDate.getWeek() + duration);
+      case 'TH':
+        endDate.setMonth(endDate.getMonth() + duration); 
+      case 'THANG':
+        endDate.setMonth(endDate.getMonth() + duration);
+        break;
+      case 'N':
+        endDate.setDate(endDate.getDate() + duration);
+        break;
+      case 'NAM':
+        endDate.setFullYear(endDate.getFullYear() + duration);
+        break;
+      case 'H':
+        endDate.setHours(endDate.getHours() + duration);
+        break;
+      default:
+        throw new Error(`Đơn vị thời gian không hỗ trợ: ${unit}`);
+    }
+    
+    console.log(`✅ [API] Ngày kết thúc tính được: ${endDate.toISOString()}`);
+    return endDate.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+    
+  } catch (error) {
+    console.error(`❌ [API Error] Lỗi tính ngày kết thúc:`, error);
+    return null;
+  }
+}
+
+// Helper: Trả về base URL (thư mục chứa các PHP endpoint)
+export function getBaseUrl() {
+  try {
+    if (!url_api) return "";
+    const lastSlashIdx = url_api.lastIndexOf("/");
+    if (lastSlashIdx === -1) return url_api;
+    return url_api.substring(0, lastSlashIdx);
+  } catch (err) {
+    console.error("getBaseUrl error", err);
+    return "";
+  }
+}
+
+// Lấy thông tin quyền hạn người dùng theo token + code
+export async function layThongTinQuyenHanNhanVien(token, userCode) {
+  try {
+    if (!token || !userCode) {
+      throw new Error('Thiếu token hoặc userCode');
+    }
+
+    const payload = {
+      table: 'lv_lv0007',
+      func: 'layThongTinTaiKhoanTheoToken',
+      token: token
+    };
+
+    const res = await fetch(url_api, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-USER-CODE': userCode,
+        'X-USER-TOKEN': token
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (Array.isArray(data) && data.length > 0) {
+      const userInfo = data[0];
+      const isAdmin = userInfo.quyenHan === '0';
+      return {
+        success: true,
+        data: {
+          taiKhoanDN: userInfo.taiKhoanDN,
+          ten: userInfo.ten,
+          roleQuyen: userInfo.roleQuyen,
+          quyenHan: userInfo.quyenHan,
+          isAdmin,
+          permissions: {
+            canAccessConfig: isAdmin,
+            canAccessCamera: isAdmin,
+            canAccessPricing: isAdmin,
+            canAccessZone: isAdmin,
+            canAccessVehicle: isAdmin,
+            canAccessVehicleType: isAdmin,
+            canAccessRfid: isAdmin
+          }
+        }
+      };
+    }
+    return { success: false, message: 'Không tìm thấy thông tin người dùng' };
+  } catch (error) {
+    console.error('❌ [API Error] Lỗi lấy thông tin quyền hạn:', error);
+    return { success: false, message: `Lỗi kết nối: ${error.message}` };
   }
 }

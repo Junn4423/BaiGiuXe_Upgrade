@@ -3,72 +3,23 @@
  * API endpoints for Parking Sessions (pm_nc0009)
  */
 
-// Get all parking sessi        // Kiểm tra xe, thêm nếu chưa có (chỉ khi có biển số)
-        if (!empty($this->lv003)) {
-            $car = db_fetch_array(db_query("SELECT 1 FROM pm_nc0002 WHERE lv001 = '{$this->lv003}'"));
-            if (!$car) {
-                $vt = db_fetch_array(db_query("SELECT lv002 FROM pm_nc0008 WHERE lv001 = '{$this->lv005}'"));
-                if (!$vt) {
-                    return [
-                        'success' => false,
-                        'message' => "Chính sách giá {$this->lv005} không hợp lệ."
-                    ];
-                }
-                $insert_car = db_query("INSERT INTO pm_nc0002 (lv001, lv002) VALUES ('{$this->lv003}', '{$vt['lv002']}')");
-                if (!$insert_car) {
-                    return [
-                        'success' => false,
-                        'message' => "Lỗi khi thêm thông tin xe {$this->lv003}."
-                    ];
-                }
-            }
-        }
-
-        // Kiểm tra chính sách giá
-        $cs = db_fetch_array(db_query("SELECT 1 FROM pm_nc0008 WHERE lv001 = '{$this->lv005}'"));
-        if (!$cs) {
-            return [
-                'success' => false,
-                'message' => "Chính sách giá {$this->lv005} không tồn tại."
-            ];
-        }
-
-        // Kiểm tra cổng vào
-        $gate = db_fetch_array(db_query("SELECT 1 FROM pm_nc0007 WHERE lv001 = '{$this->lv006}'"));
-        if (!$gate) {
-            return [
-                'success' => false,
-                'message' => "Cổng vào {$this->lv006} không tồn tại."
-            ];
-        }
-
-        // Insert phiên gửi xe
-        $sql = "INSERT INTO pm_nc0009 (lv002, lv003, lv004, lv005, lv006, lv008, lv011, lv014,lv015)
-            VALUES ('{$this->lv002}', '{$this->lv003}', " .
-            ($this->lv004 ? "'{$this->lv004}'" : "NULL") . ", '{$this->lv005}', '{$this->lv006}', '{$this->lv008}', '{$this->lv011}', 'DANG_GUI' , '{$this->lv015}')";
-
-        $result = db_query($sql);
-
-        if ($result) {
-            // Lấy AUTO_INCREMENT id vừa insert
-            $this->lv001 = sof_insert_id();
-            
-            // Đồng bộ trạng thái chỗ đỗ
-            require_once 'pm_nc0005.php';
-            $spotManager = new pm_nc0005();
-            $spotManager->AutoSyncStatus();
-            
-            return [
-                'success' => true,
-                'message' => 'Thêm phiên gửi xe thành công.'
-            ];
-        }
-
-        return [
-            'success' => false,
-            'message' => 'Lỗi khi thêm phiên gửi xe vào cơ sở dữ liệu.'
-        ];
-    }
+// Get all parking sessions
+class pm_nc0009 extends lv_controler{
+    public $lv001;
+    public $lv002;
+    public $lv003;
+    public $lv004;
+    public $lv005;
+    public $lv006;
+    public $lv007;
+    public $lv009;
+    public $lv008;
+    public $lv011;
+    public $lv012;
+    public $lv013;
+    public $lv014;
+    public $lv015;
+    public $lv016;
 	
 	//Mo comment la mo quyen ben frontend phai truyen token sau khi dang nhap vao
 	// function __construct($vCheckAdmin,$vUserID,$vright)
@@ -89,11 +40,11 @@
 		
 	// }
     function KB_Insert() {
-        // Kiểm tra các trường bắt buộc - biển số có thể rỗng
-        if (!$this->lv002 || !$this->lv005 || !$this->lv006 || !$this->lv008 || !$this->lv011) {
+        // Kiểm tra các trường bắt buộc
+        if (!$this->lv002 || !$this->lv003 || !$this->lv005 || !$this->lv006 || !$this->lv008 || !$this->lv011) {
             return [
                 'success' => false,
-                'message' => 'Thiếu thông tin bắt buộc (mã thẻ, chính sách, cổng vào, giờ vào, hoặc ảnh vào).'
+                'message' => 'Thiếu thông tin bắt buộc (mã thẻ, biển số, chính sách, cổng vào, giờ vào, hoặc ảnh vào).'
             ];
         }
 
@@ -115,32 +66,28 @@
             ];
         }
 
-        // Kiểm tra trùng biển số (chỉ khi có biển số)
-        if (!empty($this->lv003)) {
-            $cnt_plate = db_fetch_array(db_query("SELECT COUNT(*) as c FROM pm_nc0009 WHERE lv003 = '{$this->lv003}' AND lv014 = 'DANG_GUI'"));
-            if ($cnt_plate && $cnt_plate['c'] > 0) {
-                return [
-                    'success' => false,
-                    'message' => "Biển số {$this->lv003} đang được sử dụng trong một phiên gửi xe khác."
-                ];
-            }
+        // Kiểm tra trùng biển số
+        $cnt_plate = db_fetch_array(db_query("SELECT COUNT(*) as c FROM pm_nc0009 WHERE lv003 = '{$this->lv003}' AND lv014 = 'DANG_GUI'"));
+        if ($cnt_plate && $cnt_plate['c'] > 0) {
+            return [
+                'success' => false,
+                'message' => "Biển số {$this->lv003} đang được sử dụng trong một phiên gửi xe khác."
+            ];
         }
-        // Kiểm tra biển số có đúng của nhân viên hay không (chỉ khi có biển số)
-        if (!empty($this->lv003)) {
-            $sqlCheck = db_fetch_array(db_query("
-                SELECT COUNT(*) as c
-                FROM pm_nc0003
-                WHERE lv001 = '{$this->lv002}'
-                  AND lv002 IN ('NHANVIEN', 'VIP')
-                  AND lv005 != '{$this->lv003}'
-            "));
-            if ($sqlCheck && $sqlCheck['c'] > 0) {
-                return [
-                    'success' => false,
-                    'message' => "Biển số {$this->lv003} không khớp với thẻ {$this->lv002} (loại NHANVIEN/VIP)."
-                ];
-            }
-        }
+		// Kiểm tra biển số có đúng cảu nhân viên hay khác vip đó k
+		$sqlCheck = db_fetch_array(db_query("
+			SELECT COUNT(*) as c
+			FROM pm_nc0003
+			WHERE lv001 = '{$this->lv002}'
+			  AND lv002 IN ('NHANVIEN', 'VIP')
+			  AND lv005 != '{$this->lv003}'
+		"));
+		if ($sqlCheck && $sqlCheck['c'] > 0) {
+			return [
+				'success' => false,
+				'message' => "Biển số {$this->lv003} không khớp với thẻ {$this->lv002} (loại NHANVIEN/VIP)."
+			];
+		}
         // Kiểm tra xe, thêm nếu chưa có
         $car = db_fetch_array(db_query("SELECT 1 FROM pm_nc0002 WHERE lv001 = '{$this->lv003}'"));
         if (!$car) {

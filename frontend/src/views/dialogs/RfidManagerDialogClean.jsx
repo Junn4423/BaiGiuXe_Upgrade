@@ -81,7 +81,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
       console.log(`Selected policy for ${formData.maChinhSach}:`, selectedPolicy)
       
       if (selectedPolicy && selectedPolicy.tongNgay > 0) {
-        const endDate = calculatePolicyEndDate(formData.ngayBatDauCS, selectedPolicy.tongNgay)
+        const endDate = calculatePolicyEndDate(formData.maChinhSach, formData.ngayBatDauCS)
         console.log(`Calculated end date: ${endDate}`)
         
         // Chỉ cập nhật nếu ngày kết thúc thực sự thay đổi
@@ -407,18 +407,40 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
     return Object.keys(errors).length === 0
   }
 
-  const calculatePolicyEndDate = (startDate, policyDays) => {
-    console.log(`calculatePolicyEndDate called with: startDate=${startDate}, policyDays=${policyDays}`)
+  // Sử dụng hàm tính ngày kết thúc từ api.js
+  const calculatePolicyEndDate = (policyCode, startDate) => {
+    return tinhNgayKetThucChinhSach(policyCode, startDate);
+  };
+
+  // Xử lý khi chọn chính sách
+  const handlePolicyChange = (e) => {
+    const selectedPolicy = e.target.value;
+    setFormData(prev => ({ ...prev, maChinhSach: selectedPolicy }));
     
-    if (!startDate || !policyDays || policyDays <= 0) {
-      console.log(`Invalid input for calculatePolicyEndDate`)
-      return ''
+    // Tự động tính ngày kết thúc nếu đã có ngày bắt đầu
+    if (formData.ngayBatDauCS) {
+      const endDate = calculatePolicyEndDate(selectedPolicy, formData.ngayBatDauCS);
+      if (endDate) {
+        setFormData(prev => ({ ...prev, ngayKetThucCS: endDate }));
+        console.log(`🔄 Auto-updated ngày kết thúc: ${endDate}`);
+      }
     }
+  };
+
+  // Xử lý khi chọn ngày bắt đầu
+  const handleStartDateChange = (e) => {
+    const startDate = e.target.value;
+    setFormData(prev => ({ ...prev, ngayBatDauCS: startDate }));
     
-    const endDate = tinhNgayKetThucChinhSach(startDate, policyDays)
-    console.log(`Tính ngày kết thúc chính sách: ${startDate} + ${policyDays} ngày = ${endDate}`)
-    return endDate
-  }
+    // Tự động tính ngày kết thúc nếu đã có chính sách
+    if (formData.maChinhSach) {
+      const endDate = calculatePolicyEndDate(formData.maChinhSach, startDate);
+      if (endDate) {
+        setFormData(prev => ({ ...prev, ngayKetThucCS: endDate }));
+        console.log(`🔄 Auto-updated ngày kết thúc: ${endDate}`);
+      }
+    }
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A"
@@ -630,7 +652,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                 <label>Chính sách giá</label>
                 <select
                   value={formData.maChinhSach}
-                  onChange={(e) => handleInputChange("maChinhSach", e.target.value)}
+                  onChange={handlePolicyChange}
                 >
                   <option value="">Chọn chính sách</option>
                   {policies.map(policy => (
@@ -649,7 +671,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                     <input
                       type="date"
                       value={formData.ngayBatDauCS}
-                      onChange={(e) => handleInputChange("ngayBatDauCS", e.target.value)}
+                      onChange={handleStartDateChange}
                     />
                     {validationErrors.ngayBatDauCS && (
                       <span className="error-text">{validationErrors.ngayBatDauCS}</span>

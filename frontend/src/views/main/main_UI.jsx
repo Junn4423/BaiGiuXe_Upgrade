@@ -9,7 +9,8 @@ import VehicleListComponent from "../../components/VehicleListComponent";
 import QuanLyCamera from "../../components/QuanLyCamera";
 import QuanLyXe from "../../components/QuanLyXe";
 import DauDocThe from "../../components/DauDocThe";
-import { nhanDangBienSo } from "../../api/api";
+import { nhanDangBienSo, extractFilenameFromImageUrl, constructImageUrlFromFilename, layThongTinLoaiXeTuBienSo, laySlotTrongChoXeLon, capNhatTrangThaiChoDo } from "../../api/api";
+import { useUser } from "../../utils/userContext";
 import BienSoLoiDialog from "../dialogs/BienSoLoiDialog";
 import CameraConfigDialog from "../dialogs/CameraConfigDialog";
 import ParkingZoneDialog from "../dialogs/ParkingZoneDialog";
@@ -24,8 +25,25 @@ import LicensePlateConfirmDialog from "../../components/LicensePlateConfirmDialo
 import { useToast } from "../../components/Toast";
 import { layDanhSachCamera, layDanhSachKhu } from "../../api/api";
 import { cleanupObjectUrls, getEnvironmentInfo, initializeStorageCleanup } from "../../utils/imageUtils";
+import { layALLLoaiPhuongTien } from "../../api/api";
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
+  
+  // User context để lấy thông tin quyền hạn
+  const { currentUser, permissions, hasPermission, isAdmin, logout: contextLogout } = useUser();
+
+  // Debug log quyền hạn khi có thay đổi
+  useEffect(() => {
+    if (currentUser) {
+      console.log('🔐 Thông tin người dùng hiện tại:', currentUser);
+      console.log('🔑 Quyền hạn hiện tại:', permissions);
+      console.log('👑 Là admin:', isAdmin());
+      
+      // Show permission toast
+      const permissionStatus = isAdmin() ? '👑 Quyền Admin - Truy cập tất cả chức năng' : '👤 Quyền User - Một số chức năng bị hạn chế';
+      showToast(permissionStatus, isAdmin() ? 'success' : 'warning', 4000);
+    }
+  }, [currentUser, permissions]);
 
   // State management
   const [activeTab, setActiveTab] = useState("management");
@@ -429,6 +447,9 @@ const MainUI = () => {
 
   const logout = () => {
     if (window.confirm("Bạn có chắc muốn đăng xuất?")) {
+      // Clear user context
+      contextLogout();
+      
       cleanup();
       window.location.reload();
     }
@@ -920,12 +941,33 @@ const MainUI = () => {
 
               // Bước 1: Kiểm tra loại xe từ workConfig trước
               if (workConfig?.loai_xe) {
+                // Mapping workConfig vehicle type to database format
                 if (workConfig.loai_xe === "oto") {
                   loaiXe = "1"; // Xe lớn
                   console.log(`🚗 Loại xe từ workConfig: Ô tô (loaiXe = 1)`);
                 } else if (workConfig.loai_xe === "xe_may") {
                   loaiXe = "0"; // Xe nhỏ
                   console.log(`🏍️ Loại xe từ workConfig: Xe máy (loaiXe = 0)`);
+                } else {
+                  // WorkConfig có thể chứa mã loại phương tiện trực tiếp từ pm_nc0001
+                  try {
+                    const vehicleTypes = await layALLLoaiPhuongTien();
+                    const matchedType = vehicleTypes.find(vt => 
+                      vt.maLoaiPT === workConfig.loai_xe || 
+                      vt.tenLoaiPT === workConfig.vehicle_type
+                    );
+                    
+                    if (matchedType) {
+                      loaiXe = matchedType.loaiXe?.toString() || "0";
+                      console.log(`🚗 Loại xe từ workConfig mapping: ${matchedType.tenLoaiPT} (loaiXe = ${loaiXe})`);
+                    } else {
+                      loaiXe = "0"; // Default to small vehicle
+                      console.log(`⚠️ Không tìm thấy mapping cho loại xe: ${workConfig.loai_xe}, mặc định xe nhỏ`);
+                    }
+                  } catch (error) {
+                    console.error(`❌ Lỗi khi mapping loại xe:`, error);
+                    loaiXe = "0"; // Fallback to small vehicle
+                  }
                 }
               } 
               // Bước 2: Nếu không có workConfig, fallback về biển số
@@ -943,31 +985,48 @@ const MainUI = () => {
                 console.log(`⚠️ Không có workConfig và biển số, mặc định là xe nhỏ`);
               }
 
-              // Nếu là xe lớn (loaiXe = "1"), tìm và đặt slot
+              console.log(`🔍 Kết quả nhận diện loại xe: loaiXe = ${loaiXe}`);
+
+              // Xử lý cấp slot đỗ xe dựa trên loaiXe từ pm_nc0001.lv004
               if (loaiXe === "1") {
-                console.log(`🚗 Xe lớn - đang tìm slot trống...`);
-                const slotResult = await laySlotTrongChoXeLon(maKhuVuc);
+                console.log(`🚗 Xe lớn (loaiXe = 1) - đang tìm slot trống từ pm_nc0005...`);
                 
-                if (slotResult.success) {
-                  parkingSpot = slotResult.maChoDo;
-                  console.log(`✅ Đã tìm thấy slot: ${parkingSpot}`);
+                try {
+                  const slotResult = await laySlotTrongChoXeLon(maKhuVuc);
                   
-                  // Cập nhật trạng thái slot thành đã dùng
-                  await capNhatTrangThaiChoDo(parkingSpot, "1");
-                  console.log(`✅ Đã cập nhật trạng thái slot ${parkingSpot} thành đã dùng`);
-                } else {
-                  // Không còn slot cho xe lớn
-                  if (vehicleInfoComponentRef.current) {
-                    vehicleInfoComponentRef.current.updateCardReaderStatus(
-                      "KHÔNG CÒN CHỖ ĐỖ CHO XE LỚN",
-                      "#ef4444"
-                    );
+                  if (slotResult.success) {
+                    parkingSpot = slotResult.maChoDo;
+                    console.log(`✅ Đã tìm thấy slot: ${parkingSpot} tại khu vực ${slotResult.tenKhuVuc}`);
+                    
+                    // Cập nhật trạng thái slot thành đã dùng (lv003 = 1)
+                    const updateResult = await capNhatTrangThaiChoDo(parkingSpot, "1");
+                    if (updateResult.success) {
+                      console.log(`✅ Đã cập nhật trạng thái slot ${parkingSpot} thành đã dùng (lv003 = 1)`);
+                    } else {
+                      console.error(`❌ Lỗi cập nhật trạng thái slot: ${updateResult.message}`);
+                    }
+                  } else {
+                    // Không còn slot cho xe lớn
+                    if (vehicleInfoComponentRef.current) {
+                      vehicleInfoComponentRef.current.updateCardReaderStatus(
+                        "KHÔNG CÒN CHỖ ĐỖ CHO XE LỚN",
+                        "#ef4444"
+                      );
+                    }
+                    showToast("❌ Không còn chỗ đỗ cho xe lớn!", "error", 5000);
+                    return;
                   }
-                  showToast("❌ Không còn chỗ đỗ cho xe lớn!", "error", 5000);
+                } catch (error) {
+                  console.error(`❌ Lỗi khi tìm slot cho xe lớn:`, error);
+                  showToast("❌ Lỗi hệ thống khi tìm chỗ đỗ!", "error", 5000);
                   return;
                 }
+              } else if (loaiXe === "0") {
+                console.log(`🏍️ Xe nhỏ (loaiXe = 0) - không cần slot cụ thể, viTriGui = null`);
+                parkingSpot = null; // Xe nhỏ không cần vị trí đỗ cụ thể
               } else {
-                console.log(`🏍️ Xe nhỏ - không cần slot cụ thể`);
+                console.log(`⚠️ Loại xe không xác định (loaiXe = ${loaiXe}), mặc định không cần slot`);
+                parkingSpot = null;
               }
 
               // Get entry camera by calling API directly
@@ -1015,15 +1074,20 @@ const MainUI = () => {
                 );
               }
 
-              // Prepare session data
+              // Prepare session data - chỉ lưu filename vào database
+              const plateImageFilename = plateImage?.filename || extractFilenameFromImageUrl(plateImage?.url || plateImage) || "";
+              const faceImageFilename = faceImage?.filename || extractFilenameFromImageUrl(faceImage?.url || faceImage) || "";
+
+              console.log(`🖼️ Image processing: plateImage filename=${plateImageFilename}, faceImage filename=${faceImageFilename}`);
+
               const sessionData = {
                 uidThe: cardId,
                 bienSo: recognizedLicensePlate || "",
                 chinhSach: pricingPolicy,
                 congVao: entryGate,
                 gioVao: getCurrentDateTime(), // Sử dụng utility function để lấy thời gian hệ thống
-                anhVao: plateImage?.url || plateImage || "",
-                anhMatVao: faceImage?.url || faceImage || "",
+                anhVao: plateImageFilename, // Chỉ lưu filename vào database
+                anhMatVao: faceImageFilename, // Chỉ lưu filename vào database
                 trangThai: "TRONG_BAI",
                 camera_id: cameraId,
                 plate_match: recognizedLicensePlate ? 1 : 0,
@@ -1036,10 +1100,10 @@ const MainUI = () => {
               console.log("🔍 DEBUG sessionData images:", {
                 plateImageType: typeof plateImage,
                 plateImageValue: plateImage,
-                plateImageUrl: plateImage?.url,
+                plateImageFilename: plateImage?.filename,
                 faceImageType: typeof faceImage,
                 faceImageValue: faceImage,
-                faceImageUrl: faceImage?.url,
+                faceImageFilename: faceImage?.filename,
                 anhVaoInSession: sessionData.anhVao,
                 anhMatVaoInSession: sessionData.anhMatVao
               });
@@ -1263,7 +1327,7 @@ const MainUI = () => {
                     const cameraRaFirst = currentZone.cameraRa[0];
                     exitCameraId = cameraRaFirst.maCamera || null;
                     console.log(
-                      `� XE RA: Exit camera từ API cameraRa[0]: ${exitCameraId}`
+                      `🚪 XE RA: Exit camera từ API cameraRa[0]: ${exitCameraId}`
                     );
                   }
                 } else {
@@ -1407,12 +1471,18 @@ const MainUI = () => {
     try {
       const { capNhatPhienGuiXe, tinhPhiGuiXe } = await import("../../api/api");
 
+      // Extract filenames for exit images
+      const plateImageExitFilename = plateImage?.filename || extractFilenameFromImageUrl(plateImage?.url || plateImage) || "";
+      const faceImageExitFilename = faceImage?.filename || extractFilenameFromImageUrl(faceImage?.url || faceImage) || "";
+
+      console.log(`🖼️ Exit image processing: plateImage filename=${plateImageExitFilename}, faceImage filename=${faceImageExitFilename}`);
+
       const exitSessionData = {
         maPhien: activeSession.maPhien,
         congRa: exitGate,
         gioRa: getCurrentDateTime(), // Sử dụng utility function để lấy thời gian hệ thống
-        anhRa: plateImage?.url || plateImage || "",
-        anhMatRa: faceImage?.url || faceImage || "",
+        anhRa: plateImageExitFilename, // Chỉ lưu filename vào database
+        anhMatRa: faceImageExitFilename, // Chỉ lưu filename vào database
         camera_id: exitCameraId,
         plate_match: recognizedLicensePlate ? 1 : 0,
         plate: recognizedLicensePlate || "",
@@ -1595,28 +1665,72 @@ const MainUI = () => {
               </span>
             </div>
           )}
+          {currentUser && (
+            <div className="user-info">
+              <span className="user-name">👤 {currentUser.userCode}</span>
+              <span className="config-separator">|</span>
+              <span className={`user-role ${isAdmin() ? 'admin' : 'user'}`}>
+                {isAdmin() ? '👑 ADMIN' : '👤 USER'}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="toolbar-right">
-          <button className="toolbar-btn" onClick={openWorkConfig}>
+          <button 
+            className={`toolbar-btn ${!hasPermission('canAccessConfig') ? 'disabled' : ''}`}
+            onClick={hasPermission('canAccessConfig') ? openWorkConfig : undefined}
+            disabled={!hasPermission('canAccessConfig')}
+            title={!hasPermission('canAccessConfig') ? 'Không có quyền truy cập' : 'Cấu hình làm việc'}
+          >
             CẤU HÌNH
           </button>
-          <button className="toolbar-btn" onClick={openCameraConfig}>
+          <button 
+            className={`toolbar-btn ${!hasPermission('canAccessCamera') ? 'disabled' : ''}`}
+            onClick={hasPermission('canAccessCamera') ? openCameraConfig : undefined}
+            disabled={!hasPermission('canAccessCamera')}
+            title={!hasPermission('canAccessCamera') ? 'Không có quyền truy cập' : 'Cấu hình camera'}
+          >
             CAMERA
           </button>
-          <button className="toolbar-btn" onClick={openPricingPolicy}>
+          <button 
+            className={`toolbar-btn ${!hasPermission('canAccessPricing') ? 'disabled' : ''}`}
+            onClick={hasPermission('canAccessPricing') ? openPricingPolicy : undefined}
+            disabled={!hasPermission('canAccessPricing')}
+            title={!hasPermission('canAccessPricing') ? 'Không có quyền truy cập' : 'Chính sách giá cả'}
+          >
             GIÁ CẢ
           </button>
-          <button className="toolbar-btn" onClick={openParkingZoneManagement}>
+          <button 
+            className={`toolbar-btn ${!hasPermission('canAccessZone') ? 'disabled' : ''}`}
+            onClick={hasPermission('canAccessZone') ? openParkingZoneManagement : undefined}
+            disabled={!hasPermission('canAccessZone')}
+            title={!hasPermission('canAccessZone') ? 'Không có quyền truy cập' : 'Quản lý khu vực'}
+          >
             KHU VỰC
           </button>
-          <button className="toolbar-btn" onClick={openVehicleManagement}>
+          <button 
+            className={`toolbar-btn ${!hasPermission('canAccessVehicle') ? 'disabled' : ''}`}
+            onClick={hasPermission('canAccessVehicle') ? openVehicleManagement : undefined}
+            disabled={!hasPermission('canAccessVehicle')}
+            title={!hasPermission('canAccessVehicle') ? 'Không có quyền truy cập' : 'Quản lý phương tiện'}
+          >
             PHƯƠNG TIỆN
           </button>
-          <button className="toolbar-btn" onClick={openVehicleType}>
+          <button 
+            className={`toolbar-btn ${!hasPermission('canAccessVehicleType') ? 'disabled' : ''}`}
+            onClick={hasPermission('canAccessVehicleType') ? openVehicleType : undefined}
+            disabled={!hasPermission('canAccessVehicleType')}
+            title={!hasPermission('canAccessVehicleType') ? 'Không có quyền truy cập' : 'Quản lý loại xe'}
+          >
             LOẠI XE
           </button>
-          <button className="toolbar-btn" onClick={openRfidManager}>
+          <button 
+            className={`toolbar-btn ${!hasPermission('canAccessRfid') ? 'disabled' : ''}`}
+            onClick={hasPermission('canAccessRfid') ? openRfidManager : undefined}
+            disabled={!hasPermission('canAccessRfid')}
+            title={!hasPermission('canAccessRfid') ? 'Không có quyền truy cập' : 'Quản lý thẻ RFID'}
+          >
             THẺ RFID
           </button>
           <button className="toolbar-btn logout-btn" onClick={logout}>

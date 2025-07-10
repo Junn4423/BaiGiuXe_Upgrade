@@ -183,7 +183,7 @@ switch ($vtable) {
 				$chinhSach = db_fetch_array($csResult);
 
 				if (!$chinhSach) {
-					$vOutput = ['success'=>false, 'message'=>'Không tìm thấy c	hính sách giá'];
+					$vOutput = ['success'=>false, 'message'=>'Không tìm thấy chính sách giá'];
 					break;
 				}
 
