@@ -7,6 +7,7 @@ import { url_login_api } from "../api/url"
 import WorkConfigDialog from "./dialogs/WorkConfigDialog"
 import MainUI from "./main/main_UI"
 import sofLogo from "../assets/img/sof.png"
+import { useUser } from "../utils/userContext"
 
 const LOGIN_API = url_login_api
 
@@ -28,6 +29,10 @@ const Login = ({ onLoginSuccess }) => {
   const [showConfig, setShowConfig] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
   const [showContinueDialog, setShowContinueDialog] = useState(false)
+  const [loginData, setLoginData] = useState(null) // Lưu trữ thông tin đăng nhập
+
+  // Sử dụng user context để quản lý đăng nhập
+  const userContext = useUser()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -52,7 +57,27 @@ const Login = ({ onLoginSuccess }) => {
       })
       const data = await res.json()
       if (res.status === 200 && data.code && data.token) {
-        setShowConfig(true)
+        // Đăng nhập qua UserContext để lấy quyền hạn
+        console.log('🔐 Đang đăng nhập và load quyền hạn cho user:', data.code)
+        const loginResult = await userContext.login({
+          username: username,
+          userCode: data.code
+        }, data.token)
+        
+        if (loginResult.success) {
+          // Lưu thông tin đăng nhập để sử dụng sau
+          setLoginData({ 
+            username: username, 
+            userCode: data.code,
+            token: data.token
+          })
+          setShowConfig(true)
+        } else {
+          setError(loginResult.message || 'Không thể lấy thông tin quyền hạn')
+          setLoading(false)
+          setPercent(0)
+          return
+        }
         setLoading(false)
         setPercent(100)
         setTimeout(() => setPercent(0), 500)
@@ -78,7 +103,8 @@ const Login = ({ onLoginSuccess }) => {
         console.log("Tạo phiên thành công")
         setShowConfig(false)
         setLoggedIn(true)
-        onLoginSuccess && onLoginSuccess({ username })
+        // Truyền thông tin đăng nhập vào onLoginSuccess
+        onLoginSuccess && onLoginSuccess(loginData)
         return
       }
 
@@ -126,7 +152,8 @@ const Login = ({ onLoginSuccess }) => {
     if (agree) {
       console.log("Người dùng chọn tiếp tục phiên làm việc")
       setLoggedIn(true)
-      onLoginSuccess && onLoginSuccess({ username })
+      // Truyền thông tin đăng nhập vào onLoginSuccess
+      onLoginSuccess && onLoginSuccess(loginData)
     } else {
       console.log("Người dùng hủy tiếp tục phiên làm việc")
       setShowConfig(true)
@@ -137,6 +164,7 @@ const Login = ({ onLoginSuccess }) => {
     setUsername("")
     setPassword("")
     setError("")
+    setLoginData(null)
   }
 
   if (loggedIn) return <MainUI />

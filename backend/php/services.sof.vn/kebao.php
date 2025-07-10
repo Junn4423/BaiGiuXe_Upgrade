@@ -328,7 +328,7 @@ switch ($vtable) {
 				$result = $pm_nc0005->KB_ChinhSuaTrangThai($pm_nc0005->lv001,$pm_nc0005->lv003);
 				$vOutput = $result ? ['success'=>true,'message'=>'Cập nhật thành công'] : ['success'=>false,'message'=>'Lỗi khi cập nhật'];
 				break;
-				
+				//chung thêm sync_data
 			case "sync_data":
 				$result = $pm_nc0005->sync_data();
 				$vOutput = $result;
@@ -373,17 +373,13 @@ switch ($vtable) {
                     
                     // Gán dữ liệu phiên gửi xe
                     $pm_nc0009->lv002 = $uidThe;
-                    $pm_nc0009->lv003 = $input['bienSo'] ?? $_POST['lv003'] ?? "";
+                    $pm_nc0009->lv003 = $input['bienSo'] ?? $_POST['lv003'] ?? null;
                     $pm_nc0009->lv004 = $input['viTriGui'] ?? $_POST['lv004'] ?? null;
                     $pm_nc0009->lv005 = $input['chinhSach'] ?? $_POST['lv005'] ?? null;
                     $pm_nc0009->lv006 = $input['congVao'] ?? $_POST['lv006'] ?? null;
                     $pm_nc0009->lv008 = $input['gioVao'] ?? $_POST['lv008'] ?? null;
-                    // Xử lý ảnh vào - đảm bảo có giá trị mặc định
-                    $anhVao = $input['anhVao'] ?? $_POST['lv011'] ?? "";
-                    $pm_nc0009->lv011 = $anhVao ?: "placeholder_image.jpg";
-                    // Xử lý ảnh mặt vào - đảm bảo có giá trị mặc định  
-                    $anhMatVao = $input['anhMatVao'] ?? $_POST['lv015'] ?? "";
-                    $pm_nc0009->lv015 = $anhMatVao ?: "placeholder_face.jpg";
+                    $pm_nc0009->lv011 = str_replace("\\", "/", $input['anhVao'] ?? $_POST['lv011'] ?? null);
+                    $pm_nc0009->lv015 = str_replace("\\", "/", $input['anhMatVao'] ?? $_POST['lv015'] ?? null);
 
                     // Thêm mới phiên gửi xe
                     $result = $pm_nc0009->KB_Insert();
@@ -697,6 +693,70 @@ switch ($vtable) {
 			}
 		break;
 		
+		case "lv_lv0007":
+			include("lv_lv0007.php");
+			$lv_lv0007 = new lv_lv0007();
+
+			switch ($vfun) {
+				case "data":
+					$obj = $lv_lv0007->LV_Load();
+					$vOutput = [];
+					while ($row = db_fetch_array($obj)) {
+						$vOutput[] = [
+							'taiKhoanDN' => $row['lv001'],
+							'nguoiThem' => $row['lv003'],
+							'roleQuyen' => $row['lv004'],
+							'matKhau' => $row['lv005'],
+							'ten' => $row['lv006'],
+							'quyenHan' => $row['lv900'],
+							'khuVucLamViec' => $row['lv901'],
+						];
+					}
+					break;
+				case "layThongTinTaiKhoanTheoToken":
+					$lv_lv0007->lv097 = $input['token'] ?? $_POST['lv097'] ?? null;
+					$obj = $lv_lv0007->LV_LoadID($lv_lv0007->lv097);
+					$vOutput = [];
+					while ($row = db_fetch_array($obj)) {
+						$vOutput[] = [
+							'taiKhoanDN' => $row['lv001'],
+							'nguoiThem' => $row['lv003'],
+							'roleQuyen' => $row['lv004'],
+							'matKhau' => $row['lv005'],
+							'ten' => $row['lv006'],
+							'quyenHan' => $row['lv900'],
+							'khuVucLamViec' => $row['lv901'],
+						];
+					}
+					break;
+				case "add":
+					$lv_lv0007->lv001 = $input['taiKhoanDN'] ?? $_POST['lv001'] ?? null;
+					$lv_lv0007->lv003 = $input['nguoiThem'] ?? $_POST['lv003'] ?? null;
+					$lv_lv0007->lv004 = $input['roleQuyen'] ?? $_POST['lv004'] ?? null;
+					$lv_lv0007->lv005 = $input['matKhau'] ?? $_POST['lv005'] ?? null;
+					$lv_lv0007->lv006 = $input['ten'] ?? $_POST['lv006'] ?? null;
+					$lv_lv0007->lv900 = $input['quyenHan'] ?? $_POST['lv900'] ?? null;
+					$lv_lv0007->lv901 = $input['khuVucLamViec'] ?? $_POST['lv901'] ?? null;
+					$vOutput = $lv_lv0007->LV_Insert()
+						? ['success' => true, 'message' => 'Thêm thành công']
+						: ['success' => false, 'message' => 'Lỗi khi thêm tài khoản'];
+					break;
+
+				case "edit":
+					$lv_lv0007->lv001 = $input['taiKhoanDN'] ?? $_POST['lv001'] ?? null;
+					$lv_lv0007->lv003 = $input['nguoiThem'] ?? $_POST['lv003'] ?? null;
+					$lv_lv0007->lv004 = $input['roleQuyen'] ?? $_POST['lv004'] ?? null;
+					$lv_lv0007->lv005 = $input['matKhau'] ?? $_POST['lv005'] ?? null;
+					$lv_lv0007->lv006 = $input['ten'] ?? $_POST['lv006'] ?? null;
+					$lv_lv0007->lv900 = $input['quyenHan'] ?? $_POST['lv900'] ?? null;
+					$lv_lv0007->lv901 = $input['khuVucLamViec'] ?? $_POST['lv901'] ?? null;
+					$vOutput = $lv_lv0007->LV_Update()
+						? ['success' => true, 'message' => 'Cập nhật thành công']
+						: ['success' => false, 'message' => 'Lỗi khi cập nhật'];
+					break;
+
+			}
+		break;
 
 }
 ?>

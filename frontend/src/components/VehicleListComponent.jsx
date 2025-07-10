@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import "../assets/styles/VehicleListComponent.css"
-import { layALLPhienGuiXe, layALLLoaiPhuongTien } from "../api/api"
+import { layALLPhienGuiXe, layALLLoaiPhuongTien, constructImageUrlFromFilename } from "../api/api"
 import ParkingLotManagement from "../views/ParkingLotManagement"
 
 const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
