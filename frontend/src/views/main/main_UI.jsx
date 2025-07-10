@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { getCurrentDateTime } from "../../utils/timeUtils";
 import "../../assets/styles/main_UI.css";
 import CameraComponent from "../../components/CameraComponent";
@@ -115,6 +115,14 @@ const MainUI = () => {
     }
   }, [workConfig]);
 
+  // Debug workConfig state changes
+  useEffect(() => {
+    console.log("🔧 WorkConfig state changed:", workConfig);
+    if (workConfig) {
+      console.log("🚗 Current workConfig.loai_xe:", workConfig.loai_xe);
+    }
+  }, [workConfig]);
+
   // Check environment and setup auto-save info
   useEffect(() => {
     const checkEnvironment = async () => {
@@ -180,16 +188,37 @@ const MainUI = () => {
   const loadWorkConfig = () => {
     try {
       const savedConfig = localStorage.getItem("work_config");
+      console.log("📄 Loading work config from localStorage:", savedConfig);
+      
       if (savedConfig) {
         const config = JSON.parse(savedConfig);
+        console.log("✅ Parsed work config:", config);
+        console.log("🔧 Vehicle type in config:", config.loai_xe);
+        
+        // Ensure state update happens in next tick
         setWorkConfig(config);
         setCurrentVehicleType(config.loai_xe || "xe_may");
         setCurrentMode(config.default_mode || "vao");
+        
+        // Additional log after state update
+        console.log("🔄 WorkConfig state will be updated to:", config);
+        
+        // Force verify the state was set
+        setTimeout(() => {
+          console.log("🔍 Verifying workConfig state after 100ms delay...");
+          console.log("🔍 workConfig state is:", workConfig);
+          if (!workConfig && savedConfig) {
+            console.warn("⚠️ workConfig state is still null, forcing re-parse...");
+            const reparsedConfig = JSON.parse(savedConfig);
+            setWorkConfig(reparsedConfig);
+          }
+        }, 100);
       } else {
+        console.log("⚠️ No work config found in localStorage, showing config dialog");
         setShowWorkConfig(true);
       }
     } catch (error) {
-      console.error("Error loading work config:", error);
+      console.error("❌ Error loading work config:", error);
       setShowWorkConfig(true);
     }
   };
@@ -388,6 +417,11 @@ const MainUI = () => {
           return newMode;
         });
       }
+      // Debug: D key to debug workConfig
+      if (event.key === "d" || event.key === "D") {
+        event.preventDefault();
+        debugWorkConfig();
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
@@ -519,9 +553,20 @@ const MainUI = () => {
 
   // Handle work config save
   const handleWorkConfigSave = (config) => {
+    console.log("🔧 handleWorkConfigSave called with config:", config);
     setWorkConfig(config);
     setCurrentVehicleType(config.loai_xe || "xe_may");
     setShowWorkConfig(false);
+    
+    // Reload config from localStorage to ensure it's properly saved
+    setTimeout(() => {
+      const savedConfig = localStorage.getItem("work_config");
+      if (savedConfig) {
+        const reloadedConfig = JSON.parse(savedConfig);
+        console.log("✅ Config reloaded from localStorage:", reloadedConfig);
+        setWorkConfig(reloadedConfig);
+      }
+    }, 100);
   };
 
   // Calculate estimated parking fee based on pricing policy
@@ -547,10 +592,94 @@ const MainUI = () => {
     }
   };
 
+  // Debug function to verify workConfig
+  const debugWorkConfig = () => {
+    console.log("=== WORK CONFIG DEBUG ===");
+    const rawConfig = localStorage.getItem("work_config");
+    console.log("Raw localStorage value:", rawConfig);
+    
+    if (rawConfig) {
+      try {
+        const parsed = JSON.parse(rawConfig);
+        console.log("Parsed config:", parsed);
+        console.log("Config keys:", Object.keys(parsed));
+        console.log("loai_xe value:", parsed.loai_xe);
+        console.log("loai_xe type:", typeof parsed.loai_xe);
+        console.log("vehicle_type value:", parsed.vehicle_type);
+      } catch (e) {
+        console.error("Failed to parse config:", e);
+      }
+    } else {
+      console.log("No config in localStorage");
+    }
+    
+    console.log("Current workConfig state:", workConfig);
+    console.log("Current workConfig state is null:", workConfig === null);
+    console.log("Current workConfig state type:", typeof workConfig);
+    
+    // Check if state update is pending
+    setTimeout(() => {
+      console.log("⏰ WorkConfig state after timeout:", workConfig);
+    }, 50);
+    
+    console.log("=== END DEBUG ===");
+  };
+
+  // Computed workConfig for components (with fallback)
+  const effectiveWorkConfigForComponents = useMemo(() => {
+    if (workConfig) {
+      return workConfig;
+    }
+    
+    // Fallback: try to get from localStorage directly
+    try {
+      const savedConfig = localStorage.getItem("work_config");
+      if (savedConfig) {
+        const parsed = JSON.parse(savedConfig);
+        console.log("🔄 Using fallback workConfig for components:", parsed);
+        return parsed;
+      }
+    } catch (error) {
+      console.error("❌ Failed to get fallback workConfig:", error);
+    }
+    
+    return null;
+  }, [workConfig]);
+
+  // Helper function to get effective workConfig (can be called from any function)
+  const getEffectiveWorkConfig = () => {
+    if (workConfig) {
+      return workConfig;
+    }
+    
+    // Fallback: try to get from localStorage directly
+    try {
+      const savedConfig = localStorage.getItem("work_config");
+      if (savedConfig) {
+        const parsed = JSON.parse(savedConfig);
+        console.log("🔄 Using fallback workConfig:", parsed);
+        return parsed;
+      }
+    } catch (error) {
+      console.error("❌ Failed to get fallback workConfig:", error);
+    }
+    
+    return null;
+  };
+
   // Handle card scanning
   const handleCardScanned = async (cardId) => {
     console.log("🔥 handleCardScanned called with cardId:", cardId);
     console.log("🔥 currentModeRef.current:", currentModeRef.current);
+    console.log("🔥 workConfig at time of card scan:", workConfig);
+    console.log("🔥 workConfig.loai_xe at time of card scan:", workConfig?.loai_xe);
+    
+    // Get effective workConfig using helper function
+    const effectiveWorkConfig = getEffectiveWorkConfig();
+    console.log("🔄 Effective workConfig:", effectiveWorkConfig);
+    
+    // Debug workConfig structure
+    debugWorkConfig();
     
     const actualMode = currentModeRef.current;
     setScannedCardId(cardId);
@@ -822,32 +951,34 @@ const MainUI = () => {
                 console.error("Lỗi khi lấy thông tin thẻ:", cardError);
               }
 
-              // B2: Nếu thẻ chưa có chính sách, sử dụng logic cũ (fallback)
+              // B2: Nếu thẻ chưa có chính sách, sử dụng workConfig để xác định default policy
               if (!pricingPolicy) {
-                // Determine vehicle type based on work config
-                let vehicleTypeCode = null;
-                if (workConfig?.loai_xe) {
-                  const vehicleTypeMapping = {
-                    xe_may: "XE_MAY",
-                    oto: "OT",
-                  };
-                  vehicleTypeCode =
-                    vehicleTypeMapping[workConfig.loai_xe] || null;
+                console.log("🔍 Debug workConfig state:", effectiveWorkConfig);
+                console.log("🔍 effectiveWorkConfig.loai_xe:", effectiveWorkConfig?.loai_xe);
+                console.log("🔍 effectiveWorkConfig.vehicle_type:", effectiveWorkConfig?.vehicle_type);
+                console.log("🔍 typeof effectiveWorkConfig:", typeof effectiveWorkConfig);
+                console.log("🔍 effectiveWorkConfig keys:", effectiveWorkConfig ? Object.keys(effectiveWorkConfig) : "null");
+                
+                if (effectiveWorkConfig?.loai_xe) {
+                  const vehicleType = effectiveWorkConfig.loai_xe.toLowerCase();
+                  
+                  // Support multiple formats: "oto", "OT", "ô tô", etc.
+                  if (vehicleType === "oto" || vehicleType === "ot" || vehicleType.includes("oto") || vehicleType.includes("ô tô")) {
+                    pricingPolicy = "CS_OTO_4H";
+                    console.log(`🚗 Thẻ chưa có chính sách, sử dụng default cho ô tô: ${pricingPolicy} (từ ${effectiveWorkConfig.loai_xe})`);
+                  } else if (vehicleType === "xe_may" || vehicleType === "xm" || vehicleType.includes("xe máy") || vehicleType.includes("xe may")) {
+                    pricingPolicy = "CS_XEMAY_4H";
+                    console.log(`🏍️ Thẻ chưa có chính sách, sử dụng default cho xe máy: ${pricingPolicy} (từ ${effectiveWorkConfig.loai_xe})`);
+                  } else {
+                    // Fallback for other vehicle types - default to small vehicle
+                    pricingPolicy = "CS_XEMAY_4H";
+                    console.log(`⚠️ Loại xe không xác định (${effectiveWorkConfig.loai_xe}), mặc định xe máy: ${pricingPolicy}`);
+                  }
+                } else {
+                  // No workConfig vehicle type - default to small vehicle
+                  pricingPolicy = "CS_XEMAY_4H";
+                  console.log(`⚠️ WorkConfig không có loại xe (effectiveWorkConfig: ${JSON.stringify(effectiveWorkConfig)}), mặc định xe máy: ${pricingPolicy}`);
                 }
-
-                // Get pricing policy from vehicle type
-                let rawPricingPolicy = null;
-                if (vehicleTypeCode) {
-                  rawPricingPolicy = await layChinhSachGiaTheoLoaiPT(
-                    vehicleTypeCode
-                  );
-                }
-
-                pricingPolicy = validateAndEnsurePricingPolicy(
-                  rawPricingPolicy,
-                  workConfig?.loai_xe,
-                  vehicleTypeCode
-                );
               }
 
               if (!pricingPolicy) {
@@ -896,8 +1027,8 @@ const MainUI = () => {
               }
 
               // Fallback to workConfig if API failed
-              if (!apiSuccess && workConfig?.entry_gate) {
-                entryGate = workConfig.entry_gate;
+              if (!apiSuccess && effectiveWorkConfig?.entry_gate) {
+                entryGate = effectiveWorkConfig.entry_gate;
               }
 
               if (!entryGate) {
@@ -934,27 +1065,33 @@ const MainUI = () => {
               let maKhuVuc = null;
 
               // Lấy mã khu vực hiện tại
-              if (typeof workConfig === "object" && workConfig) {
-                maKhuVuc = workConfig.ma_khu_vuc || workConfig.maKhuVuc || 
-                          workConfig.zone_code || workConfig.zone;
+              if (typeof effectiveWorkConfig === "object" && effectiveWorkConfig) {
+                maKhuVuc = effectiveWorkConfig.ma_khu_vuc || effectiveWorkConfig.maKhuVuc || 
+                          effectiveWorkConfig.zone_code || effectiveWorkConfig.zone;
               }
 
-              // Bước 1: Kiểm tra loại xe từ workConfig trước
-              if (workConfig?.loai_xe) {
+              // Bước 1: Kiểm tra loại xe từ workConfig trước (CHÍNH)
+              if (effectiveWorkConfig?.loai_xe) {
+                console.log(`🔍 DEBUG: effectiveWorkConfig.loai_xe = "${effectiveWorkConfig.loai_xe}" (type: ${typeof effectiveWorkConfig.loai_xe})`);
+                
+                // Normalize vehicle type for comparison
+                const vehicleType = effectiveWorkConfig.loai_xe.toLowerCase();
+                console.log(`🔍 DEBUG: Normalized vehicleType = "${vehicleType}"`);
+                
                 // Mapping workConfig vehicle type to database format
-                if (workConfig.loai_xe === "oto") {
+                if (vehicleType === "oto" || vehicleType === "ot" || vehicleType.includes("oto") || vehicleType.includes("ô tô")) {
                   loaiXe = "1"; // Xe lớn
-                  console.log(`🚗 Loại xe từ workConfig: Ô tô (loaiXe = 1)`);
-                } else if (workConfig.loai_xe === "xe_may") {
+                  console.log(`🚗 Loại xe từ workConfig: Ô tô (loaiXe = 1) - từ "${effectiveWorkConfig.loai_xe}"`);
+                } else if (vehicleType === "xe_may" || vehicleType === "xm" || vehicleType.includes("xe máy") || vehicleType.includes("xe may")) {
                   loaiXe = "0"; // Xe nhỏ
-                  console.log(`🏍️ Loại xe từ workConfig: Xe máy (loaiXe = 0)`);
+                  console.log(`🏍️ Loại xe từ workConfig: Xe máy (loaiXe = 0) - từ "${effectiveWorkConfig.loai_xe}"`);
                 } else {
                   // WorkConfig có thể chứa mã loại phương tiện trực tiếp từ pm_nc0001
                   try {
                     const vehicleTypes = await layALLLoaiPhuongTien();
                     const matchedType = vehicleTypes.find(vt => 
-                      vt.maLoaiPT === workConfig.loai_xe || 
-                      vt.tenLoaiPT === workConfig.vehicle_type
+                      vt.maLoaiPT === effectiveWorkConfig.loai_xe || 
+                      vt.tenLoaiPT === effectiveWorkConfig.vehicle_type
                     );
                     
                     if (matchedType) {
@@ -962,7 +1099,7 @@ const MainUI = () => {
                       console.log(`🚗 Loại xe từ workConfig mapping: ${matchedType.tenLoaiPT} (loaiXe = ${loaiXe})`);
                     } else {
                       loaiXe = "0"; // Default to small vehicle
-                      console.log(`⚠️ Không tìm thấy mapping cho loại xe: ${workConfig.loai_xe}, mặc định xe nhỏ`);
+                      console.log(`⚠️ Không tìm thấy mapping cho loại xe: ${effectiveWorkConfig.loai_xe}, mặc định xe nhỏ`);
                     }
                   } catch (error) {
                     console.error(`❌ Lỗi khi mapping loại xe:`, error);
@@ -970,28 +1107,35 @@ const MainUI = () => {
                   }
                 }
               } 
-              // Bước 2: Nếu không có workConfig, fallback về biển số
+              // Bước 2: Nếu không có workConfig, fallback về biển số (FALLBACK)
               else if (recognizedLicensePlate) {
                 console.log(`🚗 WorkConfig không có loại xe, đang kiểm tra từ biển số: ${recognizedLicensePlate}`);
-                const thongTinLoaiXe = await layThongTinLoaiXeTuBienSo(recognizedLicensePlate);
-                
-                if (thongTinLoaiXe.success) {
-                  loaiXe = thongTinLoaiXe.loaiXe;
-                  console.log(`✅ Loại xe từ biển số: ${loaiXe} (0=xe nhỏ, 1=xe lớn)`);
-                } else {
-                  console.log(`⚠️ Không tìm thấy loại xe từ biển số, mặc định là xe nhỏ`);
+                try {
+                  const thongTinLoaiXe = await layThongTinLoaiXeTuBienSo(recognizedLicensePlate);
+                  
+                  if (thongTinLoaiXe.success) {
+                    loaiXe = thongTinLoaiXe.loaiXe;
+                    console.log(`✅ Loại xe từ biển số: ${loaiXe} (0=xe nhỏ, 1=xe lớn)`);
+                  } else {
+                    console.log(`⚠️ Không tìm thấy loại xe từ biển số, mặc định là xe nhỏ`);
+                  }
+                } catch (error) {
+                  console.error(`❌ Lỗi khi lấy loại xe từ biển số:`, error);
+                  loaiXe = "0";
                 }
               } else {
                 console.log(`⚠️ Không có workConfig và biển số, mặc định là xe nhỏ`);
                 loaiXe = "0";
               }
 
-              // Fallback cuối: suy luận từ mã chính sách (pricingPolicy)
-              if ((loaiXe === "0" || loaiXe === 0) && pricingPolicy) {
+              console.log(`🔍 Kết quả cuối cùng: loaiXe = ${loaiXe} (từ ${effectiveWorkConfig?.loai_xe ? 'workConfig' : 'fallback'})`);
+
+              // Fallback cuối: chỉ suy luận từ mã chính sách khi cần (cho trường hợp thẻ có policy nhưng workConfig không có loại xe)
+              if ((loaiXe === "0" || loaiXe === 0) && pricingPolicy && !effectiveWorkConfig?.loai_xe) {
                 const policyUpper = pricingPolicy.toUpperCase();
                 if (policyUpper.includes("OTO") || policyUpper.includes("OT") || policyUpper.includes("BUS") || policyUpper.includes("16CHO") || policyUpper.includes("12CHO")) {
                   loaiXe = "1";
-                  console.log(`📝 Suy luận loaiXe=1 từ policy ${pricingPolicy}`);
+                  console.log(`📝 Suy luận loaiXe=1 từ policy ${pricingPolicy} (chỉ khi workConfig không có loại xe)`);
                 }
               }
 
@@ -1049,14 +1193,14 @@ const MainUI = () => {
                 if (zonesResponse && Array.isArray(zonesResponse)) {
                   let actualZoneCode = null;
 
-                  if (typeof workConfig === "object" && workConfig) {
+                  if (typeof effectiveWorkConfig === "object" && effectiveWorkConfig) {
                     actualZoneCode =
-                      workConfig.ma_khu_vuc ||
-                      workConfig.maKhuVuc ||
-                      workConfig.zone_code ||
-                      workConfig.zone;
-                  } else if (typeof workConfig === "string") {
-                    actualZoneCode = workConfig;
+                      effectiveWorkConfig.ma_khu_vuc ||
+                      effectiveWorkConfig.maKhuVuc ||
+                      effectiveWorkConfig.zone_code ||
+                      effectiveWorkConfig.zone;
+                  } else if (typeof effectiveWorkConfig === "string") {
+                    actualZoneCode = effectiveWorkConfig;
                   }
 
                   if (!actualZoneCode && zonesResponse.length > 0) {
@@ -1293,15 +1437,15 @@ const MainUI = () => {
                 // Find current zone using workConfig
                 let actualZoneCode = null;
 
-                if (typeof workConfig === "object" && workConfig) {
+                if (typeof effectiveWorkConfig === "object" && effectiveWorkConfig) {
                   // Try common field names
                   actualZoneCode =
-                    workConfig.ma_khu_vuc ||
-                    workConfig.maKhuVuc ||
-                    workConfig.zone_code ||
-                    workConfig.zone;
-                } else if (typeof workConfig === "string") {
-                  actualZoneCode = workConfig;
+                    effectiveWorkConfig.ma_khu_vuc ||
+                    effectiveWorkConfig.maKhuVuc ||
+                    effectiveWorkConfig.zone_code ||
+                    effectiveWorkConfig.zone;
+                } else if (typeof effectiveWorkConfig === "string") {
+                  actualZoneCode = effectiveWorkConfig;
                 }
 
                 // Fallback: use first available zone if nothing found
@@ -1352,8 +1496,8 @@ const MainUI = () => {
                 );
 
                 // Fallback to workConfig if API fails
-                if (workConfig?.exit_gate) {
-                  exitGate = workConfig.exit_gate;
+                if (effectiveWorkConfig?.exit_gate) {
+                  exitGate = effectiveWorkConfig.exit_gate;
                   console.log(
                     `🚪 XE RA: Fallback exit gate từ workConfig: ${exitGate}`
                   );
@@ -1416,7 +1560,7 @@ const MainUI = () => {
                 faceImage,
                 recognizedLicensePlate,
                 cardId,
-                workConfig
+                effectiveWorkConfig
               );
             } catch (exitError) {
               console.error("❌ Error processing vehicle exit:", exitError);
@@ -1635,7 +1779,7 @@ const MainUI = () => {
         faceImage,
         correctedLicensePlate,
         cardId,
-        workConfig
+        getEffectiveWorkConfig()
       );
     } else {
       showToast("Đã hủy xử lý xe ra", "info", 3000);
@@ -1799,7 +1943,7 @@ const MainUI = () => {
         >
           <VehicleListComponent
             ref={vehicleListComponentRef}
-            workConfig={workConfig}
+            workConfig={effectiveWorkConfigForComponents}
             onVehicleSelect={(vehicle) => {
               console.log("Selected vehicle:", vehicle);
             }}
@@ -1812,7 +1956,6 @@ const MainUI = () => {
         <QuanLyCamera ref={cameraManagerRef} />
         <QuanLyXe
           ref={vehicleManagerRef}
-          loaiXe={workConfig?.loai_xe || currentVehicleType === "oto" ? 1 : 0}
           workConfig={workConfig}
         />
         <DauDocThe 

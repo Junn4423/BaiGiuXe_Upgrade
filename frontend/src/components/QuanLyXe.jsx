@@ -8,7 +8,7 @@ import VehicleStatusNotification, {
   VehicleNotificationContainer,
 } from "./VehicleStatusNotification";
 
-const QuanLyXe = () => {
+const QuanLyXe = ({ workConfig }) => {
   const {
     vehicles,
     activeSessions,
@@ -41,21 +41,50 @@ const QuanLyXe = () => {
     faceImagePath = null
   ) => {
     // Auto-determine policy if not provided
-    if (!policy && ui) {
-      if (ui.currentMode === "vao") {
-        if (ui.currentVehicleType === "xe_may") {
-          policy = "CS_XEMAY_4H";
-        } else if (ui.currentVehicleType === "oto") {
+    if (!policy) {
+      // Use workConfig to determine vehicle type and policy
+      if (workConfig?.loai_xe) {
+        if (workConfig.loai_xe === "oto") {
           policy = "CS_OTO_4H";
+        } else if (workConfig.loai_xe === "xe_may") {
+          policy = "CS_XEMAY_4H";
+        }
+      } else if (ui) {
+        // Fallback to UI state if workConfig not available
+        if (ui.currentMode === "vao") {
+          if (ui.currentVehicleType === "xe_may") {
+            policy = "CS_XEMAY_4H";
+          } else if (ui.currentVehicleType === "oto") {
+            policy = "CS_OTO_4H";
+          }
         }
       }
     }
+
+    // Calculate loaiXe from workConfig
+    let loaiXe = "0"; // Default: small vehicle
+    if (workConfig?.loai_xe) {
+      if (workConfig.loai_xe === "oto") {
+        loaiXe = "1"; // Large vehicle
+      } else if (workConfig.loai_xe === "xe_may") {
+        loaiXe = "0"; // Small vehicle
+      }
+    } else if (ui && ui.currentVehicleType) {
+      // Fallback to UI state
+      if (ui.currentVehicleType === "oto") {
+        loaiXe = "1";
+      } else {
+        loaiXe = "0";
+      }
+    }
+
+    console.log(`🚗 QuanLyXe: Determined loaiXe = ${loaiXe} from workConfig.loai_xe = ${workConfig?.loai_xe}`);
 
     const entryTime = getCurrentDateTime();
     const session = {
       uidThe: cardId,
       bienSo: licensePlate || "",
-      viTriGui: "A01", // Default parking spot - should be passed from UI
+      viTriGui: loaiXe === "1" ? "A01" : undefined, // Only set parking spot for large vehicles
       chinhSach: policy || "CS_XEMAY_4H", // Default policy if not provided
       congVao: entryGate || "GATE01", // Default gate if not provided
       gioVao: entryTime,
@@ -65,6 +94,7 @@ const QuanLyXe = () => {
       camera_id: cameraId || "CAM001", // Default camera ID if not provided
       plate_match: licensePlate ? 1 : 0, // 1 if license plate provided, 0 otherwise
       plate: licensePlate || "",
+      loaiXe: loaiXe, // Add loaiXe to session data
     };
 
     try {

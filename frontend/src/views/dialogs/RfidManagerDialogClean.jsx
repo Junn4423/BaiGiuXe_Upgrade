@@ -43,7 +43,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
   // Form state - theo chuẩn mobile app
   const [formData, setFormData] = useState({
     uidThe: "",
-    loaiThe: "KHACH",
+    loaiThe: "KHACH", // Thẻ Thường
     trangThai: "1",
     bienSoXe: "",
     maChinhSach: "",
@@ -325,10 +325,23 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
   }
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    // Nếu thay đổi loại thẻ sang KHACH (Thẻ Thường) thì reset các trường liên quan
+    if (field === "loaiThe" && value === "KHACH") {
+      setFormData(prev => ({
+        ...prev,
+        loaiThe: value,
+        bienSoXe: "",
+        maChinhSach: "",
+        ngayBatDauCS: "",
+        ngayKetThucCS: "",
+        tongNgay: 0
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
     
     // Clear validation error for this field
     if (validationErrors[field]) {
@@ -635,33 +648,38 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label>Biển số xe</label>
-                <input
-                  type="text"
-                  value={formData.bienSoXe}
-                  onChange={(e) => handleInputChange("bienSoXe", e.target.value)}
-                  placeholder="Nhập biển số xe"
-                />
-                {validationErrors.bienSoXe && (
-                  <span className="error-text">{validationErrors.bienSoXe}</span>
-                )}
-              </div>
+              {/* Biển số & Chính sách chỉ hiển thị với VIP/NHANVIEN */}
+              {formData.loaiThe !== "KHACH" && (
+                <>
+                  <div className="form-group">
+                    <label>Biển số xe</label>
+                    <input
+                      type="text"
+                      value={formData.bienSoXe}
+                      onChange={(e) => handleInputChange("bienSoXe", e.target.value)}
+                      placeholder="Nhập biển số xe"
+                    />
+                    {validationErrors.bienSoXe && (
+                      <span className="error-text">{validationErrors.bienSoXe}</span>
+                    )}
+                  </div>
 
-              <div className="form-group">
-                <label>Chính sách giá</label>
-                <select
-                  value={formData.maChinhSach}
-                  onChange={handlePolicyChange}
-                >
-                  <option value="">Chọn chính sách</option>
-                  {policies.map(policy => (
-                    <option key={policy.maChinhSach} value={policy.maChinhSach}>
-                      {policy.maChinhSach} {policy.tongNgay ? `(${policy.tongNgay} ngày)` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="form-group">
+                    <label>Chính sách giá</label>
+                    <select
+                      value={formData.maChinhSach}
+                      onChange={handlePolicyChange}
+                    >
+                      <option value="">Chọn chính sách</option>
+                      {policies.map(policy => (
+                        <option key={policy.maChinhSach} value={policy.maChinhSach}>
+                          {policy.maChinhSach} {policy.tongNgay ? `(${policy.tongNgay} ngày)` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
 
               {/* Hiển thị ngày bắt đầu và kết thúc nếu có chính sách */}
               {formData.maChinhSach && (
