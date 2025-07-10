@@ -243,19 +243,20 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
 
         return {
           id: item.maPhien || `temp_${idx}`,
-          sessionId: item.maPhien,
-          licensePlate: item.bienSo || "---",
-          cardId: item.uidThe || "---",
+          sessionId: item.maPhien || "---", // Phiên (lv001)
+          licensePlate: item.bienSo || "---", // Biển số
+          cardId: item.uidThe || "---", // Mã thẻ
+          parkingSpot: item.viTriGui || "---", // Vị trí gửi (lv004)
           vehicleType: vehicleTypeInfo.vehicleType, // For backward compatibility (xe_may/oto)
           vehicleTypeName: vehicleTypeInfo.name, // New field for display name
           vehicleTypeCode: vehicleTypeInfo.code, // New field for type code
           isLargeVehicle: vehicleTypeInfo.isLargeVehicle, // New field for size classification
-          timeIn: item.gioVao || null,
-          timeOut: item.gioRa || null,
-          duration: duration,
-          fee: fee,
-          status: status,
-          zone: item.viTriGui || "---",
+          timeIn: item.gioVao || null, // Giờ vào
+          timeOut: item.gioRa || null, // Giờ ra
+          duration: duration, // Thời gian đỗ
+          fee: fee, // Phí
+          status: status, // Trạng thái
+          zone: item.viTriGui || "---", // Keep for backward compatibility
           // Additional fields for reference
           policy: item.chinhSach || "---",
           gateIn: item.congVao || "---",
@@ -365,8 +366,10 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
   const filteredAndSortedVehicles = vehicles
     .filter((vehicle) => {
       const matchesSearch =
+        vehicle.sessionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.cardId.toLowerCase().includes(searchTerm.toLowerCase())
+        vehicle.cardId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicle.parkingSpot.toLowerCase().includes(searchTerm.toLowerCase())
       
       // Enhanced type filter with support for all vehicle types
       const matchesTypeFilter = filterType === "all" || 
@@ -497,7 +500,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
           <div className="search-box">
             <input
               type="text"
-              placeholder="Tìm kiếm biển số hoặc mã thẻ..."
+              placeholder="Tìm kiếm phiên, biển số, mã thẻ hoặc vị trí..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -526,7 +529,9 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
 
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
               <option value="timeIn">Thời gian vào</option>
+              <option value="sessionId">Phiên</option>
               <option value="licensePlate">Biển số</option>
+              <option value="parkingSpot">Vị trí gửi</option>
               <option value="fee">Phí gửi xe</option>
               <option value="duration">Thời gian đỗ</option>
               <option value="status">Trạng thái</option>
@@ -567,15 +572,15 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
           <table className="vehicle-table">
             <thead>
               <tr>
+                <th>PHIÊN</th>
                 <th>BIỂN SỐ</th>
                 <th>MÃ THẺ</th>
-                <th>LOẠI XE</th>
+                <th>VỊ TRÍ GỬI</th>
                 <th>GIỜ VÀO</th>
                 <th>GIỜ RA</th>
                 <th>THỜI GIAN ĐỖ</th>
                 <th>PHÍ</th>
                 <th>TRẠNG THÁI</th>
-                <th>KHU VỰC</th>
                 <th>THAO TÁC</th>
               </tr>
             </thead>
@@ -589,15 +594,15 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
               ) : (
                 filteredAndSortedVehicles.map((vehicle) => (
                   <tr key={vehicle.id} onClick={() => handleVehicleSelect(vehicle)} className="vehicle-row">
+                    <td className="session-id">{vehicle.sessionId}</td>
                     <td className="license-plate">{vehicle.licensePlate}</td>
                     <td className="card-id">{vehicle.cardId}</td>
-                    <td className="vehicle-type">{vehicle.vehicleTypeName || vehicle.vehicleType}</td>
+                    <td className="parking-spot">{vehicle.parkingSpot}</td>
                     <td className="time-in">{formatTime(vehicle.timeIn)}</td>
                     <td className="time-out">{formatTime(vehicle.timeOut)}</td>
                     <td className="duration">{getDuration(vehicle)}</td>
                     <td className="fee">{formatCurrency(vehicle.fee)}</td>
                     <td className={`status ${vehicle.status === "Trong bãi" ? "active" : "completed"}`}>{vehicle.status}</td>
-                    <td className="zone">{vehicle.zone}</td>
                     <td className="actions">
                       {vehicle.status === "Trong bãi" && (
                         <button 
