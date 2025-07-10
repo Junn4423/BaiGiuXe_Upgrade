@@ -84,87 +84,75 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
 
   // Helper function to determine vehicle type from various sources
   const determineVehicleType = (item) => {
-    let vehicleTypeCode = null
-    let vehicleTypeName = "Xe máy" // default fallback
-    let isLargeVehicle = false
+    let vehicleTypeCode = null;
+    let vehicleTypeName = "Xe máy"; // default
+    let isLargeVehicle = false;
 
-    // Bước 1: Ưu tiên loaiXe từ database nếu nó là mã loại phương tiện
-    if (item.loaiXe && typeof item.loaiXe === 'string' && vehicleTypeMapping.has(item.loaiXe)) {
-      vehicleTypeCode = item.loaiXe
-      const typeInfo = vehicleTypeMapping.get(vehicleTypeCode)
-      vehicleTypeName = typeInfo.name
-      isLargeVehicle = typeInfo.isLargeVehicle
-      console.log(`🚗 Vehicle ${item.bienSo}: Từ loaiXe DB = ${vehicleTypeCode} -> ${vehicleTypeName}`)
-    }
-    // Bước 2: Nếu loaiXe là số (0/1), mapping theo cách cũ nhưng ưu tiên xe lớn từ policy
-    else if (item.loaiXe !== undefined && item.loaiXe !== null) {
-      if (item.loaiXe === 1 || item.loaiXe === "1") {
-        // Kiểm tra policy để xác định loại xe lớn cụ thể
-        if (item.chinhSach) {
-          vehicleTypeCode = extractVehicleTypeFromPolicy(item.chinhSach)
-          if (vehicleTypeCode && vehicleTypeMapping.has(vehicleTypeCode)) {
-            const typeInfo = vehicleTypeMapping.get(vehicleTypeCode)
-            vehicleTypeName = typeInfo.name
-            isLargeVehicle = typeInfo.isLargeVehicle
-            console.log(`🚗 Vehicle ${item.bienSo}: loaiXe=1 + policy ${item.chinhSach} -> ${vehicleTypeName}`)
-          } else {
-            vehicleTypeName = "Ô tô"
-            isLargeVehicle = true
-            console.log(`🚗 Vehicle ${item.bienSo}: loaiXe=1 fallback -> Ô tô`)
-          }
-        } else {
-          vehicleTypeName = "Ô tô"
-          isLargeVehicle = true
-          console.log(`🚗 Vehicle ${item.bienSo}: loaiXe=1 -> Ô tô`)
-        }
-      } else if (item.loaiXe === 0 || item.loaiXe === "0") {
-        vehicleTypeName = "Xe máy"
-        isLargeVehicle = false
-        console.log(`🏍️ Vehicle ${item.bienSo}: loaiXe=0 -> Xe máy`)
-      }
-    }
-    // Bước 3: Fallback - parse từ policy name
-    else if (item.chinhSach) {
-      vehicleTypeCode = extractVehicleTypeFromPolicy(item.chinhSach)
-      if (vehicleTypeCode && vehicleTypeMapping.has(vehicleTypeCode)) {
-        const typeInfo = vehicleTypeMapping.get(vehicleTypeCode)
-        vehicleTypeName = typeInfo.name
-        isLargeVehicle = typeInfo.isLargeVehicle
-        console.log(`🚗 Vehicle ${item.bienSo}: Từ policy ${item.chinhSach} -> ${vehicleTypeName}`)
+    // =====================================================================
+    // 1) ƯU TIÊN cấu hình làm việc (workConfig)
+    // =====================================================================
+    if (workConfig?.loai_xe && vehicleTypeMapping.has(workConfig.loai_xe)) {
+      const cfgInfo = vehicleTypeMapping.get(workConfig.loai_xe);
+      vehicleTypeCode = workConfig.loai_xe;
+      vehicleTypeName = cfgInfo.name;
+      isLargeVehicle = cfgInfo.isLargeVehicle;
+      console.log(`⚙️  WorkConfig override -> ${vehicleTypeName}`);
+    } else if (workConfig?.vehicle_type) {
+      // Khi chỉ có tên (ví dụ “oto”, “xe_may”...)
+      if (workConfig.vehicle_type.toLowerCase().includes("oto")) {
+        vehicleTypeName = "Ô tô";
+        isLargeVehicle = true;
       } else {
-        // Fallback detection từ policy name
-        if (item.chinhSach.toLowerCase().includes("oto") || 
-            item.chinhSach.toLowerCase().includes("car") ||
-            item.chinhSach.toLowerCase().includes("auto")) {
-          vehicleTypeName = "Ô tô"
-          isLargeVehicle = true
-        } else {
-          vehicleTypeName = "Xe máy"
-          isLargeVehicle = false
-        }
-        console.log(`🔍 Vehicle ${item.bienSo}: Policy fallback ${item.chinhSach} -> ${vehicleTypeName}`)
+        vehicleTypeName = "Xe máy";
+        isLargeVehicle = false;
       }
-    }
-    // Bước 4: CHỈ KHI TẠO MỚI - dùng workConfig
-    else if (workConfig?.vehicle_type && item.trangThai === "DANG_GUI") {
-      if (workConfig.vehicle_type === "oto") {
-        vehicleTypeName = "Ô tô"
-        isLargeVehicle = true
-        console.log(`🚗 Vehicle ${item.bienSo}: Xe mới từ workConfig -> Ô tô`)
-      } else if (workConfig.vehicle_type === "xe_may") {
-        vehicleTypeName = "Xe máy"
-        isLargeVehicle = false
-        console.log(`🏍️ Vehicle ${item.bienSo}: Xe mới từ workConfig -> Xe máy`)
+      console.log(`⚙️  WorkConfig (string) override -> ${vehicleTypeName}`);
+    } else {
+      // ===================================================================
+      // 2) DỮ LIỆU TỪ DATABASE (loaiXe cột lv004 của pm_nc0001 / pm_nc0009)
+      // ===================================================================
+      if (item.loaiXe && typeof item.loaiXe === 'string' && vehicleTypeMapping.has(item.loaiXe)) {
+        vehicleTypeCode = item.loaiXe;
+        const typeInfo = vehicleTypeMapping.get(vehicleTypeCode);
+        vehicleTypeName = typeInfo.name;
+        isLargeVehicle = typeInfo.isLargeVehicle;
+        console.log(`🚗 DB loaiXe mã = ${vehicleTypeCode} -> ${vehicleTypeName}`);
+      } else if (item.loaiXe !== undefined && item.loaiXe !== null) {
+        // Giá trị số 0/1 cũ
+        if (item.loaiXe === 1 || item.loaiXe === "1") {
+          vehicleTypeName = "Ô tô";
+          isLargeVehicle = true;
+        } else {
+          vehicleTypeName = "Xe máy";
+          isLargeVehicle = false;
+        }
+        console.log(`🚗 DB loaiXe số = ${item.loaiXe} -> ${vehicleTypeName}`);
+      } else if (item.chinhSach) {
+        // =================================================================
+        // 3) PARSE TỪ TÊN CHÍNH SÁCH (thẻ được quét)
+        // =================================================================
+        vehicleTypeCode = extractVehicleTypeFromPolicy(item.chinhSach);
+        if (vehicleTypeCode && vehicleTypeMapping.has(vehicleTypeCode)) {
+          const tInfo = vehicleTypeMapping.get(vehicleTypeCode);
+          vehicleTypeName = tInfo.name;
+          isLargeVehicle = tInfo.isLargeVehicle;
+        } else if (item.chinhSach.toLowerCase().includes("oto")) {
+          vehicleTypeName = "Ô tô";
+          isLargeVehicle = true;
+        } else {
+          vehicleTypeName = "Xe máy";
+          isLargeVehicle = false;
+        }
+        console.log(`📄 Policy ${item.chinhSach} -> ${vehicleTypeName}`);
       }
     }
 
     return {
       code: vehicleTypeCode,
       name: vehicleTypeName,
-      isLargeVehicle: isLargeVehicle,
-      // For backward compatibility
+      isLargeVehicle,
       vehicleType: isLargeVehicle ? "oto" : "xe_may"
-    }
+    };
   }
 
   // Helper function to extract vehicle type code from policy name

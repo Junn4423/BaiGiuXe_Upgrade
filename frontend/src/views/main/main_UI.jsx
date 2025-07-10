@@ -983,6 +983,16 @@ const MainUI = () => {
                 }
               } else {
                 console.log(`⚠️ Không có workConfig và biển số, mặc định là xe nhỏ`);
+                loaiXe = "0";
+              }
+
+              // Fallback cuối: suy luận từ mã chính sách (pricingPolicy)
+              if ((loaiXe === "0" || loaiXe === 0) && pricingPolicy) {
+                const policyUpper = pricingPolicy.toUpperCase();
+                if (policyUpper.includes("OTO") || policyUpper.includes("OT") || policyUpper.includes("BUS") || policyUpper.includes("16CHO") || policyUpper.includes("12CHO")) {
+                  loaiXe = "1";
+                  console.log(`📝 Suy luận loaiXe=1 từ policy ${pricingPolicy}`);
+                }
               }
 
               console.log(`🔍 Kết quả nhận diện loại xe: loaiXe = ${loaiXe}`);
