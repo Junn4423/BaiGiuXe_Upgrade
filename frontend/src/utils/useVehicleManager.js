@@ -45,7 +45,8 @@ export const useVehicleManager = () => {
         policy,
         entryGate,
         cameraId,
-        faceImagePath
+        faceImagePath,
+        loaiXe
       } = entryData;
 
       console.log('🚗 Processing vehicle entry:', entryData);
@@ -57,7 +58,8 @@ export const useVehicleManager = () => {
         policy,
         entryGate,
         cameraId,
-        faceImagePath
+        faceImagePath,
+        loaiXe
       );
 
       if (result.success) {

@@ -86,21 +86,56 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
     setSaving(true)
     setError("")
     try {
+      console.log("🔍 Debug save process:")
+      console.log("- selectedZone:", selectedZone)
+      console.log("- selectedVehicleType:", selectedVehicleType)
+      console.log("- selectedMode:", selectedMode)
+
       if (!selectedZone || !selectedVehicleType || !selectedMode) {
         throw new Error("Chưa chọn đủ thông tin")
       }
+
+      // Determine the correct loai_xe value based on vehicle type data structure
+      let loaiXeValue = "";
+      if (selectedVehicleType.maLoaiPT) {
+        loaiXeValue = selectedVehicleType.maLoaiPT;
+      } else if (selectedVehicleType.code) {
+        loaiXeValue = selectedVehicleType.code;
+      } else if (selectedVehicleType.tenLoaiPT) {
+        // Map vehicle type names to standard codes
+        const vehicleTypeName = selectedVehicleType.tenLoaiPT.toLowerCase();
+        if (vehicleTypeName.includes("ô tô") || vehicleTypeName.includes("oto") || vehicleTypeName.includes("car")) {
+          loaiXeValue = "oto";
+        } else if (vehicleTypeName.includes("xe máy") || vehicleTypeName.includes("motor") || vehicleTypeName.includes("bike")) {
+          loaiXeValue = "xe_may";
+        } else {
+          loaiXeValue = "xe_may"; // default
+        }
+      } else if (selectedVehicleType.name) {
+        // Map vehicle type names to standard codes
+        const vehicleTypeName = selectedVehicleType.name.toLowerCase();
+        if (vehicleTypeName.includes("ô tô") || vehicleTypeName.includes("oto") || vehicleTypeName.includes("car")) {
+          loaiXeValue = "oto";
+        } else if (vehicleTypeName.includes("xe máy") || vehicleTypeName.includes("motor") || vehicleTypeName.includes("bike")) {
+          loaiXeValue = "xe_may";
+        } else {
+          loaiXeValue = "xe_may"; // default
+        }
+      }
+
+      console.log("🚗 Determined loai_xe value:", loaiXeValue);
 
       // Build config đúng format
       const config = {
         zone: selectedZone.tenKhuVuc || selectedZone.name,
         zone_data: selectedZone,
         vehicle_type: selectedVehicleType.tenLoaiPT || selectedVehicleType.name,
-        loai_xe: selectedVehicleType.maLoaiPT || selectedVehicleType.code || "",
+        loai_xe: loaiXeValue,
         ma_khu_vuc: selectedZone.maKhuVuc || selectedZone.code || "",
         default_mode: selectedMode, // new: save default mode
       }
 
-      console.log("Saving work config:", config)
+      console.log("💾 Saving work config:", config)
       localStorage.setItem("work_config", JSON.stringify(config))
 
       if (onConfigSaved) onConfigSaved(config)

@@ -183,7 +183,15 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
     try {
       setIsRefreshing(true)
       console.log('🔄 Refreshing vehicle list...')
-      console.log('📋 Current workConfig:', workConfig) // Debug log
+      console.log('📋 Current workConfig:', workConfig)
+      console.log('📋 WorkConfig type:', typeof workConfig)
+      console.log('📋 WorkConfig is null:', workConfig === null)
+      console.log('📋 WorkConfig is undefined:', workConfig === undefined)
+      if (workConfig) {
+        console.log('📋 WorkConfig.loai_xe:', workConfig.loai_xe)
+        console.log('📋 WorkConfig.vehicle_type:', workConfig.vehicle_type)
+        console.log('📋 WorkConfig keys:', Object.keys(workConfig))
+      }
       const apiData = await layALLPhienGuiXe()
       
       // Debug: Log sample data to check loaiXe field
@@ -263,7 +271,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
         }
       })
 
-      console.log(`🔄 Vehicle type mapping summary: WorkConfig=${workConfig?.vehicle_type}, Total vehicles=${mappedVehicles.length}`)
+      console.log(`🔄 Vehicle type mapping summary: WorkConfig=${workConfig?.loai_xe || workConfig?.vehicle_type}, Total vehicles=${mappedVehicles.length}`)
       
       // Debug: Log vehicle type distribution
       const typeDistribution = {}
@@ -274,11 +282,11 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
       console.log('📊 Vehicle type distribution:', typeDistribution)
       
       // Debug: Log pricing issues if any
-      const pricingIssues = mappedVehicles.filter(v => v._debug && v._debug.feeValue !== undefined && v._debug.feeValue > 0 && v._debug.determinedType !== workConfig?.vehicle_type && v._debug.status === 'DA_RA')
+      const pricingIssues = mappedVehicles.filter(v => v._debug && v._debug.feeValue !== undefined && v._debug.feeValue > 0 && v._debug.determinedType !== (workConfig?.loai_xe || workConfig?.vehicle_type) && v._debug.status === 'DA_RA')
       if (pricingIssues.length > 0) {
         console.warn(`💰 Phát hiện ${pricingIssues.length} xe ĐÃ RA có khác biệt loại xe so với WorkConfig:`)
         pricingIssues.forEach(v => {
-          console.warn(`  - ${v.licensePlate}: WorkConfig=${workConfig?.vehicle_type}, Thực tế=${v._debug.determinedType}, Phí=${v._debug.feeValue}, Policy=${v._debug.policyName}`)
+          console.warn(`  - ${v.licensePlate}: WorkConfig=${workConfig?.loai_xe || workConfig?.vehicle_type || 'undefined'}, Thực tế=${v._debug.determinedType}, Phí=${v._debug.feeValue}, Policy=${v._debug.policyName}`)
         })
         console.info(`📋 NOTE: Điều này bình thường vì xe đã vào trước khi thay đổi WorkConfig. Chỉ xe mới vào mới áp dụng WorkConfig hiện tại.`)
       }
@@ -320,13 +328,24 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
     return () => clearInterval(refreshInterval)
   }, [])
 
+  // Debug useEffect to monitor workConfig changes
+  useEffect(() => {
+    console.log('🔧 VehicleListComponent: workConfig prop changed:', workConfig)
+    if (workConfig) {
+      console.log('✅ WorkConfig is now available with loai_xe:', workConfig.loai_xe)
+    } else {
+      console.log('⚠️ WorkConfig is null/undefined')
+    }
+  }, [workConfig])
+
   // Re-fetch when workConfig changes to update vehicle types
   useEffect(() => {
     if (workConfig) {
       console.log('📋 WorkConfig changed, refreshing vehicle list for type sync...')
+      console.log('📋 New workConfig.loai_xe:', workConfig.loai_xe)
       fetchVehicles()
     }
-  }, [workConfig?.vehicle_type])
+  }, [workConfig?.loai_xe, workConfig?.vehicle_type]) // Watch both fields
 
   // Update 'now' every second for realtime duration
   useEffect(() => {
