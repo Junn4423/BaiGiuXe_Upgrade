@@ -2433,17 +2433,36 @@ export function constructImageUrlFromFilename(filename, serverIndex = 0) {
 // Lấy slot trống cho xe lớn
 export async function laySlotTrongChoXeLon(maKhuVuc = null) {
   try {
-    const payload = {
-      table: 'pm_nc0012',
-      func: 'laySlotTrong'
-    };
-    if (maKhuVuc) payload.maKhuVuc = maKhuVuc;
+    // Lấy toàn bộ danh sách chỗ đỗ
+    let spots = await layDanhSachChoDo();
 
-    const result = await callApiWithAuth(payload);
-    if (result && result.success) {
-      return { success: true, ...result };
+    if (!Array.isArray(spots)) {
+      return { success: false, message: 'Không lấy được danh sách chỗ đỗ' };
     }
-    return { success: false, message: result?.message || 'Không còn chỗ đỗ trống' };
+
+    // Lọc theo khu vực (nếu có)
+    if (maKhuVuc) {
+      spots = spots.filter((s) => s.maKhuVuc === maKhuVuc);
+    }
+
+    // Lọc slot trống (trangThai = 0)
+    const freeSpots = spots.filter((s) => s.trangThai === '0' || s.trangThai === 0);
+
+    if (freeSpots.length === 0) {
+      return { success: false, message: 'Không còn chỗ đỗ trống' };
+    }
+
+    // Sắp xếp theo mã chỗ đỗ (tăng dần) => P0001, P0002 ...
+    freeSpots.sort((a, b) => a.maChoDo.localeCompare(b.maChoDo, undefined, { numeric: true }));
+
+    const bestSpot = freeSpots[0];
+
+    return {
+      success: true,
+      maChoDo: bestSpot.maChoDo,
+      maKhuVuc: bestSpot.maKhuVuc,
+      tenKhuVuc: bestSpot.tenKhuVuc || '',
+    };
   } catch (error) {
     console.error('❌ [API Error] Lỗi lấy slot trống:', error);
     return { success: false, message: `Lỗi kết nối: ${error.message}` };
