@@ -27,11 +27,15 @@
   border-radius: 24px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  width: 480px;
+  width: 600px;
   max-width: 96vw;
+  height: 800px;
+  max-height: 95vh;
   padding: 0;
   overflow: hidden;
   animation: slideUp 0.4s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes slideUp {
@@ -48,11 +52,12 @@
 .workconfig-title-bar {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
-  padding: 24px 28px;
+  padding: 20px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
+  flex-shrink: 0;
 }
 
 .workconfig-title-bar::after {
@@ -103,6 +108,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .refresh-button {
@@ -130,15 +136,18 @@
 }
 
 .workconfig-content {
-  padding: 28px;
+  padding: 24px 28px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .loading-message {
   text-align: center;
-  padding: 40px;
+  padding: 60px 40px;
   color: #6b7280;
-  font-size: 16px;
+  font-size: 18px;
   background: linear-gradient(145deg, #f9fafb, #f3f4f6);
   border-radius: 12px;
   font-style: italic;
@@ -149,8 +158,8 @@
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
-  margin-bottom: 20px;
-  padding: 20px;
+  margin-bottom: 24px;
+  padding: 24px;
   transition: all 0.3s ease;
 }
 
@@ -162,20 +171,21 @@
 .workconfig-card-title {
   font-weight: 600;
   color: #1e40af;
-  margin-bottom: 12px;
-  font-size: 15px;
+  margin-bottom: 16px;
+  font-size: 16px;
 }
 
 .workconfig-select {
   width: 100%;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-radius: 10px;
   border: 2px solid #e5e7eb;
-  font-size: 15px;
-  margin-bottom: 8px;
+  font-size: 16px;
+  margin-bottom: 12px;
   background: white;
   color: #1f2937;
   transition: all 0.3s ease;
+  min-height: 48px;
 }
 
 .workconfig-select:focus {
@@ -198,35 +208,38 @@
 
 .workconfig-config-text {
   text-align: center;
-  font-size: 16px;
+  font-size: 18px;
   color: #374151;
-  padding: 16px 0;
+  padding: 24px 0;
   line-height: 1.6;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border-radius: 12px;
   border: 1px solid rgba(59, 130, 246, 0.1);
+  margin: 20px 0;
 }
 
 .workconfig-footer {
-  padding: 24px 28px;
+  padding: 20px 28px;
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 
 .workconfig-start-btn {
   width: 100%;
-  padding: 14px;
+  padding: 16px;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  min-height: 56px;
 }
 
 .workconfig-start-btn:disabled {
@@ -257,7 +270,8 @@
 @media (max-width: 768px) {
   .workconfig-dialog {
     width: 95%;
-    margin: 10px;
+    height: 90vh;
+    margin: 5vh auto;
     border-radius: 20px;
   }
 
@@ -266,17 +280,40 @@
   }
 
   .workconfig-footer {
-    padding: 20px;
+    padding: 16px 20px;
   }
 
   .workconfig-header {
     flex-direction: column;
     gap: 8px;
     text-align: center;
+    padding: 12px 20px;
   }
 
   .refresh-button {
     width: 100%;
+  }
+
+  .workconfig-card {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .workconfig-card-title {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .workconfig-select {
+    padding: 12px 16px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+
+  .workconfig-start-btn {
+    padding: 14px;
+    font-size: 16px;
+    min-height: 50px;
   }
 }
   
