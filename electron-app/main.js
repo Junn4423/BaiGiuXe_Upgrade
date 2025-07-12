@@ -38,7 +38,6 @@ function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL("http://localhost:3000")
-    mainWindow.webContents.openDevTools()
   } else {
     // In production build, frontend is copied to build/ directory
     const indexPath = path.join(__dirname, "build", "index.html")
@@ -60,10 +59,21 @@ function createWindow() {
         console.error("❌ No index.html found in either location")
       }
     }
-    
-    // Enable DevTools in production for debugging
-    mainWindow.webContents.openDevTools()
   }
+  // // Disable DevTools
+  // mainWindow.webContents.on('devtools-opened', () => {
+  //   mainWindow.webContents.closeDevTools();
+  // });
+  // mainWindow.webContents.on('before-input-event', (event, input) => {
+  //   // Block F12, Cmd+Opt+I, Ctrl+Shift+I
+  //   if (
+  //     (input.key === 'F12') ||
+  //     (input.control && input.shift && input.key.toUpperCase() === 'I') ||
+  //     (input.meta && input.alt && input.key.toUpperCase() === 'I')
+  //   ) {
+  //     event.preventDefault();
+  //   }
+  // });
 
   // Start RTSP streaming server
   startRTSPStreamingServer()
