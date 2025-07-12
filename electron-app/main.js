@@ -19,6 +19,18 @@ function createWindow() {
       webSecurity: false, // Allow RTSP connections
       preload: path.join(__dirname, "preload.js"),
     },
+    // Show window only when ready to prevent white screen
+    show: false
+  })
+
+  // Show window when ready
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show()
+  })
+
+  // Handle navigation errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load:', errorCode, errorDescription)
   })
 
   // Load the React app
@@ -28,7 +40,29 @@ function createWindow() {
     mainWindow.loadURL("http://localhost:3000")
     mainWindow.webContents.openDevTools()
   } else {
-    mainWindow.loadFile(path.join(__dirname, "../frontend/build/index.html"))
+    // In production build, frontend is copied to build/ directory
+    const indexPath = path.join(__dirname, "build", "index.html")
+    console.log("Loading index.html from:", indexPath)
+    
+    // Check if file exists first
+    const fs = require('fs')
+    if (fs.existsSync(indexPath)) {
+      console.log("✅ Index file exists, loading...")
+      mainWindow.loadFile(indexPath)
+    } else {
+      console.error("❌ Index file not found at:", indexPath)
+      // Try alternative path
+      const altPath = path.join(__dirname, "../frontend/build/index.html")
+      console.log("Trying alternative path:", altPath)
+      if (fs.existsSync(altPath)) {
+        mainWindow.loadFile(altPath)
+      } else {
+        console.error("❌ No index.html found in either location")
+      }
+    }
+    
+    // Enable DevTools in production for debugging
+    mainWindow.webContents.openDevTools()
   }
 
   // Start RTSP streaming server

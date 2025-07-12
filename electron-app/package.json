@@ -1,17 +1,24 @@
 {
-  "name": "parking-lot-electron",
+  "name": "parking-lot-management",
   "version": "1.0.0",
-  "description": "Parking Lot Management System - Electron App",
+  "description": "Parking Lot Management System - Hệ thống quản lý bãi đỗ xe",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "NODE_ENV=development electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "build-frontend": "cd ../frontend && npm run build",
+    "prebuild": "npm run build-frontend",
     "build": "electron-builder",
-    "pack": "electron-builder --dir"
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux",
+    "build-all": "electron-builder --win --mac --linux",
+    "pack": "electron-builder --dir",
+    "dist": "npm run build-frontend && electron-builder"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["parking", "management", "electron", "car", "parking-lot"],
+  "author": "Parking Lot Management Team",
+  "license": "MIT",
   "dependencies": {
     "concurrently": "^9.2.0",
     "cross-env": "^7.0.3",
@@ -34,27 +41,87 @@
     "webpack-dev-server": "^5.2.2"
   },
   "build": {
-    "appId": "com.parkinglot.app",
+    "appId": "com.parkinglot.management",
     "productName": "Parking Lot Management",
+    "copyright": "Copyright © 2025 Parking Lot Management Team",
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "assets"
     },
     "files": [
       "main.js",
+      "preload.js",
       "rtsp-streaming-server.js",
-      "../frontend/build/**/*"
+      "package.json",
+      {
+        "from": "../frontend/build",
+        "to": "build",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "extraFiles": [
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker",
+      "signAndEditExecutable": false
     },
     "linux": {
-      "target": "AppImage",
-      "icon": "assets/icon.png"
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        },
+        {
+          "target": "rpm",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Office",
+      "synopsis": "Parking Lot Management System"
     },
     "mac": {
-      "target": "dmg",
-      "icon": "assets/icon.icns"
-    }
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "public.app-category.business"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Parking Lot Management"
+    },
+    "publish": null
   }
 }
