@@ -449,4 +449,137 @@ switch ($vtable) {
         }
         break;
 
+    // Statistics (Thống kê)
+    case "statistics":
+        switch ($vfun) {
+            /* --------------------------------------------------
+             * 1. Thống kê doanh thu (revenue)
+             *    Yêu cầu truyền fromDate, toDate theo định dạng YYYY-MM-DD
+             *    Nếu thiếu thì mặc định = ngày hiện tại
+             *    Trả về tổng doanh thu và chi tiết theo ngày
+             * --------------------------------------------------*/
+            case "revenue":
+                $fromDate = $input['fromDate'] ?? $_POST['fromDate'] ?? $_GET['fromDate'] ?? null;
+                $toDate   = $input['toDate']   ?? $_POST['toDate']   ?? $_GET['toDate']   ?? null;
+
+                // Nếu không truyền thì mặc định là hôm nay
+                if (!$fromDate) $fromDate = date('Y-m-d');
+                if (!$toDate)   $toDate   = $fromDate;
+
+                $start  = strtotime($fromDate);
+                $end    = strtotime($toDate);
+                if ($start === false || $end === false) {
+                    $vOutput = ['success'=>false,'message'=>'Định dạng ngày phải là YYYY-MM-DD'];
+                    break;
+                }
+
+                $detail = [];
+                $grandTotal = 0;
+
+                for ($ts = $start; $ts <= $end; $ts += 86400) {
+                    $dateYMD = date('Y-m-d', $ts);   // 2025-07-14
+                    $dateDMY = date('d-m-Y', $ts);   // 14-07-2025
+                    $dateForTable = date('dmY', $ts); // 14072025
+
+                    // Xác định bảng cần truy vấn
+                    if ($dateYMD === date('Y-m-d')) {
+                        $tableName = 'pm_nc0009'; // ngày hiện tại
+                    } else {
+                        $tableName = 'pm_nc0009_' . $dateForTable;
+                    }
+
+                    // Kiểm tra bảng có tồn tại không
+                    $checkTableQuery = "SHOW TABLES LIKE '$tableName'";
+                    $checkResult = db_query($checkTableQuery);
+                    if (db_num_rows($checkResult) === 0) {
+                        // Không có bảng => bỏ qua, ghi nhận 0
+                        $detail[] = [
+                            'date'  => $dateYMD,
+                            'total' => 0
+                        ];
+                        continue;
+                    }
+
+                    $sumQuery = "SELECT SUM(lv013) AS total FROM $tableName"; // lv013 là phí
+                    $sumResult = db_query($sumQuery);
+                    $sumRow = db_fetch_array($sumResult);
+                    $total = (float)($sumRow['total'] ?? 0);
+
+                    $detail[] = [
+                        'date'  => $dateYMD,
+                        'total' => $total
+                    ];
+                    $grandTotal += $total;
+                }
+
+                $vOutput = [
+                    'success' => true,
+                    'grandTotal' => $grandTotal,
+                    'detail' => $detail
+                ];
+                break;
+
+            /* --------------------------------------------------
+             * 2. Thống kê số lượt theo loại xe (vehicleTypeCounts)
+             *    Trả về số lượt xe nhỏ / xe lớn / theo maLoaiPT ...
+             * --------------------------------------------------*/
+            case "vehicleTypeCounts":
+                $fromDate = $input['fromDate'] ?? $_POST['fromDate'] ?? $_GET['fromDate'] ?? null;
+                $toDate   = $input['toDate']   ?? $_POST['toDate']   ?? $_GET['toDate']   ?? null;
+                if (!$fromDate) $fromDate = date('Y-m-d');
+                if (!$toDate)   $toDate   = $fromDate;
+                $start  = strtotime($fromDate);
+                $end    = strtotime($toDate);
+                $counts = [];
+
+                for ($ts = $start; $ts <= $end; $ts += 86400) {
+                    $dateForTable = date('dmY', $ts);
+                    $tableName = ($ts==strtotime(date('Y-m-d')))?'pm_nc0009':'pm_nc0009_'.$dateForTable;
+                    $check = db_query("SHOW TABLES LIKE '$tableName'");
+                    if (db_num_rows($check)==0) continue;
+                    $query = "SELECT loaiPhuongTien as loaiXe, COUNT(*) as c FROM $tableName GROUP BY loaiPhuongTien";
+                    $res = db_query($query);
+                    while($row = db_fetch_array($res)){
+                        $lx = $row['loaiXe'] !== null ? $row['loaiXe'] : 'unknown';
+                        if(!isset($counts[$lx])) $counts[$lx]=0;
+                        $counts[$lx]+= (int)$row['c'];
+                    }
+                }
+                $vOutput = [ 'success'=>true, 'data'=>$counts ];
+                break;
+
+            /* --------------------------------------------------
+             * 3. Tỷ lệ lấp đầy hiện tại (occupancy)
+             * --------------------------------------------------*/
+            case "occupancy":
+                // Tổng slot
+                $totalQuery = "SELECT COUNT(*) as total FROM pm_nc0005"; // giả định pm_nc0005 là bảng chỗ đỗ
+                $totalRes = db_query($totalQuery);
+                $totalRow = db_fetch_array($totalRes);
+                $totalSlots = (int)($totalRow['total'] ?? 0);
+                if ($totalSlots == 0) {
+                    $vOutput = ['success'=>false,'message'=>'Không lấy được tổng số chỗ'];
+                    break;
+                }
+                // Số xe đang trong bãi
+                $occupiedQuery = "SELECT COUNT(*) as busy FROM pm_nc0009 WHERE lv014 = 'TRONG_BAI'";
+                $occRes = db_query($occupiedQuery);
+                $occRow = db_fetch_array($occRes);
+                $busy = (int)($occRow['busy'] ?? 0);
+                $ratio = $totalSlots>0 ? round($busy/$totalSlots*100,2):0;
+
+                $vOutput = [
+                    'success'=>true,
+                    'totalSlots'=>$totalSlots,
+                    'occupied'=>$busy,
+                    'ratio'=>$ratio // %
+                ];
+                break;
+
+            default:
+                $vOutput = ['success'=>false,'message'=>'Hành động thống kê không hợp lệ'];
+                break;
+        }
+        break;
+
 }

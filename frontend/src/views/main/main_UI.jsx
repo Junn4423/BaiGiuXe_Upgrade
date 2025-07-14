@@ -27,6 +27,7 @@ import { useToast } from "../../components/Toast";
 import { layDanhSachCamera, layDanhSachKhu } from "../../api/api";
 import { cleanupObjectUrls, getEnvironmentInfo, initializeStorageCleanup } from "../../utils/imageUtils";
 import { layALLLoaiPhuongTien } from "../../api/api";
+import StatisticsPage from "../../components/StatisticsPage";
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
   
@@ -80,6 +81,7 @@ const MainUI = () => {
   const [showVehicleManagement, setShowVehicleManagement] = useState(false);
   const [showVehicleType, setShowVehicleType] = useState(false);
   const [showEmployeePermission, setShowEmployeePermission] = useState(false);
+  const [showStatistics, setShowStatistics] = useState(false);
 
   // Card scanning and image capture
   const [showImageCaptureModal, setShowImageCaptureModal] = useState(false);
@@ -179,6 +181,9 @@ const MainUI = () => {
         const testCardId = "0002468477";
         console.log("🔥 F2 pressed - testing card scan with ID:", testCardId);
         handleCardScanned(testCardId);
+      } else if (event.key === "F12" || (event.ctrlKey && event.key === "F12")) {
+        event.preventDefault();
+        setShowStatistics((prev) => !prev);
       }
     };
 
@@ -2086,6 +2091,11 @@ const MainUI = () => {
 
       {/* Toast Notifications */}
       <ToastContainer />
+
+      {/* Statistics Page Overlay */}
+      {showStatistics && (
+        <StatisticsPage onClose={() => setShowStatistics(false)} />
+      )}
     </div>
   );
 };
