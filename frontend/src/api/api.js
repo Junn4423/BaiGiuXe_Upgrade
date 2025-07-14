@@ -2058,9 +2058,6 @@ export async function themNhatKyQuetTheVoiThoiGian(scanLogData) {
   return callApiWithAuth(payload);
 }
 
-
-
-
 /**
  * Tính phí gửi xe cho một mã phiên
  * @param {string} maPhien - Mã phiên gửi xe
@@ -2690,3 +2687,78 @@ export async function layThongTinQuyenHanNhanVien(token, userCode) {
     return { success: false, message: `Lỗi kết nối: ${error.message}` };
   }
 }
+
+// -------------------- Employee Management Functions --------------------
+
+/**
+ * Lấy danh sách tất cả nhân viên từ bảng lv_lv0007
+ * @returns {Promise<Array>} Danh sách nhân viên
+ */
+export async function layDanhSachNhanVien() {
+  const payload = {
+    table: "lv_lv0007",
+    func: "layDanhSach"
+  };
+  return callApiWithAuth(payload);
+}
+
+export async function layNhanVienTheoMa(maNhanVien) {
+  const payload = {
+    table: "lv_lv0007",
+    func: "layNhanVienTheoMa",
+    maNhanVien: maNhanVien
+  };
+  return callApiWithAuth(payload);
+}
+
+export async function capNhatNhanVien(nhanVien) {
+  const payload = {
+    table: "lv_lv0007",
+    func: "capNhatNhanVien",
+    nhanVien: nhanVien
+  };
+  return callApiWithAuth(payload);
+}
+
+export async function xoaNhanVien(maNhanVien) {
+  const payload = {
+    table: "lv_lv0007",
+    func: "xoaNhanVien",
+    maNhanVien: maNhanVien
+  };
+  return callApiWithAuth(payload);
+}
+
+export async function themNhanVien(nhanVien) {
+  const payload = {
+    table: "lv_lv0007",
+    func: "themNhanVien",
+    nhanVien: nhanVien
+  };
+  return callApiWithAuth(payload);
+}
+
+export async function datLaiMatKhauNhanVien(maNhanVien, matKhauMoi) {
+  const payload = {
+    table: "lv_lv0007",
+    func: "datLaiMatKhauNhanVien",
+    maNhanVien: maNhanVien,
+    matKhauMoi: matKhauMoi
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Thêm nhân viên mới
+ * @param {Object} nhanVien - Thông tin nhân viên
+ * @param {string} nhanVien.lv001 - Mã người dùng (Primary Key)
+ * @param {string} nhanVien.lv002 - Mã nhóm quyền (1=Admin, 2=Manager, 3=Cashier, 4=Guard, 5=Staff)
+ * @param {string} nhanVien.lv003 - Tên
+ * @param {string} nhanVien.lv004 - Họ
+ * @param {string} nhanVien.lv005 - Mật khẩu
+ * @param {string} nhanVien.lv006 - Mã nhân viên
+ * @param {string} nhanVien.lv095 - Trạng thái hoạt động (1=Active, 0=Inactive)
+ * @param {string} nhanVien.lv099 - Giao diện (default, dark, light, blue)
+ * @param {string} nhanVien.lv900 - Ghi chú
+ * @returns {Promise<Object>} Kết quả thêm nhân viên
+ */
