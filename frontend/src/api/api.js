@@ -2762,3 +2762,32 @@ export async function datLaiMatKhauNhanVien(maNhanVien, matKhauMoi) {
  * @param {string} nhanVien.lv900 - Ghi chú
  * @returns {Promise<Object>} Kết quả thêm nhân viên
  */
+
+// ==================== THỐNG KÊ (STATISTICS) ====================
+export async function layThongKeDoanhThu({ fromDate, toDate }) {
+  const payload = {
+    table: "statistics",
+    func: "revenue",
+    fromDate,
+    toDate,
+  };
+  return callApiWithAuth(payload);
+}
+
+export async function layThongKeLoaiXe({ fromDate, toDate }) {
+  const payload = {
+    table: "statistics",
+    func: "vehicleTypeCounts",
+    fromDate,
+    toDate,
+  };
+  return callApiWithAuth(payload);
+}
+
+export async function layTiLeLapDay() {
+  const payload = {
+    table: "statistics",
+    func: "occupancy",
+  };
+  return callApiWithAuth(payload);
+}
