@@ -20,6 +20,7 @@ import ThemTheDialog from "../dialogs/ThemTheDialog";
 import WorkConfigDialog from "../dialogs/WorkConfigDialog";
 import VehicleManagementDialog from "../dialogs/VehicleManagementDialog";
 import VehicleTypeDialog from "../dialogs/VehicleTypeDialog";
+import EmployeePermissionDialog from "../dialogs/EmployeePermissionDialog";
 import ImageCaptureModal from "../../components/ImageCaptureModal";
 import LicensePlateConfirmDialog from "../../components/LicensePlateConfirmDialog";
 import { useToast } from "../../components/Toast";
@@ -78,6 +79,7 @@ const MainUI = () => {
   const [showLicensePlateConfirm, setShowLicensePlateConfirm] = useState(false);
   const [showVehicleManagement, setShowVehicleManagement] = useState(false);
   const [showVehicleType, setShowVehicleType] = useState(false);
+  const [showEmployeePermission, setShowEmployeePermission] = useState(false);
 
   // Card scanning and image capture
   const [showImageCaptureModal, setShowImageCaptureModal] = useState(false);
@@ -474,6 +476,7 @@ const MainUI = () => {
   const openRfidManager = () => setShowRfidManager(true);
   const openVehicleManagement = () => setShowVehicleManagement(true);
   const openVehicleType = () => setShowVehicleType(true);
+  const openEmployeePermission = () => setShowEmployeePermission(true);
 
   const reloadMainUI = () => {
     window.location.reload();
@@ -1880,6 +1883,14 @@ const MainUI = () => {
             LOẠI XE
           </button>
           <button 
+            className={`toolbar-btn ${!isAdmin() ? 'disabled' : ''}`}
+            onClick={isAdmin() ? openEmployeePermission : undefined}
+            disabled={!isAdmin()}
+            title={!isAdmin() ? 'Chỉ Admin mới có quyền truy cập' : 'Quản lý phân quyền nhân viên'}
+          >
+            NHÂN VIÊN
+          </button>
+          <button 
             className={`toolbar-btn ${!hasPermission('canAccessRfid') ? 'disabled' : ''}`}
             onClick={hasPermission('canAccessRfid') ? openRfidManager : undefined}
             disabled={!hasPermission('canAccessRfid')}
@@ -2013,6 +2024,12 @@ const MainUI = () => {
       {showVehicleType && (
         <VehicleTypeDialog
           onClose={() => setShowVehicleType(false)}
+        />
+      )}
+
+      {showEmployeePermission && (
+        <EmployeePermissionDialog
+          onClose={() => setShowEmployeePermission(false)}
         />
       )}
 
