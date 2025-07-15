@@ -78,7 +78,7 @@ const QuanLyXe = ({ workConfig }) => {
       }
     }
 
-    console.log(`🚗 QuanLyXe: Determined loaiXe = ${loaiXe} from workConfig.loai_xe = ${workConfig?.loai_xe}`);
+    console.log(`QuanLyXe: Determined loaiXe = ${loaiXe} from workConfig.loai_xe = ${workConfig?.loai_xe}`);
 
     const entryTime = getCurrentDateTime();
     const session = {

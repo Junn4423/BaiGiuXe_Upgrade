@@ -30,7 +30,7 @@ export const UserProvider = ({ children }) => {
       const storedToken = localStorage.getItem('authToken');
       const storedUser = localStorage.getItem('currentUser');
       
-      console.log('🔄 [UserContext] Loading user from storage...', { 
+      console.log('[UserContext] Loading user from storage...', { 
         hasToken: !!storedToken, 
         hasUser: !!storedUser 
       });
@@ -39,25 +39,25 @@ export const UserProvider = ({ children }) => {
         const userData = JSON.parse(storedUser);
         
         // Verify token với server và lấy quyền hạn mới nhất
-        console.log('🔐 [UserContext] Verifying token with server...');
+        console.log('[UserContext] Verifying token with server...');
         const permissionResult = await layThongTinQuyenHanNhanVien(storedToken, userData.userCode);
         
         if (permissionResult.success) {
-          console.log('✅ [UserContext] Token valid, updating user data');
+          console.log('[UserContext] Token valid, updating user data');
           setCurrentUser({
             ...userData,
             ...permissionResult.data
           });
           setPermissions(permissionResult.data.permissions);
         } else {
-          console.warn('⚠️ [UserContext] Token invalid, clearing storage');
+          console.warn('[UserContext] Token invalid, clearing storage');
           clearUserData();
         }
       } else {
-        console.log('🔍 [UserContext] No stored user data found');
+        console.log('[UserContext] No stored user data found');
       }
     } catch (error) {
-      console.error('❌ [UserContext] Error loading user:', error);
+      console.error('[UserContext] Error loading user:', error);
       clearUserData();
     } finally {
       setIsLoading(false);
@@ -67,7 +67,7 @@ export const UserProvider = ({ children }) => {
   // Đăng nhập user
   const login = async (userData, token) => {
     try {
-      console.log('🔐 [UserContext] Logging in user...', userData);
+      console.log('[UserContext] Logging in user...', userData);
       
       // Lấy thông tin quyền hạn từ server
       const permissionResult = await layThongTinQuyenHanNhanVien(token, userData.userCode);
@@ -79,7 +79,7 @@ export const UserProvider = ({ children }) => {
           loginTime: new Date().toISOString()
         };
         
-        console.log('✅ [UserContext] Login successful with permissions:', fullUserData);
+        console.log('[UserContext] Login successful with permissions:', fullUserData);
         
         setCurrentUser(fullUserData);
         setPermissions(permissionResult.data.permissions);
@@ -90,14 +90,14 @@ export const UserProvider = ({ children }) => {
         
         return { success: true };
       } else {
-        console.error('❌ [UserContext] Failed to get user permissions:', permissionResult.message);
+        console.error('[UserContext] Failed to get user permissions:', permissionResult.message);
         return { 
           success: false, 
           message: permissionResult.message || 'Không thể lấy thông tin quyền hạn' 
         };
       }
     } catch (error) {
-      console.error('❌ [UserContext] Login error:', error);
+      console.error('[UserContext] Login error:', error);
       return { 
         success: false, 
         message: `Lỗi đăng nhập: ${error.message}` 
@@ -107,7 +107,7 @@ export const UserProvider = ({ children }) => {
 
   // Đăng xuất
   const logout = () => {
-    console.log('🔓 [UserContext] Logging out user');
+    console.log('[UserContext] Logging out user');
     clearUserData();
   };
 
@@ -130,14 +130,14 @@ export const UserProvider = ({ children }) => {
   // Kiểm tra quyền hạn
   const hasPermission = (permissionKey) => {
     const result = permissions[permissionKey] || false;
-    console.log(`🔐 [UserContext] Checking permission '${permissionKey}':`, result);
+    console.log(`[UserContext] Checking permission '${permissionKey}':`, result);
     return result;
   };
 
   // Kiểm tra admin
   const isAdmin = () => {
     const result = currentUser?.isAdmin || false;
-    console.log('🔐 [UserContext] Checking admin status:', result);
+    console.log('[UserContext] Checking admin status:', result);
     return result;
   };
 
@@ -147,7 +147,7 @@ export const UserProvider = ({ children }) => {
       const token = localStorage.getItem('authToken');
       if (!token) return false;
 
-      console.log('🔄 [UserContext] Refreshing permissions...');
+      console.log('[UserContext] Refreshing permissions...');
       const permissionResult = await layThongTinQuyenHanNhanVien(token, currentUser?.userCode || currentUser?.taiKhoanDN);
       
       if (permissionResult.success) {
@@ -156,14 +156,14 @@ export const UserProvider = ({ children }) => {
           ...permissionResult.data
         }));
         setPermissions(permissionResult.data.permissions);
-        console.log('✅ [UserContext] Permissions refreshed');
+        console.log('[UserContext] Permissions refreshed');
         return true;
       } else {
-        console.warn('⚠️ [UserContext] Failed to refresh permissions');
+        console.warn('[UserContext] Failed to refresh permissions');
         return false;
       }
     } catch (error) {
-      console.error('❌ [UserContext] Error refreshing permissions:', error);
+      console.error('[UserContext] Error refreshing permissions:', error);
       return false;
     }
   };

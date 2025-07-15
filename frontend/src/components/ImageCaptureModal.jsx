@@ -33,7 +33,7 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
     setRecognitionError(null)
     
     try {
-      console.log("🚗 Bắt đầu nhận dạng biển số...")
+      console.log("Bắt đầu nhận dạng biển số...")
       
       let blob = images.plateImageBlob
       
@@ -46,14 +46,14 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
       // Gửi lên API nhận dạng
       const result = await nhanDangBienSo(blob)
       
-      console.log("✅ Kết quả nhận dạng:", result)
+      console.log("Kết quả nhận dạng:", result)
       
       // Transform API response to match our expected format
       const transformedResult = transformApiResponse(result)
       setLicensePlateResult(transformedResult)
       
     } catch (error) {
-      console.error("❌ Lỗi nhận dạng biển số:", error)
+      console.error("Lỗi nhận dạng biển số:", error)
       setRecognitionError(error.message)
     } finally {
       setIsRecognizing(false)
@@ -107,7 +107,7 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
   // Debug function to check video elements
   const debugVideoElements = () => {
     const videos = Array.from(document.querySelectorAll('video'))
-    console.log('🎥 Debug Video Elements:', videos.map(v => ({
+    console.log('Debug Video Elements:', videos.map(v => ({
       element: v,
       cameraType: v.getAttribute('data-camera-type'),
       readyState: v.readyState,
@@ -127,12 +127,12 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
           name: dirHandle.name,
           setup: true
         }))
-        alert(`✅ Đã thiết lập thư mục lưu tự động: ${dirHandle.name}`)
+        alert(`Đã thiết lập thư mục lưu tự động: ${dirHandle.name}`)
       } catch (error) {
         console.warn('User cancelled directory selection')
       }
     } else {
-      alert('⚠️ Trình duyệt không hỗ trợ File System Access API. Ảnh sẽ tự động download.')
+      alert('Trình duyệt không hỗ trợ File System Access API. Ảnh sẽ tự động download.')
     }
   }
 
@@ -155,14 +155,14 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
               margin: '8px 0 0 0',
               fontSize: '14px'
             }}>
-              ✅ Ảnh đã được tự động lưu vào thư mục Downloads
+              Ảnh đã được tự động lưu vào thư mục Downloads
             </p>
           </div>
 
           {/* Kết quả nhận dạng biển số */}
           {images.plateImage && (
             <div className="license-plate-recognition">
-              <h3>🚗 Nhận Dạng Biển Số</h3>
+              <h3>Nhận Dạng Biển Số</h3>
               
               {isRecognizing && (
                 <div className="recognition-status recognizing">
@@ -173,7 +173,7 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
               
               {recognitionError && (
                 <div className="recognition-status error">
-                  <span>❌</span>
+                  <span></span>
                   Lỗi nhận dạng: {recognitionError}
                   <button 
                     className="retry-btn"
@@ -197,7 +197,7 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
               {licensePlateResult && (
                 <div className="recognition-result">
                   <div className="recognition-status success">
-                    <span>✅</span>
+                    <span></span>
                     Nhận dạng thành công!
                   </div>
                   
@@ -273,7 +273,7 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
                   cursor: 'pointer'
                 }}
               >
-                🔍 Nhận Dạng Lại
+                Nhận Dạng Lại
               </button>
             )}
             

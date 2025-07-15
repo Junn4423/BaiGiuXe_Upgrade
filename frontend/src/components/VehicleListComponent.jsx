@@ -33,7 +33,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
   // Load vehicle type mapping from API
   const loadVehicleTypeMapping = async () => {
     try {
-      console.log('🔄 Loading vehicle type mapping from API...')
+      console.log('Loading vehicle type mapping from API...')
       const vehicleTypes = await layALLLoaiPhuongTien()
       
       if (Array.isArray(vehicleTypes)) {
@@ -61,14 +61,14 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
         setVehicleTypeMapping(mapping)
         setAvailableVehicleTypes(typesList)
         
-        console.log('✅ Vehicle type mapping loaded:', {
+        console.log('Vehicle type mapping loaded:', {
           totalTypes: vehicleTypes.length,
           mapping: Object.fromEntries(mapping),
           typesList
         })
       }
     } catch (error) {
-      console.error('❌ Error loading vehicle type mapping:', error)
+      console.error('Error loading vehicle type mapping:', error)
       // Fallback to basic mapping
       const fallbackMapping = new Map([
         ['XE_MAY', { name: 'Xe máy', loaiXe: 0, isLargeVehicle: false }],
@@ -78,7 +78,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
         ['XE_12CHO', { name: 'Xe 12 chỗ', loaiXe: 1, isLargeVehicle: true }]
       ])
       setVehicleTypeMapping(fallbackMapping)
-      console.log('⚠️ Using fallback vehicle type mapping')
+      console.log('Using fallback vehicle type mapping')
     }
   }
 
@@ -96,7 +96,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
       vehicleTypeCode = workConfig.loai_xe;
       vehicleTypeName = cfgInfo.name;
       isLargeVehicle = cfgInfo.isLargeVehicle;
-      console.log(`⚙️  WorkConfig override -> ${vehicleTypeName}`);
+      console.log(`WorkConfig override -> ${vehicleTypeName}`);
     } else if (workConfig?.vehicle_type) {
       // Khi chỉ có tên (ví dụ “oto”, “xe_may”...)
       if (workConfig.vehicle_type.toLowerCase().includes("oto")) {
@@ -106,7 +106,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
         vehicleTypeName = "Xe máy";
         isLargeVehicle = false;
       }
-      console.log(`⚙️  WorkConfig (string) override -> ${vehicleTypeName}`);
+      console.log(`WorkConfig (string) override -> ${vehicleTypeName}`);
     } else {
       // ===================================================================
       // 2) DỮ LIỆU TỪ DATABASE (loaiXe cột lv004 của pm_nc0001 / pm_nc0009)
@@ -116,7 +116,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
         const typeInfo = vehicleTypeMapping.get(vehicleTypeCode);
         vehicleTypeName = typeInfo.name;
         isLargeVehicle = typeInfo.isLargeVehicle;
-        console.log(`🚗 DB loaiXe mã = ${vehicleTypeCode} -> ${vehicleTypeName}`);
+        console.log(`DB loaiXe mã = ${vehicleTypeCode} -> ${vehicleTypeName}`);
       } else if (item.loaiXe !== undefined && item.loaiXe !== null) {
         // Giá trị số 0/1 cũ
         if (item.loaiXe === 1 || item.loaiXe === "1") {
@@ -126,7 +126,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
           vehicleTypeName = "Xe máy";
           isLargeVehicle = false;
         }
-        console.log(`🚗 DB loaiXe số = ${item.loaiXe} -> ${vehicleTypeName}`);
+        console.log(`DB loaiXe số = ${item.loaiXe} -> ${vehicleTypeName}`);
       } else if (item.chinhSach) {
         // =================================================================
         // 3) PARSE TỪ TÊN CHÍNH SÁCH (thẻ được quét)
@@ -143,7 +143,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
           vehicleTypeName = "Xe máy";
           isLargeVehicle = false;
         }
-        console.log(`📄 Policy ${item.chinhSach} -> ${vehicleTypeName}`);
+        console.log(`Policy ${item.chinhSach} -> ${vehicleTypeName}`);
       }
     }
 
@@ -182,21 +182,21 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
   const fetchVehicles = async () => {
     try {
       setIsRefreshing(true)
-      console.log('🔄 Refreshing vehicle list...')
-      console.log('📋 Current workConfig:', workConfig)
-      console.log('📋 WorkConfig type:', typeof workConfig)
-      console.log('📋 WorkConfig is null:', workConfig === null)
-      console.log('📋 WorkConfig is undefined:', workConfig === undefined)
+      console.log('Refreshing vehicle list...')
+      console.log('Current workConfig:', workConfig)
+      console.log('WorkConfig type:', typeof workConfig)
+      console.log('WorkConfig is null:', workConfig === null)
+      console.log('WorkConfig is undefined:', workConfig === undefined)
       if (workConfig) {
-        console.log('📋 WorkConfig.loai_xe:', workConfig.loai_xe)
-        console.log('📋 WorkConfig.vehicle_type:', workConfig.vehicle_type)
-        console.log('📋 WorkConfig keys:', Object.keys(workConfig))
+        console.log('WorkConfig.loai_xe:', workConfig.loai_xe)
+        console.log('WorkConfig.vehicle_type:', workConfig.vehicle_type)
+        console.log('WorkConfig keys:', Object.keys(workConfig))
       }
       const apiData = await layALLPhienGuiXe()
       
       // Debug: Log sample data to check loaiXe field
       if (Array.isArray(apiData) && apiData.length > 0) {
-        console.log('🔍 DEBUG: Sample vehicle data from API:', {
+        console.log('DEBUG: Sample vehicle data from API:', {
           sampleCount: Math.min(3, apiData.length),
           samples: apiData.slice(0, 3).map(item => ({
             bienSo: item.bienSo,
@@ -205,9 +205,9 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
             chinhSach: item.chinhSach
           }))
         })
-        console.log('🔍 DEBUG: workConfig.vehicle_type:', workConfig?.vehicle_type)
-        console.log('📋 NOTE: Ưu tiên dữ liệu từ database (loaiXe) thay vì workConfig để tính phí chính xác')
-        console.log('📋 HƯỚNG DẪN: WorkConfig chỉ ảnh hưởng xe MỚI vào. Xe cũ giữ nguyên loại xe và chính sách khi vào.')
+        console.log('DEBUG: workConfig.vehicle_type:', workConfig?.vehicle_type)
+        console.log('NOTE: Ưu tiên dữ liệu từ database (loaiXe) thay vì workConfig để tính phí chính xác')
+        console.log('HƯỚNG DẪN: WorkConfig chỉ ảnh hưởng xe MỚI vào. Xe cũ giữ nguyên loại xe và chính sách khi vào.')
       }
       
       // Map API data to component format based on pm_nc0009 structure
@@ -271,7 +271,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
         }
       })
 
-      console.log(`🔄 Vehicle type mapping summary: WorkConfig=${workConfig?.loai_xe || workConfig?.vehicle_type}, Total vehicles=${mappedVehicles.length}`)
+      console.log(`Vehicle type mapping summary: WorkConfig=${workConfig?.loai_xe || workConfig?.vehicle_type}, Total vehicles=${mappedVehicles.length}`)
       
       // Debug: Log vehicle type distribution
       const typeDistribution = {}
@@ -279,16 +279,16 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
         const typeName = v.vehicleTypeName || v.vehicleType
         typeDistribution[typeName] = (typeDistribution[typeName] || 0) + 1
       })
-      console.log('📊 Vehicle type distribution:', typeDistribution)
+      console.log('Vehicle type distribution:', typeDistribution)
       
       // Debug: Log pricing issues if any
       const pricingIssues = mappedVehicles.filter(v => v._debug && v._debug.feeValue !== undefined && v._debug.feeValue > 0 && v._debug.determinedType !== (workConfig?.loai_xe || workConfig?.vehicle_type) && v._debug.status === 'DA_RA')
       if (pricingIssues.length > 0) {
-        console.warn(`💰 Phát hiện ${pricingIssues.length} xe ĐÃ RA có khác biệt loại xe so với WorkConfig:`)
+        console.warn(`Phát hiện ${pricingIssues.length} xe ĐÃ RA có khác biệt loại xe so với WorkConfig:`)
         pricingIssues.forEach(v => {
           console.warn(`  - ${v.licensePlate}: WorkConfig=${workConfig?.loai_xe || workConfig?.vehicle_type || 'undefined'}, Thực tế=${v._debug.determinedType}, Phí=${v._debug.feeValue}, Policy=${v._debug.policyName}`)
         })
-        console.info(`📋 NOTE: Điều này bình thường vì xe đã vào trước khi thay đổi WorkConfig. Chỉ xe mới vào mới áp dụng WorkConfig hiện tại.`)
+        console.info(`NOTE: Điều này bình thường vì xe đã vào trước khi thay đổi WorkConfig. Chỉ xe mới vào mới áp dụng WorkConfig hiện tại.`)
       }
       
       setVehicles(mappedVehicles)
@@ -303,9 +303,9 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
       
       setStatistics({ totalVehicles, motorcycles, cars, totalRevenue })
       setLastUpdated(new Date())
-      console.log(`✅ Vehicle list updated: ${totalVehicles} vehicles in parking, ${mappedVehicles.length} total sessions`)
+      console.log(`Vehicle list updated: ${totalVehicles} vehicles in parking, ${mappedVehicles.length} total sessions`)
     } catch (error) {
-      console.error('❌ Error fetching vehicles:', error)
+      console.error('Error fetching vehicles:', error)
       setVehicles([])
       setStatistics({ totalVehicles: 0, motorcycles: 0, cars: 0, totalRevenue: 0 })
     } finally {
@@ -330,19 +330,19 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
 
   // Debug useEffect to monitor workConfig changes
   useEffect(() => {
-    console.log('🔧 VehicleListComponent: workConfig prop changed:', workConfig)
+    console.log('VehicleListComponent: workConfig prop changed:', workConfig)
     if (workConfig) {
-      console.log('✅ WorkConfig is now available with loai_xe:', workConfig.loai_xe)
+      console.log('WorkConfig is now available with loai_xe:', workConfig.loai_xe)
     } else {
-      console.log('⚠️ WorkConfig is null/undefined')
+      console.log('WorkConfig is null/undefined')
     }
   }, [workConfig])
 
   // Re-fetch when workConfig changes to update vehicle types
   useEffect(() => {
     if (workConfig) {
-      console.log('📋 WorkConfig changed, refreshing vehicle list for type sync...')
-      console.log('📋 New workConfig.loai_xe:', workConfig.loai_xe)
+      console.log('WorkConfig changed, refreshing vehicle list for type sync...')
+      console.log('New workConfig.loai_xe:', workConfig.loai_xe)
       fetchVehicles()
     }
   }, [workConfig?.loai_xe, workConfig?.vehicle_type]) // Watch both fields
@@ -360,7 +360,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
 
   // Force refresh from API
   const refreshVehicleList = () => {
-    console.log('🔄 Manual refresh triggered')
+    console.log('Manual refresh triggered')
     fetchVehicles()
   }
 

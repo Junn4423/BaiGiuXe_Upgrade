@@ -55,7 +55,7 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
       // If too much time has passed, reset buffer (new card scan)
       if (timeDiff > CARD_TIMEOUT) {
         keyboardBuffer.current = ""
-        console.log(`🔄 Reset buffer due to timeout (${timeDiff}ms > ${CARD_TIMEOUT}ms)`)
+        console.log(`Reset buffer due to timeout (${timeDiff}ms > ${CARD_TIMEOUT}ms)`)
       }
 
       lastKeyTime.current = currentTime
@@ -70,14 +70,14 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
         if (cardId && cardId.length >= 6 && cardId.length <= 20 && /^\d+$/.test(cardId)) {
           // Prevent duplicate processing of the same card within short time
           if (!isScanningRef.current || cardId !== currentCardIdRef.current) {
-            console.log(`✅ RFID CARD DETECTED: ${cardId} (length: ${cardId.length})`)
+            console.log(`RFID CARD DETECTED: ${cardId} (length: ${cardId.length})`)
             currentCardIdRef.current = cardId
             processCardScan(cardId)
           } else {
-            console.log(`⚠️ Ignoring duplicate card scan: ${cardId}`)
+            console.log(`Ignoring duplicate card scan: ${cardId}`)
           }
         } else if (cardId) {
-          console.log(`❌ Invalid card ID format: ${cardId} (length: ${cardId.length})`)
+          console.log(`Invalid card ID format: ${cardId} (length: ${cardId.length})`)
           // Clear invalid data
           keyboardBuffer.current = ""
           
@@ -100,12 +100,12 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
         
         // Limit buffer size to prevent memory issues
         if (keyboardBuffer.current.length > 25) {
-          console.log(`⚠️ Buffer too long, resetting: ${keyboardBuffer.current}`)
+          console.log(`Buffer too long, resetting: ${keyboardBuffer.current}`)
           keyboardBuffer.current = ""
         }
       } else if (event.key.length === 1) {
         // Log non-digit characters for debugging
-        console.log(`🔍 Ignoring non-digit character: ${event.key}`)
+        console.log(`Ignoring non-digit character: ${event.key}`)
       }
     },
     [],
@@ -206,7 +206,7 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
   const processCardScan = useCallback(
     async (cardId) => {
       if (isScanningRef.current) {
-        console.log(`⚠️ Card reader busy, ignoring duplicate scan: ${cardId}`)
+        console.log(`Card reader busy, ignoring duplicate scan: ${cardId}`)
         return
       }
 
@@ -220,41 +220,41 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
 
         // Validate UI reference
         if (!ui) {
-          console.error(`❌ UI reference is null, cannot proceed with card processing`)
+          console.error(`UI reference is null, cannot proceed with card processing`)
           return
         }
 
         // Determine current mode (vao/ra) - prioritize UI reference as it's more reliable
         const currentMode = ui.currentMode || propCurrentMode || "vao"
-        console.log(`🎯 Processing card ${cardId} in mode: ${currentMode}`)
-        console.log(`🔍 Mode source: ui.currentMode=${ui.currentMode}, propCurrentMode=${propCurrentMode}`)
-        console.log(`🔍 Mode detection priority: ui.currentMode (${ui.currentMode}) -> propCurrentMode (${propCurrentMode}) -> default (vao)`)
+        console.log(`Processing card ${cardId} in mode: ${currentMode}`)
+        console.log(`Mode source: ui.currentMode=${ui.currentMode}, propCurrentMode=${propCurrentMode}`)
+        console.log(`Mode detection priority: ui.currentMode (${ui.currentMode}) -> propCurrentMode (${propCurrentMode}) -> default (vao)`)
         
         // Additional validation for mode consistency
         if (ui.currentMode && propCurrentMode && ui.currentMode !== propCurrentMode) {
-          console.warn(`⚠️ Mode mismatch detected! UI mode: ${ui.currentMode}, Prop mode: ${propCurrentMode}`)
+          console.warn(`Mode mismatch detected! UI mode: ${ui.currentMode}, Prop mode: ${propCurrentMode}`)
         }
 
         // Check if card exists in database
         const cardExists = await checkCardExists(cardId)
-        console.log(`📋 Card ${cardId} exists in database: ${cardExists}`)
+        console.log(`Card ${cardId} exists in database: ${cardExists}`)
 
         if (!cardExists) {
-          console.log(`❌ Card ${cardId} not found in database`)
+          console.log(`Card ${cardId} not found in database`)
           if (ui) {
             ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ ${cardId} chưa được đăng ký`, "#F44336")
           }
           
           // For entry mode, still allow processing but show warning
           if (currentMode === "vao") {
-            console.log(`⚠️ Allowing unregistered card entry for card ${cardId}`)
+            console.log(`Allowing unregistered card entry for card ${cardId}`)
             if (ui && ui.handleCardScanned) {
               ui.handleCardScanned(cardId)
             }
             return
           } else {
             // For exit mode, reject unregistered cards
-            console.log(`🚫 Rejecting unregistered card exit for card ${cardId}`)
+            console.log(`Rejecting unregistered card exit for card ${cardId}`)
             if (ui) {
               ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ chưa đăng ký - Không thể ra`, "#F44336")
             }
@@ -265,37 +265,37 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
         // Card exists - check mode-specific logic
         if (currentMode === "vao") {
           // Entry mode: Check if card already has active session
-          console.log(`🚪 Entry mode - checking for existing session for card ${cardId}`)
+          console.log(`Entry mode - checking for existing session for card ${cardId}`)
           const hasActiveSession = await checkActiveSession(cardId)
           
           if (hasActiveSession) {
-            console.log(`⚠️ Card ${cardId} already has active parking session`)
+            console.log(`Card ${cardId} already has active parking session`)
             if (ui) {
               ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ ${cardId} đã có phiên gửi xe`, "#F44336")
             }
             return
           }
           
-          console.log(`✅ Card ${cardId} is ready for entry`)
+          console.log(`Card ${cardId} is ready for entry`)
           if (ui) {
             ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ hợp lệ - Đang chụp ảnh xe vào...`, "#FF9800")
           }
           
           // Validate required UI data for entry
           if (!ui) {
-            console.error(`❌ UI reference is null, cannot proceed with entry`)
+            console.error(`UI reference is null, cannot proceed with entry`)
             return
           }
           
           if (!ui.currentVehicleType) {
-            console.warn(`⚠️ Missing vehicle type, using default`)
+            console.warn(`Missing vehicle type, using default`)
           }
           if (!ui.workConfig?.zone) {
-            console.warn(`⚠️ Missing work zone configuration`)
+            console.warn(`Missing work zone configuration`)
           }
           
           // Log work configuration for debugging
-          console.log(`📋 Work Config for entry:`, {
+          console.log(`Work Config for entry:`, {
             vehicleType: ui?.currentVehicleType || 'unknown',
             zone: ui?.workConfig?.zone || 'unknown',
             zoneData: ui?.workConfig?.zone_data || 'unknown'
@@ -303,18 +303,18 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
           
         } else if (currentMode === "ra") {
           // Exit mode: Check if card has active session
-          console.log(`🚪 Exit mode - checking for active session for card ${cardId}`)
+          console.log(`Exit mode - checking for active session for card ${cardId}`)
           const hasActiveSession = await checkActiveSession(cardId)
           
           if (!hasActiveSession) {
-            console.log(`❌ Card ${cardId} has no active parking session`)
+            console.log(`Card ${cardId} has no active parking session`)
             if (ui) {
               ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ ${cardId} không có phiên gửi xe`, "#F44336")
             }
             return
           }
           
-          console.log(`✅ Card ${cardId} has active session - ready for exit`)
+          console.log(`Card ${cardId} has active session - ready for exit`)
           if (ui) {
             ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Thẻ hợp lệ - Đang chụp ảnh xe ra...`, "#FF9800")
           }
@@ -326,7 +326,7 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
         }
 
       } catch (error) {
-        console.error("❌ Error processing card scan:", error)
+        console.error("Error processing card scan:", error)
 
         if (ui) {
           ui.updateCardReaderStatus && ui.updateCardReaderStatus(`Lỗi xử lý thẻ: ${error.message}`, "#F44336")
@@ -348,10 +348,10 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
   const simulateCardScan = useCallback(
     (cardId) => {
       if (!isScanningRef.current) {
-        console.log(`🧪 Simulating card scan: ${cardId}`)
+        console.log(`Simulating card scan: ${cardId}`)
         processCardScan(cardId)
       } else {
-        console.log(`⚠️ Cannot simulate card scan, reader is busy`)
+        console.log(`Cannot simulate card scan, reader is busy`)
       }
     },
     [],
@@ -370,7 +370,7 @@ const DauDocThe = React.forwardRef(({ currentMode: propCurrentMode }, ref) => {
 
   // Force reset card reader state
   const forceReset = useCallback(() => {
-    console.log(`🔄 Force resetting card reader state`)
+    console.log(`Force resetting card reader state`)
     keyboardBuffer.current = ""
     currentCardIdRef.current = null
     resetScanningState()

@@ -8,7 +8,7 @@ const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   const handleLoginSuccess = async (loginData) => {
-    console.log('🔐 Login thành công với dữ liệu:', loginData);
+    console.log('Login thành công với dữ liệu:', loginData);
     setLoggedIn(true);
   };
 

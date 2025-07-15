@@ -34,23 +34,23 @@ class VehicleManager {
   ) {
     try {
       console.log(
-        `🚗 DEBUG processVehicleEntry: loaiXe nhận vào = ${loaiXe} (type: ${typeof loaiXe})`
+        `DEBUG processVehicleEntry: loaiXe nhận vào = ${loaiXe} (type: ${typeof loaiXe})`
       );
 
       // Tự động xác định chính sách nếu chưa có - từ loaiXe thay vì currentVehicleType
       if (!policy && loaiXe !== null) {
         if (loaiXe === "0" || loaiXe === 0) {
           policy = "CS_XEMAY_4H";
-          console.log(`📋 Auto policy từ loaiXe=0: ${policy}`);
+          console.log(`Auto policy từ loaiXe=0: ${policy}`);
         } else if (loaiXe === "1" || loaiXe === 1) {
           policy = "CS_OTO_4H";
-          console.log(`📋 Auto policy từ loaiXe=1: ${policy}`);
+          console.log(`Auto policy từ loaiXe=1: ${policy}`);
         }
       }
 
       // Fallback chỉ khi loaiXe không có
       if (!policy && this.ui) {
-        console.log(`⚠️ FALLBACK: Không có loaiXe, dùng currentVehicleType`);
+        console.log(`FALLBACK: Không có loaiXe, dùng currentVehicleType`);
         if (this.ui.currentVehicleType === "xe_may") {
           policy = "CS_XEMAY_4H";
         } else if (this.ui.currentVehicleType === "oto") {
@@ -73,7 +73,7 @@ class VehicleManager {
         loaiXe: loaiXe || null, // Từ cấu hình, không có default
       };
 
-      console.log(`🚗 DEBUG: Session data với loaiXe từ config:`, session);
+      console.log(`DEBUG: Session data với loaiXe từ config:`, session);
 
       const apiResult = await themPhienGuiXe(session);
 
@@ -96,14 +96,14 @@ class VehicleManager {
         let vehicleTypeDisplay = null;
         if (loaiXe === "1" || loaiXe === 1) {
           vehicleTypeDisplay = "oto";
-          console.log(`🚗 UI Display: Ô tô (loaiXe=${loaiXe})`);
+          console.log(`UI Display: Ô tô (loaiXe=${loaiXe})`);
         } else if (loaiXe === "0" || loaiXe === 0) {
           vehicleTypeDisplay = "xe_may";
-          console.log(`🏍️ UI Display: Xe máy (loaiXe=${loaiXe})`);
+          console.log(`UI Display: Xe máy (loaiXe=${loaiXe})`);
         } else {
           // Fallback để tương thích với UI cũ
           vehicleTypeDisplay = this.ui?.currentVehicleType || null;
-          console.log(`⚠️ UI Display: Fallback to ${vehicleTypeDisplay}`);
+          console.log(`UI Display: Fallback to ${vehicleTypeDisplay}`);
         }
 
         // Cập nhật thông tin xe vào UI
@@ -144,7 +144,7 @@ class VehicleManager {
         };
       }
     } catch (error) {
-      console.error("❌ Lỗi xử lý xe vào:", error);
+      console.error("Lỗi xử lý xe vào:", error);
       if (this.ui) {
         this.ui.updateVehicleEntryStatus(
           cardId,
@@ -172,7 +172,7 @@ class VehicleManager {
     workConfig = null
   ) {
     console.log(
-      "🚗 Xử lý xe ra:",
+      "Xử lý xe ra:",
       cardId,
       exitGate,
       cameraId,
@@ -183,18 +183,18 @@ class VehicleManager {
     try {
       // Bước 1: Load phiên gửi xe theo mã thẻ
       console.log(
-        `🔍 DEBUG: Gọi API loadPhienGuiXeTheoMaThe cho mã thẻ: ${cardId}`
+        `DEBUG: Gọi API loadPhienGuiXeTheoMaThe cho mã thẻ: ${cardId}`
       );
       const response = await loadPhienGuiXeTheoMaThe(cardId);
 
-      console.log(`🔍 DEBUG: API Response type: ${typeof response}`);
-      console.log(`🔍 DEBUG: API Response:`, response);
+      console.log(`DEBUG: API Response type: ${typeof response}`);
+      console.log(`DEBUG: API Response:`, response);
 
       // Xử lý response từ API như Python
       let session = null;
       if (Array.isArray(response) && response.length > 0) {
         session = response[0];
-        console.log(`🔍 DEBUG: Lấy session từ list:`, session);
+        console.log(`DEBUG: Lấy session từ list:`, session);
       } else if (typeof response === "object" && response !== null) {
         if (response.success && response.data) {
           const data = response.data;
@@ -205,7 +205,7 @@ class VehicleManager {
           }
         } else {
           const msg = response.message || "Không tìm thấy phiên gửi xe";
-          console.log(`❌ API trả về lỗi: ${msg}`);
+          console.log(`API trả về lỗi: ${msg}`);
           if (this.ui) {
             this.ui.updateVehicleExitStatus(cardId, "", false, msg);
           }
@@ -214,7 +214,7 @@ class VehicleManager {
       } else {
         const msg =
           "Không tìm thấy phiên gửi xe hoặc format response không đúng";
-        console.log(`❌ ${msg}`);
+        console.log(`${msg}`);
         if (this.ui) {
           this.ui.updateVehicleExitStatus(cardId, "", false, msg);
         }
@@ -223,18 +223,18 @@ class VehicleManager {
 
       if (!session) {
         const msg = "Dữ liệu phiên gửi xe trống";
-        console.log(`❌ ${msg}`);
+        console.log(`${msg}`);
         if (this.ui) {
           this.ui.updateVehicleExitStatus(cardId, "", false, msg);
         }
         return { success: false, message: msg };
       }
 
-      console.log(`🔍 DEBUG: Session object:`, session);
+      console.log(`DEBUG: Session object:`, session);
 
       // Tự động xác định cổng ra và camera ID từ zoneInfo FIRST
       console.log(
-        `🔍 DEBUG VehicleManager: Checking zoneInfo for exit gate/camera:`,
+        `DEBUG VehicleManager: Checking zoneInfo for exit gate/camera:`,
         {
           zoneInfo: zoneInfo,
           hasCongRa: zoneInfo?.congRa ? true : false,
@@ -253,7 +253,7 @@ class VehicleManager {
         } else if (workConfig?.exit_gate) {
           exitGate = workConfig.exit_gate;
         }
-        console.log(`🚪 VehicleManager: Tự động xác định cổng ra: ${exitGate}`);
+        console.log(`VehicleManager: Tự động xác định cổng ra: ${exitGate}`);
       }
 
       if (!cameraId) {
@@ -262,7 +262,7 @@ class VehicleManager {
           cameraId = zoneInfo.cameraRa[0].maCamera || null;
         }
         console.log(
-          `📹 VehicleManager: Tự động xác định camera ID: ${cameraId}`
+          `VehicleManager: Tự động xác định camera ID: ${cameraId}`
         );
       }
 
@@ -272,10 +272,10 @@ class VehicleManager {
       const sessionId = session.maPhien || "";
 
       console.log(
-        `🔍 DEBUG: Biển số vào = '${entryLicensePlate}', Biển số ra = '${exitLicensePlate}'`
+        `DEBUG: Biển số vào = '${entryLicensePlate}', Biển số ra = '${exitLicensePlate}'`
       );
-      console.log(`🔍 DEBUG: URL ảnh vào = '${entryImageUrl}'`);
-      console.log(`🔍 DEBUG: Mã phiên = '${sessionId}'`);
+      console.log(`DEBUG: URL ảnh vào = '${entryImageUrl}'`);
+      console.log(`DEBUG: Mã phiên = '${sessionId}'`);
 
       // Hiển thị ảnh xe vào ngay lập tức
       if (this.ui && entryImageUrl) {
@@ -291,10 +291,10 @@ class VehicleManager {
         entryLicensePlate,
         exitLicensePlate
       );
-      console.log(`🔍 DEBUG: Kết quả kiểm tra khớp = ${licensePlatesMatch}`);
+      console.log(`DEBUG: Kết quả kiểm tra khớp = ${licensePlatesMatch}`);
 
       if (!licensePlatesMatch && this.ui) {
-        console.log("🚨 Hiển thị dialog lỗi biển số");
+        console.log("Hiển thị dialog lỗi biển số");
         const dialogResult = await this.handleLicensePlateError(
           cardId,
           entryLicensePlate,
@@ -302,14 +302,14 @@ class VehicleManager {
           exitImagePath,
           exitFaceImagePath
         );
-        console.log(`🔍 DEBUG: Kết quả dialog = ${dialogResult}`);
+        console.log(`DEBUG: Kết quả dialog = ${dialogResult}`);
 
         if (
           typeof dialogResult === "string" &&
           dialogResult.startsWith("xac_nhan:")
         ) {
           exitLicensePlate = dialogResult.split(":", 2)[1];
-          console.log(`🔍 DEBUG: Biển số mới từ dialog = ${exitLicensePlate}`);
+          console.log(`DEBUG: Biển số mới từ dialog = ${exitLicensePlate}`);
           licensePlatesMatch = true; // Người dùng đã xác nhận
         } else if (dialogResult === "huy") {
           return { success: false, message: "Người dùng hủy bỏ" };
@@ -340,7 +340,7 @@ class VehicleManager {
         plate: exitLicensePlate,
       };
 
-      console.log(`🔍 DEBUG: Cập nhật phiên gửi xe:`, sessionUpdate);
+      console.log(`DEBUG: Cập nhật phiên gửi xe:`, sessionUpdate);
       const apiResult = await capNhatPhienGuiXe(sessionUpdate);
 
       // Kiểm tra kết quả API
@@ -354,19 +354,19 @@ class VehicleManager {
       }
 
       if (success) {
-        console.log("✅ Cập nhật xe ra thành công, bắt đầu tính phí...");
+        console.log("Cập nhật xe ra thành công, bắt đầu tính phí...");
 
         // Bước 3: Tính phí gửi xe
-        console.log(`🔍 DEBUG: Gọi tinhPhiGuiXe cho mã phiên: ${sessionId}`);
+        console.log(`DEBUG: Gọi tinhPhiGuiXe cho mã phiên: ${sessionId}`);
         const feeResult = await tinhPhiGuiXe(sessionId, cardId);
-        console.log(`🔍 DEBUG: Kết quả tinhPhiGuiXe:`, feeResult);
+        console.log(`DEBUG: Kết quả tinhPhiGuiXe:`, feeResult);
 
         let calculatedFee = null;
         if (feeResult && feeResult.success) {
           calculatedFee = feeResult.phi || 0;
-          console.log(`✅ Tính phí thành công: ${calculatedFee}`);
+          console.log(`Tính phí thành công: ${calculatedFee}`);
         } else {
-          console.log(`⚠️ Lỗi tính phí: ${feeResult?.message}`);
+          console.log(`Lỗi tính phí: ${feeResult?.message}`);
         }
 
         // Bước 4: Load lại dữ liệu hoàn chỉnh từ server
@@ -376,7 +376,7 @@ class VehicleManager {
           currentTime.toISOString().slice(0, 19).replace("T", " ")
         );
 
-        console.log(`🔍 DEBUG: Hoàn tất xử lý xe ra cho mã thẻ ${cardId}.`);
+        console.log(`DEBUG: Hoàn tất xử lý xe ra cho mã thẻ ${cardId}.`);
 
         return { success: true, message: "Xe ra thành công" };
       } else {
@@ -392,7 +392,7 @@ class VehicleManager {
         return { success: false, message: msg };
       }
     } catch (error) {
-      console.log(`❌ Lỗi xử lý xe ra: ${error}`);
+      console.log(`Lỗi xử lý xe ra: ${error}`);
       console.error(error);
       if (this.ui) {
         this.ui.updateVehicleExitStatus(cardId, "", false, error.message);
@@ -411,10 +411,10 @@ class VehicleManager {
   ) {
     try {
       console.log(
-        `🔍 DEBUG: Bắt đầu load dữ liệu hoàn chỉnh cho mã thẻ ${cardId}`
+        `DEBUG: Bắt đầu load dữ liệu hoàn chỉnh cho mã thẻ ${cardId}`
       );
       console.log(
-        `🔍 DEBUG: Phí được tính toán: ${calculatedFee}, Giờ ra thực tế: ${actualExitTime}`
+        `DEBUG: Phí được tính toán: ${calculatedFee}, Giờ ra thực tế: ${actualExitTime}`
       );
 
       // Gọi API lấy dữ liệu phiên gửi xe
@@ -434,7 +434,7 @@ class VehicleManager {
           }
         } else {
           const msg = response.message || "Lỗi load dữ liệu từ server";
-          console.log(`❌ Load dữ liệu thất bại: ${msg}`);
+          console.log(`Load dữ liệu thất bại: ${msg}`);
           if (this.ui) {
             this.ui.updateVehicleExitStatus(cardId, "", false, msg);
           }
@@ -442,7 +442,7 @@ class VehicleManager {
         }
       } else {
         const msg = "Không có response từ server hoặc format không đúng";
-        console.log(`❌ Load dữ liệu thất bại: ${msg}`);
+        console.log(`Load dữ liệu thất bại: ${msg}`);
         if (this.ui) {
           this.ui.updateVehicleExitStatus(cardId, "", false, msg);
         }
@@ -450,7 +450,7 @@ class VehicleManager {
       }
 
       if (!session) {
-        console.log("❌ Không tìm thấy phiên gửi xe");
+        console.log("Không tìm thấy phiên gửi xe");
         if (this.ui) {
           this.ui.updateVehicleExitStatus(
             cardId,
@@ -462,7 +462,7 @@ class VehicleManager {
         return;
       }
 
-      console.log(`🔍 DEBUG: Session object nhận được:`, session);
+      console.log(`DEBUG: Session object nhận được:`, session);
 
       // Chuyển đổi dữ liệu sang format UI
       const vehicleData = this.convertSessionObjectToUI(
@@ -470,10 +470,10 @@ class VehicleManager {
         calculatedFee,
         actualExitTime
       );
-      console.log(`🔍 DEBUG: Dữ liệu UI được tạo:`, vehicleData);
+      console.log(`DEBUG: Dữ liệu UI được tạo:`, vehicleData);
 
       if (this.ui) {
-        console.log(`🔍 DEBUG: Cập nhật UI với dữ liệu:`, vehicleData);
+        console.log(`DEBUG: Cập nhật UI với dữ liệu:`, vehicleData);
 
         // Cập nhật thông tin xe lên UI
         this.ui.updateVehicleInfo(vehicleData);
@@ -495,7 +495,7 @@ class VehicleManager {
         const entryFaceImageUrl = session.anhMatVao || "";
 
         console.log(
-          `🎯 Gọi hiển thị ảnh vào sau xe ra thành công - Xe: ${entryImageUrl}, Face: ${entryFaceImageUrl}`
+          `Gọi hiển thị ảnh vào sau xe ra thành công - Xe: ${entryImageUrl}, Face: ${entryFaceImageUrl}`
         );
 
         // Gọi method hiển thị ảnh vào trên camera frames
@@ -510,7 +510,7 @@ class VehicleManager {
         }, 3000);
 
         console.log(
-          `✅ Đã load và hiển thị dữ liệu hoàn chỉnh cho mã thẻ ${cardId}`
+          `Đã load và hiển thị dữ liệu hoàn chỉnh cho mã thẻ ${cardId}`
         );
       }
     } catch (error) {
@@ -546,7 +546,7 @@ class VehicleManager {
       const exitGate = session.congRa || "";
       const feeValue = overrideFee !== null ? overrideFee : session.phi || "";
 
-      console.log(`🔍 DEBUG: Trích xuất dữ liệu từ session:`);
+      console.log(`DEBUG: Trích xuất dữ liệu từ session:`);
       console.log(`  - Biển số: ${licensePlate}`);
       console.log(`  - Giờ vào: ${entryTimeStr}`);
       console.log(`  - Giờ ra: ${exitTimeStr}`);
@@ -566,7 +566,7 @@ class VehicleManager {
           );
           parkingDurationFormatted = `${hours}h ${minutes}m`;
         } catch (error) {
-          console.log(`⚠️ Lỗi tính thời gian đỗ: ${error}`);
+          console.log(`Lỗi tính thời gian đỗ: ${error}`);
           parkingDurationFormatted = "N/A";
         }
       }
@@ -589,15 +589,15 @@ class VehicleManager {
       const loaiXe = session.loaiXe;
 
       console.log(
-        `🚗 DEBUG: loaiXe từ session = ${loaiXe} (type: ${typeof loaiXe})`
+        `DEBUG: loaiXe từ session = ${loaiXe} (type: ${typeof loaiXe})`
       );
 
       if (loaiXe === 1 || loaiXe === "1") {
         vehicleType = "oto";
-        console.log(`🚗 Phân loại: Ô tô/xe lớn (loaiXe = ${loaiXe})`);
+        console.log(`Phân loại: Ô tô/xe lớn (loaiXe = ${loaiXe})`);
       } else if (loaiXe === 0 || loaiXe === "0") {
         vehicleType = "xe_may";
-        console.log(`🏍️ Phân loại: Xe máy/2 bánh (loaiXe = ${loaiXe})`);
+        console.log(`Phân loại: Xe máy/2 bánh (loaiXe = ${loaiXe})`);
       } else {
         // Fallback: nếu không có loaiXe, dùng policy làm backup
         if (
@@ -606,10 +606,10 @@ class VehicleManager {
           policy.includes("CS_OTO")
         ) {
           vehicleType = "oto";
-          console.log(`🚗 Fallback: Phân loại từ policy -> Ô tô`);
+          console.log(`Fallback: Phân loại từ policy -> Ô tô`);
         } else {
           vehicleType = "xe_may";
-          console.log(`🏍️ Fallback: Phân loại từ policy -> Xe máy`);
+          console.log(`Fallback: Phân loại từ policy -> Xe máy`);
         }
       }
 
@@ -632,10 +632,10 @@ class VehicleManager {
         da_xac_minh: true,
       };
 
-      console.log(`🔍 DEBUG: Dữ liệu UI được tạo:`, vehicleData);
+      console.log(`DEBUG: Dữ liệu UI được tạo:`, vehicleData);
       return vehicleData;
     } catch (error) {
-      console.log(`❌ Lỗi chuyển đổi session object: ${error}`);
+      console.log(`Lỗi chuyển đổi session object: ${error}`);
       console.error(error);
 
       // Fallback data
@@ -788,8 +788,8 @@ class VehicleManager {
         if (session) {
           entryImageUrl = session.anhVao || "";
           entryFaceImageUrl = session.anhMatVao || "";
-          console.log(`🔍 DEBUG Dialog: URL ảnh vào: ${entryImageUrl}`);
-          console.log(`🔍 DEBUG Dialog: URL ảnh mặt vào: ${entryFaceImageUrl}`);
+          console.log(`DEBUG Dialog: URL ảnh vào: ${entryImageUrl}`);
+          console.log(`DEBUG Dialog: URL ảnh mặt vào: ${entryFaceImageUrl}`);
         }
       }
 
@@ -806,7 +806,7 @@ class VehicleManager {
         });
 
         console.log(
-          `🔍 DEBUG Dialog: Kết quả = ${dialogResult.action}, Biển số = ${dialogResult.licensePlate}`
+          `DEBUG Dialog: Kết quả = ${dialogResult.action}, Biển số = ${dialogResult.licensePlate}`
         );
 
         if (dialogResult.action === "confirm" && dialogResult.licensePlate) {
@@ -818,7 +818,7 @@ class VehicleManager {
 
       return "huy";
     } catch (error) {
-      console.log(`❌ Lỗi hiển thị dialog: ${error}`);
+      console.log(`Lỗi hiển thị dialog: ${error}`);
       console.error(error);
       return "huy";
     }
@@ -842,11 +842,11 @@ class VehicleManager {
         ...this.vehicles[existingVehicleIndex],
         ...vehicleData,
       };
-      console.log(`✅ Đã cập nhật xe ${licensePlate} trong danh sách`);
+      console.log(`Đã cập nhật xe ${licensePlate} trong danh sách`);
     } else {
       // Thêm xe mới
       this.vehicles.push(vehicleData);
-      console.log(`✅ Đã thêm xe ${licensePlate} vào danh sách`);
+      console.log(`Đã thêm xe ${licensePlate} vào danh sách`);
     }
   }
 

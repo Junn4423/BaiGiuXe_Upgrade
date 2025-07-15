@@ -14,12 +14,12 @@ import {
  */
 export async function handleVehicleEntryImage(imageFile) {
   try {
-    console.log('🚗 Uploading entry license plate image...');
+    console.log('Uploading entry license plate image...');
     
     const uploadResult = await uploadLicensePlateImage(imageFile);
     
     if (uploadResult.success) {
-      console.log('✅ Entry image uploaded successfully:', {
+      console.log('Entry image uploaded successfully:', {
         filename: uploadResult.filename,
         servers: uploadResult.results.filter(r => r.status === 'success').length,
         primaryUrl: uploadResult.primaryUrl
@@ -36,7 +36,7 @@ export async function handleVehicleEntryImage(imageFile) {
       throw new Error('Upload failed to all servers');
     }
   } catch (error) {
-    console.error('❌ Failed to upload entry image:', error);
+    console.error('Failed to upload entry image:', error);
     throw error;
   }
 }
@@ -46,12 +46,12 @@ export async function handleVehicleEntryImage(imageFile) {
  */
 export async function handleVehicleExitImage(imageFile) {
   try {
-    console.log('🚗 Uploading exit license plate image...');
+    console.log('Uploading exit license plate image...');
     
     const uploadResult = await uploadLicensePlateOutImage(imageFile);
     
     if (uploadResult.success) {
-      console.log('✅ Exit image uploaded successfully:', {
+      console.log('Exit image uploaded successfully:', {
         filename: uploadResult.filename,
         servers: uploadResult.results.filter(r => r.status === 'success').length,
         primaryUrl: uploadResult.primaryUrl
@@ -67,7 +67,7 @@ export async function handleVehicleExitImage(imageFile) {
       throw new Error('Upload failed to all servers');
     }
   } catch (error) {
-    console.error('❌ Failed to upload exit image:', error);
+    console.error('Failed to upload exit image:', error);
     throw error;
   }
 }
@@ -77,12 +77,12 @@ export async function handleVehicleExitImage(imageFile) {
  */
 export async function handleDriverFaceImage(imageFile) {
   try {
-    console.log('👤 Uploading driver face image...');
+    console.log('Uploading driver face image...');
     
     const uploadResult = await uploadFaceImage(imageFile);
     
     if (uploadResult.success) {
-      console.log('✅ Face image uploaded successfully:', {
+      console.log('Face image uploaded successfully:', {
         filename: uploadResult.filename,
         servers: uploadResult.results.filter(r => r.status === 'success').length,
         primaryUrl: uploadResult.primaryUrl
@@ -98,7 +98,7 @@ export async function handleDriverFaceImage(imageFile) {
       throw new Error('Upload failed to all servers');
     }
   } catch (error) {
-    console.error('❌ Failed to upload face image:', error);
+    console.error('Failed to upload face image:', error);
     throw error;
   }
 }
@@ -108,12 +108,12 @@ export async function handleDriverFaceImage(imageFile) {
  */
 export async function handleCustomImage(imageFile, customPrefix) {
   try {
-    console.log(`📷 Uploading custom image with prefix: ${customPrefix}...`);
+    console.log(`Uploading custom image with prefix: ${customPrefix}...`);
     
     const uploadResult = await uploadImageToMinIO(imageFile, customPrefix);
     
     if (uploadResult.success) {
-      console.log('✅ Custom image uploaded successfully:', {
+      console.log('Custom image uploaded successfully:', {
         filename: uploadResult.filename,
         servers: uploadResult.results.filter(r => r.status === 'success').length,
         primaryUrl: uploadResult.primaryUrl
@@ -129,7 +129,7 @@ export async function handleCustomImage(imageFile, customPrefix) {
       throw new Error('Upload failed to all servers');
     }
   } catch (error) {
-    console.error('❌ Failed to upload custom image:', error);
+    console.error('Failed to upload custom image:', error);
     throw error;
   }
 }
@@ -139,7 +139,7 @@ export async function handleCustomImage(imageFile, customPrefix) {
  */
 export async function completeVehicleEntry(vehicleData, plateImage, faceImage) {
   try {
-    console.log('🚗 Starting complete vehicle entry process...');
+    console.log('Starting complete vehicle entry process...');
     
     // Upload images in parallel
     const [plateUpload, faceUpload] = await Promise.all([
@@ -159,12 +159,12 @@ export async function completeVehicleEntry(vehicleData, plateImage, faceImage) {
       }
     };
     
-    console.log('✅ Vehicle entry images uploaded, session data ready:', sessionData);
+    console.log('Vehicle entry images uploaded, session data ready:', sessionData);
     
     return sessionData;
     
   } catch (error) {
-    console.error('❌ Complete vehicle entry failed:', error);
+    console.error('Complete vehicle entry failed:', error);
     throw error;
   }
 }
@@ -174,7 +174,7 @@ export async function completeVehicleEntry(vehicleData, plateImage, faceImage) {
  */
 export async function completeVehicleExit(sessionId, plateImage, faceImage) {
   try {
-    console.log('🚗 Starting complete vehicle exit process...');
+    console.log('Starting complete vehicle exit process...');
     
     // Upload exit images
     const [plateUpload, faceUpload] = await Promise.all([
@@ -195,12 +195,12 @@ export async function completeVehicleExit(sessionId, plateImage, faceImage) {
       }
     };
     
-    console.log('✅ Vehicle exit images uploaded, update data ready:', updateData);
+    console.log('Vehicle exit images uploaded, update data ready:', updateData);
     
     return updateData;
     
   } catch (error) {
-    console.error('❌ Complete vehicle exit failed:', error);
+    console.error('Complete vehicle exit failed:', error);
     throw error;
   }
 }
@@ -228,7 +228,7 @@ export function handleImageFileInput(event, uploadType = 'license_plate') {
     throw new Error('Image file must be smaller than 10MB');
   }
   
-  console.log('📷 Valid image file selected:', {
+  console.log('Valid image file selected:', {
     name: file.name,
     type: file.type,
     size: file.size,

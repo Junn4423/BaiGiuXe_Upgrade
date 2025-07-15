@@ -43,7 +43,7 @@ const LicensePlateConfirmDialog = ({
     <div className="license-plate-confirm-overlay">
       <div className="license-plate-confirm-dialog">
         <div className="dialog-header">
-          <h2>🚗 Xác nhận biển số xe ra</h2>
+          <h2>Xác nhận biển số xe ra</h2>
           <button className="close-btn" onClick={handleCancel}>
             ×
           </button>
@@ -81,7 +81,7 @@ const LicensePlateConfirmDialog = ({
               originalPlate &&
               detectedPlate && (
                 <div className="warning-message">
-                  ⚠️ Biển số xe ra khác với biển số xe vào. Vui lòng kiểm tra
+                  Biển số xe ra khác với biển số xe vào. Vui lòng kiểm tra
                   lại!
                 </div>
               )}
@@ -89,7 +89,7 @@ const LicensePlateConfirmDialog = ({
 
           <div className="images-comparison">
             <div className="image-section">
-              <h3>🚪 Ảnh xe vào</h3>
+              <h3>Ảnh xe vào</h3>
               <div className="image-grid">
                 <div className="image-item">
                   <span className="image-label">Khuôn mặt vào</span>
@@ -107,7 +107,7 @@ const LicensePlateConfirmDialog = ({
             </div>
 
             <div className="image-section">
-              <h3>🚪 Ảnh xe ra</h3>
+              <h3>Ảnh xe ra</h3>
               <div className="image-grid">
                 <div className="image-item">
                   <span className="image-label">Khuôn mặt ra</span>

@@ -71,7 +71,7 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
   const loadCamerasWithStatus = async () => {
     try {
       setLoading(true)
-      console.log("🔄 Loading cameras with status...")
+      console.log("Loading cameras with status...")
       
       // Load camera classification and status
       const phanLoai = await phanLoaiCameraTheoTrangThai()
@@ -81,7 +81,7 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
       const cameraList = await layDanhSachCamera()
       setCameras(cameraList || [])
       
-      console.log("✅ Cameras loaded with status:", {
+      console.log("Cameras loaded with status:", {
         total: phanLoai.tongSo,
         entrance: phanLoai.cameraVao.length,
         exit: phanLoai.cameraRa.length,
@@ -90,7 +90,7 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
       })
       
     } catch (error) {
-      console.error("❌ Error loading cameras with status:", error)
+      console.error("Error loading cameras with status:", error)
       alert("Lỗi tải danh sách camera: " + error.message)
     } finally {
       setLoading(false)
@@ -121,9 +121,9 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
       }))
       
       if (result.success) {
-        alert(`✅ Camera ${camera.tenCamera}: Kết nối RTSP thành công`)
+        alert(`Camera ${camera.tenCamera}: Kết nối RTSP thành công`)
       } else {
-        alert(`❌ Camera ${camera.tenCamera}: ${result.message}`)
+        alert(`Camera ${camera.tenCamera}: ${result.message}`)
       }
       
     } catch (error) {
@@ -439,14 +439,14 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
                             onClick={() => handleEditCamera(camera)}
                             title="Chỉnh sửa camera"
                           >
-                            ✏️
+                            
                           </button>
                           <button 
                             className="btn btn-danger delete-button" 
                             onClick={() => handleDeleteCamera(camera)}
                             title="Xóa camera"
                           >
-                            🗑️
+                          
                           </button>
                         </td>
                       </tr>

@@ -42,14 +42,14 @@ const VehicleStatusNotification = ({
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return '✅';
+        return 'success';
       case 'error':
-        return '❌';
+        return 'error';
       case 'warning':
-        return '⚠️';
+        return 'warning';
       case 'info':
       default:
-        return 'ℹ️';
+        return 'info';
     }
   };
 

@@ -12,7 +12,7 @@ export const useVehicleManager = () => {
   useEffect(() => {
     if (!vehicleManagerRef.current) {
       vehicleManagerRef.current = new VehicleManager();
-      console.log('✅ VehicleManager initialized');
+      console.log('VehicleManager initialized');
     }
     
     return () => {
@@ -49,7 +49,7 @@ export const useVehicleManager = () => {
         loaiXe
       } = entryData;
 
-      console.log('🚗 Processing vehicle entry:', entryData);
+      console.log('Processing vehicle entry:', entryData);
       
       const result = await vehicleManagerRef.current.processVehicleEntry(
         cardId,
@@ -73,7 +73,7 @@ export const useVehicleManager = () => {
 
       return result;
     } catch (error) {
-      console.error('❌ Error in processVehicleEntry:', error);
+      console.error('Error in processVehicleEntry:', error);
       setLastError(error.message);
       return { success: false, message: error.message };
     } finally {
@@ -101,7 +101,7 @@ export const useVehicleManager = () => {
         exitFaceImagePath
       } = exitData;
 
-      console.log('🚗 Processing vehicle exit:', exitData);
+      console.log('Processing vehicle exit:', exitData);
       
       const result = await vehicleManagerRef.current.processVehicleExit(
         cardId,
@@ -124,7 +124,7 @@ export const useVehicleManager = () => {
 
       return result;
     } catch (error) {
-      console.error('❌ Error in processVehicleExit:', error);
+      console.error('Error in processVehicleExit:', error);
       setLastError(error.message);
       return { success: false, message: error.message };
     } finally {
@@ -181,7 +181,7 @@ export const useVehicleManager = () => {
         const updatedSessions = new Map(vehicleManagerRef.current.getActiveParkingSessions());
         setActiveSessions(updatedSessions);
       } catch (error) {
-        console.error('❌ Error refreshing vehicle data:', error);
+        console.error('Error refreshing vehicle data:', error);
         setLastError(error.message);
       }
     }
