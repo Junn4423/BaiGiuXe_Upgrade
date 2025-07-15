@@ -5,7 +5,7 @@ import {
   layTiLeLapDay,
 } from "../api/api";
 import Chart from "chart.js/auto";
-import "./StatisticsPage.css";
+import "../assets/styles/StatisticsPage.css"; // Assuming you have a CSS file for styles
 
 // Helper to calculate from / to dates based on preset
 const getDateRange = (preset) => {
