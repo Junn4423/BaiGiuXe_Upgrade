@@ -166,7 +166,7 @@ class pm_nc0009 extends lv_controler{
         ];
     }
     function KB_Update() {
-        if (!$this->lv001 || !$this->lv007 || !$this->lv009 || !$this->lv012) {
+        if (!$this->lv001 || !$this->lv007 || !$this->lv009 || !$this->lv012 || !$this->lv016 ) {
             return false;
         }
         // Kiểm tra phiên gửi xe còn "DANG_GUI"
@@ -184,7 +184,6 @@ class pm_nc0009 extends lv_controler{
         $gioRa = strtotime($this->lv009);
         $phutGui = ($gioRa - $gioVao) / 60;
         if ($phutGui < 60) $phutGui = '60'; // Đảm bảo ít nhất 1 giờ
-
         // Cập nhật phiên gửi xe
         $sql = "UPDATE pm_nc0009 
                 SET lv007='{$this->lv007}',
@@ -192,7 +191,7 @@ class pm_nc0009 extends lv_controler{
                     lv010='{$phutGui}',
                     lv012='{$this->lv012}',
                     lv014='DA_RA',
-                    lv016='{$this->lv016}' || 'chưa có'
+                    lv016='{$this->lv016}' 
                 WHERE lv001='{$this->lv001}'";
         
         $result = db_query($sql);

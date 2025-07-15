@@ -2683,7 +2683,7 @@ export async function layThongTinQuyenHanNhanVien(token, userCode) {
     }
     return { success: false, message: 'Không tìm thấy thông tin người dùng' };
   } catch (error) {
-    console.error('❌ [API Error] Lỗi lấy thông tin quyền hạn:', error);
+    console.error('[API Error] Lỗi lấy thông tin quyền hạn:', error);
     return { success: false, message: `Lỗi kết nối: ${error.message}` };
   }
 }
