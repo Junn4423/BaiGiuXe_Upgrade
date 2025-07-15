@@ -37,7 +37,7 @@ testCases.forEach((testCase, index) => {
   console.log(`  Input: ${testCase.startDate} + ${testCase.tongNgay} ngày`);
   console.log(`  Expected: ${testCase.expected}`);
   console.log(`  Actual: ${result}`);
-  console.log(`  Result: ${isCorrect ? '✅ PASS' : '❌ FAIL'}`);
+  console.log(`  Result: ${isCorrect ? 'PASS' : 'FAIL'}`);
 });
 
 console.log("\n=== Test hoàn thành ===");

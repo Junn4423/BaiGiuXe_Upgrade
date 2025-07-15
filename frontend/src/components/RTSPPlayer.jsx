@@ -382,7 +382,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
     initializePlayer()
 
     return () => {
-      console.log(`🧹 Cleaning up RTSP Player for camera ${cameraId}`)
+      console.log(`Cleaning up RTSP Player for camera ${cameraId}`)
       mountedRef.current = false
       initializingRef.current = false
       isInitializedRef.current = false
@@ -403,7 +403,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
         try {
           mediaSourceRef.current.endOfStream()
         } catch (err) {
-          console.warn(`⚠️ Error ending media source for camera ${cameraId}:`, err)
+          console.warn(`Error ending media source for camera ${cameraId}:`, err)
         }
       }
 
@@ -457,7 +457,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
         >
           {error ? (
             <div>
-              <div style={{ fontSize: "16px", marginBottom: "8px" }}>❌</div>
+              <div style={{ fontSize: "16px", marginBottom: "8px" }}></div>
               <div style={{ fontWeight: "bold", marginBottom: "4px" }}>Connection Error</div>
               <div style={{ fontSize: "10px", opacity: 0.8 }}>{error}</div>
               <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "4px" }}>Camera: {cameraId}</div>
@@ -469,14 +469,14 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
             </div>
           ) : isConnected && !hasVideoData ? (
             <div>
-              <div style={{ fontSize: "16px", marginBottom: "8px" }}>📺</div>
+              <div style={{ fontSize: "16px", marginBottom: "8px" }}></div>
               <div style={{ fontWeight: "bold", marginBottom: "4px" }}>Loading Video...</div>
               <div style={{ fontSize: "10px", opacity: 0.8 }}>Processing video data</div>
               <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "4px" }}>Camera: {cameraId}</div>
             </div>
           ) : (
             <div>
-              <div style={{ fontSize: "16px", marginBottom: "8px" }}>🔄</div>
+              <div style={{ fontSize: "16px", marginBottom: "8px" }}></div>
               <div style={{ fontWeight: "bold", marginBottom: "4px" }}>Connecting...</div>
               <div style={{ fontSize: "10px", opacity: 0.8 }}>Loading camera {cameraId}</div>
               <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "4px" }}>

@@ -37,12 +37,12 @@ const MainUI = () => {
   // Debug log quyền hạn khi có thay đổi
   useEffect(() => {
     if (currentUser) {
-      console.log('🔐 Thông tin người dùng hiện tại:', currentUser);
-      console.log('🔑 Quyền hạn hiện tại:', permissions);
-      console.log('👑 Là admin:', isAdmin());
+      console.log('Thông tin người dùng hiện tại:', currentUser);
+      console.log('Quyền hạn hiện tại:', permissions);
+      console.log('Là admin:', isAdmin());
       
       // Show permission toast
-      const permissionStatus = isAdmin() ? '👑 Quyền Admin - Truy cập tất cả chức năng' : '👤 Quyền User - Một số chức năng bị hạn chế';
+      const permissionStatus = isAdmin() ? 'Quyền Admin - Truy cập tất cả chức năng' : 'Quyền User - Một số chức năng bị hạn chế';
       showToast(permissionStatus, isAdmin() ? 'success' : 'warning', 4000);
     }
   }, [currentUser, permissions]);
@@ -121,9 +121,9 @@ const MainUI = () => {
 
   // Debug workConfig state changes
   useEffect(() => {
-    console.log("🔧 WorkConfig state changed:", workConfig);
+    console.log("WorkConfig state changed:", workConfig);
     if (workConfig) {
-      console.log("🚗 Current workConfig.loai_xe:", workConfig.loai_xe);
+      console.log("Current workConfig.loai_xe:", workConfig.loai_xe);
     }
   }, [workConfig]);
 
@@ -136,12 +136,12 @@ const MainUI = () => {
 
         if (envInfo.isElectron) {
           showToast(
-            `✅ Electron App: Ảnh sẽ tự động lưu vào ${envInfo.saveLocation}`,
+            `Electron App: Ảnh sẽ tự động lưu vào ${envInfo.saveLocation}`,
             "success",
-            6000
+            1000
           );
         } else {
-          showToast(`🌐 Web App: Ảnh sẽ được download tự động`, "info", 4000);
+          showToast(`Web App: Ảnh sẽ được download tự động`, "info", 4000);
         }
       } catch (error) {
         console.error("Error checking environment:", error);
@@ -179,7 +179,7 @@ const MainUI = () => {
         // Test hotkey - simulate card scan
         event.preventDefault();
         const testCardId = "0002468477";
-        console.log("🔥 F2 pressed - testing card scan with ID:", testCardId);
+        console.log("F2 pressed - testing card scan with ID:", testCardId);
         handleCardScanned(testCardId);
       } else if (event.key === "F12" || (event.ctrlKey && event.key === "F12")) {
         event.preventDefault();
@@ -195,12 +195,12 @@ const MainUI = () => {
   const loadWorkConfig = () => {
     try {
       const savedConfig = localStorage.getItem("work_config");
-      console.log("📄 Loading work config from localStorage:", savedConfig);
+      console.log("Loading work config from localStorage:", savedConfig);
       
       if (savedConfig) {
         const config = JSON.parse(savedConfig);
-        console.log("✅ Parsed work config:", config);
-        console.log("🔧 Vehicle type in config:", config.loai_xe);
+        console.log("Parsed work config:", config);
+        console.log("Vehicle type in config:", config.loai_xe);
         
         // Ensure state update happens in next tick
         setWorkConfig(config);
@@ -208,24 +208,24 @@ const MainUI = () => {
         setCurrentMode(config.default_mode || "vao");
         
         // Additional log after state update
-        console.log("🔄 WorkConfig state will be updated to:", config);
+        console.log("WorkConfig state will be updated to:", config);
         
         // Force verify the state was set
         setTimeout(() => {
-          console.log("🔍 Verifying workConfig state after 100ms delay...");
-          console.log("🔍 workConfig state is:", workConfig);
+          console.log("Verifying workConfig state after 100ms delay...");
+          console.log("workConfig state is:", workConfig);
           if (!workConfig && savedConfig) {
-            console.warn("⚠️ workConfig state is still null, forcing re-parse...");
+            console.warn("workConfig state is still null, forcing re-parse...");
             const reparsedConfig = JSON.parse(savedConfig);
             setWorkConfig(reparsedConfig);
           }
         }, 100);
       } else {
-        console.log("⚠️ No work config found in localStorage, showing config dialog");
+        console.log("No work config found in localStorage, showing config dialog");
         setShowWorkConfig(true);
       }
     } catch (error) {
-      console.error("❌ Error loading work config:", error);
+      console.error("Error loading work config:", error);
       setShowWorkConfig(true);
     }
   };
@@ -362,12 +362,12 @@ const MainUI = () => {
       showNotification: (title, message) => {
         // Show as toast warning for camera fallback issues
         if (title.includes("Camera") || message.includes("camera")) {
-          showToast(`⚠️ ${message}`, "warning", 6000);
+          showToast(`${message}`, "warning", 6000);
         }
       },
       showError: (title, message) => {
-        console.error(`❌ Error: ${title} - ${message}`);
-        showToast(`❌ ${title}: ${message}`, "error", 5000);
+        console.error(`Error: ${title} - ${message}`);
+        showToast(`${title}: ${message}`, "error", 5000);
       },
       
       // Card handling
@@ -461,7 +461,7 @@ const MainUI = () => {
     }
 
     // Re-setup connections to ensure all components have updated UI interface
-    console.log(`🔄 Mode changed to ${mode}, re-setting up connections`);
+    console.log(`Mode changed to ${mode}, re-setting up connections`);
     setupConnections();
   };
 
@@ -514,17 +514,17 @@ const MainUI = () => {
   // Debug function to check card session status
   const debugCheckCardSession = async (cardId) => {
     try {
-      console.log(`🔍 DEBUG: Checking session status for card ${cardId}`);
+      console.log(`DEBUG: Checking session status for card ${cardId}`);
       const { loadPhienGuiXeTheoMaThe, layDanhSachThe } = await import("../../api/api");
       
       // Check if card exists
       const cardList = await layDanhSachThe();
       const cardExists = cardList?.find(card => card.uidThe === cardId);
-      console.log(`🔍 DEBUG: Card exists:`, cardExists);
+      console.log(`DEBUG: Card exists:`, cardExists);
       
       // Check active sessions
       const activeSessions = await loadPhienGuiXeTheoMaThe(cardId);
-      console.log(`🔍 DEBUG: Active sessions:`, activeSessions);
+      console.log(`DEBUG: Active sessions:`, activeSessions);
       
       return {
         cardExists: !!cardExists,
@@ -532,7 +532,7 @@ const MainUI = () => {
         hasActiveSession: activeSessions && activeSessions.length > 0
       };
     } catch (error) {
-      console.error(`🔍 DEBUG: Error checking card session:`, error);
+      console.error(`DEBUG: Error checking card session:`, error);
       return { error: error.message };
     }
   };
@@ -561,7 +561,7 @@ const MainUI = () => {
 
   // Handle work config save
   const handleWorkConfigSave = (config) => {
-    console.log("🔧 handleWorkConfigSave called with config:", config);
+    console.log("handleWorkConfigSave called with config:", config);
     setWorkConfig(config);
     setCurrentVehicleType(config.loai_xe || "xe_may");
     setShowWorkConfig(false);
@@ -571,7 +571,7 @@ const MainUI = () => {
       const savedConfig = localStorage.getItem("work_config");
       if (savedConfig) {
         const reloadedConfig = JSON.parse(savedConfig);
-        console.log("✅ Config reloaded from localStorage:", reloadedConfig);
+        console.log("Config reloaded from localStorage:", reloadedConfig);
         setWorkConfig(reloadedConfig);
       }
     }, 100);
@@ -627,7 +627,7 @@ const MainUI = () => {
     
     // Check if state update is pending
     setTimeout(() => {
-      console.log("⏰ WorkConfig state after timeout:", workConfig);
+      console.log("WorkConfig state after timeout:", workConfig);
     }, 50);
     
     console.log("=== END DEBUG ===");
@@ -644,11 +644,11 @@ const MainUI = () => {
       const savedConfig = localStorage.getItem("work_config");
       if (savedConfig) {
         const parsed = JSON.parse(savedConfig);
-        console.log("🔄 Using fallback workConfig for components:", parsed);
+        console.log("Using fallback workConfig for components:", parsed);
         return parsed;
       }
     } catch (error) {
-      console.error("❌ Failed to get fallback workConfig:", error);
+      console.error("Failed to get fallback workConfig:", error);
     }
     
     return null;
@@ -665,11 +665,11 @@ const MainUI = () => {
       const savedConfig = localStorage.getItem("work_config");
       if (savedConfig) {
         const parsed = JSON.parse(savedConfig);
-        console.log("🔄 Using fallback workConfig:", parsed);
+        console.log("Using fallback workConfig:", parsed);
         return parsed;
       }
     } catch (error) {
-      console.error("❌ Failed to get fallback workConfig:", error);
+      console.error("Failed to get fallback workConfig:", error);
     }
     
     return null;
@@ -677,14 +677,14 @@ const MainUI = () => {
 
   // Handle card scanning
   const handleCardScanned = async (cardId) => {
-    console.log("🔥 handleCardScanned called with cardId:", cardId);
-    console.log("🔥 currentModeRef.current:", currentModeRef.current);
-    console.log("🔥 workConfig at time of card scan:", workConfig);
-    console.log("🔥 workConfig.loai_xe at time of card scan:", workConfig?.loai_xe);
+    console.log("handleCardScanned called with cardId:", cardId);
+    console.log("currentModeRef.current:", currentModeRef.current);
+    console.log("workConfig at time of card scan:", workConfig);
+    console.log("workConfig.loai_xe at time of card scan:", workConfig?.loai_xe);
     
     // Get effective workConfig using helper function
     const effectiveWorkConfig = getEffectiveWorkConfig();
-    console.log("🔄 Effective workConfig:", effectiveWorkConfig);
+    console.log("Effective workConfig:", effectiveWorkConfig);
     
     // Debug workConfig structure
     debugWorkConfig();
@@ -722,7 +722,7 @@ const MainUI = () => {
 
         setShowAddCard({ show: true, cardId: cardId });
         showToast(
-          `🔔 Thẻ ${cardId} chưa được đăng ký. Vui lòng thêm thẻ mới.`,
+          `Thẻ ${cardId} chưa được đăng ký. Vui lòng thêm thẻ mới.`,
           "warning",
           5000
         );
@@ -748,7 +748,7 @@ const MainUI = () => {
             );
           }
           showToast(
-            `❌ Thẻ ${cardId} đã tồn tại trong phiên gửi xe!`,
+            `Thẻ ${cardId} đã tồn tại trong phiên gửi xe!`,
             "error",
             5000
           );
@@ -775,8 +775,8 @@ const MainUI = () => {
 
       if (cameraManagerRef.current) {
         try {
-          console.log("🔥 About to call captureImage - cameraManagerRef.current:", !!cameraManagerRef.current);
-          console.log("🔥 Available methods:", Object.keys(cameraManagerRef.current || {}));
+          console.log("About to call captureImage - cameraManagerRef.current:", !!cameraManagerRef.current);
+          console.log("Available methods:", Object.keys(cameraManagerRef.current || {}));
           
           const captureResult = await cameraManagerRef.current.captureImage(cardId, actualMode);
           
@@ -784,7 +784,7 @@ const MainUI = () => {
           licensePlate = captureResult[1]; 
           faceImage = captureResult[2];
 
-          console.log("📸 Image capture result:", {
+          console.log("Image capture result:", {
             plateImage: plateImage ? "có" : "không có",
             plateImageType: typeof plateImage,
             plateImageUrl: plateImage?.url,
@@ -804,22 +804,22 @@ const MainUI = () => {
           // Display captured images on camera panels
           if (cameraComponentRef.current) {
             if (plateImage?.url || plateImage) {
-              console.log("📺 Displaying plate image:", plateImage?.url || plateImage);
+              console.log("Displaying plate image:", plateImage?.url || plateImage);
               cameraComponentRef.current.displayCapturedImage(
                 plateImage?.url || plateImage,
                 1
               );
             } else {
-              console.warn("❌ No plate image to display");
+              console.warn("No plate image to display");
             }
 
             if (faceImage?.url || faceImage) {
-              console.log("📺 Displaying face image:", faceImage?.url || faceImage);
+              console.log("Displaying face image:", faceImage?.url || faceImage);
               cameraComponentRef.current.displayCapturedFaceImage(
                 faceImage?.url || faceImage
               );
             } else {
-              console.warn("❌ No face image to display");
+              console.warn("No face image to display");
             }
           }
 
@@ -886,7 +886,7 @@ const MainUI = () => {
                   }
 
                   showToast(
-                    `🏷️ Nhận dạng biển số: ${recognizedLicensePlate}`,
+                    `Nhận dạng biển số: ${recognizedLicensePlate}`,
                     "success",
                     3000
                   );
@@ -897,7 +897,7 @@ const MainUI = () => {
                       "#ef4444"
                     );
                   }
-                  showToast(`❌ Không nhận dạng được biển số`, "warning", 3000);
+                  showToast(`Không nhận dạng được biển số`, "warning", 3000);
                 }
               }
             } catch (recognitionError) {
@@ -912,7 +912,7 @@ const MainUI = () => {
                 );
               }
               showToast(
-                `❌ Lỗi nhận dạng biển số: ${recognitionError.message}`,
+                `Lỗi nhận dạng biển số: ${recognitionError.message}`,
                 "error",
                 4000
               );
@@ -951,9 +951,9 @@ const MainUI = () => {
                 if (currentCard && currentCard.maChinhSach && currentCard.maChinhSach.trim() !== '') {
                   // Ưu tiên sử dụng chính sách đã gán cho thẻ
                   pricingPolicy = currentCard.maChinhSach.trim();
-                  console.log(`🎯 Sử dụng chính sách từ thẻ: ${pricingPolicy}`);
+                  console.log(`Sử dụng chính sách từ thẻ: ${pricingPolicy}`);
                 } else {
-                  console.log(`⚠️ Thẻ ${cardId} chưa có chính sách gán sẵn, sử dụng fallback`);
+                  console.log(`Thẻ ${cardId} chưa có chính sách gán sẵn, sử dụng fallback`);
                 }
               } catch (cardError) {
                 console.error("Lỗi khi lấy thông tin thẻ:", cardError);
@@ -961,11 +961,11 @@ const MainUI = () => {
 
               // B2: Nếu thẻ chưa có chính sách, sử dụng workConfig để xác định default policy
               if (!pricingPolicy) {
-                console.log("🔍 Debug workConfig state:", effectiveWorkConfig);
-                console.log("🔍 effectiveWorkConfig.loai_xe:", effectiveWorkConfig?.loai_xe);
-                console.log("🔍 effectiveWorkConfig.vehicle_type:", effectiveWorkConfig?.vehicle_type);
-                console.log("🔍 typeof effectiveWorkConfig:", typeof effectiveWorkConfig);
-                console.log("🔍 effectiveWorkConfig keys:", effectiveWorkConfig ? Object.keys(effectiveWorkConfig) : "null");
+                console.log("Debug workConfig state:", effectiveWorkConfig);
+                console.log("effectiveWorkConfig.loai_xe:", effectiveWorkConfig?.loai_xe);
+                console.log("effectiveWorkConfig.vehicle_type:", effectiveWorkConfig?.vehicle_type);
+                console.log("typeof effectiveWorkConfig:", typeof effectiveWorkConfig);
+                console.log("effectiveWorkConfig keys:", effectiveWorkConfig ? Object.keys(effectiveWorkConfig) : "null");
                 
                 if (effectiveWorkConfig?.loai_xe) {
                   const vehicleType = effectiveWorkConfig.loai_xe.toLowerCase();
@@ -973,19 +973,19 @@ const MainUI = () => {
                   // Support multiple formats: "oto", "OT", "ô tô", etc.
                   if (vehicleType === "oto" || vehicleType === "ot" || vehicleType.includes("oto") || vehicleType.includes("ô tô")) {
                     pricingPolicy = "CS_OTO_4H";
-                    console.log(`🚗 Thẻ chưa có chính sách, sử dụng default cho ô tô: ${pricingPolicy} (từ ${effectiveWorkConfig.loai_xe})`);
+                    console.log(`Thẻ chưa có chính sách, sử dụng default cho ô tô: ${pricingPolicy} (từ ${effectiveWorkConfig.loai_xe})`);
                   } else if (vehicleType === "xe_may" || vehicleType === "xm" || vehicleType.includes("xe máy") || vehicleType.includes("xe may")) {
                     pricingPolicy = "CS_XEMAY_4H";
-                    console.log(`🏍️ Thẻ chưa có chính sách, sử dụng default cho xe máy: ${pricingPolicy} (từ ${effectiveWorkConfig.loai_xe})`);
+                    console.log(`Thẻ chưa có chính sách, sử dụng default cho xe máy: ${pricingPolicy} (từ ${effectiveWorkConfig.loai_xe})`);
                   } else {
                     // Fallback for other vehicle types - default to small vehicle
                     pricingPolicy = "CS_XEMAY_4H";
-                    console.log(`⚠️ Loại xe không xác định (${effectiveWorkConfig.loai_xe}), mặc định xe máy: ${pricingPolicy}`);
+                    console.log(`Loại xe không xác định (${effectiveWorkConfig.loai_xe}), mặc định xe máy: ${pricingPolicy}`);
                   }
                 } else {
                   // No workConfig vehicle type - default to small vehicle
                   pricingPolicy = "CS_XEMAY_4H";
-                  console.log(`⚠️ WorkConfig không có loại xe (effectiveWorkConfig: ${JSON.stringify(effectiveWorkConfig)}), mặc định xe máy: ${pricingPolicy}`);
+                  console.log(`WorkConfig không có loại xe (effectiveWorkConfig: ${JSON.stringify(effectiveWorkConfig)}), mặc định xe máy: ${pricingPolicy}`);
                 }
               }
 
@@ -1080,19 +1080,19 @@ const MainUI = () => {
 
               // Bước 1: Kiểm tra loại xe từ workConfig trước (CHÍNH)
               if (effectiveWorkConfig?.loai_xe) {
-                console.log(`🔍 DEBUG: effectiveWorkConfig.loai_xe = "${effectiveWorkConfig.loai_xe}" (type: ${typeof effectiveWorkConfig.loai_xe})`);
+                console.log(`DEBUG: effectiveWorkConfig.loai_xe = "${effectiveWorkConfig.loai_xe}" (type: ${typeof effectiveWorkConfig.loai_xe})`);
                 
                 // Normalize vehicle type for comparison
                 const vehicleType = effectiveWorkConfig.loai_xe.toLowerCase();
-                console.log(`🔍 DEBUG: Normalized vehicleType = "${vehicleType}"`);
+                console.log(`DEBUG: Normalized vehicleType = "${vehicleType}"`);
                 
                 // Mapping workConfig vehicle type to database format
                 if (vehicleType === "oto" || vehicleType === "ot" || vehicleType.includes("oto") || vehicleType.includes("ô tô")) {
                   loaiXe = "1"; // Xe lớn
-                  console.log(`🚗 Loại xe từ workConfig: Ô tô (loaiXe = 1) - từ "${effectiveWorkConfig.loai_xe}"`);
+                  console.log(`Loại xe từ workConfig: Ô tô (loaiXe = 1) - từ "${effectiveWorkConfig.loai_xe}"`);
                 } else if (vehicleType === "xe_may" || vehicleType === "xm" || vehicleType.includes("xe máy") || vehicleType.includes("xe may")) {
                   loaiXe = "0"; // Xe nhỏ
-                  console.log(`🏍️ Loại xe từ workConfig: Xe máy (loaiXe = 0) - từ "${effectiveWorkConfig.loai_xe}"`);
+                  console.log(`Loại xe từ workConfig: Xe máy (loaiXe = 0) - từ "${effectiveWorkConfig.loai_xe}"`);
                 } else {
                   // WorkConfig có thể chứa mã loại phương tiện trực tiếp từ pm_nc0001
                   try {
@@ -1104,68 +1104,68 @@ const MainUI = () => {
                     
                     if (matchedType) {
                       loaiXe = matchedType.loaiXe?.toString() || "0";
-                      console.log(`🚗 Loại xe từ workConfig mapping: ${matchedType.tenLoaiPT} (loaiXe = ${loaiXe})`);
+                      console.log(`Loại xe từ workConfig mapping: ${matchedType.tenLoaiPT} (loaiXe = ${loaiXe})`);
                     } else {
                       loaiXe = "0"; // Default to small vehicle
-                      console.log(`⚠️ Không tìm thấy mapping cho loại xe: ${effectiveWorkConfig.loai_xe}, mặc định xe nhỏ`);
+                      console.log(`Không tìm thấy mapping cho loại xe: ${effectiveWorkConfig.loai_xe}, mặc định xe nhỏ`);
                     }
                   } catch (error) {
-                    console.error(`❌ Lỗi khi mapping loại xe:`, error);
+                    console.error(`Lỗi khi mapping loại xe:`, error);
                     loaiXe = "0"; // Fallback to small vehicle
                   }
                 }
               } 
               // Bước 2: Nếu không có workConfig, fallback về biển số (FALLBACK)
               else if (recognizedLicensePlate) {
-                console.log(`🚗 WorkConfig không có loại xe, đang kiểm tra từ biển số: ${recognizedLicensePlate}`);
+                console.log(`WorkConfig không có loại xe, đang kiểm tra từ biển số: ${recognizedLicensePlate}`);
                 try {
                   const thongTinLoaiXe = await layThongTinLoaiXeTuBienSo(recognizedLicensePlate);
                   
                   if (thongTinLoaiXe.success) {
                     loaiXe = thongTinLoaiXe.loaiXe;
-                    console.log(`✅ Loại xe từ biển số: ${loaiXe} (0=xe nhỏ, 1=xe lớn)`);
+                    console.log(`Loại xe từ biển số: ${loaiXe} (0=xe nhỏ, 1=xe lớn)`);
                   } else {
-                    console.log(`⚠️ Không tìm thấy loại xe từ biển số, mặc định là xe nhỏ`);
+                    console.log(`Không tìm thấy loại xe từ biển số, mặc định là xe nhỏ`);
                   }
                 } catch (error) {
-                  console.error(`❌ Lỗi khi lấy loại xe từ biển số:`, error);
+                  console.error(`Lỗi khi lấy loại xe từ biển số:`, error);
                   loaiXe = "0";
                 }
               } else {
-                console.log(`⚠️ Không có workConfig và biển số, mặc định là xe nhỏ`);
+                console.log(`Không có workConfig và biển số, mặc định là xe nhỏ`);
                 loaiXe = "0";
               }
 
-              console.log(`🔍 Kết quả cuối cùng: loaiXe = ${loaiXe} (từ ${effectiveWorkConfig?.loai_xe ? 'workConfig' : 'fallback'})`);
+              console.log(`Kết quả cuối cùng: loaiXe = ${loaiXe} (từ ${effectiveWorkConfig?.loai_xe ? 'workConfig' : 'fallback'})`);
 
               // Fallback cuối: chỉ suy luận từ mã chính sách khi cần (cho trường hợp thẻ có policy nhưng workConfig không có loại xe)
               if ((loaiXe === "0" || loaiXe === 0) && pricingPolicy && !effectiveWorkConfig?.loai_xe) {
                 const policyUpper = pricingPolicy.toUpperCase();
                 if (policyUpper.includes("OTO") || policyUpper.includes("OT") || policyUpper.includes("BUS") || policyUpper.includes("16CHO") || policyUpper.includes("12CHO")) {
                   loaiXe = "1";
-                  console.log(`📝 Suy luận loaiXe=1 từ policy ${pricingPolicy} (chỉ khi workConfig không có loại xe)`);
+                  console.log(`Suy luận loaiXe=1 từ policy ${pricingPolicy} (chỉ khi workConfig không có loại xe)`);
                 }
               }
 
-              console.log(`🔍 Kết quả nhận diện loại xe: loaiXe = ${loaiXe}`);
+              console.log(`Kết quả nhận diện loại xe: loaiXe = ${loaiXe}`);
 
               // Xử lý cấp slot đỗ xe dựa trên loaiXe từ pm_nc0001.lv004
               if (loaiXe === "1") {
-                console.log(`🚗 Xe lớn (loaiXe = 1) - đang tìm slot trống từ pm_nc0005...`);
+                console.log(`Xe lớn (loaiXe = 1) - đang tìm slot trống từ pm_nc0005...`);
                 
                 try {
                   const slotResult = await laySlotTrongChoXeLon(maKhuVuc);
                   
                   if (slotResult.success) {
                     parkingSpot = slotResult.maChoDo;
-                    console.log(`✅ Đã tìm thấy slot: ${parkingSpot} tại khu vực ${slotResult.tenKhuVuc}`);
+                    console.log(`Đã tìm thấy slot: ${parkingSpot} tại khu vực ${slotResult.tenKhuVuc}`);
                     
                     // Cập nhật trạng thái slot thành đã dùng (lv003 = 1)
                     const updateResult = await capNhatTrangThaiChoDo(parkingSpot, "1");
                     if (updateResult.success) {
-                      console.log(`✅ Đã cập nhật trạng thái slot ${parkingSpot} thành đã dùng (lv003 = 1)`);
+                      console.log(`Đã cập nhật trạng thái slot ${parkingSpot} thành đã dùng (lv003 = 1)`);
                     } else {
-                      console.error(`❌ Lỗi cập nhật trạng thái slot: ${updateResult.message}`);
+                      console.error(`Lỗi cập nhật trạng thái slot: ${updateResult.message}`);
                     }
                   } else {
                     // Không còn slot cho xe lớn
@@ -1175,19 +1175,19 @@ const MainUI = () => {
                         "#ef4444"
                       );
                     }
-                    showToast("❌ Không còn chỗ đỗ cho xe lớn!", "error", 5000);
+                    showToast("Không còn chỗ đỗ cho xe lớn!", "error", 5000);
                     return;
                   }
                 } catch (error) {
-                  console.error(`❌ Lỗi khi tìm slot cho xe lớn:`, error);
-                  showToast("❌ Lỗi hệ thống khi tìm chỗ đỗ!", "error", 5000);
+                  console.error(`Lỗi khi tìm slot cho xe lớn:`, error);
+                  showToast("Lỗi hệ thống khi tìm chỗ đỗ!", "error", 5000);
                   return;
                 }
               } else if (loaiXe === "0") {
-                console.log(`🏍️ Xe nhỏ (loaiXe = 0) - không cần slot cụ thể, viTriGui = null`);
+                console.log(`Xe nhỏ (loaiXe = 0) - không cần slot cụ thể, viTriGui = null`);
                 parkingSpot = null; // Xe nhỏ không cần vị trí đỗ cụ thể
               } else {
-                console.log(`⚠️ Loại xe không xác định (loaiXe = ${loaiXe}), mặc định không cần slot`);
+                console.log(`Loại xe không xác định (loaiXe = ${loaiXe}), mặc định không cần slot`);
                 parkingSpot = null;
               }
 
@@ -1240,7 +1240,7 @@ const MainUI = () => {
               const plateImageFilename = plateImage?.filename || extractFilenameFromImageUrl(plateImage?.url || plateImage) || "";
               const faceImageFilename = faceImage?.filename || extractFilenameFromImageUrl(faceImage?.url || faceImage) || "";
 
-              console.log(`🖼️ Image processing: plateImage filename=${plateImageFilename}, faceImage filename=${faceImageFilename}`);
+              console.log(`Image processing: plateImage filename=${plateImageFilename}, faceImage filename=${faceImageFilename}`);
 
               const sessionData = {
                 uidThe: cardId,
@@ -1259,7 +1259,7 @@ const MainUI = () => {
               };
 
               // Debug log to check image data
-              console.log("🔍 DEBUG sessionData images:", {
+              console.log("DEBUG sessionData images:", {
                 plateImageType: typeof plateImage,
                 plateImageValue: plateImage,
                 plateImageFilename: plateImage?.filename,
@@ -1325,7 +1325,7 @@ const MainUI = () => {
                   vehicleListComponentRef.current.refreshVehicleList();
                 }
 
-                let successMessage = `✅ Xe vào thành công! Thẻ: ${cardId}`;
+                let successMessage = `Xe vào thành công! Thẻ: ${cardId}`;
                 if (loaiXe === "1" && parkingSpot) {
                   successMessage += ` | Vị trí: ${parkingSpot}`;
                 }
@@ -1346,7 +1346,7 @@ const MainUI = () => {
                 );
               }
             } catch (sessionError) {
-              console.error("❌ Error saving parking session:", sessionError);
+              console.error("Error saving parking session:", sessionError);
               if (vehicleInfoComponentRef.current) {
                 vehicleInfoComponentRef.current.updateCardReaderStatus(
                   "LỖI LƯU PHIÊN GỬI XE",
@@ -1354,7 +1354,7 @@ const MainUI = () => {
                 );
               }
               showToast(
-                `❌ Lỗi lưu phiên gửi xe: ${sessionError.message}`,
+                `Lỗi lưu phiên gửi xe: ${sessionError.message}`,
                 "error",
                 5000
               );
@@ -1371,19 +1371,19 @@ const MainUI = () => {
             try {
               // Find active parking session for this card
               const { loadPhienGuiXeTheoMaThe } = await import("../../api/api");
-              console.log(`🔍 Searching for active session for card: ${cardId}`);
+              console.log(`Searching for active session for card: ${cardId}`);
               
               let activeSessions;
               try {
                 activeSessions = await loadPhienGuiXeTheoMaThe(cardId);
-                console.log(`🔍 Active sessions result:`, {
+                console.log(`Active sessions result:`, {
                   type: typeof activeSessions,
                   isArray: Array.isArray(activeSessions),
                   length: activeSessions?.length,
                   content: activeSessions
                 });
               } catch (apiError) {
-                console.error(`❌ API Error loading sessions for card ${cardId}:`, apiError);
+                console.error(`API Error loading sessions for card ${cardId}:`, apiError);
                 if (vehicleInfoComponentRef.current) {
                   vehicleInfoComponentRef.current.updateCardReaderStatus(
                     "LỖI TẢI DỮ LIỆU",
@@ -1391,7 +1391,7 @@ const MainUI = () => {
                   );
                 }
                 showToast(
-                  `❌ Lỗi tải dữ liệu phiên gửi xe: ${apiError.message}`,
+                  `Lỗi tải dữ liệu phiên gửi xe: ${apiError.message}`,
                   "error",
                   5000
                 );
@@ -1400,13 +1400,13 @@ const MainUI = () => {
 
               if (!activeSessions || activeSessions.length === 0) {
                 // No active session found - this card is not currently parked
-                console.log(`❌ No active session found for card ${cardId}`);
-                console.log(`🔍 API Response:`, activeSessions);
-                console.log(`💡 Possible reasons:`);
+                console.log(`No active session found for card ${cardId}`);
+                console.log(`API Response:`, activeSessions);
+                console.log(`Possible reasons:`);
                 console.log(`   1. Card never entered parking lot`);
                 console.log(`   2. Card already exited parking lot`);
                 console.log(`   3. Database inconsistency`);
-                console.log(`🔧 Debug: Run debugCheckCardSession("${cardId}") in console for details`);
+                console.log(`Debug: Run debugCheckCardSession("${cardId}") in console for details`);
                 
                 if (vehicleInfoComponentRef.current) {
                   vehicleInfoComponentRef.current.updateCardReaderStatus(
@@ -1424,7 +1424,7 @@ const MainUI = () => {
                   });
                 }
                 showToast(
-                  `❌ Thẻ ${cardId} không có xe trong bãi. Kiểm tra: đã vào bãi chưa hoặc đã ra rồi?`,
+                  `Thẻ ${cardId} không có xe trong bãi. Kiểm tra: đã vào bãi chưa hoặc đã ra rồi?`,
                   "error",
                   10000
                 );
@@ -1464,7 +1464,7 @@ const MainUI = () => {
                 // Debug available zones
                 if (zonesResponse && Array.isArray(zonesResponse)) {
                   console.log(
-                    `🔍 DEBUG XE RA: Available zones:`,
+                    `DEBUG XE RA: Available zones:`,
                     zonesResponse.map((z) => ({
                       maKhuVuc: z.maKhuVuc,
                       tenKhuVuc: z.tenKhuVuc,
@@ -1489,17 +1489,17 @@ const MainUI = () => {
                     const cameraRaFirst = currentZone.cameraRa[0];
                     exitCameraId = cameraRaFirst.maCamera || null;
                     console.log(
-                      `🚪 XE RA: Exit camera từ API cameraRa[0]: ${exitCameraId}`
+                      `XE RA: Exit camera từ API cameraRa[0]: ${exitCameraId}`
                     );
                   }
                 } else {
                   console.log(
-                    `❌ XE RA: Không tìm thấy zone ${actualZoneCode} trong API response`
+                    `XE RA: Không tìm thấy zone ${actualZoneCode} trong API response`
                   );
                 }
               } catch (apiError) {
                 console.error(
-                  `❌ XE RA: Lỗi gọi API layDanhSachKhu:`,
+                  `XE RA: Lỗi gọi API layDanhSachKhu:`,
                   apiError
                 );
 
@@ -1507,25 +1507,25 @@ const MainUI = () => {
                 if (effectiveWorkConfig?.exit_gate) {
                   exitGate = effectiveWorkConfig.exit_gate;
                   console.log(
-                    `🚪 XE RA: Fallback exit gate từ workConfig: ${exitGate}`
+                    `XE RA: Fallback exit gate từ workConfig: ${exitGate}`
                   );
                 }
               }
 
               console.log(
-                `🔍 XE RA: Final Exit Values: exitGate=${exitGate}, exitCameraId=${exitCameraId}`
+                `XE RA: Final Exit Values: exitGate=${exitGate}, exitCameraId=${exitCameraId}`
               );
 
               // Log warning if values are null but allow processing to continue
               if (!exitGate) {
                 console.warn(
-                  `⚠️ XE RA: WARNING - exitGate is null. API payload will have null congRa.`
+                  `XE RA: WARNING - exitGate is null. API payload will have null congRa.`
                 );
               }
 
               if (!exitCameraId) {
                 console.warn(
-                  `⚠️ XE RA: WARNING - exitCameraId is null. Camera data may be missing in API payload.`
+                  `XE RA: WARNING - exitCameraId is null. Camera data may be missing in API payload.`
                 );
               }
 
@@ -1571,7 +1571,7 @@ const MainUI = () => {
                 effectiveWorkConfig
               );
             } catch (exitError) {
-              console.error("❌ Error processing vehicle exit:", exitError);
+              console.error("Error processing vehicle exit:", exitError);
               if (vehicleInfoComponentRef.current) {
                 vehicleInfoComponentRef.current.updateCardReaderStatus(
                   "LỖI XỬ LÝ XE RA",
@@ -1579,32 +1579,32 @@ const MainUI = () => {
                 );
               }
               showToast(
-                `❌ Lỗi xử lý xe ra: ${exitError.message}`,
+                `Lỗi xử lý xe ra: ${exitError.message}`,
                 "error",
                 5000
               );
 
               // Still show captured images even if exit processing fails
               const saveMessage = environmentInfo?.isElectron
-                ? `⚠️ Đã lưu ảnh nhưng có lỗi xử lý xe ra cho thẻ: ${cardId}`
-                : `⚠️ Đã download ảnh nhưng có lỗi xử lý xe ra cho thẻ: ${cardId}`;
+                ? `Đã lưu ảnh nhưng có lỗi xử lý xe ra cho thẻ: ${cardId}`
+                : `Đã download ảnh nhưng có lỗi xử lý xe ra cho thẻ: ${cardId}`;
 
               showToast(saveMessage, "warning", 4000);
             }
           }
         } catch (error) {
-          console.error("❌ Error in card scanning process:", error);
+          console.error("Error in card scanning process:", error);
           if (vehicleInfoComponentRef.current) {
             vehicleInfoComponentRef.current.updateCardReaderStatus(
               "LỖI XỬ LÝ THẺ",
               "#ef4444"
             );
           }
-          showToast(`❌ Lỗi xử lý thẻ: ${error.message}`, "error", 5000);
+          showToast(`Lỗi xử lý thẻ: ${error.message}`, "error", 5000);
         }
       }
     } catch (error) {
-      console.error("❌ Error capturing images:", error);
+      console.error("Error capturing images:", error);
       if (vehicleInfoComponentRef.current) {
         vehicleInfoComponentRef.current.updateCardReaderStatus(
           "LỖI CHỤP ẢNH",
@@ -1612,7 +1612,7 @@ const MainUI = () => {
         );
       }
       showToast(
-        `❌ Lỗi chụp ảnh cho thẻ: ${cardId} (${actualMode})`,
+        `Lỗi chụp ảnh cho thẻ: ${cardId} (${actualMode})`,
         "error",
         5000
       );
@@ -1637,7 +1637,7 @@ const MainUI = () => {
       const plateImageExitFilename = plateImage?.filename || extractFilenameFromImageUrl(plateImage?.url || plateImage) || "";
       const faceImageExitFilename = faceImage?.filename || extractFilenameFromImageUrl(faceImage?.url || faceImage) || "";
 
-      console.log(`🖼️ Exit image processing: plateImage filename=${plateImageExitFilename}, faceImage filename=${faceImageExitFilename}`);
+      console.log(`Exit image processing: plateImage filename=${plateImageExitFilename}, faceImage filename=${faceImageExitFilename}`);
 
       const exitSessionData = {
         maPhien: activeSession.maPhien,
@@ -1718,7 +1718,7 @@ const MainUI = () => {
                 }).format(parkingFee)}`
               : "";
           showToast(
-            `✅ Xe ra thành công! Thẻ: ${cardId}${feeText}`,
+            `Xe ra thành công! Thẻ: ${cardId}${feeText}`,
             "success",
             5000
           );
@@ -1735,7 +1735,7 @@ const MainUI = () => {
             );
           }
           showToast(
-            `✅ Xe ra thành công! Thẻ: ${cardId} (Lỗi tính phí: ${feeError.message})`,
+            `Xe ra thành công! Thẻ: ${cardId} (Lỗi tính phí: ${feeError.message})`,
             "warning",
             5000
           );
@@ -1757,14 +1757,14 @@ const MainUI = () => {
         );
       }
     } catch (error) {
-      console.error("❌ Error processing vehicle exit:", error);
+      console.error("Error processing vehicle exit:", error);
       if (vehicleInfoComponentRef.current) {
         vehicleInfoComponentRef.current.updateCardReaderStatus(
           "LỖI XỬ LÝ XE RA",
           "#ef4444"
         );
       }
-      showToast(`❌ Lỗi xử lý xe ra: ${error.message}`, "error", 5000);
+      showToast(`Lỗi xử lý xe ra: ${error.message}`, "error", 5000);
     }
   };
 
@@ -1829,10 +1829,10 @@ const MainUI = () => {
           )}
           {currentUser && (
             <div className="user-info">
-              <span className="user-name">👤 {currentUser.userCode}</span>
+              <span className="user-name"> {currentUser.userCode}</span>
               <span className="config-separator">|</span>
               <span className={`user-role ${isAdmin() ? 'admin' : 'user'}`}>
-                {isAdmin() ? '👑 ADMIN' : '👤 USER'}
+                {isAdmin() ? 'ADMIN' : 'USER'}
               </span>
             </div>
           )}

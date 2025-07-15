@@ -57,7 +57,7 @@ const LicensePlateErrorDialog = ({
     <div className="license-plate-error-overlay">
       <div className="license-plate-error-dialog">
         <div className="dialog-header">
-          <h2>⚠️ Biển số xe không khớp</h2>
+          <h2>Biển số xe không khớp</h2>
           <button className="close-button" onClick={handleCancel}>×</button>
         </div>
 

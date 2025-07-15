@@ -11,7 +11,7 @@ export const cleanupObjectUrls = () => {
     URL.revokeObjectURL(url)
   })
   createdUrls.clear()
-  console.log('🧹 Cleaned up object URLs')
+  console.log('Cleaned up object URLs')
 }
 
 /**
@@ -38,29 +38,29 @@ export const saveImageToAssets = async (blob, fileName, type) => {
         const base64 = await blobToBase64(blob)
         const storageKey = `captured_image_${fileName}`
         localStorage.setItem(storageKey, base64)
-        console.log(`💾 Emergency fallback: Saved to localStorage: ${storageKey}`)
+        console.log(`Emergency fallback: Saved to localStorage: ${storageKey}`)
       } catch (storageError) {
-        console.warn('⚠️ localStorage save failed (quota exceeded):', storageError.message)
+        console.warn('localStorage save failed (quota exceeded):', storageError.message)
         // Try to clear old localStorage data and retry once
         clearOldStorageData()
         try {
           localStorage.setItem(storageKey, base64)
-          console.log(`💾 Retry successful after cleanup: ${storageKey}`)
+          console.log(`Retry successful after cleanup: ${storageKey}`)
         } catch (retryError) {
-          console.error('❌ localStorage save failed even after cleanup:', retryError.message)
+          console.error('localStorage save failed even after cleanup:', retryError.message)
           // At this point, we're out of options but continue - image is still in memory
         }
       }
     }
     
     if (savedPath) {
-      console.log(`✅ Image successfully saved to: ${savedPath}`)
+      console.log(`Image successfully saved to: ${savedPath}`)
     } else {
-      console.log(`⚠️ Image saved in memory only (not persistent)`)
+      console.log(`Image saved in memory only (not persistent)`)
     }
     
-    console.log(`🔗 Object URL created: ${objectUrl}`)
-    console.log(`📁 File saved to: ${savedPath || 'localStorage fallback'}`)
+    console.log(`Object URL created: ${objectUrl}`)
+    console.log(`File saved to: ${savedPath || 'localStorage fallback'}`)
     
     // Return both URL, blob and file path for API calls
     return {
@@ -70,7 +70,7 @@ export const saveImageToAssets = async (blob, fileName, type) => {
     }
     
   } catch (error) {
-    console.error(`❌ Error saving ${type} image:`, error)
+    console.error(`Error saving ${type} image:`, error)
     throw error
   }
 }
@@ -79,19 +79,19 @@ export const saveImageToAssets = async (blob, fileName, type) => {
  * Auto save image - tries multiple methods silently
  */
 const autoSaveImage = async (blob, fileName, folderName) => {
-  console.log(`🔄 Auto-saving: ${fileName} to ${folderName}`)
-  console.log(`🔍 Electron API available:`, !!window.electronAPI)
-  console.log(`🔍 Save function available:`, !!(window.electronAPI && window.electronAPI.saveImage))
+  console.log(`Auto-saving: ${fileName} to ${folderName}`)
+  console.log(`Electron API available:`, !!window.electronAPI)
+  console.log(`Save function available:`, !!(window.electronAPI && window.electronAPI.saveImage))
   
   try {
     // Method 1: Check if running in Electron (PRIORITY)
     if (window.electronAPI && window.electronAPI.saveImage) {
       try {
-        console.log(`⚡ Attempting Electron save...`)
+        console.log(`Attempting Electron save...`)
         const arrayBuffer = await blob.arrayBuffer()
         const uint8Array = new Uint8Array(arrayBuffer)
         
-        console.log(`📊 Image data size: ${uint8Array.length} bytes`)
+        console.log(`Image data size: ${uint8Array.length} bytes`)
         
         const saveData = {
           data: Array.from(uint8Array),
@@ -99,7 +99,7 @@ const autoSaveImage = async (blob, fileName, folderName) => {
           folder: `assets/imgAnhChup/${folderName}`
         }
         
-        console.log(`📦 Save data prepared:`, {
+        console.log(`Save data prepared:`, {
           dataLength: saveData.data.length,
           fileName: saveData.fileName,
           folder: saveData.folder
@@ -107,36 +107,36 @@ const autoSaveImage = async (blob, fileName, folderName) => {
         
         const filePath = await window.electronAPI.saveImage(saveData)
         
-        console.log(`✅ Auto-saved via Electron to: ${filePath}`)
+        console.log(`Auto-saved via Electron to: ${filePath}`)
         
         // Verify file exists by trying to show in explorer
         if (window.electronAPI.showInExplorer) {
-          console.log(`📂 File saved to: ${filePath}`)
+          console.log(`File saved to: ${filePath}`)
           // Optionally show in explorer - uncomment if needed
           // await window.electronAPI.showInExplorer(filePath)
         }
         
         return filePath
       } catch (electronError) {
-        console.error('❌ Electron auto-save failed:', electronError)
-        console.error('📋 Error details:', {
+        console.error('Electron auto-save failed:', electronError)
+        console.error('Error details:', {
           name: electronError.name,
           message: electronError.message,
           stack: electronError.stack
         })
       }
     } else {
-      console.log(`ℹ️ Not running in Electron or API not available`)
+      console.log(`ℹNot running in Electron or API not available`)
     }
     
     // Method 2: Fallback to browser download for web version
-    console.log(`🌐 Trying browser download fallback...`)
+    console.log(`Trying browser download fallback...`)
     const downloadPath = await silentAutoDownload(blob, fileName, folderName)
-    console.log(`📥 Auto-downloaded: ${downloadPath}`)
+    console.log(`Auto-downloaded: ${downloadPath}`)
     return downloadPath
     
   } catch (error) {
-    console.error('❌ Auto-save completely failed:', error)
+    console.error('Auto-save completely failed:', error)
     // Don't throw - this is best effort
     return null
   }
@@ -196,7 +196,7 @@ const saveWithElectron = async (blob, fileName, folderName) => {
     
     return filePath
   } catch (error) {
-    console.error('❌ Electron save error:', error)
+    console.error('Electron save error:', error)
     throw error
   }
 }
@@ -244,11 +244,11 @@ const saveWithFileSystemAPI = async (blob, fileName, folderName) => {
     await writable.write(blob)
     await writable.close()
     
-    console.log(`✅ File saved to file system: ${folderName}/${fileName}`)
+    console.log(`File saved to file system: ${folderName}/${fileName}`)
     return `assets/imgAnhChup/${folderName}/${fileName}`
     
   } catch (error) {
-    console.error('❌ File System API error:', error)
+    console.error('File System API error:', error)
     throw error
   }
 }
@@ -323,7 +323,7 @@ const saveWithDownload = async (blob, fileName, folderName) => {
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
   
-  console.log(`📥 File downloaded: ${folderName}_${fileName}`)
+  console.log(`File downloaded: ${folderName}_${fileName}`)
   return `downloads/${folderName}_${fileName}`
 }
 
@@ -397,7 +397,7 @@ export const captureVideoFrame = (videoElement) => {
       canvas.height = videoElement.videoHeight || 480
       const ctx = canvas.getContext('2d')
       
-      console.log(`📸 Capturing frame: ${canvas.width}x${canvas.height}`)
+      console.log(`Capturing frame: ${canvas.width}x${canvas.height}`)
       
       // Draw current video frame
       ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
@@ -405,7 +405,7 @@ export const captureVideoFrame = (videoElement) => {
       // Convert to blob với quality cao hơn và format rõ ràng
       canvas.toBlob((blob) => {
         if (blob) {
-          console.log(`✅ Frame captured:`, {
+          console.log(`Frame captured:`, {
             size: blob.size,
             type: blob.type,
             dimensions: `${canvas.width}x${canvas.height}`
@@ -416,7 +416,7 @@ export const captureVideoFrame = (videoElement) => {
         }
       }, 'image/jpeg', 0.95) // Tăng quality từ 0.8 lên 0.95
     } catch (error) {
-      console.error('❌ Error capturing video frame:', error)
+      console.error('Error capturing video frame:', error)
       reject(error)
     }
   })
@@ -496,9 +496,9 @@ export const clearOldStorageData = () => {
       const toRemove = keysToRemove.slice(0, keysToRemove.length - 5)
       toRemove.forEach(key => {
         localStorage.removeItem(key)
-        console.log(`🗑️ Removed old localStorage item: ${key}`)
+        console.log(`Removed old localStorage item: ${key}`)
       })
-      console.log(`✅ Cleaned ${toRemove.length} old items from localStorage`)
+      console.log(`Cleaned ${toRemove.length} old items from localStorage`)
     }
     
     // Also clear if total size is too large (> 50MB)
@@ -511,18 +511,18 @@ export const clearOldStorageData = () => {
         toRemove.forEach(key => {
           localStorage.removeItem(key)
         })
-        console.log(`🧹 Storage cleanup: removed ${toRemove.length} items due to size limit`)
+        console.log(`Storage cleanup: removed ${toRemove.length} items due to size limit`)
       }
     }
     
   } catch (error) {
-    console.error('❌ Error cleaning localStorage:', error)
+    console.error('Error cleaning localStorage:', error)
     // If cleanup fails, try nuclear option
     try {
       keysToRemove.forEach(key => localStorage.removeItem(key))
-      console.log('🧹 Emergency cleanup completed')
+      console.log('Emergency cleanup completed')
     } catch (nuclearError) {
-      console.error('❌ Emergency cleanup failed:', nuclearError)
+      console.error('Emergency cleanup failed:', nuclearError)
     }
   }
 }
@@ -531,20 +531,20 @@ export const clearOldStorageData = () => {
  * Initialize storage cleanup on app start
  */
 export const initializeStorageCleanup = () => {
-  console.log('🔧 Initializing storage cleanup...')
+  console.log('Initializing storage cleanup...')
   
   // Get current storage info
   const storageInfo = getStorageInfo()
-  console.log('📊 Current storage:', storageInfo)
+  console.log('Current storage:', storageInfo)
   
   // Auto cleanup on startup if needed
   if (storageInfo.capturedImageCount > 10 || storageInfo.totalSize > 10 * 1024 * 1024) {
-    console.log('🧹 Auto-cleaning localStorage on startup...')
+    console.log('Auto-cleaning localStorage on startup...')
     clearOldStorageData()
     
     // Show updated info
     const newInfo = getStorageInfo()
-    console.log('📊 After cleanup:', newInfo)
+    console.log('After cleanup:', newInfo)
   }
 }
 
@@ -563,7 +563,7 @@ export const clearAllCapturedImages = () => {
   }
   
   keysToRemove.forEach(key => localStorage.removeItem(key))
-  console.log(`🧹 Cleared ${keysToRemove.length} captured images from localStorage`)
+  console.log(`Cleared ${keysToRemove.length} captured images from localStorage`)
   return keysToRemove.length
 }
 

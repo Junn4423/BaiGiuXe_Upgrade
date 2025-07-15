@@ -227,7 +227,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
           const selectedPolicy = policies.find(p => p.maChinhSach === formData.maChinhSach)
           if (selectedPolicy && selectedPolicy.tongNgay > 0) {
             finalEndDate = tinhNgayKetThucChinhSach(formData.ngayBatDauCS, selectedPolicy.tongNgay)
-            console.log(`🔄 Tính lại ngày kết thúc cho edit: ${formData.ngayBatDauCS} + ${selectedPolicy.tongNgay} ngày = ${finalEndDate}`)
+            console.log(`Tính lại ngày kết thúc cho edit: ${formData.ngayBatDauCS} + ${selectedPolicy.tongNgay} ngày = ${finalEndDate}`)
           }
         }
 
@@ -435,7 +435,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
       const endDate = calculatePolicyEndDate(selectedPolicy, formData.ngayBatDauCS);
       if (endDate) {
         setFormData(prev => ({ ...prev, ngayKetThucCS: endDate }));
-        console.log(`🔄 Auto-updated ngày kết thúc: ${endDate}`);
+        console.log(`Auto-updated ngày kết thúc: ${endDate}`);
       }
     }
   };
@@ -450,7 +450,7 @@ const RfidManagerDialog = ({ onClose, onSave }) => {
       const endDate = calculatePolicyEndDate(formData.maChinhSach, startDate);
       if (endDate) {
         setFormData(prev => ({ ...prev, ngayKetThucCS: endDate }));
-        console.log(`🔄 Auto-updated ngày kết thúc: ${endDate}`);
+        console.log(`Auto-updated ngày kết thúc: ${endDate}`);
       }
     }
   };

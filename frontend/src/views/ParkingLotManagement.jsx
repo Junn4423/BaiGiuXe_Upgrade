@@ -49,16 +49,16 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
       
       // Load areas first
       const areasData = await layDanhSachKhuVuc()
-      console.log("📍 Areas loaded:", areasData)
+      console.log("Areas loaded:", areasData)
       setAreas(areasData || [])
       
       // Load all parking spots from pm_nc0005
       const spotsData = await layDanhSachChoDo()
-      console.log("🅿️ Parking spots loaded:", spotsData)
+      console.log("Parking spots loaded:", spotsData)
       
       // Load active parking sessions from pm_nc0009
       const sessionsData = await layALLPhienGuiXe()
-      console.log("📋 Sessions loaded:", sessionsData)
+      console.log("Sessions loaded:", sessionsData)
       setSessions(sessionsData || [])
       
       // Transform spots data to match UI format
@@ -71,7 +71,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
       }
       
     } catch (error) {
-      console.error("❌ Error loading parking data:", error)
+      console.error("Error loading parking data:", error)
     } finally {
       setLoading(false)
     }
@@ -119,7 +119,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
       transformedSpots.push(spotData)
     })
     
-    console.log("🔄 Transformed spots:", transformedSpots)
+    console.log("Transformed spots:", transformedSpots)
     return transformedSpots
   }
 
@@ -243,7 +243,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
       }
       
     } catch (error) {
-      console.error("❌ Error releasing spot:", error)
+      console.error("Error releasing spot:", error)
       alert("Lỗi giải phóng vị trí: " + error.message)
     } finally {
       setLoading(false)
@@ -257,7 +257,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
       const result = await dongBoTrangThaiChoDo()
       
       if (result && result.success) {
-        console.log("🔄 Sync result:", result)
+        console.log("Sync result:", result)
         await loadInitialData()
         alert(`Đồng bộ thành công!\n${result.message}`)
       } else {
@@ -265,7 +265,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
       }
       
     } catch (error) {
-      console.error("❌ Error syncing status:", error)
+      console.error("Error syncing status:", error)
       alert("Lỗi đồng bộ: " + error.message)
     } finally {
       setLoading(false)
@@ -314,7 +314,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
               disabled={loading}
               title="Đồng bộ trạng thái chỗ đỗ"
             >
-              🔄 Đồng bộ
+              ↻ Đồng bộ
             </button>
             <div className="current-time">
               {new Date().toLocaleString("vi-VN")}
@@ -381,7 +381,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
                 <span className="stat-label">Tổng vị trí</span>
                 <span className="stat-value">{stats.total}</span>
               </div>
-              <div className="stat-icon">🅿️</div>
+              <div className="stat-icon"></div>
             </div>
           </div>
 
@@ -411,7 +411,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
                 <span className="stat-label">Tỉ lệ sử dụng</span>
                 <span className="stat-value">{stats.total > 0 ? Math.round((stats.occupied / stats.total) * 100) : 0}%</span>
               </div>
-              <div className="stat-icon">📊</div>
+              <div className="stat-icon"></div>
             </div>
           </div>
         </div>
@@ -419,7 +419,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
         {/* Parking Grid */}
         <div className="parking-grid-container">
           <div className="grid-header">
-            <h3>🅿️ {currentArea?.tenKhuVuc || "Khu vực"} - Sơ đồ bãi đỗ xe</h3>
+            <h3>{currentArea?.tenKhuVuc || "Khu vực"} - Sơ đồ bãi đỗ xe</h3>
           </div>
           
           <div className="parking-grid">
@@ -432,8 +432,8 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
               <div className="parking-layout">
                 {/* Entrance/Exit Labels */}
                 <div className="layout-labels">
-                  <div className="entrance-label">🚪 Lối vào</div>
-                  <div className="exit-label">Lối ra 🚪</div>
+                  <div className="entrance-label">Lối vào</div>
+                  <div className="exit-label">Lối ra</div>
                 </div>
 
                 {/* Main Parking Spots Grid */}
@@ -446,8 +446,8 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
                       title={`${spot.position} - ${getStatusText(spot.status)}${spot.licensePlate ? ` - ${spot.licensePlate}` : ""}`}
                     >
                       <div className="spot-icon">
-                        {spot.status === "occupied" && "🚗"}
-                        {spot.status === "reserved" && "🅿️"}
+                        {spot.status === "occupied" && ""}
+                        {spot.status === "reserved" && ""}
                       </div>
                       <div className="spot-number">
                         {spot.position.split("-").pop()}
@@ -482,7 +482,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
           <div className="dialog-overlay">
             <div className="spot-dialog">
               <div className="dialog-header">
-                <h3>🚗 Thông tin vị trí {selectedSpot.position}</h3>
+                <h3>Thông tin vị trí {selectedSpot.position}</h3>
                 <button 
                   className="dialog-close"
                   onClick={() => setIsDialogOpen(false)}
@@ -538,7 +538,7 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
                       onClick={handleReleaseSpot}
                       disabled={loading}
                     >
-                      {loading ? "Đang xử lý..." : "🗑️ Giải phóng vị trí"}
+                      {loading ? "Đang xử lý..." : "Giải phóng vị trí"}
                     </button>
                   )}
                   

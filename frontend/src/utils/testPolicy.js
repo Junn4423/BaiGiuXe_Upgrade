@@ -2,7 +2,7 @@
 // Run this in browser console to test
 
 async function testPolicyLogic() {
-  console.log("🧪 Testing pricing policy logic...")
+  console.log("Testing pricing policy logic...")
   
   try {
     // Test với loại xe máy
@@ -20,12 +20,12 @@ async function testPolicyLogic() {
     const invalidPolicy = await layChinhSachMacDinhChoLoaiPT("INVALID")
     console.log("Invalid type policy:", invalidPolicy)
     
-    console.log("\n✅ Policy logic test completed!")
+    console.log("\nPolicy logic test completed!")
     
   } catch (error) {
-    console.error("❌ Policy logic test failed:", error)
+    console.error("Policy logic test failed:", error)
   }
 }
 
 // Để chạy test, gọi: testPolicyLogic()
-console.log("💡 To run test, execute: testPolicyLogic()")
+console.log("To run test, execute: testPolicyLogic()")

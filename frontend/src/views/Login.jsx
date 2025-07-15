@@ -58,7 +58,7 @@ const Login = ({ onLoginSuccess }) => {
       const data = await res.json()
       if (res.status === 200 && data.code && data.token) {
         // Đăng nhập qua UserContext để lấy quyền hạn
-        console.log('🔐 Đang đăng nhập và load quyền hạn cho user:', data.code)
+        console.log('Đang đăng nhập và load quyền hạn cho user:', data.code)
         const loginResult = await userContext.login({
           username: username,
           userCode: data.code

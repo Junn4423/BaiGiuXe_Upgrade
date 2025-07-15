@@ -46,7 +46,7 @@ const CameraComponent = React.forwardRef(({ currentMode = "vao", zoneInfo }, ref
   const cameraData = useMemo(() => {
     if (!zoneInfo) return {}
 
-    console.log(`🎯 Memoizing camera data for zone:`, zoneInfo.maKhuVuc)
+    console.log(`Memoizing camera data for zone:`, zoneInfo.maKhuVuc)
 
     return {
       cameraInPlate: {
@@ -92,7 +92,7 @@ const CameraComponent = React.forwardRef(({ currentMode = "vao", zoneInfo }, ref
 
   // Display captured image on capture panel
   const displayCapturedImage = (imagePath, panelNumber = 1) => {
-    console.log(`📺 CameraComponent.displayCapturedImage called with:`, { imagePath, panelNumber })
+    console.log(`CameraComponent.displayCapturedImage called with:`, { imagePath, panelNumber })
     if (!imagePath) {
       console.log(`Image does not exist: ${imagePath}`)
       return
@@ -106,13 +106,13 @@ const CameraComponent = React.forwardRef(({ currentMode = "vao", zoneInfo }, ref
     setStaticImageStates((prev) => ({ ...prev, [panelKey]: true }))
     setCameraFeeds((prev) => ({ ...prev, [panelKey]: imagePath }))
 
-    console.log(`✅ Displayed captured image on ${panelKey}: ${imagePath}`)
+    console.log(`Displayed captured image on ${panelKey}: ${imagePath}`)
     restoreTimer.current = setTimeout(restoreCaptureFeeds, 10000) // Tăng thời gian hiển thị lên 10 giây
   }
 
   // Display captured face image
   const displayCapturedFaceImage = (imagePath) => {
-    console.log(`📺 CameraComponent.displayCapturedFaceImage called with:`, imagePath)
+    console.log(`CameraComponent.displayCapturedFaceImage called with:`, imagePath)
     displayCapturedImage(imagePath, 2)
   }
 
@@ -297,7 +297,7 @@ const CameraComponent = React.forwardRef(({ currentMode = "vao", zoneInfo }, ref
   )
 
   // Debug log để kiểm tra re-render
-  console.log(`🔄 CameraComponent render - Zone: ${zoneInfo?.maKhuVuc}, Mode: ${currentMode}`)
+  console.log(`CameraComponent render - Zone: ${zoneInfo?.maKhuVuc}, Mode: ${currentMode}`)
 
   return (
     <div className="camera-container">

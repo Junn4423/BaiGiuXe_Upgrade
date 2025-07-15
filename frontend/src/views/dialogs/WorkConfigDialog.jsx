@@ -86,7 +86,7 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
     setSaving(true)
     setError("")
     try {
-      console.log("🔍 Debug save process:")
+      console.log("Debug save process:")
       console.log("- selectedZone:", selectedZone)
       console.log("- selectedVehicleType:", selectedVehicleType)
       console.log("- selectedMode:", selectedMode)
@@ -123,7 +123,7 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
         }
       }
 
-      console.log("🚗 Determined loai_xe value:", loaiXeValue);
+      console.log("Determined loai_xe value:", loaiXeValue);
 
       // Build config đúng format
       const config = {
@@ -135,7 +135,7 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
         default_mode: selectedMode, // new: save default mode
       }
 
-      console.log("💾 Saving work config:", config)
+      console.log("Saving work config:", config)
       localStorage.setItem("work_config", JSON.stringify(config))
 
       if (onConfigSaved) onConfigSaved(config)

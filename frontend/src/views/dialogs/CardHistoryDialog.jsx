@@ -253,7 +253,7 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                                       {log.tenCamera || `Camera ${log.maCamera}`}
                                     </div>
                                     <div className="log-direction">
-                                      {log.huongQuet === "VAO" ? "🔵 Vào" : "🔴 Ra"}
+                                      {log.huongQuet === "VAO" ? "Vào" : "Ra"}
                                     </div>
                                     <div className="log-match">
                                       {log.khopBienSo ? "Khớp biển số" : "Không khớp"}

@@ -16,11 +16,11 @@ const testCases = [
 
 // Hàm test (copy từ api.js và chỉnh sửa để không gọi API thật)
 async function testLayChinhSachMacDinhChoLoaiPT(loaiXe, maLoaiPT) {
-  console.log(`🔍 Testing với loai xe: ${loaiXe}, mã loại PT: ${maLoaiPT}`);
+  console.log(`Testing với loai xe: ${loaiXe}, mã loại PT: ${maLoaiPT}`);
   
   try {
     // Skip API call for testing, go straight to fallback
-    console.log(`⚠️ Skipping API call, using fallback logic...`);
+    console.log(`Skipping API call, using fallback logic...`);
     
     // Fallback logic
     let fallbackPolicy = "CS_XEMAY_4H"; // Mặc định cho xe máy
@@ -34,13 +34,13 @@ async function testLayChinhSachMacDinhChoLoaiPT(loaiXe, maLoaiPT) {
     // Đảm bảo fallback policy không bao giờ là null/empty
     if (!fallbackPolicy || fallbackPolicy.trim() === '') {
       fallbackPolicy = "CS_XEMAY_4H"; // Mặc định cuối cùng
-      console.log(`🔧 Sử dụng mặc định cuối cùng: ${fallbackPolicy}`);
+      console.log(`Sử dụng mặc định cuối cùng: ${fallbackPolicy}`);
     }
     
     return fallbackPolicy;
     
   } catch (error) {
-    console.error("❌ Lỗi khi test:", error);
+    console.error("Lỗi khi test:", error);
     
     // Fallback cuối cùng
     let fallbackPolicy = "CS_XEMAY_4H"; // Mặc định
@@ -62,7 +62,7 @@ async function testLayChinhSachMacDinhChoLoaiPT(loaiXe, maLoaiPT) {
 
 // Chạy tất cả test cases
 async function runAllTests() {
-  console.log("🚀 Starting all tests...");
+  console.log("Starting all tests...");
   
   for (let i = 0; i < testCases.length; i++) {
     const testCase = testCases[i];
@@ -75,17 +75,17 @@ async function runAllTests() {
       console.log(`Input: loaiXe="${testCase.loaiXe}", maLoaiPT="${testCase.maLoaiPT}"`);
       console.log(`Expected: "${testCase.expected}"`);
       console.log(`Got: "${result}"`);
-      console.log(`Result: ${success ? '✅ PASS' : '❌ FAIL'}`);
+      console.log(`Result: ${success ? 'PASS' : 'FAIL'}`);
       
       if (!success) {
-        console.error(`❌ Test failed for case ${i + 1}`);
+        console.error(`Test failed for case ${i + 1}`);
       }
     } catch (error) {
-      console.error(`❌ Test ${i + 1} threw error:`, error);
+      console.error(`Test ${i + 1} threw error:`, error);
     }
   }
   
-  console.log("\n🏁 All tests completed!");
+  console.log("\nAll tests completed!");
 }
 
 // Chạy tests
@@ -98,4 +98,4 @@ window.testPricingPolicy = {
   testCases
 };
 
-console.log("💡 You can also call window.testPricingPolicy.runAllTests() manually");
+console.log("You can also call window.testPricingPolicy.runAllTests() manually");

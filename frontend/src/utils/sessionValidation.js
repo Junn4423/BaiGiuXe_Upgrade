@@ -14,7 +14,7 @@ export function validateAndEnsurePricingPolicy(
   vehicleTypeCode
 ) {
   console.log(
-    `🔍 Validating pricing policy: "${pricingPolicy}" for vehicle type: "${vehicleType}" (${vehicleTypeCode})`
+    `Validating pricing policy: "${pricingPolicy}" for vehicle type: "${vehicleType}" (${vehicleTypeCode})`
   );
 
   // Check if pricing policy is valid
@@ -25,12 +25,12 @@ export function validateAndEnsurePricingPolicy(
     pricingPolicy !== "null" &&
     pricingPolicy !== "undefined"
   ) {
-    console.log(`✅ Pricing policy is valid: ${pricingPolicy}`);
+    console.log(`Pricing policy is valid: ${pricingPolicy}`);
     return pricingPolicy;
   }
 
   console.warn(
-    `⚠️ Invalid pricing policy detected: "${pricingPolicy}" (type: ${typeof pricingPolicy})`
+    `Invalid pricing policy detected: "${pricingPolicy}" (type: ${typeof pricingPolicy})`
   );
 
   // Generate fallback based on vehicle type
@@ -49,7 +49,7 @@ export function validateAndEnsurePricingPolicy(
     fallbackPolicy = "CS_XEMAY_4H";
   }
 
-  console.log(`🔧 Using fallback pricing policy: ${fallbackPolicy}`);
+  console.log(`Using fallback pricing policy: ${fallbackPolicy}`);
   return fallbackPolicy;
 }
 
@@ -59,7 +59,7 @@ export function validateAndEnsurePricingPolicy(
  * @returns {Object} - Validated session data
  */
 export function validateSessionData(sessionData) {
-  console.log(`🔍 Validating session data:`, sessionData);
+  console.log(`Validating session data:`, sessionData);
 
   // Determine loaiXe from pricing policy or explicit field
   let loaiXe = sessionData.loaiXe;
@@ -79,11 +79,11 @@ export function validateSessionData(sessionData) {
   // Fallback: assume xe máy if still undetermined
   if (loaiXe === undefined || loaiXe === null) {
     loaiXe = "0";
-    console.log(`⚠️ Loại xe không xác định, mặc định là xe máy (loaiXe = 0)`);
+    console.log(`Loại xe không xác định, mặc định là xe máy (loaiXe = 0)`);
   }
 
   console.log(
-    `🚗 Loại xe xác định: ${loaiXe} (${
+    `Loại xe xác định: ${loaiXe} (${
       loaiXe === "1" ? "Ô tô - cần vị trí" : "Xe máy - không cần vị trí"
     })`
   );
@@ -95,12 +95,12 @@ export function validateSessionData(sessionData) {
   if (loaiXe === "1") {
     // Ô tô: yêu cầu vị trí gửi
     requiredFields.push("viTriGui");
-    console.log(`🅿️ Loại xe = 1: Yêu cầu vị trí gửi`);
+    console.log(`Loại xe = 1: Yêu cầu vị trí gửi`);
   } else if (loaiXe === "0") {
     // Xe máy: không cần vị trí gửi, xóa khỏi sessionData nếu có
     if (sessionData.viTriGui !== undefined) {
       delete sessionData.viTriGui;
-      console.log(`🏍️ Loại xe = 0: Đã xóa vị trí gửi khỏi session data`);
+      console.log(`Loại xe = 0: Đã xóa vị trí gửi khỏi session data`);
     }
   }
 
@@ -121,7 +121,7 @@ export function validateSessionData(sessionData) {
   });
 
   if (errors.length > 0) {
-    console.error(`❌ Session data validation failed:`, errors);
+    console.error(`Session data validation failed:`, errors);
     throw new Error(`Session data validation failed: ${errors.join(", ")}`);
   }
 
@@ -131,7 +131,7 @@ export function validateSessionData(sessionData) {
     const policyPattern = /^CS_[A-Z_]+$/;
     if (!policyPattern.test(sessionData.chinhSach)) {
       console.warn(
-        `⚠️ Pricing policy format looks unusual: ${sessionData.chinhSach}`
+        `Pricing policy format looks unusual: ${sessionData.chinhSach}`
       );
     }
   }
@@ -139,8 +139,8 @@ export function validateSessionData(sessionData) {
   // Add loaiXe to session data for API
   sessionData.loaiXe = loaiXe;
 
-  console.log(`✅ Session data validation passed`);
-  console.log(`📋 Final session data:`, {
+  console.log(`Session data validation passed`);
+  console.log(`Final session data:`, {
     ...sessionData,
     viTriGui: sessionData.viTriGui || "Không có (xe máy)",
   });
@@ -154,7 +154,7 @@ export function validateSessionData(sessionData) {
  * @returns {Promise<Object>} - API response
  */
 export async function themPhienGuiXeWithValidation(sessionData) {
-  console.log(`🚀 Starting themPhienGuiXe with enhanced validation...`);
+  console.log(`Starting themPhienGuiXe with enhanced validation...`);
 
   try {
     // Validate session data first
@@ -171,14 +171,14 @@ export async function themPhienGuiXeWithValidation(sessionData) {
     const { themPhienGuiXe } = await import("../api/api");
     const result = await themPhienGuiXe(validatedData);
 
-    console.log(`✅ themPhienGuiXe completed successfully:`, result);
+    console.log(`themPhienGuiXe completed successfully:`, result);
     return result;
   } catch (error) {
-    console.error(`❌ themPhienGuiXe failed:`, error);
+    console.error(`themPhienGuiXe failed:`, error);
 
     // Log detailed error info for debugging
-    console.error(`❌ Failed session data:`, sessionData);
-    console.error(`❌ Error stack:`, error.stack);
+    console.error(`Failed session data:`, sessionData);
+    console.error(`Error stack:`, error.stack);
 
     throw error;
   }

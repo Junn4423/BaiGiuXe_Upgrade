@@ -45,24 +45,24 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
   // Capture image
   const captureImage = async (cardId, mode = "vao") => {
     try {
-      console.log(`📸 Capturing image for card ${cardId} in ${mode} mode`)
+      console.log(`Capturing image for card ${cardId} in ${mode} mode`)
       
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
       
-      console.log(`🔄 Capturing plate image...`)
+      console.log(`Capturing plate image...`)
       const plateImagePath = await captureFromVideo('plate', cardId, timestamp, mode)
       
-      console.log(`🔄 Capturing face image...`)
+      console.log(`Capturing face image...`)
       const faceImagePath = await captureFromVideo('face', cardId, timestamp, mode)
       
       const licensePlate = `29A-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`
 
       // Display captured images on UI panels immediately
       if (ui && ui.displayCapturedImage && plateImagePath) {
-        console.log(`📺 QuanLyCamera: Displaying plate image on panel 1`)
+        console.log(`QuanLyCamera: Displaying plate image on panel 1`)
         ui.displayCapturedImage(plateImagePath?.url || plateImagePath, 1)
       } else {
-        console.log(`❌ QuanLyCamera: Cannot display plate image:`, {
+        console.log(`QuanLyCamera: Cannot display plate image:`, {
           hasUI: !!ui,
           hasDisplayMethod: !!(ui && ui.displayCapturedImage),
           hasPlateImage: !!plateImagePath
@@ -70,20 +70,20 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
       }
       
       if (ui && ui.displayCapturedFaceImage && faceImagePath) {
-        console.log(`📺 QuanLyCamera: Displaying face image on panel 2`)
+        console.log(`QuanLyCamera: Displaying face image on panel 2`)
         ui.displayCapturedFaceImage(faceImagePath?.url || faceImagePath)
       } else {
-        console.log(`❌ QuanLyCamera: Cannot display face image:`, {
+        console.log(`QuanLyCamera: Cannot display face image:`, {
           hasUI: !!ui,
           hasDisplayMethod: !!(ui && ui.displayCapturedFaceImage),
           hasFaceImage: !!faceImagePath
         })
       }
 
-      console.log(`✅ All images captured and auto-saved for card ${cardId}`)
+      console.log(`All images captured and auto-saved for card ${cardId}`)
       return [plateImagePath, licensePlate, faceImagePath]
     } catch (error) {
-      console.error("❌ Error capturing image:", error)
+      console.error("Error capturing image:", error)
       return [null, null, null]
     }
   }
@@ -96,12 +96,12 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
         ? `video[data-camera-type="${mode}-plate"]`
         : `video[data-camera-type="${mode}-face"]`
       
-      console.log(`🔍 Looking for video element: ${videoSelector} (mode: ${mode})`)
+      console.log(`Looking for video element: ${videoSelector} (mode: ${mode})`)
       const videoElement = document.querySelector(videoSelector)
       
       if (!videoElement) {
-        console.log(`❌ Video element not found for ${type} in ${mode} mode`)
-        console.log('📹 Available video elements:', 
+        console.log(`Video element not found for ${type} in ${mode} mode`)
+        console.log('Available video elements:', 
           Array.from(document.querySelectorAll('video')).map(v => ({
             cameraType: v.getAttribute('data-camera-type'),
             readyState: v.readyState,
@@ -130,7 +130,7 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
         
         if (fallbackVideo) {
           const fallbackType = fallbackVideo.getAttribute('data-camera-type')
-          console.log(`⚠️ Using fallback camera: ${fallbackType} (requested: ${mode}-${type})`)
+          console.log(`Using fallback camera: ${fallbackType} (requested: ${mode}-${type})`)
           
           // Track camera fallback usage
           const warningMessage = `Camera ${mode}-${type} không khả dụng, sử dụng ${fallbackType} thay thế`
@@ -138,7 +138,7 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
           
           // Show warning toast if using wrong direction
           if (!fallbackType.startsWith(mode + '-')) {
-            console.warn(`⚠️ WARNING: Chụp ảnh ${type} cho xe ${mode} nhưng dùng camera ${fallbackType}`)
+            console.warn(`WARNING: Chụp ảnh ${type} cho xe ${mode} nhưng dùng camera ${fallbackType}`)
             
             // Notify UI about camera mismatch
             if (ui && ui.showNotification) {
@@ -149,20 +149,20 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
           return await captureFromVideoElement(fallbackVideo, type, cardId, timestamp, mode)
         }
         
-        console.error(`❌ No suitable camera found for ${type} capture in ${mode} mode`)
+        console.error(`No suitable camera found for ${type} capture in ${mode} mode`)
         return createPlaceholderImage(type, cardId, timestamp, mode)
       }
 
       return await captureFromVideoElement(videoElement, type, cardId, timestamp, mode)
     } catch (error) {
-      console.error(`❌ Error capturing ${type} image:`, error)
+      console.error(`Error capturing ${type} image:`, error)
       return createPlaceholderImage(type, cardId, timestamp, mode)
     }
   }
 
   // Helper function to capture from specific video element
   const captureFromVideoElement = async (videoElement, type, cardId, timestamp, mode) => {
-    console.log(`✅ Found video element:`, {
+    console.log(`Found video element:`, {
       cameraType: videoElement.getAttribute('data-camera-type'),
       readyState: videoElement.readyState,
       videoWidth: videoElement.videoWidth,
@@ -172,7 +172,7 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
 
     // Check if video is actually playing
     if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
-      console.log(`⚠️ Video not ready for ${type} in ${mode} mode - using placeholder`)
+      console.log(`Video not ready for ${type} in ${mode} mode - using placeholder`)
       return createPlaceholderImage(type, cardId, timestamp, mode)
     }
 
@@ -180,12 +180,12 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
     await new Promise(resolve => setTimeout(resolve, 100))
 
     // Capture frame from video
-    console.log(`📸 Capturing frame from video...`)
+    console.log(`Capturing frame from video...`)
     const blob = await captureVideoFrame(videoElement)
     
     try {
       // Upload to MinIO instead of saving locally
-      console.log(`☁️ Uploading ${type} image to MinIO...`)
+      console.log(`Uploading ${type} image to MinIO...`)
       let uploadResult
       
       if (type === 'plate') {
@@ -199,11 +199,11 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
       }
 
       if (uploadResult && uploadResult.success) {
-        console.log(`✅ Image uploaded to MinIO: ${uploadResult.primaryUrl}`)
+        console.log(`Image uploaded to MinIO: ${uploadResult.primaryUrl}`)
         
         // Tách filename từ URL để lưu vào database
         const imageFilename = uploadResult.filename || uploadResult.primaryUrl.split('/').pop()
-        console.log(`📎 Extracted filename for database: ${imageFilename}`)
+        console.log(`Extracted filename for database: ${imageFilename}`)
         
         return {
           url: uploadResult.primaryUrl, // URL đầy đủ để hiển thị ngay
@@ -215,10 +215,10 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
         throw new Error('Upload failed to all MinIO servers')
       }
     } catch (error) {
-      console.error(`❌ MinIO upload failed for ${type} image:`, error)
+      console.error(`MinIO upload failed for ${type} image:`, error)
       // Fallback: Create object URL for immediate display
       const objectUrl = URL.createObjectURL(blob)
-      console.log(`⚠️ Using local fallback URL: ${objectUrl}`)
+      console.log(`Using local fallback URL: ${objectUrl}`)
       return {
         url: objectUrl,
         blob: blob,
