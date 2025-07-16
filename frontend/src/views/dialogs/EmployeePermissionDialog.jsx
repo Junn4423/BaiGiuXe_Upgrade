@@ -5,8 +5,7 @@ import {
   layDanhSachNhanVien, 
   themNhanVien, 
   capNhatNhanVien, 
-  xoaNhanVien, 
-  datLaiMatKhauNhanVien
+  xoaNhanVien
 } from "../../api/api"
 
 const EmployeePermissionDialog = ({ onClose }) => {
@@ -18,17 +17,12 @@ const EmployeePermissionDialog = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Form data state
+  // Form data state - mapping trực tiếp với API response
   const [formData, setFormData] = useState({
-    lv001: "", // User ID
-    lv002: "", // User Group ID
-    lv003: "", // First Name
-    lv004: "", // Last Name
-    lv005: "", // Password
-    lv006: "", // Employee ID
-    lv095: "1", // Active Status
-    lv099: "default", // Themes
-    lv900: "" // Notes
+    taiKhoanDN: "", // User ID - field name từ API
+    roleQuyen: "",  // Role Quyền - field name từ API (sử dụng làm field chính)
+    ten: "",        // Tên nhân viên - field name từ API
+    matKhau: ""     // Password - field name từ API
   })
 
   // Search and filter states
@@ -39,25 +33,17 @@ const EmployeePermissionDialog = ({ onClose }) => {
 
   // Permission groups options
   const PERMISSION_GROUPS = [
-    { value: "1", label: "Quản trị viên", description: "Toàn quyền hệ thống" },
-    { value: "2", label: "Quản lý", description: "Quản lý bãi xe và nhân viên" },
-    { value: "3", label: "Thu ngân", description: "Thu phí và thống kê" },
-    { value: "4", label: "Bảo vệ", description: "Kiểm soát ra vào" },
-    { value: "5", label: "Nhân viên", description: "Quyền cơ bản" }
+    { value: "0", label: "Toàn quyền", description: "Toàn quyền hệ thống" },
+    { value: "1", label: "Nhân Viên QL Vào", description: "Quản lý xe vào bãi" },
+    { value: "2", label: "Nhân Viên QL Ra", description: "Quản lý xe ra khỏi bãi" },
+    { value: "3", label: "Nhân Viên QL Vào Ra", description: "Quản lý xe vào và ra" }
   ]
 
-  // Status options
+  // Status options for filtering
   const STATUS_OPTIONS = [
-    { value: "1", label: "Hoạt động", color: "green" },
-    { value: "0", label: "Tạm khóa", color: "red" }
-  ]
-
-  // Theme options
-  const THEME_OPTIONS = [
-    { value: "default", label: "Mặc định" },
-    { value: "dark", label: "Tối" },
-    { value: "light", label: "Sáng" },
-    { value: "blue", label: "Xanh dương" }
+    { value: "all", label: "Tất cả", color: "gray" },
+    { value: "active", label: "Hoạt động", color: "green" },
+    { value: "inactive", label: "Tạm khóa", color: "red" }
   ]
 
   // Load data when component mounts
@@ -68,13 +54,11 @@ const EmployeePermissionDialog = ({ onClose }) => {
   // Filter employees when search/filter changes
   const filteredEmployees = employees.filter(emp => {
     const matchesSearch = 
-      emp.lv001?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.lv003?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.lv004?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.lv006?.toLowerCase().includes(searchTerm.toLowerCase())
+      emp.taiKhoanDN?.toLowerCase().includes(searchTerm.toLowerCase()) || // taiKhoanDN
+      emp.ten?.toLowerCase().includes(searchTerm.toLowerCase())           // ten
 
-    const matchesGroup = groupFilter === "all" || emp.lv002 === groupFilter
-    const matchesStatus = statusFilter === "all" || emp.lv095 === statusFilter
+    const matchesGroup = groupFilter === "all" || emp.roleQuyen === groupFilter // roleQuyen
+    const matchesStatus = statusFilter === "all" // Status filtering not implemented in API yet
 
     return matchesSearch && matchesGroup && matchesStatus
   })
@@ -96,6 +80,7 @@ const EmployeePermissionDialog = ({ onClose }) => {
   const loadEmployees = async () => {
     try {
       const data = await layDanhSachNhanVien()
+      console.log("Dữ liệu nhân viên từ API:", data)
       setEmployees(data || [])
     } catch (error) {
       console.error("Lỗi tải danh sách nhân viên:", error)
@@ -114,16 +99,12 @@ const EmployeePermissionDialog = ({ onClose }) => {
 
   const handleSelectEmployee = (employee) => {
     setSelectedEmployee(employee)
+    // Map API response to form data - sử dụng trực tiếp field names từ API
     setFormData({
-      lv001: employee.lv001 || "",
-      lv002: employee.lv002 || "",
-      lv003: employee.lv003 || "",
-      lv004: employee.lv004 || "",
-      lv005: "", // Never show password
-      lv006: employee.lv006 || "",
-      lv095: employee.lv095 || "1",
-      lv099: employee.lv099 || "default",
-      lv900: employee.lv900 || ""
+      taiKhoanDN: employee.taiKhoanDN || "",  // taiKhoanDN từ API
+      roleQuyen: employee.roleQuyen || "",    // roleQuyen từ API  
+      ten: employee.ten || "",                // ten từ API
+      matKhau: "" // Never show password
     })
     setIsEditing(false)
     setErrors({})
@@ -132,15 +113,10 @@ const EmployeePermissionDialog = ({ onClose }) => {
   const handleNewEmployee = () => {
     setSelectedEmployee(null)
     setFormData({
-      lv001: "",
-      lv002: "",
-      lv003: "",
-      lv004: "",
-      lv005: "",
-      lv006: "",
-      lv095: "1",
-      lv099: "default",
-      lv900: ""
+      taiKhoanDN: "", // taiKhoanDN
+      roleQuyen: "",  // roleQuyen
+      ten: "",        // ten
+      matKhau: ""     // matKhau
     })
     setIsEditing(true)
     setErrors({})
@@ -154,24 +130,20 @@ const EmployeePermissionDialog = ({ onClose }) => {
   const validateForm = () => {
     const newErrors = {}
 
-    if (!formData.lv001.trim()) {
-      newErrors.lv001 = "Mã người dùng không được trống"
+    if (!formData.taiKhoanDN.trim()) {
+      newErrors.taiKhoanDN = "Tài khoản đăng nhập không được trống"
     }
 
-    if (!formData.lv003.trim()) {
-      newErrors.lv003 = "Tên không được trống"
+    if (!formData.ten.trim()) {
+      newErrors.ten = "Tên nhân viên không được trống"
     }
 
-    if (!formData.lv006.trim()) {
-      newErrors.lv006 = "Mã nhân viên không được trống"
+    if (!selectedEmployee && !formData.matKhau.trim()) {
+      newErrors.matKhau = "Mật khẩu không được trống khi tạo mới"
     }
 
-    if (!selectedEmployee && !formData.lv005.trim()) {
-      newErrors.lv005 = "Mật khẩu không được trống khi tạo mới"
-    }
-
-    if (!formData.lv002) {
-      newErrors.lv002 = "Chọn nhóm quyền"
+    if (!formData.roleQuyen) {
+      newErrors.roleQuyen = "Chọn role quyền"
     }
 
     setErrors(newErrors)
@@ -183,18 +155,27 @@ const EmployeePermissionDialog = ({ onClose }) => {
 
     setIsSubmitting(true)
     try {
+      // Sử dụng trực tiếp formData vì đã match với API structure
       const employeeData = {
-        ...formData,
+        taiKhoanDN: formData.taiKhoanDN,
+        nguoiThem: "admin",              // Current user (fixed for now)
+        roleQuyen: formData.roleQuyen,
+        ten: formData.ten,
+        quyenHan: formData.roleQuyen,    // Set quyenHan = roleQuyen để đồng bộ
         // Only include password if it's being changed
-        ...(formData.lv005 ? { lv005: formData.lv005 } : {})
+        ...(formData.matKhau ? { matKhau: formData.matKhau } : {})
       }
+
+      console.log("Dữ liệu gửi lên API:", employeeData)
 
       if (selectedEmployee) {
         // Update existing employee
-        await capNhatNhanVien(employeeData)
+        const result = await capNhatNhanVien(employeeData)
+        console.log("Kết quả cập nhật:", result)
       } else {
         // Create new employee
-        await themNhanVien(employeeData)
+        const result = await themNhanVien(employeeData)
+        console.log("Kết quả thêm mới:", result)
       }
 
       await loadEmployees()
@@ -211,13 +192,13 @@ const EmployeePermissionDialog = ({ onClose }) => {
   const handleDelete = async () => {
     if (!selectedEmployee) return
 
-    if (!window.confirm(`Bạn có chắc muốn xóa nhân viên "${selectedEmployee.lv003} ${selectedEmployee.lv004}"?`)) {
+    if (!window.confirm(`Bạn có chắc muốn xóa nhân viên "${selectedEmployee.ten}"?`)) {
       return
     }
 
     setIsSubmitting(true)
     try {
-      await xoaNhanVien(selectedEmployee.lv001)
+      await xoaNhanVien(selectedEmployee.taiKhoanDN)
       await loadEmployees()
       clearForm()
     } catch (error) {
@@ -231,15 +212,10 @@ const EmployeePermissionDialog = ({ onClose }) => {
   const clearForm = () => {
     setSelectedEmployee(null)
     setFormData({
-      lv001: "",
-      lv002: "",
-      lv003: "",
-      lv004: "",
-      lv005: "",
-      lv006: "",
-      lv095: "1",
-      lv099: "default",
-      lv900: ""
+      taiKhoanDN: "", // taiKhoanDN
+      roleQuyen: "",  // roleQuyen
+      ten: "",        // ten
+      matKhau: ""     // matKhau
     })
     setIsEditing(false)
     setErrors({})
@@ -286,7 +262,7 @@ const EmployeePermissionDialog = ({ onClose }) => {
   const resetPassword = async () => {
     if (!selectedEmployee) return
 
-    if (!window.confirm(`Bạn có chắc muốn đặt lại mật khẩu cho "${selectedEmployee.lv003} ${selectedEmployee.lv004}"?`)) {
+    if (!window.confirm(`Bạn có chắc muốn đặt lại mật khẩu cho "${selectedEmployee.ten}"?`)) {
       return
     }
 
@@ -295,7 +271,17 @@ const EmployeePermissionDialog = ({ onClose }) => {
 
     setIsSubmitting(true)
     try {
-      await datLaiMatKhauNhanVien(selectedEmployee.lv001, newPassword)
+      // Use the update employee API to change password
+      const employeeData = {
+        taiKhoanDN: selectedEmployee.taiKhoanDN,
+        nguoiThem: "admin",
+        roleQuyen: selectedEmployee.roleQuyen,
+        ten: selectedEmployee.ten,
+        quyenHan: selectedEmployee.roleQuyen, // Set quyenHan = roleQuyen
+        matKhau: newPassword
+      }
+      
+      await capNhatNhanVien(employeeData)
       alert("Đặt lại mật khẩu thành công")
     } catch (error) {
       console.error("Lỗi đặt lại mật khẩu:", error)
@@ -375,26 +361,26 @@ const EmployeePermissionDialog = ({ onClose }) => {
               ) : (
                 filteredEmployees.map(emp => (
                   <div
-                    key={emp.lv001}
-                    className={`employee-item ${selectedEmployee?.lv001 === emp.lv001 ? 'selected' : ''}`}
+                    key={emp.taiKhoanDN}
+                    className={`employee-item ${selectedEmployee?.taiKhoanDN === emp.taiKhoanDN ? 'selected' : ''}`}
                     onClick={() => handleSelectEmployee(emp)}
                   >
                     <div className="employee-info">
                       <div className="employee-name">
-                        {emp.lv003} {emp.lv004}
+                        {emp.ten}
                       </div>
                       <div className="employee-details">
-                        <span className="employee-id">ID: {emp.lv001}</span>
-                        <span className="employee-code">Mã NV: {emp.lv006}</span>
+                        <span className="employee-id">ID: {emp.taiKhoanDN}</span>
+                        <span className="employee-code">Quyền: {getGroupLabel(emp.roleQuyen)}</span>
                       </div>
                       <div className="employee-meta">
                         <span className="group-badge">
-                          {getGroupLabel(emp.lv002)}
+                          {getGroupLabel(emp.roleQuyen)}
                         </span>
                         <span 
-                          className={`status-badge status-${getStatusColor(emp.lv095)}`}
+                          className={`status-badge status-green`}
                         >
-                          {getStatusLabel(emp.lv095)}
+                          Hoạt động
                         </span>
                       </div>
                     </div>
@@ -446,51 +432,29 @@ const EmployeePermissionDialog = ({ onClose }) => {
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Mã Người Dùng *</label>
+                      <label>Tài Khoản Đăng Nhập *</label>
                       <input
                         type="text"
-                        value={formData.lv001}
-                        onChange={(e) => updateField('lv001', e.target.value)}
+                        value={formData.taiKhoanDN}
+                        onChange={(e) => updateField('taiKhoanDN', e.target.value)}
                         disabled={!isEditing || selectedEmployee}
-                        className={errors.lv001 ? 'error' : ''}
+                        className={errors.taiKhoanDN ? 'error' : ''}
+                        placeholder="Nhập tài khoản đăng nhập"
                       />
-                      {errors.lv001 && <span className="field-error">{errors.lv001}</span>}
+                      {errors.taiKhoanDN && <span className="field-error">{errors.taiKhoanDN}</span>}
                     </div>
 
                     <div className="form-group">
-                      <label>Mã Nhân Viên *</label>
+                      <label>Tên Nhân Viên *</label>
                       <input
                         type="text"
-                        value={formData.lv006}
-                        onChange={(e) => updateField('lv006', e.target.value)}
+                        value={formData.ten}
+                        onChange={(e) => updateField('ten', e.target.value)}
                         disabled={!isEditing}
-                        className={errors.lv006 ? 'error' : ''}
+                        className={errors.ten ? 'error' : ''}
+                        placeholder="Nhập tên nhân viên"
                       />
-                      {errors.lv006 && <span className="field-error">{errors.lv006}</span>}
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Tên *</label>
-                      <input
-                        type="text"
-                        value={formData.lv003}
-                        onChange={(e) => updateField('lv003', e.target.value)}
-                        disabled={!isEditing}
-                        className={errors.lv003 ? 'error' : ''}
-                      />
-                      {errors.lv003 && <span className="field-error">{errors.lv003}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label>Họ</label>
-                      <input
-                        type="text"
-                        value={formData.lv004}
-                        onChange={(e) => updateField('lv004', e.target.value)}
-                        disabled={!isEditing}
-                      />
+                      {errors.ten && <span className="field-error">{errors.ten}</span>}
                     </div>
                   </div>
 
@@ -502,76 +466,34 @@ const EmployeePermissionDialog = ({ onClose }) => {
                         </label>
                         <input
                           type="password"
-                          value={formData.lv005}
-                          onChange={(e) => updateField('lv005', e.target.value)}
+                          value={formData.matKhau}
+                          onChange={(e) => updateField('matKhau', e.target.value)}
                           placeholder={selectedEmployee ? "Để trống nếu không đổi" : "Nhập mật khẩu"}
-                          className={errors.lv005 ? 'error' : ''}
+                          className={errors.matKhau ? 'error' : ''}
                         />
-                        {errors.lv005 && <span className="field-error">{errors.lv005}</span>}
+                        {errors.matKhau && <span className="field-error">{errors.matKhau}</span>}
                       </div>
                     </div>
                   )}
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Nhóm Quyền *</label>
+                      <label>Role Quyền *</label>
                       <select
-                        value={formData.lv002}
-                        onChange={(e) => updateField('lv002', e.target.value)}
+                        value={formData.roleQuyen}
+                        onChange={(e) => updateField('roleQuyen', e.target.value)}
                         disabled={!isEditing}
-                        className={errors.lv002 ? 'error' : ''}
+                        className={errors.roleQuyen ? 'error' : ''}
                       >
-                        <option value="">Chọn nhóm quyền</option>
+                        <option value="">Chọn role quyền</option>
                         {PERMISSION_GROUPS.map(group => (
                           <option key={group.value} value={group.value}>
                             {group.label} - {group.description}
                           </option>
                         ))}
                       </select>
-                      {errors.lv002 && <span className="field-error">{errors.lv002}</span>}
+                      {errors.roleQuyen && <span className="field-error">{errors.roleQuyen}</span>}
                     </div>
-
-                    <div className="form-group">
-                      <label>Trạng Thái</label>
-                      <select
-                        value={formData.lv095}
-                        onChange={(e) => updateField('lv095', e.target.value)}
-                        disabled={!isEditing}
-                      >
-                        {STATUS_OPTIONS.map(status => (
-                          <option key={status.value} value={status.value}>
-                            {status.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Giao Diện</label>
-                      <select
-                        value={formData.lv099}
-                        onChange={(e) => updateField('lv099', e.target.value)}
-                        disabled={!isEditing}
-                      >
-                        {THEME_OPTIONS.map(theme => (
-                          <option key={theme.value} value={theme.value}>
-                            {theme.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Ghi Chú</label>
-                    <textarea
-                      value={formData.lv900}
-                      onChange={(e) => updateField('lv900', e.target.value)}
-                      disabled={!isEditing}
-                      rows={3}
-                    />
                   </div>
 
                   {isEditing && (
@@ -610,15 +532,15 @@ const EmployeePermissionDialog = ({ onClose }) => {
           </div>
           <div className="stat-card">
             <span className="stat-number">
-              {employees.filter(emp => emp.lv095 === "1").length}
+              {employees.length}
             </span>
             <span className="stat-label">Đang hoạt động</span>
           </div>
           <div className="stat-card">
             <span className="stat-number">
-              {employees.filter(emp => emp.lv002 === "1").length}
+              {employees.filter(emp => emp.roleQuyen === "0").length}
             </span>
-            <span className="stat-label">Quản trị viên</span>
+            <span className="stat-label">Toàn quyền</span>
           </div>
           <div className="stat-card">
             <span className="stat-number">

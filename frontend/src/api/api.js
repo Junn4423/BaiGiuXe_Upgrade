@@ -2268,7 +2268,7 @@ export async function themPhienGuiXeVoiViTri(session) {
 // Lấy thông tin quyền hạn người dùng từ lv_lv0007
 export async function layThongTinQuyenHanNguoiDung(userCode) {
   try {
-    console.log(`🔐 Đang lấy thông tin quyền hạn cho người dùng: ${userCode}`);
+    console.log(`Đang lấy thông tin quyền hạn cho người dùng: ${userCode}`);
     
     const payload = {
       table: "pm_nc0011",
@@ -2279,13 +2279,13 @@ export async function layThongTinQuyenHanNguoiDung(userCode) {
     const result = await callApiWithAuth(payload);
     
     if (result && result.success && result.data) {
-      console.log(`✅ Lấy thông tin quyền hạn thành công:`, result.data);
+      console.log(`Lấy thông tin quyền hạn thành công:`, result.data);
       return {
         success: true,
         ...result.data
       };
     } else {
-      console.error(`❌ Lỗi lấy thông tin quyền hạn:`, result?.message || "Unknown error");
+      console.error(`Lỗi lấy thông tin quyền hạn:`, result?.message || "Unknown error");
       return {
         success: false,
         message: result?.message || "Không thể lấy thông tin quyền hạn",
@@ -2302,7 +2302,7 @@ export async function layThongTinQuyenHanNguoiDung(userCode) {
       };
     }
   } catch (error) {
-    console.error(`❌ Exception khi lấy thông tin quyền hạn:`, error);
+    console.error(`Exception khi lấy thông tin quyền hạn:`, error);
     return {
       success: false,
       message: `Lỗi hệ thống: ${error.message}`,
@@ -2688,62 +2688,30 @@ export async function layThongTinQuyenHanNhanVien(token, userCode) {
   }
 }
 
-// -------------------- Employee Management Functions --------------------
+// ==================== QUẢN LÝ NHÂN VIÊN (lv_lv0007) ====================
 
 /**
- * Lấy danh sách tất cả nhân viên từ bảng lv_lv0007
- * @returns {Promise<Array>} Danh sách nhân viên
+ * Lấy danh sách tất cả nhân viên
+ * @returns {Promise<Array>} Danh sách nhân viên với thông tin: taiKhoanDN, nguoiThem, roleQuyen, matKhau, ten, quyenHan
  */
 export async function layDanhSachNhanVien() {
   const payload = {
     table: "lv_lv0007",
-    func: "layDanhSach"
+    func: "data"
   };
   return callApiWithAuth(payload);
 }
 
-export async function layNhanVienTheoMa(maNhanVien) {
+/**
+ * Lấy thông tin tài khoản theo token
+ * @param {string} token - Token để xác thực
+ * @returns {Promise<Array>} Thông tin tài khoản
+ */
+export async function layThongTinTaiKhoanTheoToken(token) {
   const payload = {
     table: "lv_lv0007",
-    func: "layNhanVienTheoMa",
-    maNhanVien: maNhanVien
-  };
-  return callApiWithAuth(payload);
-}
-
-export async function capNhatNhanVien(nhanVien) {
-  const payload = {
-    table: "lv_lv0007",
-    func: "capNhatNhanVien",
-    nhanVien: nhanVien
-  };
-  return callApiWithAuth(payload);
-}
-
-export async function xoaNhanVien(maNhanVien) {
-  const payload = {
-    table: "lv_lv0007",
-    func: "xoaNhanVien",
-    maNhanVien: maNhanVien
-  };
-  return callApiWithAuth(payload);
-}
-
-export async function themNhanVien(nhanVien) {
-  const payload = {
-    table: "lv_lv0007",
-    func: "themNhanVien",
-    nhanVien: nhanVien
-  };
-  return callApiWithAuth(payload);
-}
-
-export async function datLaiMatKhauNhanVien(maNhanVien, matKhauMoi) {
-  const payload = {
-    table: "lv_lv0007",
-    func: "datLaiMatKhauNhanVien",
-    maNhanVien: maNhanVien,
-    matKhauMoi: matKhauMoi
+    func: "layThongTinTaiKhoanTheoToken",
+    token: token
   };
   return callApiWithAuth(payload);
 }
@@ -2751,17 +2719,145 @@ export async function datLaiMatKhauNhanVien(maNhanVien, matKhauMoi) {
 /**
  * Thêm nhân viên mới
  * @param {Object} nhanVien - Thông tin nhân viên
- * @param {string} nhanVien.lv001 - Mã người dùng (Primary Key)
- * @param {string} nhanVien.lv002 - Mã nhóm quyền (1=Admin, 2=Manager, 3=Cashier, 4=Guard, 5=Staff)
- * @param {string} nhanVien.lv003 - Tên
- * @param {string} nhanVien.lv004 - Họ
- * @param {string} nhanVien.lv005 - Mật khẩu
- * @param {string} nhanVien.lv006 - Mã nhân viên
- * @param {string} nhanVien.lv095 - Trạng thái hoạt động (1=Active, 0=Inactive)
- * @param {string} nhanVien.lv099 - Giao diện (default, dark, light, blue)
- * @param {string} nhanVien.lv900 - Ghi chú
+ * @param {string} nhanVien.taiKhoanDN - Tài khoản đăng nhập (-> lv001)
+ * @param {string} nhanVien.nguoiThem - Người thêm (-> lv003)
+ * @param {string} nhanVien.roleQuyen - Role quyền (-> lv004)
+ * @param {string} nhanVien.matKhau - Mật khẩu (-> lv005)
+ * @param {string} nhanVien.ten - Tên nhân viên (-> lv006)
+ * @param {string} nhanVien.quyenHan - Quyền hạn (-> lv900)
  * @returns {Promise<Object>} Kết quả thêm nhân viên
  */
+export async function themNhanVien(nhanVien) {
+  const payload = {
+    table: "lv_lv0007",
+    func: "add",
+    taiKhoanDN: nhanVien.taiKhoanDN,  // -> lv001
+    nguoiThem: nhanVien.nguoiThem,    // -> lv003
+    roleQuyen: nhanVien.roleQuyen,    // -> lv004
+    matKhau: nhanVien.matKhau,        // -> lv005
+    ten: nhanVien.ten,                // -> lv006
+    quyenHan: nhanVien.quyenHan       // -> lv900
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Cập nhật thông tin nhân viên
+ * @param {Object} nhanVien - Thông tin nhân viên cần cập nhật
+ * @param {string} nhanVien.taiKhoanDN - Tài khoản đăng nhập (-> lv001)
+ * @param {string} nhanVien.nguoiThem - Người thêm (-> lv003)
+ * @param {string} nhanVien.roleQuyen - Role quyền (-> lv004)
+ * @param {string} nhanVien.matKhau - Mật khẩu (-> lv005)
+ * @param {string} nhanVien.ten - Tên nhân viên (-> lv006)
+ * @param {string} nhanVien.quyenHan - Quyền hạn (-> lv900)
+ * @returns {Promise<Object>} Kết quả cập nhật
+ */
+export async function capNhatNhanVien(nhanVien) {
+  const payload = {
+    table: "lv_lv0007",
+    func: "edit",
+    taiKhoanDN: nhanVien.taiKhoanDN,  // -> lv001
+    nguoiThem: nhanVien.nguoiThem,    // -> lv003
+    roleQuyen: nhanVien.roleQuyen,    // -> lv004
+    matKhau: nhanVien.matKhau,        // -> lv005
+    ten: nhanVien.ten,                // -> lv006
+    quyenHan: nhanVien.quyenHan       // -> lv900
+  };
+  return callApiWithAuth(payload);
+}
+
+
+// ==================== QUẢN LÝ KHU VỰC LÀM VIỆC NHÂN VIÊN (pm_nc0011) ====================
+
+/**
+ * Lấy danh sách khu vực làm việc của nhân viên
+ * @returns {Promise<Array>} Danh sách khu vực làm việc
+ */
+export async function layDanhSachKhuVucLamViec() {
+  const payload = {
+    table: "pm_nc0011",
+    func: "data"
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Thêm khu vực làm việc cho nhân viên
+ * @param {Object} khuVucLamViec - Thông tin khu vực làm việc
+ * @param {string} khuVucLamViec.maKhuVuc - Mã khu vực
+ * @param {string} khuVucLamViec.taiKhoanDN - Tài khoản đăng nhập nhân viên
+ * @param {string} khuVucLamViec.moTa - Mô tả
+ * @returns {Promise<Object>} Kết quả thêm
+ */
+export async function themKhuVucLamViec(khuVucLamViec) {
+  const payload = {
+    table: "pm_nc0011",
+    func: "add",
+    maKhuVuc: khuVucLamViec.maKhuVuc,
+    taiKhoanDN: khuVucLamViec.taiKhoanDN,
+    moTa: khuVucLamViec.moTa
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Xóa khu vực làm việc của nhân viên
+ * @param {string} maKhuVuc - Mã khu vực
+ * @param {string} taiKhoanDN - Tài khoản đăng nhập nhân viên
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function xoaKhuVucLamViec(maKhuVuc, taiKhoanDN) {
+  const payload = {
+    table: "pm_nc0011",
+    func: "delete",
+    maKhuVuc: maKhuVuc,
+    taiKhoanDN: taiKhoanDN
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy khu vực làm việc của một nhân viên cụ thể
+ * @param {string} taiKhoanDN - Tài khoản đăng nhập nhân viên
+ * @returns {Promise<Array>} Danh sách khu vực làm việc của nhân viên
+ */
+export async function layKhuVucLamViecCuaNhanVien(taiKhoanDN) {
+  const payload = {
+    table: "pm_nc0011",
+    func: "layKhuVucLamViecCuaNhanVien",
+    taiKhoanDN: taiKhoanDN
+  };
+  return callApiWithAuth(payload);
+}
+
+// ==================== HELPER FUNCTIONS CHO NHÂN VIÊN ====================
+
+/**
+ * @deprecated Sử dụng layThongTinTaiKhoanTheoToken thay thế
+ */
+export async function layNhanVienTheoMa(token) {
+  return layThongTinTaiKhoanTheoToken(token);
+}
+
+/**
+ * @deprecated Chức năng này chưa được implement trong backend
+ */
+export async function xoaNhanVien(taiKhoanDN) {
+  const payload = {
+    table: "lv_lv0007",
+    func: "delete",
+    taiKhoanDN: taiKhoanDN
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * @deprecated Chức năng này chưa được implement trong backend
+ */
+export async function datLaiMatKhauNhanVien(maNhanVien, matKhauMoi) {
+  console.warn("API datLaiMatKhauNhanVien chưa được implement trong backend");
+  return { success: false, message: "Chức năng chưa được hỗ trợ" };
+}
 
 // ==================== THỐNG KÊ (STATISTICS) ====================
 export async function layThongKeDoanhThu({ fromDate, toDate }) {
@@ -2790,4 +2886,202 @@ export async function layTiLeLapDay() {
     func: "occupancy",
   };
   return callApiWithAuth(payload);
+}
+
+// ==================== THỐNG KÊ NÂNG CAO ====================
+
+/**
+ * Lấy thống kê tổng quan hệ thống
+ * @returns {Promise<Object>} Thống kê tổng quan
+ */
+export async function layThongKeTongQuan() {
+  try {
+    const payload = {
+      table: "statistics",
+      func: "systemOverview"
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy thống kê tổng quan:', error);
+    return {
+      totalCards: 0,
+      totalEmployees: 0,
+      totalZones: 0,
+      totalCameras: 0,
+      totalGates: 0,
+      totalSessions: 0,
+      activeSessionsToday: 0
+    };
+  }
+}
+
+/**
+ * Lấy thống kê xe trong bãi theo thời gian
+ * @param {Object} params - Tham số thống kê
+ * @returns {Promise<Object>} Thống kê xe trong bãi
+ */
+export async function layThongKeXeTrongBai({ fromDate, toDate }) {
+  try {
+    const payload = {
+      table: "statistics", 
+      func: "vehiclesInParking",
+      fromDate,
+      toDate
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy thống kê xe trong bãi:', error);
+    return { hourlyData: [], totalIn: 0, totalOut: 0 };
+  }
+}
+
+/**
+ * Lấy thống kê doanh thu theo từng loại thẻ
+ * @param {Object} params - Tham số thống kê
+ * @returns {Promise<Object>} Thống kê doanh thu theo loại thẻ
+ */
+export async function layThongKeDoanhThuTheoLoaiThe({ fromDate, toDate }) {
+  try {
+    const payload = {
+      table: "statistics",
+      func: "revenueByCardType", 
+      fromDate,
+      toDate
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy thống kê doanh thu theo loại thẻ:', error);
+    return { cardTypes: [], totalRevenue: 0 };
+  }
+}
+
+/**
+ * Lấy thống kê hiệu suất camera
+ * @param {Object} params - Tham số thống kê
+ * @returns {Promise<Object>} Thống kê camera
+ */
+export async function layThongKeHieuSuatCamera({ fromDate, toDate }) {
+  try {
+    const payload = {
+      table: "statistics",
+      func: "cameraPerformance",
+      fromDate, 
+      toDate
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy thống kê camera:', error);
+    return { cameras: [], totalScans: 0, successRate: 0 };
+  }
+}
+
+/**
+ * Lấy thống kê theo khu vực
+ * @param {Object} params - Tham số thống kê
+ * @returns {Promise<Object>} Thống kê theo khu vực
+ */
+export async function layThongKeTheoKhuVuc({ fromDate, toDate }) {
+  try {
+    const payload = {
+      table: "statistics",
+      func: "zoneStatistics",
+      fromDate,
+      toDate
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy thống kê theo khu vực:', error);
+    return { zones: [], busiest: null };
+  }
+}
+
+/**
+ * Lấy thống kê nhân viên hoạt động
+ * @param {Object} params - Tham số thống kê  
+ * @returns {Promise<Object>} Thống kê nhân viên
+ */
+export async function layThongKeNhanVien({ fromDate, toDate }) {
+  try {
+    const payload = {
+      table: "statistics", 
+      func: "employeeActivity",
+      fromDate,
+      toDate
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy thống kê nhân viên:', error);
+    return { 
+      totalEmployees: 0,
+      activeEmployees: 0,
+      byRole: [],
+      byStatus: []
+    };
+  }
+}
+
+/**
+ * Lấy thống kê thời gian gửi xe trung bình
+ * @param {Object} params - Tham số thống kê
+ * @returns {Promise<Object>} Thống kê thời gian
+ */
+export async function layThongKeThoiGianTrungBinh({ fromDate, toDate }) {
+  try {
+    const payload = {
+      table: "statistics",
+      func: "averageParkingTime", 
+      fromDate,
+      toDate
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy thống kê thời gian:', error);
+    return { averageTime: 0, byVehicleType: [], distribution: [] };
+  }
+}
+
+/**
+ * Lấy top thẻ sử dụng nhiều nhất
+ * @param {Object} params - Tham số thống kê
+ * @returns {Promise<Object>} Top thẻ
+ */
+export async function layTopTheSuDung({ fromDate, toDate, limit = 10 }) {
+  try {
+    const payload = {
+      table: "statistics",
+      func: "topCards",
+      fromDate,
+      toDate,
+      limit
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy top thẻ:', error);
+    return { topCards: [] };
+  }
+}
+
+/**
+ * Lấy thống kê lỗi và sự cố
+ * @param {Object} params - Tham số thống kê
+ * @returns {Promise<Object>} Thống kê lỗi
+ */
+export async function layThongKeLoiSuCo({ fromDate, toDate }) {
+  try {
+    const payload = {
+      table: "statistics",
+      func: "errorAnalysis",
+      fromDate,
+      toDate
+    };
+    return callApiWithAuth(payload);
+  } catch (error) {
+    console.error('[API Error] Lỗi lấy thống kê lỗi:', error);
+    return { 
+      plateErrors: 0,
+      cameraErrors: 0, 
+      cardErrors: 0,
+      systemErrors: 0
+    };
+  }
 }
