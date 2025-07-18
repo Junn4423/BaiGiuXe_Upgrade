@@ -36,7 +36,7 @@
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-.panel-header {
+.camera-panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -44,18 +44,18 @@
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   color: white;
   min-height: 5px;
-  max-height: 5px !important;
+  max-height: 5px;
   flex-shrink: 0;
 }
 
-.panel-title {
-  font-size: 11px;
+.camera-panel-header .panel-title {
+  font-size: 8px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.panel-status {
+.camera-panel-header .panel-status {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -64,12 +64,17 @@
   text-transform: uppercase;
 }
 
-.status-dot {
+.camera-panel-header .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #10b981;
   animation: pulse 2s infinite;
+}
+
+.camera-panel-header .panel-status.offline .status-dot {
+  background: #ef4444;
+  animation: none;
 }
 
 @keyframes pulse {
@@ -170,11 +175,11 @@
     gap: 8px;
   }
 
-  .panel-title {
+  .camera-panel-header .panel-title {
     font-size: 10px;
   }
 
-  .panel-status {
+  .camera-panel-header .panel-status {
     font-size: 8px;
   }
 
