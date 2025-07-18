@@ -659,6 +659,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
                 <th>BIỂN SỐ</th>
                 <th>MÃ THẺ</th>
                 <th>LOẠI XE</th>
+                <th>VỊ TRÍ GỬI</th>
                 <th>GIỜ VÀO</th>
                 <th>GIỜ RA</th>
                 <th>THỜI GIAN ĐỖ</th>
@@ -670,7 +671,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
             <tbody>
               {filteredAndSortedVehicles.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="no-data">
+                  <td colSpan="11" className="no-data">
                     Không có dữ liệu
                   </td>
                 </tr>
@@ -685,6 +686,7 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
                     <td className="license-plate">{vehicle.licensePlate}</td>
                     <td className="card-id">{vehicle.cardId}</td>
                     <td className="vehicle-type">{vehicle.vehicleTypeName}</td>
+                    <td className="parking-spot">{vehicle.parkingSpot}</td>
                     <td className="time-in">{formatTime(vehicle.timeIn)}</td>
                     <td className="time-out">{formatTime(vehicle.timeOut)}</td>
                     <td className="duration">{getDuration(vehicle)}</td>

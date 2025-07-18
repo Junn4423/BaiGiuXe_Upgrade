@@ -329,6 +329,24 @@
   font-size: 11px;
 }
 
+.parking-spot {
+  font-weight: 600;
+  color: #3b82f6;
+  background: #eff6ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  text-align: center;
+  min-width: 60px;
+  display: inline-block;
+}
+
+.parking-spot:empty::after {
+  content: "---";
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .time-in,
 .time-out {
   color: #374151;
@@ -460,7 +478,13 @@
   padding: 8px !important;
 }
 
-/* Update table to accommodate actions column */
+/* Update table to accommodate parking spot column */
+.vehicle-table th:nth-child(5), /* Vị trí gửi */
+.vehicle-table td:nth-child(5) {
+  width: 120px;
+  text-align: center;
+}
+
 .vehicle-table th:last-child,
 .vehicle-table td:last-child {
   width: 100px;
