@@ -39,7 +39,6 @@ import {
 } from "../../utils/imageUtils";
 import { layALLLoaiPhuongTien } from "../../api/api";
 import StatisticsPage from "../../components/StatisticsPage";
-import EggComponent from "../../components/egg";
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
 
@@ -102,7 +101,6 @@ const MainUI = () => {
   const [showVehicleType, setShowVehicleType] = useState(false);
   const [showEmployeePermission, setShowEmployeePermission] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
-  const [showEggGame, setShowEggGame] = useState(false);
 
   // Card scanning and image capture
   const [showImageCaptureModal, setShowImageCaptureModal] = useState(false);
@@ -139,22 +137,6 @@ const MainUI = () => {
       loadZoneInfo(workConfig.zone);
     }
   }, [workConfig]);
-
-  // F11 event listener for secret Snake game
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "F10") {
-        event.preventDefault();
-        setShowEggGame(true);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
 
   // Debug workConfig state changes
   useEffect(() => {
@@ -2369,34 +2351,6 @@ const MainUI = () => {
       {/* Statistics Page Overlay */}
       {showStatistics && (
         <StatisticsPage onClose={() => setShowStatistics(false)} />
-      )}
-
-      {/* Secret Snake Game (Easter Egg) - Triggered by F11 */}
-      {showEggGame && (
-        <EggComponent
-          onClose={() => setShowEggGame(false)}
-          onGameOver={() => {
-            setShowEggGame(false);
-            // Game over consequence - terminate app after showing message
-            setTimeout(() => {
-              showToast(
-                "Trò chơi kết thúc! Ứng dụng sẽ đóng do không cho gửi xe nữa.",
-                "error",
-                3000
-              );
-              setTimeout(() => {
-                if (window.require) {
-                  // If in Electron, close the app
-                  const { ipcRenderer } = window.require("electron");
-                  ipcRenderer.send("app-quit");
-                } else {
-                  // If in browser, close window/tab
-                  window.close();
-                }
-              }, 3000);
-            }, 1000);
-          }}
-        />
       )}
     </div>
   );
