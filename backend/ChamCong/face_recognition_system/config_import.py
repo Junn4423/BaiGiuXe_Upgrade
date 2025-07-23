@@ -8,7 +8,7 @@ Vui lòng điều chỉnh các thông số kết nối theo hệ thống của b
 ERP_MAIN_CONFIG = {
     'host': '192.168.1.90',      # IP server MySQL ERP
     'port': 3306,             # Port MySQL
-    'user': 'faceuser',           # Username MySQL
+    'user': 'root',           # Username MySQL
     'password': 'THU@1982',           # Password MySQL
     'database': 'nhansu_erp_sofv4_0',
     'charset': 'utf8mb4'
@@ -18,7 +18,7 @@ ERP_MAIN_CONFIG = {
 ERP_DOCS_CONFIG = {
     'host': '192.168.1.90',      # IP server MySQL ERP Documents
     'port': 3306,             # Port MySQL
-    'user': 'faceuser',           # Username MySQL
+    'user': 'root',           # Username MySQL
     'password': 'THU@1982',           # Password MySQL
     'database': 'nhansu_sof_documents_v4_0',
     'charset': 'utf8mb4'
