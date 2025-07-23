@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  backend:
+    build: .
+    container_name: face_backend
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./static/faces:/app/static/faces
+    environment:
+      - ERP_HOST=192.168.1.90
+      - ERP_PORT=3306
+      - ERP_USER=faceuser
+      - ERP_PASSWORD=THU@1982
+      - ERP_DATABASE=nhansu_erp_sofv4_0
+    restart: unless-stopped
+
+  frontend:
+    build: ./face-attendance-react
+    container_name: face_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+# MySQL ERP không chạy trong container, backend sẽ kết nối tới server ERP thật như cấu hình 
