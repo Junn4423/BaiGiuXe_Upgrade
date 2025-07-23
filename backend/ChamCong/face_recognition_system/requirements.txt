@@ -1,0 +1,13 @@
+flask
+flask-sqlalchemy
+opencv-python
+face-recognition
+numpy
+Pillow
+python-dateutil
+mysql-connector-python
+torch
+torchvision
+easydict
+tqdm
+tensorboardX

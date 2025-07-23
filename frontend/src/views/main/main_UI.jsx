@@ -30,6 +30,7 @@ import VehicleTypeDialog from "../dialogs/VehicleTypeDialog";
 import EmployeePermissionDialog from "../dialogs/EmployeePermissionDialog";
 import ImageCaptureModal from "../../components/ImageCaptureModal";
 import LicensePlateConfirmDialog from "../../components/LicensePlateConfirmDialog";
+import AttendanceDialog from "../../components/AttendanceDialog";
 import { useToast } from "../../components/Toast";
 import { layDanhSachCamera, layDanhSachKhu } from "../../api/api";
 import {
@@ -39,6 +40,7 @@ import {
 } from "../../utils/imageUtils";
 import { layALLLoaiPhuongTien } from "../../api/api";
 import StatisticsPage from "../../components/StatisticsPage";
+import { processAttendanceImage } from "../../api/apiChamCong";
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
 
@@ -101,6 +103,7 @@ const MainUI = () => {
   const [showVehicleType, setShowVehicleType] = useState(false);
   const [showEmployeePermission, setShowEmployeePermission] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
+  const [showAttendance, setShowAttendance] = useState(false);
 
   // Card scanning and image capture
   const [showImageCaptureModal, setShowImageCaptureModal] = useState(false);
@@ -870,6 +873,49 @@ const MainUI = () => {
               cameraComponentRef.current.displayCapturedFaceImage(
                 faceImage?.url || faceImage
               );
+              
+              // Xử lý chấm công khi có ảnh khuôn mặt - CHỈ ở chế độ xe vào
+              if (actualMode === "vao" && faceImage?.blob) {
+                console.log('🎯 Bắt đầu xử lý chấm công với ảnh khuôn mặt (mode: vào)');
+                
+                // Lấy biển số từ div plate-text trong camera panel (tối ưu)
+                const getDisplayedLicensePlate = () => {
+                  try {
+                    // Sử dụng querySelector với cache element nếu có thể
+                    const plateTextDiv = document.querySelector('.plate-text');
+                    if (plateTextDiv && plateTextDiv.textContent) {
+                      const plateText = plateTextDiv.textContent.trim();
+                      if (plateText && plateText !== '' && plateText !== 'N/A') {
+                        console.log('Biển số từ plate-text div:', plateText);
+                        return plateText;
+                      }
+                    }
+                    return null;
+                  } catch (error) {
+                    console.warn('Không thể lấy biển số từ plate-text div:', error);
+                    return null;
+                  }
+                };
+
+                const displayedPlate = getDisplayedLicensePlate();
+                const finalLicensePlate = displayedPlate || licensePlate || recognizedLicensePlate || '';
+                
+                console.log('Biển số cuối cùng sử dụng cho chấm công:', finalLicensePlate);
+                
+                // Chạy chấm công bất đồng bộ để không chặn UI
+                setTimeout(async () => {
+                  try {
+                    await processAttendanceImage(
+                      faceImage.blob,
+                      finalLicensePlate,
+                      showToast,
+                      actualMode
+                    );
+                  } catch (error) {
+                    console.error('❌ Lỗi chấm công:', error);
+                  }
+                }, 50); // Giảm delay để responsive hơn
+              }
             } else {
               console.warn("No face image to display");
             }
@@ -2167,6 +2213,13 @@ const MainUI = () => {
           >
             THẺ RFID
           </button>
+          <button 
+            className="toolbar-btn attendance-btn" 
+            onClick={() => setShowAttendance(true)}
+            title="Xem chấm công hôm nay"
+          >
+            CHẤM CÔNG
+          </button>
           <button className="toolbar-btn logout-btn" onClick={logout}>
             ĐĂNG XUẤT
           </button>
@@ -2343,6 +2396,12 @@ const MainUI = () => {
         onClose={handleCloseImageModal}
         images={capturedImages}
         cardId={scannedCardId}
+      />
+
+      {/* Attendance Dialog */}
+      <AttendanceDialog
+        isOpen={showAttendance}
+        onClose={() => setShowAttendance(false)}
       />
 
       {/* Toast Notifications */}
