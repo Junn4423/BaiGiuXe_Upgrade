@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Session Logic - Parking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button.success {
+            background: #28a745;
+        }
+        .button.danger {
+            background: #dc3545;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #b8daff;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚗 Test Session Logic - Parking System</h1>
+    <p>Test logic lấy mã phiên từ localStorage thay vì query database</p>
+
+    <div class="grid">
+        <div class="container">
+            <h3>🚪 Quá trình Xe Vào</h3>
+            <div>
+                <input type="text" id="cardId" placeholder="Mã thẻ (VD: 123456789)" value="123456789">
+                <input type="text" id="licensePlate" placeholder="Biển số (VD: 86B82132)" value="86B82132">
+            </div>
+            <button class="button success" onclick="simulateVehicleEntry()">📥 Mô phỏng Xe Vào</button>
+            <button class="button" onclick="checkCurrentSession()">🔍 Kiểm tra Session Hiện tại</button>
+            <button class="button danger" onclick="simulateVehicleExit()">📤 Mô phỏng Xe Ra</button>
+        </div>
+
+        <div class="container">
+            <h3>👤 Chấm Công</h3>
+            <button class="button" onclick="testAttendanceWithSession()">✅ Test Chấm Công (có session)</button>
+            <button class="button" onclick="testAttendanceWithoutSession()">❌ Test Chấm Công (không có session)</button>
+            <button class="button" onclick="simulateAttendanceAPI()">📡 Mô phỏng API Chấm Công</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>🗄️ Quản lý LocalStorage</h3>
+        <button class="button" onclick="viewLocalStorage()">👀 Xem localStorage</button>
+        <button class="button" onclick="clearSessions()">🗑️ Xóa tất cả sessions</button>
+        <button class="button" onclick="addMultipleSessions()">📚 Thêm nhiều sessions</button>
+    </div>
+
+    <div class="container">
+        <h3>📊 Trạng thái</h3>
+        <div id="status"></div>
+    </div>
+
+    <div class="container">
+        <h3>📝 Log</h3>
+        <button class="button" onclick="clearLog()">🧹 Xóa Log</button>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Mock functions for testing
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('log');
+            const typeIcon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logDiv.textContent += `[${timestamp}] ${typeIcon} ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+
+        // Mock getCurrentActiveSessionId function (from apiChamCong.js)
+        async function getCurrentActiveSessionId() {
+            try {
+                log('🔍 Tìm mã phiên từ localStorage...');
+                
+                // Lấy tất cả keys có prefix session_
+                const allKeys = Object.keys(localStorage);
+                const sessionKeys = allKeys.filter(key => key.startsWith('session_'));
+                
+                log(`📋 Tìm thấy các session keys: ${JSON.stringify(sessionKeys)}`);
+                
+                if (sessionKeys.length === 0) {
+                    log('⚠️ Không tìm thấy session nào trong localStorage');
+                    return null;
+                }
+                
+                // Lấy tất cả sessions và sắp xếp theo timestamp để lấy session mới nhất
+                const sessions = [];
+                
+                for (const key of sessionKeys) {
+                    try {
+                        const sessionDataStr = localStorage.getItem(key);
+                        let sessionData;
+                        
+                        // Xử lý cả format cũ (string) và format mới (JSON)
+                        try {
+                            sessionData = JSON.parse(sessionDataStr);
+                            // Format mới: có timestamp
+                            if (sessionData && typeof sessionData === 'object' && sessionData.sessionId) {
+                                sessions.push({
+                                    key: key,
+                                    sessionId: sessionData.sessionId,
+                                    cardId: sessionData.cardId,
+                                    timestamp: sessionData.timestamp || 0,
+                                    licensePlate: sessionData.licensePlate || '',
+                                    entryTime: sessionData.entryTime || ''
+                                });
+                            }
+                        } catch (parseError) {
+                            // Format cũ: chỉ là string sessionId
+                            if (sessionDataStr && typeof sessionDataStr === 'string') {
+                                const cardId = key.replace('session_', '');
+                                sessions.push({
+                                    key: key,
+                                    sessionId: sessionDataStr,
+                                    cardId: cardId,
+                                    timestamp: 0, // Không có timestamp, gán = 0
+                                    licensePlate: '',
+                                    entryTime: ''
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        log(`⚠️ Không thể parse session từ key ${key}: ${error.message}`, 'error');
+                    }
+                }
+                
+                if (sessions.length === 0) {
+                    log('⚠️ Không có session hợp lệ nào');
+                    return null;
+                }
+                
+                // Sắp xếp theo timestamp giảm dần (mới nhất trước)
+                sessions.sort((a, b) => b.timestamp - a.timestamp);
+                
+                const latestSession = sessions[0];
+                log(`✅ Tìm thấy ${sessions.length} sessions, lấy session mới nhất: ${JSON.stringify({
+                    cardId: latestSession.cardId,
+                    sessionId: latestSession.sessionId,
+                    timestamp: latestSession.timestamp,
+                    licensePlate: latestSession.licensePlate
+                })}`, 'success');
+                
+                return latestSession.sessionId;
+                
+            } catch (error) {
+                log(`❌ Lỗi lấy mã phiên từ localStorage: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        // Test functions
+        function simulateVehicleEntry() {
+            const cardId = document.getElementById('cardId').value || '123456789';
+            const licensePlate = document.getElementById('licensePlate').value || '86B82132';
+            
+            log(`🚪 Mô phỏng xe vào: Thẻ ${cardId}, Biển số ${licensePlate}`);
+            
+            // Mô phỏng response từ API themPhienGuiXe
+            const sessionId = Math.floor(Math.random() * 1000) + 1000; // Random session ID
+            const success = true;
+            
+            if (success) {
+                // Mô phỏng logic lưu session từ QuanLyXe.jsx
+                const sessionData = {
+                    sessionId: sessionId,
+                    cardId: cardId,
+                    timestamp: Date.now(),
+                    licensePlate: licensePlate,
+                    entryTime: new Date().toISOString()
+                };
+                localStorage.setItem(`session_${cardId}`, JSON.stringify(sessionData));
+                log(`✅ Đã lưu mã phiên ${sessionId} cho thẻ ${cardId} với timestamp ${sessionData.timestamp}`, 'success');
+                updateStatus(`Xe vào thành công! Session ID: ${sessionId}`, 'success');
+            } else {
+                log('❌ Xe vào thất bại', 'error');
+                updateStatus('Xe vào thất bại!', 'error');
+            }
+        }
+
+        async function checkCurrentSession() {
+            log('🔍 Kiểm tra session hiện tại...');
+            
+            const sessionId = await getCurrentActiveSessionId();
+            
+            if (sessionId) {
+                log(`✅ Session hiện tại: ${sessionId}`, 'success');
+                updateStatus(`Session hiện tại: ${sessionId}`, 'success');
+            } else {
+                log('❌ Không có session hiện tại', 'error');
+                updateStatus('Không có session hiện tại', 'error');
+            }
+        }
+
+        function simulateVehicleExit() {
+            const cardId = document.getElementById('cardId').value || '123456789';
+            
+            log(`🚪 Mô phỏng xe ra: Thẻ ${cardId}`);
+            
+            // Mô phỏng logic xóa session từ QuanLyXe.jsx
+            const sessionKey = `session_${cardId}`;
+            const existingSession = localStorage.getItem(sessionKey);
+            
+            if (existingSession) {
+                localStorage.removeItem(sessionKey);
+                log(`✅ Đã xóa session cho thẻ ${cardId}`, 'success');
+                updateStatus(`Xe ra thành công! Đã xóa session cho thẻ ${cardId}`, 'success');
+            } else {
+                log(`⚠️ Không tìm thấy session cho thẻ ${cardId}`, 'error');
+                updateStatus(`Không tìm thấy session cho thẻ ${cardId}`, 'error');
+            }
+        }
+
+        async function testAttendanceWithSession() {
+            log('👤 Test chấm công với session...');
+            
+            const sessionId = await getCurrentActiveSessionId();
+            
+            if (sessionId) {
+                // Mô phỏng API chấm công
+                log(`📤 Gửi chấm công với attendance_code: ${sessionId}`);
+                log('✅ Chấm công thành công!', 'success');
+                updateStatus(`Chấm công thành công với session: ${sessionId}`, 'success');
+            } else {
+                log('❌ Không có session để chấm công', 'error');
+                updateStatus('Không có session để chấm công', 'error');
+            }
+        }
+
+        async function testAttendanceWithoutSession() {
+            log('👤 Test chấm công không có session...');
+            
+            // Clear all sessions first
+            clearSessions();
+            
+            const sessionId = await getCurrentActiveSessionId();
+            
+            if (!sessionId) {
+                log('📤 Gửi chấm công không có attendance_code');
+                log('✅ Chấm công thành công (không có session)', 'success');
+                updateStatus('Chấm công thành công (không có session)', 'info');
+            }
+        }
+
+        function simulateAttendanceAPI() {
+            log('📡 Mô phỏng gửi request đến API chấm công...');
+            
+            getCurrentActiveSessionId().then(sessionId => {
+                const formData = new FormData();
+                formData.append('image', new Blob(['fake image data'], {type: 'image/jpeg'}));
+                
+                if (sessionId) {
+                    formData.append('attendance_code', sessionId);
+                    log(`✅ Đã thêm attendance_code: ${sessionId}`);
+                } else {
+                    log('⚠️ Không có attendance_code');
+                }
+                
+                log('📡 Giả lập gửi request đến http://192.168.1.20:5005/api/attendance_image');
+                log('✅ API response: {"success": true, "user": {"name": "John Doe"}}', 'success');
+                updateStatus('API chấm công thành công!', 'success');
+            });
+        }
+
+        function viewLocalStorage() {
+            log('👀 Xem tất cả localStorage sessions...');
+            
+            const allKeys = Object.keys(localStorage);
+            const sessionKeys = allKeys.filter(key => key.startsWith('session_'));
+            
+            if (sessionKeys.length === 0) {
+                log('📭 Không có session nào trong localStorage');
+                updateStatus('Không có session nào', 'info');
+            } else {
+                log(`📋 Tìm thấy ${sessionKeys.length} sessions:`);
+                sessionKeys.forEach(key => {
+                    const data = localStorage.getItem(key);
+                    try {
+                        const parsed = JSON.parse(data);
+                        log(`  ${key}: ${JSON.stringify(parsed, null, 2)}`);
+                    } catch (e) {
+                        log(`  ${key}: ${data} (string format)`);
+                    }
+                });
+                updateStatus(`Có ${sessionKeys.length} sessions trong localStorage`, 'info');
+            }
+        }
+
+        function clearSessions() {
+            log('🗑️ Xóa tất cả sessions...');
+            
+            const allKeys = Object.keys(localStorage);
+            const sessionKeys = allKeys.filter(key => key.startsWith('session_'));
+            
+            sessionKeys.forEach(key => {
+                localStorage.removeItem(key);
+                log(`  Đã xóa: ${key}`);
+            });
+            
+            log(`✅ Đã xóa ${sessionKeys.length} sessions`, 'success');
+            updateStatus(`Đã xóa ${sessionKeys.length} sessions`, 'success');
+        }
+
+        function addMultipleSessions() {
+            log('📚 Thêm nhiều sessions để test...');
+            
+            const sessions = [
+                { cardId: '111111111', sessionId: 1001, licensePlate: '30A12345' },
+                { cardId: '222222222', sessionId: 1002, licensePlate: '29B67890' },
+                { cardId: '333333333', sessionId: 1003, licensePlate: '51C11111' }
+            ];
+            
+            sessions.forEach((session, index) => {
+                const sessionData = {
+                    sessionId: session.sessionId,
+                    cardId: session.cardId,
+                    timestamp: Date.now() + (index * 1000), // Tăng timestamp để test sắp xếp
+                    licensePlate: session.licensePlate,
+                    entryTime: new Date(Date.now() + (index * 1000)).toISOString()
+                };
+                localStorage.setItem(`session_${session.cardId}`, JSON.stringify(sessionData));
+                log(`  Đã thêm session ${session.sessionId} cho thẻ ${session.cardId}`);
+            });
+            
+            log(`✅ Đã thêm ${sessions.length} sessions`, 'success');
+            updateStatus(`Đã thêm ${sessions.length} sessions`, 'success');
+        }
+
+        // Initialize
+        log('🚀 Test Session Logic đã sẵn sàng!');
+        updateStatus('Sẵn sàng test', 'info');
+    </script>
+</body>
+</html>

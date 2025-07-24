@@ -102,16 +102,31 @@ const QuanLyXe = ({ workConfig }) => {
 
       let success = false;
       let errorMessage = "";
+      let sessionId = null;
 
       if (typeof apiResult === "object" && apiResult !== null) {
         success = apiResult.success || false;
         errorMessage = apiResult.message || "";
+        sessionId = apiResult.maPhien || null; // Lấy mã phiên từ response
       } else {
         success = Boolean(apiResult);
       }
 
-      if (success) {
-        setActiveParkingSessions((prev) => ({ ...prev, [cardId]: session }));
+      if (success && sessionId) {
+        // Lưu mã phiên vào localStorage với timestamp để sử dụng cho chấm công
+        const sessionData = {
+          sessionId: sessionId,
+          cardId: cardId,
+          timestamp: Date.now(),
+          licensePlate: licensePlate || '',
+          entryTime: entryTime
+        };
+        localStorage.setItem(`session_${cardId}`, JSON.stringify(sessionData));
+        console.log(`✅ Đã lưu mã phiên ${sessionId} cho thẻ ${cardId} với timestamp ${sessionData.timestamp}`);
+        
+        // Cập nhật session với maPhien
+        const sessionWithId = { ...session, maPhien: sessionId };
+        setActiveParkingSessions((prev) => ({ ...prev, [cardId]: sessionWithId }));
 
         // Update vehicle info in UI
         if (ui) {
@@ -294,6 +309,10 @@ const QuanLyXe = ({ workConfig }) => {
           calculatedFee,
           currentTime.toISOString().slice(0, 19).replace("T", " ")
         );
+
+        // Xóa session khỏi localStorage sau khi xe ra thành công
+        localStorage.removeItem(`session_${cardId}`);
+        console.log(`✅ Đã xóa mã phiên cho thẻ ${cardId} khỏi localStorage`);
 
         return { success: true, message: "Xe ra thành công" };
       } else {

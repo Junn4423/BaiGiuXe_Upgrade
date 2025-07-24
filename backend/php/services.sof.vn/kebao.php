@@ -1,7 +1,7 @@
 <?php
-//ini_set('display_errors', 1); 
-//ini_set('display_startup_errors', 1);
-//error_reporting(E_ALL);
+// ini_set('display_errors', 1); 
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 switch ($vtable) {
     // --- Loại Phương Tiện ---
     case "pm_nc0001":
@@ -17,7 +17,7 @@ switch ($vtable) {
                         'tenLoaiPT' => $vrow['lv002'],
                         'moTa' => $vrow['lv003'],
 						'loaiXe' => $vrow['lv004'],
-                    ];
+                    ];  
                 }
                 break;
             case "add":
@@ -458,30 +458,102 @@ switch ($vtable) {
                         ['success'=>true,'message'=>'ĐỔI TRẠNG THÁI THÀNH ĐANG GỬI THÀNH CÔNG'] :
                         ['success'=>false,'message'=>'Lỗi khi đổi trạng thái'];
                     break;   
-                case "getCurrentActiveSession":
-                    // Lấy tất cả phiên gửi xe đang hoạt động (DANG_GUI)
-                    $sql = "SELECT lv001, lv002, lv003, lv008, lv014 FROM pm_nc0009 WHERE lv014 = 'DANG_GUI' ORDER BY lv008 DESC";
+                case "getMaxSessionId":
+                    // Lấy mã phiên lớn nhất (ID lớn nhất) từ bảng pm_nc0009
+                    $sql = "SELECT MAX(lv001) as maxSessionId FROM pm_nc0009";
+                    $result = db_query($sql);
+                    
+                    if ($result && db_num_rows($result) > 0) {
+                        $maxRow = db_fetch_array($result);
+                        $maxSessionId = $maxRow['maxSessionId'];
+                        
+                        if ($maxSessionId) {
+                            $vOutput = [
+                                'success' => true, 
+                                'maxSessionId' => $maxSessionId,
+                                'message' => "Mã phiên lớn nhất: {$maxSessionId}"
+                            ];
+                        } else {
+                            $vOutput = [
+                                'success' => false, 
+                                'maxSessionId' => null,
+                                'message' => 'Không có phiên gửi xe nào trong database'
+                            ];
+                        }
+                    } else {
+                        $vOutput = [
+                            'success' => false, 
+                            'maxSessionId' => null,
+                            'message' => 'Lỗi truy vấn database'
+                        ];
+                    }
+                    break;
+				case "getCurrentActiveSession":
+                    // Lấy mã phiên lớn nhất (mới nhất) từ bảng pm_nc0009
+                    // Sử dụng MAX(lv001) để đảm bảo lấy session mới nhất vừa tạo
+                    $sql = "SELECT MAX(lv001) as maxSessionId FROM pm_nc0009";
                     $result = db_query($sql);
                     $vOutput = [];
                     
                     if ($result && db_num_rows($result) > 0) {
-                        while ($vrow = db_fetch_array($result)) {
-                            $vOutput[] = [
-                                'lv001'        => $vrow['lv001'], // Mã phiên
-                                'maPhien'      => $vrow['lv001'], // Mã phiên (alias)
-                                'uidThe'       => $vrow['lv002'], // Mã thẻ
-                                'bienSo'       => $vrow['lv003'], // Biển số
-                                'gioVao'       => $vrow['lv008'], // Giờ vào
-                                'trangThai'    => $vrow['lv014']  // Trạng thái
-                            ];
+                        $maxRow = db_fetch_array($result);
+                        $maxSessionId = $maxRow['maxSessionId'];
+                        
+                        if ($maxSessionId) {
+                            // Lấy thông tin chi tiết của session có mã lớn nhất
+                            $detailSql = "SELECT lv001, lv002, lv003, lv008, lv014 FROM pm_nc0009 WHERE lv001 = '$maxSessionId'";
+                            $detailResult = db_query($detailSql);
+                            
+                            if ($detailResult && db_num_rows($detailResult) > 0) {
+                                $vrow = db_fetch_array($detailResult);
+                                $sessionData = [
+                                    'lv001'        => $vrow['lv001'], // Mã phiên
+                                    'maPhien'      => $vrow['lv001'], // Mã phiên (alias)
+                                    'uidThe'       => $vrow['lv002'], // Mã thẻ
+                                    'bienSo'       => $vrow['lv003'], // Biển số
+                                    'gioVao'       => $vrow['lv008'], // Giờ vào
+                                    'trangThai'    => $vrow['lv014']  // Trạng thái
+                                ];
+                                $vOutput = ['success' => true, 'data' => [$sessionData], 'message' => "Lấy mã phiên lớn nhất: {$vrow['lv001']} (trạng thái: {$vrow['lv014']})"];
+                            } else {
+                                $vOutput = ['success' => false, 'message' => 'Không thể lấy chi tiết phiên gửi xe', 'data' => []];
+                            }
+                        } else {
+                            $vOutput = ['success' => false, 'message' => 'Không có phiên gửi xe nào trong database', 'data' => []];
                         }
-                        $vOutput = ['success' => true, 'data' => $vOutput];
                     } else {
-                        $vOutput = ['success' => false, 'message' => 'Không có phiên gửi xe nào đang hoạt động', 'data' => []];
+                        $vOutput = ['success' => false, 'message' => 'Lỗi truy vấn database', 'data' => []];
                     }
                     break;
                 case "data":
                     $objEmp = $pm_nc0009->LoadAll();
+                    $vOutput = [];
+                    while ($vrow = db_fetch_array($objEmp)) {
+                        $vOutput[] = [
+                            'maPhien'      => $vrow['lv001'] ?? null,
+                            'uidThe'       => $vrow['lv002'] ?? null,
+                            'bienSo'       => $vrow['lv003'] ?? null,
+                            'viTriGui'     => $vrow['lv004'] ?? null,
+                            'chinhSach'    => $vrow['lv005'] ?? null,
+                            'congVao'      => $vrow['lv006'] ?? null,
+                            'congRa'       => $vrow['lv007'] ?? null,
+                            'gioVao'       => $vrow['lv008'] ?? null,
+                            'gioRa'        => $vrow['lv009'] ?? null,
+                            'phutGui'      => isset($vrow['lv010']) ? (float)$vrow['lv010'] : null,
+                            'anhVao'       => $vrow['lv011'] ?? null,
+                            'anhRa'        => $vrow['lv012'] ?? null,
+                            'anhMatVao'    => $vrow['lv015'] ?? null,
+                            'anhMatRa'     => $vrow['lv016'] ?? null,
+                            'phi'          => isset($vrow['lv013']) ? (float)$vrow['lv013'] : null,
+                            'trangThai'    => $vrow['lv014'] ?? null,
+                            'camera_id'    => $vrow['camera_id'] ?? null,
+                            'plate_match'  => isset($vrow['plate_match']) ? (int)$vrow['plate_match'] : null,
+                        ];
+                    }
+                    break;
+                case "layPhienGuiXeTheoNgay":
+                    $ngay = $input['ngay'] ?? $_POST['ngay'] ?? null;
+                    $objEmp = $pm_nc0009->KB_LoadPhienTheoNgay($ngay);
                     $vOutput = [];
                     while ($vrow = db_fetch_array($objEmp)) {
                         $vOutput[] = [
@@ -733,7 +805,6 @@ switch ($vtable) {
 							'matKhau' => $row['lv005'],
 							'ten' => $row['lv006'],
 							'quyenHan' => $row['lv900'],
-							'khuVucLamViec' => $row['lv901'],
 						];
 					}
 					break;
@@ -775,7 +846,23 @@ switch ($vtable) {
 						? ['success' => true, 'message' => 'Cập nhật thành công']
 						: ['success' => false, 'message' => 'Lỗi khi cập nhật'];
 					break;
+                case "delete":
+                    include("pm_nc0011.php");
+                    $pm_nc0011 = new pm_nc0011();
+                    $lv_lv0007->lv001 = $input['taiKhoanDN'] ?? $_POST['lv001'] ?? null;
+                    if (!$lv_lv0007->lv001) {
+                        $vOutput = ['success' => false, 'message' => 'Thiếu tài khoản cần xóa'];
+                        break;
+                    }
+                    // Xóa liên kết khu vực - nhân viên trước
+                    $pm_nc0011->lv002 = $lv_lv0007->lv001;
+                    $pm_nc0011->KB_XoaAll();
 
+                    // Xóa tài khoản
+                    $vOutput = $lv_lv0007->LV_Delete()
+                        ? ['success' => true, 'message' => 'Xóa thành công']
+                        : ['success' => false, 'message' => 'Lỗi khi xóa tài khoản'];
+                    break;
 			}
 		break;
         
@@ -827,6 +914,8 @@ switch ($vtable) {
                     ];
                 }
                 break;
+
+
 
         }
 	break;

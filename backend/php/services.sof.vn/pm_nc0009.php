@@ -335,4 +335,19 @@ class pm_nc0009 extends lv_controler{
 		$vresult = db_query($sql);
 		return $vresult;
 	}
+    function KB_LoadPhienTheoNgay($ngay) {
+        $date = DateTime::createFromFormat('d/m/Y', $ngay);
+        if (!$date) {
+            $date = DateTime::createFromFormat('d-m-Y', $ngay);
+        }
+        if (!$date) {
+            return ['error' => 'Ngày không hợp lệ'];
+        }
+        $cleanDate = $date->format('dmY');
+
+        $bang = "pm_nc0009_" . $cleanDate;
+        $sql = "SELECT * FROM $bang";
+
+        return db_query($sql);
+    }
 }
