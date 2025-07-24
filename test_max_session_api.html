@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test MAX Session API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .button:hover { background: #0056b3; }
+        .button.success { background: #28a745; }
+        .button.danger { background: #dc3545; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 4px; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; font-weight: bold; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test MAX Session Logic API</h1>
+        <p>Test API <code>getCurrentActiveSession</code> với MAX logic</p>
+        
+        <div>
+            <button class="button" onclick="testGetCurrentSession()">🔍 Test getCurrentActiveSession</button>
+            <button class="button success" onclick="testAttendanceWithSession()">👤 Test Chấm Công với Session</button>
+            <button class="button danger" onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+        
+        <div id="status" class="status info">Sẵn sàng để test...</div>
+        <div id="log" class="log">Nhật ký hoạt động:\n</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost/parkinglot/backend/php/services.sof.vn/';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('log');
+            const typeIcon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logDiv.textContent += `[${timestamp}] ${typeIcon} ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = 'Nhật ký hoạt động:\n';
+        }
+
+        async function testGetCurrentSession() {
+            log('🔍 Test getCurrentActiveSession API...');
+            updateStatus('Đang test API...', 'info');
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        table: "pm_nc0009",
+                        func: "getCurrentActiveSession"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                log(`📡 API Response: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result && result.success && result.data) {
+                    const sessionData = result.data;
+                    if (sessionData.lv001) {
+                        log(`✅ Session ID từ MAX logic: ${sessionData.lv001}`, 'success');
+                        log(`📋 Thông tin session:`);
+                        log(`   - Session ID: ${sessionData.lv001}`);
+                        log(`   - Card ID: ${sessionData.uidThe || sessionData.lv002}`);
+                        log(`   - License Plate: ${sessionData.bienSo || sessionData.lv003}`);
+                        log(`   - Entry Time: ${sessionData.gioVao || sessionData.lv008}`);
+                        log(`   - Status: ${sessionData.trangThai || sessionData.lv014}`);
+                        updateStatus(`Session ID mới nhất: ${sessionData.lv001}`, 'success');
+                    } else {
+                        log('⚠️ Session data trống', 'error');
+                        updateStatus('Session data trống', 'error');
+                    }
+                } else {
+                    log('⚠️ Không có session nào đang hoạt động', 'error');
+                    updateStatus('Không có session nào đang hoạt động', 'error');
+                }
+            } catch (error) {
+                log(`❌ Lỗi khi gọi API: ${error.message}`, 'error');
+                updateStatus(`Lỗi API: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAttendanceWithSession() {
+            log('👤 Test chấm công với session từ MAX logic...');
+            
+            try {
+                // Lấy session từ API
+                const sessionResponse = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        table: "pm_nc0009",
+                        func: "getCurrentActiveSession"
+                    })
+                });
+
+                if (!sessionResponse.ok) {
+                    throw new Error(`HTTP error! status: ${sessionResponse.status}`);
+                }
+
+                const sessionResult = await sessionResponse.json();
+                log(`📡 Session API Response: ${JSON.stringify(sessionResult, null, 2)}`);
+                
+                if (sessionResult && sessionResult.success && sessionResult.data && sessionResult.data.lv001) {
+                    const sessionId = sessionResult.data.lv001;
+                    log(`✅ Đã lấy session ID: ${sessionId}`, 'success');
+                    
+                    // Mô phỏng gửi chấm công với attendance_code
+                    log('📤 Mô phỏng gửi chấm công với attendance_code...');
+                    
+                    const formData = new FormData();
+                    formData.append('image', new Blob(['fake image data'], {type: 'image/jpeg'}));
+                    formData.append('attendance_code', sessionId);
+                    
+                    log(`✅ FormData prepared with attendance_code: ${sessionId}`);
+                    log('📡 Giả lập gửi request đến API chấm công...');
+                    log('✅ Chấm công thành công với session từ MAX logic!', 'success');
+                    updateStatus(`Chấm công thành công với session: ${sessionId}`, 'success');
+                } else {
+                    log('❌ Không có session để chấm công', 'error');
+                    updateStatus('Không có session để chấm công', 'error');
+                }
+            } catch (error) {
+                log(`❌ Lỗi khi test chấm công: ${error.message}`, 'error');
+                updateStatus(`Lỗi test chấm công: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-load when page loads
+        window.addEventListener('load', function() {
+            log('🚀 Trang test đã sẵn sàng');
+            log('💡 Hướng dẫn:');
+            log('   1. Click "Test getCurrentActiveSession" để kiểm tra API');
+            log('   2. Click "Test Chấm Công với Session" để test flow hoàn chỉnh');
+            log('---');
+        });
+    </script>
+</body>
+</html>

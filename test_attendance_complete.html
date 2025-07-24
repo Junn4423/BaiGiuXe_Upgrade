@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Attendance với Session ID</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        .log { background-color: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Hoàn Chỉnh Attendance với Session ID</h1>
+    
+    <div class="container info">
+        <h3>📝 Hướng dẫn test</h3>
+        <ol>
+            <li><strong>Bước 1:</strong> Tạo session giả lập (như khi xe vào)</li>
+            <li><strong>Bước 2:</strong> Test lấy session ID từ localStorage</li>
+            <li><strong>Bước 3:</strong> Test API chấm công với attendance_code</li>
+            <li><strong>Bước 4:</strong> Kiểm tra kết quả</li>
+        </ol>
+    </div>
+
+    <!-- Bước 1: Tạo session giả lập -->
+    <div class="container">
+        <h3>🚗 Bước 1: Tạo Session Giả Lập (Xe Vào)</h3>
+        <input type="text" id="cardId" placeholder="Mã thẻ (VD: EMP001)" value="EMP001">
+        <input type="text" id="sessionId" placeholder="Session ID (VD: 555)" value="555">
+        <input type="text" id="licensePlate" placeholder="Biển số xe (VD: 30A-12345)" value="30A-12345">
+        <button onclick="createTestSession()">Tạo Session Giả Lập</button>
+        <div id="sessionResult" class="log"></div>
+    </div>
+
+    <!-- Bước 2: Test lấy session -->
+    <div class="container">
+        <h3>🔍 Bước 2: Test Lấy Session ID</h3>
+        <button onclick="testGetSessionId()">Lấy Session ID Hiện Tại</button>
+        <div id="sessionIdResult" class="log"></div>
+    </div>
+
+    <!-- Bước 3: Test attendance với file -->
+    <div class="container">
+        <h3>📸 Bước 3: Test Attendance với File</h3>
+        <input type="file" id="imageFile" accept="image/*">
+        <button onclick="testAttendanceWithFile()">Test Chấm Công (File)</button>
+        <div id="fileResult" class="log"></div>
+    </div>
+
+    <!-- Bước 4: Test attendance với camera -->
+    <div class="container">
+        <h3>📷 Bước 4: Test Attendance với Camera</h3>
+        <video id="video" width="320" height="240" autoplay style="border: 1px solid #ddd;"></video>
+        <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+        <br>
+        <button onclick="startCamera()">Bật Camera</button>
+        <button onclick="captureAndTest()">Chụp & Test Chấm Công</button>
+        <button onclick="stopCamera()">Tắt Camera</button>
+        <div id="cameraResult" class="log"></div>
+    </div>
+
+    <!-- Kết quả tổng hợp -->
+    <div class="container">
+        <h3>📊 Thông Tin Hệ Thống</h3>
+        <button onclick="showSystemInfo()">Hiển thị Thông Tin</button>
+        <div id="systemInfo" class="log"></div>
+    </div>
+
+    <script>
+        // API URLs - Cập nhật theo config thực tế
+        const API_BASE = 'http://localhost/services.sof.vn';
+        const ATTENDANCE_API_BASE = 'http://127.0.0.1:5000';
+        
+        let videoStream = null;
+
+        // === BƯỚC 1: TẠO SESSION GIẢ LẬP ===
+        function createTestSession() {
+            const cardId = document.getElementById('cardId').value || 'EMP001';
+            const sessionId = document.getElementById('sessionId').value || Math.floor(Math.random() * 1000) + 500;
+            const licensePlate = document.getElementById('licensePlate').value || '30A-12345';
+            
+            const sessionData = {
+                sessionId: sessionId,
+                cardId: cardId,
+                licensePlate: licensePlate,
+                timestamp: Date.now(),
+                entryTime: new Date().toISOString(),
+                status: 'DANG_GUI'
+            };
+            
+            localStorage.setItem(`session_${cardId}`, JSON.stringify(sessionData));
+            
+            const resultDiv = document.getElementById('sessionResult');
+            resultDiv.textContent = `✅ Đã tạo session giả lập:\nCard ID: ${cardId}\nSession ID: ${sessionId}\nBiển số: ${licensePlate}\nTimestamp: ${sessionData.timestamp}`;
+            resultDiv.className = 'log success';
+            
+            console.log('Created test session:', sessionData);
+        }
+
+        // === BƯỚC 2: TEST LẤY SESSION ID ===
+        async function testGetSessionId() {
+            const resultDiv = document.getElementById('sessionIdResult');
+            resultDiv.textContent = '🔄 Đang lấy session ID...';
+            
+            try {
+                const sessionId = await getCurrentActiveSessionId();
+                if (sessionId) {
+                    resultDiv.textContent = `✅ Lấy được Session ID: ${sessionId}`;
+                    resultDiv.className = 'log success';
+                } else {
+                    resultDiv.textContent = '⚠️ Không có session ID nào';
+                    resultDiv.className = 'log error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Lỗi: ${error.message}`;
+                resultDiv.className = 'log error';
+            }
+        }
+
+        // === BƯỚC 3: TEST ATTENDANCE VỚI FILE ===
+        async function testAttendanceWithFile() {
+            const fileInput = document.getElementById('imageFile');
+            const resultDiv = document.getElementById('fileResult');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.textContent = '⚠️ Vui lòng chọn file ảnh';
+                resultDiv.className = 'log error';
+                return;
+            }
+            
+            resultDiv.textContent = '🔄 Đang test chấm công với file...';
+            
+            try {
+                const result = await attendanceByImage(fileInput.files[0], '30A-12345');
+                resultDiv.textContent = `✅ Kết quả chấm công:\n${JSON.stringify(result, null, 2)}`;
+                resultDiv.className = 'log success';
+            } catch (error) {
+                resultDiv.textContent = `❌ Lỗi chấm công: ${error.message}`;
+                resultDiv.className = 'log error';
+            }
+        }
+
+        // === BƯỚC 4: TEST VỚI CAMERA ===
+        async function startCamera() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('video').srcObject = videoStream;
+                document.getElementById('cameraResult').textContent = '✅ Camera đã được bật';
+            } catch (error) {
+                document.getElementById('cameraResult').textContent = `❌ Lỗi bật camera: ${error.message}`;
+            }
+        }
+
+        function stopCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+                document.getElementById('video').srcObject = null;
+                document.getElementById('cameraResult').textContent = '🔴 Camera đã tắt';
+            }
+        }
+
+        async function captureAndTest() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const resultDiv = document.getElementById('cameraResult');
+            
+            if (!videoStream) {
+                resultDiv.textContent = '⚠️ Vui lòng bật camera trước';
+                return;
+            }
+            
+            // Chụp ảnh từ video
+            ctx.drawImage(video, 0, 0, 320, 240);
+            
+            canvas.toBlob(async (blob) => {
+                if (blob) {
+                    resultDiv.textContent = '🔄 Đang test chấm công với ảnh camera...';
+                    try {
+                        const result = await attendanceByImage(blob, '30A-12345');
+                        resultDiv.textContent = `✅ Kết quả chấm công camera:\n${JSON.stringify(result, null, 2)}`;
+                        resultDiv.className = 'log success';
+                    } catch (error) {
+                        resultDiv.textContent = `❌ Lỗi chấm công camera: ${error.message}`;
+                        resultDiv.className = 'log error';
+                    }
+                }
+            }, 'image/jpeg', 0.8);
+        }
+
+        // === HIỂN THỊ THÔNG TIN HỆ THỐNG ===
+        function showSystemInfo() {
+            const resultDiv = document.getElementById('systemInfo');
+            
+            // Lấy tất cả sessions từ localStorage
+            const sessions = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('session_')) {
+                    try {
+                        const sessionData = JSON.parse(localStorage.getItem(key));
+                        sessions.push({
+                            key,
+                            ...sessionData
+                        });
+                    } catch (e) {
+                        sessions.push({
+                            key,
+                            value: localStorage.getItem(key),
+                            error: 'Parse error'
+                        });
+                    }
+                }
+            }
+            
+            const info = {
+                'API Base': API_BASE,
+                'Attendance API': ATTENDANCE_API_BASE,
+                'LocalStorage Sessions': sessions.length,
+                'Sessions Detail': sessions,
+                'Browser': navigator.userAgent,
+                'Timestamp': new Date().toISOString()
+            };
+            
+            resultDiv.textContent = JSON.stringify(info, null, 2);
+            resultDiv.className = 'log info';
+        }
+
+        // === FUNCTIONS TỪ APICHAMCONG.JS (Sao chép để test) ===
+        
+        /**
+         * Lấy mã phiên hiện tại từ localStorage hoặc database
+         */
+        async function getCurrentActiveSessionId() {
+            try {
+                console.log('🔍 Đang lấy mã phiên từ localStorage...');
+                
+                const sessions = [];
+                
+                // Duyệt qua tất cả keys trong localStorage
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || !key.startsWith('session_')) continue;
+                    
+                    try {
+                        const sessionDataStr = localStorage.getItem(key);
+                        if (!sessionDataStr) continue;
+                        
+                        try {
+                            // Format mới: JSON object
+                            const sessionData = JSON.parse(sessionDataStr);
+                            if (sessionData && sessionData.sessionId) {
+                                sessions.push({
+                                    key: key,
+                                    sessionId: sessionData.sessionId,
+                                    cardId: sessionData.cardId || key.replace('session_', ''),
+                                    timestamp: sessionData.timestamp || 0,
+                                    licensePlate: sessionData.licensePlate || '',
+                                    entryTime: sessionData.entryTime || ''
+                                });
+                            }
+                        } catch (parseError) {
+                            // Format cũ: chỉ là string sessionId
+                            if (sessionDataStr && typeof sessionDataStr === 'string') {
+                                const cardId = key.replace('session_', '');
+                                sessions.push({
+                                    key: key,
+                                    sessionId: sessionDataStr,
+                                    cardId: cardId,
+                                    timestamp: 0,
+                                    licensePlate: '',
+                                    entryTime: ''
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`⚠️ Không thể parse session từ key ${key}:`, error);
+                    }
+                }
+                
+                if (sessions.length === 0) {
+                    console.log('⚠️ Không có session hợp lệ nào');
+                    return null;
+                }
+                
+                // Sắp xếp theo timestamp giảm dần (mới nhất trước)
+                sessions.sort((a, b) => b.timestamp - a.timestamp);
+                
+                const latestSession = sessions[0];
+                console.log(`✅ Tìm thấy ${sessions.length} sessions, lấy session mới nhất:`, {
+                    cardId: latestSession.cardId,
+                    sessionId: latestSession.sessionId,
+                    timestamp: latestSession.timestamp,
+                    licensePlate: latestSession.licensePlate
+                });
+                
+                return latestSession.sessionId;
+                
+            } catch (error) {
+                console.error('❌ Lỗi lấy mã phiên từ localStorage:', error);
+                
+                // Fallback: query database
+                console.log('🔄 Fallback: Query database để lấy mã phiên...');
+                return await getCurrentActiveSessionIdFromDB();
+            }
+        }
+
+        /**
+         * Fallback function: Lấy mã phiên từ database
+         */
+        async function getCurrentActiveSessionIdFromDB() {
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        table: "pm_nc0009",
+                        func: "getCurrentActiveSession"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result && result.success && result.data && result.data.length > 0) {
+                    const activeSession = result.data[0];
+                    const sessionId = activeSession.lv001 || activeSession.maPhien;
+                    console.log('✅ Lấy được mã phiên từ database:', sessionId);
+                    return sessionId;
+                }
+                
+                console.log('ℹ️ Không có phiên gửi xe nào đang hoạt động từ database');
+                return null;
+            } catch (error) {
+                console.error('❌ Lỗi lấy mã phiên từ database:', error);
+                return null;
+            }
+        }
+
+        /**
+         * Gửi ảnh chấm công
+         */
+        async function attendanceByImage(imageBlob, licensePlate = '') {
+            try {
+                console.log('📸 Gửi ảnh chấm công:', {
+                    imageSize: imageBlob.size,
+                    imageType: imageBlob.type,
+                    licensePlate
+                });
+
+                // Lấy mã phiên hiện tại
+                const attendanceCode = await getCurrentActiveSessionId();
+                console.log('🎯 Mã phiên hiện tại cho chấm công:', attendanceCode);
+
+                const formData = new FormData();
+                
+                // Tạo file từ blob
+                const file = new File([imageBlob], `attendance_${Date.now()}.jpg`, {
+                    type: imageBlob.type || 'image/jpeg',
+                    lastModified: Date.now()
+                });
+                
+                formData.append('image', file);
+                
+                // Thêm attendance_code nếu có mã phiên
+                if (attendanceCode) {
+                    formData.append('attendance_code', attendanceCode);
+                    console.log('✅ Đã thêm attendance_code vào request:', attendanceCode);
+                } else {
+                    console.log('⚠️ Không có mã phiên hiện tại, gửi chấm công không có attendance_code');
+                }
+
+                const response = await fetch(`${ATTENDANCE_API_BASE}/api/attendance_image`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ Kết quả chấm công:', result);
+
+                return result;
+            } catch (error) {
+                console.error('❌ Lỗi chấm công:', error);
+                return { success: false, message: error.message };
+            }
+        }
+    </script>
+</body>
+</html>
