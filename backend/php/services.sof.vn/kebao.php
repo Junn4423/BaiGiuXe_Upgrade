@@ -458,6 +458,28 @@ switch ($vtable) {
                         ['success'=>true,'message'=>'ĐỔI TRẠNG THÁI THÀNH ĐANG GỬI THÀNH CÔNG'] :
                         ['success'=>false,'message'=>'Lỗi khi đổi trạng thái'];
                     break;   
+                case "getCurrentActiveSession":
+                    // Lấy tất cả phiên gửi xe đang hoạt động (DANG_GUI)
+                    $sql = "SELECT lv001, lv002, lv003, lv008, lv014 FROM pm_nc0009 WHERE lv014 = 'DANG_GUI' ORDER BY lv008 DESC";
+                    $result = db_query($sql);
+                    $vOutput = [];
+                    
+                    if ($result && db_num_rows($result) > 0) {
+                        while ($vrow = db_fetch_array($result)) {
+                            $vOutput[] = [
+                                'lv001'        => $vrow['lv001'], // Mã phiên
+                                'maPhien'      => $vrow['lv001'], // Mã phiên (alias)
+                                'uidThe'       => $vrow['lv002'], // Mã thẻ
+                                'bienSo'       => $vrow['lv003'], // Biển số
+                                'gioVao'       => $vrow['lv008'], // Giờ vào
+                                'trangThai'    => $vrow['lv014']  // Trạng thái
+                            ];
+                        }
+                        $vOutput = ['success' => true, 'data' => $vOutput];
+                    } else {
+                        $vOutput = ['success' => false, 'message' => 'Không có phiên gửi xe nào đang hoạt động', 'data' => []];
+                    }
+                    break;
                 case "data":
                     $objEmp = $pm_nc0009->LoadAll();
                     $vOutput = [];

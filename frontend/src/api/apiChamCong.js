@@ -1,10 +1,49 @@
-import { url_api_chamcong } from './url.js';
+import { url_api_chamcong, url_api } from './url.js';
 
 // API endpoint cho chấm công
 const ATTENDANCE_API_BASE = url_api_chamcong;
 
 // Local storage để lưu dữ liệu chấm công hôm nay
 const ATTENDANCE_STORAGE_KEY = 'attendance_today';
+
+/**
+ * Lấy mã phiên hiện tại từ bảng pm_nc0009 (phiên gửi xe đang hoạt động)
+ * @returns {Promise<string|null>} - Mã phiên hiện tại hoặc null nếu không có
+ */
+async function getCurrentActiveSessionId() {
+  try {
+    const response = await fetch(url_api, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        table: "pm_nc0009",
+        func: "getCurrentActiveSession"
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result && result.success && result.data && result.data.length > 0) {
+      // Lấy phiên gửi xe mới nhất (theo thời gian vào)
+      const activeSession = result.data[0];
+      const sessionId = activeSession.lv001 || activeSession.maPhien;
+      console.log('✅ Lấy được mã phiên hiện tại:', sessionId);
+      return sessionId;
+    }
+    
+    console.log('ℹ️ Không có phiên gửi xe nào đang hoạt động');
+    return null;
+  } catch (error) {
+    console.error('❌ Lỗi lấy mã phiên hiện tại:', error);
+    return null;
+  }
+}
 
 /**
  * Gửi ảnh chấm công đến hệ thống nhận diện khuôn mặt
@@ -20,6 +59,10 @@ export async function attendanceByImage(imageBlob, licensePlate = '') {
       licensePlate
     });
 
+    // Lấy mã phiên hiện tại
+    const attendanceCode = await getCurrentActiveSessionId();
+    console.log('🎯 Mã phiên hiện tại cho chấm công:', attendanceCode);
+
     const formData = new FormData();
     
     // Tạo file từ blob
@@ -30,6 +73,14 @@ export async function attendanceByImage(imageBlob, licensePlate = '') {
     
     formData.append('image', file);
     
+    // Thêm attendance_code nếu có mã phiên
+    if (attendanceCode) {
+      formData.append('attendance_code', attendanceCode);
+      console.log('✅ Đã thêm attendance_code vào request:', attendanceCode);
+    } else {
+      console.log('⚠️ Không có mã phiên hiện tại, gửi chấm công không có attendance_code');
+    }
+
     const response = await fetch(`${ATTENDANCE_API_BASE}/api/attendance_image`, {
       method: 'POST',
       body: formData
@@ -48,6 +99,7 @@ export async function attendanceByImage(imageBlob, licensePlate = '') {
         user: result.user,
         status: result.status,
         message: result.message,
+        attendance_code: result.attendance_code || attendanceCode, // Lưu attendance_code từ response hoặc từ request
         licensePlate: licensePlate || 'Không xác định',
         timestamp: new Date().toISOString()
       };
@@ -63,9 +115,7 @@ export async function attendanceByImage(imageBlob, licensePlate = '') {
     // Bỏ qua lỗi, không hiển thị cho user
     return { success: false, message: error.message };
   }
-}
-
-/**
+}/**
  * Gửi ảnh chấm công bằng base64
  * @param {string} imageBase64 - Ảnh base64
  * @param {string} licensePlate - Biển số xe (tùy chọn)
@@ -78,14 +128,28 @@ export async function attendanceByBase64(imageBase64, licensePlate = '') {
       licensePlate
     });
 
+    // Lấy mã phiên hiện tại
+    const attendanceCode = await getCurrentActiveSessionId();
+    console.log('🎯 Mã phiên hiện tại cho chấm công (base64):', attendanceCode);
+
+    const requestBody = {
+      image_base64: imageBase64
+    };
+
+    // Thêm attendance_code nếu có mã phiên
+    if (attendanceCode) {
+      requestBody.attendance_code = attendanceCode;
+      console.log('✅ Đã thêm attendance_code vào request (base64):', attendanceCode);
+    } else {
+      console.log('⚠️ Không có mã phiên hiện tại, gửi chấm công không có attendance_code (base64)');
+    }
+
     const response = await fetch(`${ATTENDANCE_API_BASE}/api/attendance_image`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        image_base64: imageBase64
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -101,6 +165,7 @@ export async function attendanceByBase64(imageBase64, licensePlate = '') {
         user: result.user,
         status: result.status,
         message: result.message,
+        attendance_code: result.attendance_code || attendanceCode, // Lưu attendance_code từ response hoặc từ request
         licensePlate: licensePlate || 'Không xác định',
         timestamp: new Date().toISOString()
       };
@@ -247,7 +312,13 @@ function saveAttendanceRecord(record) {
       
       localStorage.setItem(storageKey, JSON.stringify(existingRecords));
       
-      console.log('Đã lưu record chấm công:', record);
+      console.log('Đã lưu record chấm công:', {
+        user: record.user?.name,
+        status: record.status,
+        attendance_code: record.attendance_code,
+        licensePlate: record.licensePlate,
+        timestamp: record.timestamp
+      });
     } catch (error) {
       console.error('Lỗi lưu record chấm công:', error);
     }

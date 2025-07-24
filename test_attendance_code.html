@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Attendance Code API</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Test Attendance Code Integration</h1>
+    
+    <div>
+        <h2>1. Test Lấy Mã Phiên Hiện Tại</h2>
+        <button onclick="testGetCurrentSession()">Test lấy mã phiên</button>
+        <div id="sessionResult"></div>
+    </div>
+
+    <div>
+        <h2>2. Test API Chấm Công (Mock)</h2>
+        <button onclick="testAttendanceAPI()">Test attendance API</button>
+        <div id="attendanceResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://192.168.1.94/parkinglot/services.sof.vn/index.php';
+        const ATTENDANCE_API = 'http://192.168.1.20:5005';
+
+        // Test lấy mã phiên hiện tại
+        async function testGetCurrentSession() {
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        table: "pm_nc0009",
+                        func: "getCurrentActiveSession"
+                    })
+                });
+
+                const result = await response.json();
+                
+                document.getElementById('sessionResult').innerHTML = `
+                    <h3>Kết quả lấy mã phiên:</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+
+                if (result && result.success && result.data && result.data.length > 0) {
+                    const sessionId = result.data[0].lv001;
+                    console.log('Mã phiên hiện tại:', sessionId);
+                    return sessionId;
+                }
+                
+                return null;
+            } catch (error) {
+                document.getElementById('sessionResult').innerHTML = `
+                    <h3>Lỗi:</h3>
+                    <p style="color: red;">${error.message}</p>
+                `;
+                console.error('Lỗi:', error);
+                return null;
+            }
+        }
+
+        // Test API chấm công với attendance_code
+        async function testAttendanceAPI() {
+            try {
+                // Trước tiên lấy mã phiên
+                const sessionId = await testGetCurrentSession();
+                
+                if (!sessionId) {
+                    document.getElementById('attendanceResult').innerHTML = `
+                        <h3>Không thể test vì không có mã phiên:</h3>
+                        <p style="color: orange;">Không có phiên gửi xe nào đang hoạt động</p>
+                    `;
+                    return;
+                }
+
+                // Mock attendance request với attendance_code
+                const mockAttendanceData = {
+                    image_base64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", // 1x1 pixel base64
+                    attendance_code: sessionId
+                };
+
+                console.log('Gửi request chấm công với attendance_code:', sessionId);
+
+                // Hiển thị kết quả mock (không gửi thật đến server chấm công)
+                document.getElementById('attendanceResult').innerHTML = `
+                    <h3>Mock Request Chấm Công:</h3>
+                    <pre>${JSON.stringify(mockAttendanceData, null, 2)}</pre>
+                    <p style="color: green;">✅ Request sẽ được gửi với attendance_code: ${sessionId}</p>
+                    <p><strong>Lưu ý:</strong> Đây là mock test. Request thật sẽ được gửi đến ${ATTENDANCE_API}/api/attendance_image</p>
+                `;
+
+            } catch (error) {
+                document.getElementById('attendanceResult').innerHTML = `
+                    <h3>Lỗi test attendance:</h3>
+                    <p style="color: red;">${error.message}</p>
+                `;
+                console.error('Lỗi:', error);
+            }
+        }
+
+        // Test tự động khi load trang
+        window.onload = function() {
+            console.log('Trang test attendance code đã load');
+            console.log('API Base:', API_BASE);
+            console.log('Attendance API:', ATTENDANCE_API);
+        };
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        button:hover {
+            background: #005a87;
+        }
+        
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        
+        div {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</body>
+</html>
