@@ -816,7 +816,7 @@ export async function uploadFaceImage(imageBlob, options = {}) {
 /**
  * Get full MinIO image URL from filename
  * @param {string} filename - Image filename stored in database
- * @returns {string} - Full MinIO URL
+ * @returns {string} - Full MinIO URL (primary server)
  */
 export function getImageUrl(filename) {
   if (!filename) return '';
@@ -832,20 +832,93 @@ export function getImageUrl(filename) {
 
 /**
  * Get backup MinIO URLs from filename for redundancy
+ * Thứ tự ưu tiên: 192.168.1.19, 192.168.1.90, 192.168.1.94
  * @param {string} filename - Image filename stored in database
- * @returns {Array<string>} - Array of backup MinIO URLs
+ * @returns {Array<string>} - Array of all MinIO URLs in priority order
  */
 export function getBackupImageUrls(filename) {
   if (!filename) return [];
   
-  // If it's already a full URL, return as single item array
+  // If it's already a full URL, extract filename and generate all URLs
   if (filename.startsWith('http://') || filename.startsWith('https://')) {
-    return [filename];
+    const urlParts = filename.split('/');
+    const extractedFilename = urlParts[urlParts.length - 1];
+    
+    // Tạo URLs cho tất cả servers, ưu tiên server hiện tại
+    const currentServer = filename.match(/\/\/([\d\.:]+)/)?.[1];
+    const allServers = ['192.168.1.19:9000', '192.168.1.90:9000', '192.168.1.94:9000'];
+    
+    // Đưa server hiện tại lên đầu
+    const orderedServers = currentServer 
+      ? [currentServer, ...allServers.filter(s => s !== currentServer)]
+      : allServers;
+      
+    return orderedServers.map(server => `http://${server}/parking-lot-images/${extractedFilename}`);
   }
   
-  // Construct URLs for all MinIO servers
+  // Construct URLs for all MinIO servers in priority order
   const servers = ['192.168.1.19:9000', '192.168.1.90:9000', '192.168.1.94:9000'];
   return servers.map(server => `http://${server}/parking-lot-images/${filename}`);
+}
+
+/**
+ * Check if image URL is accessible
+ * @param {string} url - Image URL to check
+ * @returns {Promise<boolean>} - True if accessible
+ */
+export async function checkImageUrl(url) {
+  if (!url) return false;
+  
+  try {
+    // Tạo Image object để test load
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        resolve(false);
+      }, 3000); // 3 second timeout
+      
+      img.onload = () => {
+        clearTimeout(timeout);
+        resolve(true);
+      };
+      
+      img.onerror = () => {
+        clearTimeout(timeout);
+        resolve(false);
+      };
+      
+      img.src = url;
+    });
+  } catch (error) {
+    console.warn('Error checking image URL:', error);
+    return false;
+  }
+}
+
+/**
+ * Get first working image URL from filename
+ * @param {string} filename - Image filename stored in database
+ * @returns {Promise<string>} - First working URL or empty string
+ */
+export async function getWorkingImageUrl(filename) {
+  const urls = getBackupImageUrls(filename);
+  
+  for (const url of urls) {
+    console.log(`Checking image URL: ${url}`);
+    const isWorking = await checkImageUrl(url);
+    
+    if (isWorking) {
+      console.log(`Found working image URL: ${url}`);
+      return url;
+    } else {
+      console.log(`URL not working: ${url}`);
+    }
+  }
+  
+  console.warn(`No working URLs found for: ${filename}`);
+  return '';
 }
 
 /**

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import "../../assets/styles/CardHistoryDialog.css"
 import { layNhatKyTheoThe, getImageUrl } from "../../api/api"
+import FallbackImage from "../../components/FallbackImage"
 
 const CardHistoryDialog = ({ cardId, onClose }) => {
   const [history, setHistory] = useState([])
@@ -226,13 +227,31 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                                 {session.anhVao && (
                                   <div className="image-item">
                                     <label>Ảnh vào:</label>
-                                    <img src={getImageUrl(session.anhVao)} alt="Ảnh vào" className="session-image" />
+                                    <FallbackImage 
+                                      filename={session.anhVao} 
+                                      alt="Ảnh vào" 
+                                      className="session-image"
+                                      placeholder={
+                                        <div style={{ height: '120px', width: '160px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '12px' }}>
+                                          Không có ảnh vào
+                                        </div>
+                                      }
+                                    />
                                   </div>
                                 )}
                                 {session.anhRa && (
                                   <div className="image-item">
                                     <label>Ảnh ra:</label>
-                                    <img src={getImageUrl(session.anhRa)} alt="Ảnh ra" className="session-image" />
+                                    <FallbackImage 
+                                      filename={session.anhRa} 
+                                      alt="Ảnh ra" 
+                                      className="session-image"
+                                      placeholder={
+                                        <div style={{ height: '120px', width: '160px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '12px' }}>
+                                          Không có ảnh ra
+                                        </div>
+                                      }
+                                    />
                                   </div>
                                 )}
                               </div>
@@ -260,7 +279,16 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                                     </div>
                                     {log.anhQuet && (
                                       <div className="log-image">
-                                        <img src={getImageUrl(log.anhQuet)} alt="Ảnh quét" className="log-scan-image" />
+                                        <FallbackImage 
+                                          filename={log.anhQuet} 
+                                          alt="Ảnh quét" 
+                                          className="log-scan-image"
+                                          placeholder={
+                                            <div style={{ height: '80px', width: '120px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '11px' }}>
+                                              Không có ảnh
+                                            </div>
+                                          }
+                                        />
                                       </div>
                                     )}
                                   </div>
