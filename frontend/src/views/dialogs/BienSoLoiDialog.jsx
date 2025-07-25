@@ -4,6 +4,7 @@ import { useState } from "react"
 import "../../assets/styles/BienSoLoiDialog.css"
 import "../../assets/styles/global-dialog-theme.css"
 import { getImageUrl } from "../../api/api"
+import FallbackImage from "../../components/FallbackImage"
 
 const BienSoLoiDialog = ({
   onClose,
@@ -73,15 +74,29 @@ const BienSoLoiDialog = ({
             <div className="image-group">
               <div className="image-container">
                 <div className="image-title">Ảnh xe vào</div>
-                <img
-                  src={entryImage ? getImageUrl(entryImage) : "/placeholder.svg?height=200&width=300"}
+                <FallbackImage
+                  filename={entryImage}
                   alt="Xe vào"
                   className="vehicle-image"
+                  placeholder={
+                    <div style={{ height: '200px', width: '300px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+                      Không có ảnh
+                    </div>
+                  }
                 />
               </div>
               <div className="image-container">
                 <div className="image-title">Ảnh xe ra</div>
-                <img src={exitImage ? getImageUrl(exitImage) : "/placeholder.svg?height=200&width=300"} alt="Xe ra" className="vehicle-image" />
+                <FallbackImage
+                  filename={exitImage}
+                  alt="Xe ra"
+                  className="vehicle-image"
+                  placeholder={
+                    <div style={{ height: '200px', width: '300px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+                      Không có ảnh
+                    </div>
+                  }
+                />
               </div>
             </div>
 
@@ -89,18 +104,28 @@ const BienSoLoiDialog = ({
               <div className="image-group">
                 <div className="image-container">
                   <div className="image-title">Ảnh mặt vào</div>
-                  <img
-                    src={entryFaceImage ? getImageUrl(entryFaceImage) : "/placeholder.svg?height=150&width=150"}
+                  <FallbackImage
+                    filename={entryFaceImage}
                     alt="Mặt vào"
                     className="face-image"
+                    placeholder={
+                      <div style={{ height: '150px', width: '150px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+                        Không có ảnh
+                      </div>
+                    }
                   />
                 </div>
                 <div className="image-container">
                   <div className="image-title">Ảnh mặt ra</div>
-                  <img
-                    src={exitFaceImage ? getImageUrl(exitFaceImage) : "/placeholder.svg?height=150&width=150"}
+                  <FallbackImage
+                    filename={exitFaceImage}
                     alt="Mặt ra"
                     className="face-image"
+                    placeholder={
+                      <div style={{ height: '150px', width: '150px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+                        Không có ảnh
+                      </div>
+                    }
                   />
                 </div>
               </div>

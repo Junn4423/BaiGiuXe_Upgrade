@@ -56,6 +56,150 @@ export const testImageUpload = async () => {
   }
 };
 
+// Test Image URL Fallback System
+export const testImageUrlFallback = async (filename) => {
+  console.log('🧪 Testing Image URL Fallback System...');
+  
+  try {
+    const { getBackupImageUrls, checkImageUrl } = await import('../api/api.js');
+    
+    if (!filename) {
+      filename = 'license_plate_2025-07-25T03-11-53-051Z.jpg'; // Test filename
+    }
+    
+    console.log(`🔍 Testing filename: ${filename}`);
+    
+    // Get all possible URLs
+    const urls = getBackupImageUrls(filename);
+    console.log('📋 All possible URLs:', urls);
+    
+    // Test each URL
+    const results = [];
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      console.log(`🔄 Testing URL ${i + 1}/${urls.length}: ${url}`);
+      
+      const startTime = performance.now();
+      const isWorking = await checkImageUrl(url);
+      const endTime = performance.now();
+      const duration = Math.round(endTime - startTime);
+      
+      const result = {
+        url,
+        working: isWorking,
+        duration,
+        server: url.match(/\/\/([\d\.:]+)/)?.[1] || 'unknown'
+      };
+      
+      results.push(result);
+      
+      if (isWorking) {
+        console.log(`✅ Server ${result.server} working (${duration}ms)`);
+      } else {
+        console.log(`❌ Server ${result.server} failed (${duration}ms)`);
+      }
+    }
+    
+    // Summary
+    const workingServers = results.filter(r => r.working);
+    const fastestServer = workingServers.sort((a, b) => a.duration - b.duration)[0];
+    
+    console.log('📊 Fallback Test Summary:', {
+      totalServers: results.length,
+      workingServers: workingServers.length,
+      failedServers: results.length - workingServers.length,
+      fastestServer: fastestServer?.server || 'none',
+      fastestTime: fastestServer?.duration || 'N/A'
+    });
+    
+    return {
+      filename,
+      urls,
+      results,
+      summary: {
+        totalServers: results.length,
+        workingServers: workingServers.length,
+        fastestServer: fastestServer?.server || 'none'
+      }
+    };
+    
+  } catch (error) {
+    console.error('❌ Fallback test failed:', error);
+    throw error;
+  }
+};
+
+// Test all servers health
+export const checkAllServersHealth = async () => {
+  console.log('🏥 Checking all MinIO servers health...');
+  
+  const servers = [
+    '192.168.1.19:9000',
+    '192.168.1.90:9000', 
+    '192.168.1.94:9000'
+  ];
+  
+  const testFilename = 'test-health-check.jpg';
+  const results = [];
+  
+  for (const server of servers) {
+    const url = `http://${server}/parking-lot-images/${testFilename}`;
+    console.log(`🔄 Checking server: ${server}`);
+    
+    try {
+      const startTime = performance.now();
+      
+      // Try to access MinIO API endpoint
+      const response = await fetch(`http://${server}/minio/health/live`, {
+        method: 'GET',
+        mode: 'no-cors' // To avoid CORS issues
+      });
+      
+      const endTime = performance.now();
+      const duration = Math.round(endTime - startTime);
+      
+      results.push({
+        server,
+        status: 'healthy',
+        duration,
+        type: 'api'
+      });
+      
+      console.log(`✅ Server ${server} healthy (${duration}ms)`);
+      
+    } catch (error) {
+      // Try image URL instead
+      const { checkImageUrl } = await import('../api/api.js');
+      const imageWorking = await checkImageUrl(url);
+      
+      results.push({
+        server,
+        status: imageWorking ? 'image-accessible' : 'failed',
+        error: error.message,
+        type: 'fallback'
+      });
+      
+      if (imageWorking) {
+        console.log(`⚠️ Server ${server} API not accessible but images work`);
+      } else {
+        console.log(`❌ Server ${server} completely failed`);
+      }
+    }
+  }
+  
+  const healthyServers = results.filter(r => r.status === 'healthy').length;
+  const accessibleServers = results.filter(r => r.status !== 'failed').length;
+  
+  console.log('📊 Server Health Summary:', {
+    totalServers: servers.length,
+    healthyServers,
+    accessibleServers,
+    failedServers: servers.length - accessibleServers
+  });
+  
+  return results;
+};
+
 // Test Toast Queue System
 export const testToastQueue = async () => {
   console.log('🧪 Testing Toast Queue System...');
@@ -214,6 +358,8 @@ export const monitorUploadPerformance = async (iterations = 5) => {
 if (typeof window !== 'undefined') {
   window.debugImageSystem = {
     testImageUpload,
+    testImageUrlFallback,
+    checkAllServersHealth,
     testToastQueue,
     testFolderCreation,
     checkSystemStatus,
@@ -225,6 +371,8 @@ if (typeof window !== 'undefined') {
 
 export default {
   testImageUpload,
+  testImageUrlFallback,
+  checkAllServersHealth,
   testToastQueue,
   testFolderCreation,
   checkSystemStatus,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../assets/styles/LicensePlateConfirmDialog.css"; 
 import { getImageUrl } from "../api/api"; 
+import FallbackImage from "./FallbackImage"; 
 
 const LicensePlateConfirmDialog = ({
   isOpen,
@@ -94,10 +95,13 @@ const LicensePlateConfirmDialog = ({
                 <div className="image-item">
                   <span className="image-label">Khuôn mặt vào</span>
                   {entryData.faceImage ? (
-                    <img
-                      src={getImageUrl(entryData.faceImage)}
+                    <FallbackImage
+                      filename={entryData.faceImage}
                       alt="Khuôn mặt xe vào"
                       className="comparison-image"
+                      placeholder={
+                        <div className="no-image">Không có ảnh</div>
+                      }
                     />
                   ) : (
                     <div className="no-image">Không có ảnh</div>
@@ -112,10 +116,13 @@ const LicensePlateConfirmDialog = ({
                 <div className="image-item">
                   <span className="image-label">Khuôn mặt ra</span>
                   {exitData.faceImage ? (
-                    <img
-                      src={getImageUrl(exitData.faceImage)}
+                    <FallbackImage
+                      filename={exitData.faceImage}
                       alt="Khuôn mặt xe ra"
                       className="comparison-image"
+                      placeholder={
+                        <div className="no-image">Không có ảnh</div>
+                      }
                     />
                   ) : (
                     <div className="no-image">Không có ảnh</div>
