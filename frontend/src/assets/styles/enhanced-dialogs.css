@@ -1464,6 +1464,42 @@
   50% { transform: translateY(-10px); }
 }
 
+/* Fix scroll layout for PricingPolicy Dialog */
+.dialog-body {
+  overflow: hidden !important; /* Remove scroll from parent */
+}
+
+.content-layout {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 2rem !important;
+  height: 100% !important;
+  overflow: hidden !important; /* Prevent parent scroll */
+}
+
+/* Each panel manages its own scroll */
+.panel {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+.panel-content {
+  flex: 1 !important;
+  overflow-y: auto !important; /* Each panel has its own scroll */
+  padding: 1rem !important;
+}
+
+/* List panel specific styling */
+.list-panel .panel-content {
+  padding-right: 0.5rem !important;
+}
+
+.form-panel .panel-content {
+  padding-left: 0.5rem !important;
+}
+
 /* Enhanced Responsive Design */
 @media (max-width: 1024px) {
   .form-row {

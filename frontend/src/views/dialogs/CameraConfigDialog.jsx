@@ -291,179 +291,199 @@ const CameraConfigDialog = ({ onClose, onSave }) => {
         </div>
 
         <div className="dialog-content">
-          {/* Status Panel */}
-          {showStatusPanel && (
-            <div className="status-panel">
+          <div className="content-layout">
+            {/* Left Panel - Camera List */}
+            <div className="camera-list-panel">
               <div className="panel-header">
-                <h4>Trạng Thái Camera</h4>
-                <div className="status-controls">
+                <h4>Danh Sách Camera</h4>
+                <div className="header-actions">
                   <button 
                     className="btn btn-refresh" 
                     onClick={handleRefreshStatus}
                     disabled={loading}
                   >
-                    ↻ Làm mới
-                  </button>
-                  <button 
-                    className="btn btn-secondary" 
-                    onClick={() => setShowStatusPanel(false)}
-                  >
-                    ▲ Ẩn
+                    {loading ? "Đang tải..." : "Làm mới"}
                   </button>
                 </div>
               </div>
-              <div className="status-summary">
-                <div className="status-item">
-                  <span className="status-label">Tổng số:</span>
-                  <span className="status-value">{cameraStatus.tongSo}</span>
-                </div>
-                <div className="status-item">
-                  <span className="status-label">Vào:</span>
-                  <span className="status-value">{cameraStatus.cameraVao.length}</span>
-                </div>
-                <div className="status-item">
-                  <span className="status-label">Ra:</span>
-                  <span className="status-value">{cameraStatus.cameraRa.length}</span>
-                </div>
-                <div className="status-item">
-                  <span className="status-label">Online:</span>
-                  <span className="status-value">{cameraStatus.cameraOnline.length}</span>
-                </div>
-                <div className="status-item">
-                  <span className="status-label">Offline:</span>
-                  <span className="status-value">{cameraStatus.cameraOffline.length}</span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {!showStatusPanel && (
-            <div className="status-toggle">
-              <button 
-                className="btn btn-secondary" 
-                onClick={() => setShowStatusPanel(true)}
-              >
-                ▼ Hiện trạng thái
-              </button>
-            </div>
-          )}
-
-          {/* Filter Section */}
-          <div className="filter-section">
-            <div className="panel-header">
-              <h4>Bộ Lọc</h4>
-            </div>
-            <div className="filter-row">
-              <div className="filter-group">
-                <label>Khu vực:</label>
-                <select value={selectedZone} onChange={handleZoneChange}>
-                  <option value="">Tất cả khu vực</option>
-                  {zones.map((zone) => (
-                    <option key={zone.maKhuVuc} value={zone.maKhuVuc}>
-                      {zone.tenKhuVuc}
-                    </option>
-                  ))}
-                </select>
-              </div>
               
-              <div className="filter-group">
-                <label>Loại camera:</label>
-                <select value={filterType} onChange={handleFilterTypeChange}>
-                  <option value="all">Tất cả</option>
-                  <option value="vao">Camera vào</option>
-                  <option value="ra">Camera ra</option>
-                  <option value="online">Online</option>
-                  <option value="offline">Offline</option>
-                </select>
-              </div>
-              
-              <button className="btn btn-primary add-button" onClick={handleAddCamera}>
-                + Thêm Camera
-              </button>
-            </div>
-          </div>
-
-          {/* Camera List */}
-          <div className="camera-list-panel">
-            <div className="panel-header">
-              <h4>Danh Sách Camera</h4>
-            </div>
-            <div className="camera-table-container">
-              {loading ? (
-                <div className="loading">Đang tải...</div>
-              ) : (
-                <table className="camera-table">
-                  <thead>
-                    <tr>
-                      <th>Trạng thái</th>
-                      <th>Mã Camera</th>
-                      <th>Tên Camera</th>
-                      <th>Loại</th>
-                      <th>Chức năng</th>
-                      <th>Khu vực</th>
-                      <th>Link RTSP</th>
-                      <th>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCameras.map((camera) => (
-                      <tr key={camera.maCamera}>
-                        <td className="status-cell">
-                          <span className="status-icon" title={getCameraStatusText(camera)}>
-                            {getCameraStatusIcon(camera)}
-                          </span>
-                          <small>{getCameraStatusText(camera)}</small>
-                        </td>
-                        <td>{camera.maCamera}</td>
-                        <td>{camera.tenCamera}</td>
-                        <td>{getCameraTypeText(camera.loaiCamera)}</td>
-                        <td>{getCameraFunctionText(camera.chucNangCamera)}</td>
-                        <td>{camera.maKhuVuc}</td>
-                        <td className="rtsp-link" title={camera.linkRTSP}>
-                          {camera.linkRTSP?.length > 20 
-                            ? camera.linkRTSP.substring(0, 20) + "..." 
-                            : camera.linkRTSP
-                          }
-                        </td>
-                        <td className="actions-cell">
-                          <button 
-                            className="btn btn-primary test-button" 
-                            onClick={() => testCameraRTSP(camera)}
-                            disabled={testingCamera === camera.maCamera}
-                            title="Test kết nối RTSP"
-                          >
-                            {testingCamera === camera.maCamera ? "⏳" : "🔍"}
-                          </button>
-                          <button 
-                            className="btn btn-secondary edit-button" 
-                            onClick={() => handleEditCamera(camera)}
-                            title="Chỉnh sửa camera"
-                          >
-                            
-                          </button>
-                          <button 
-                            className="btn btn-danger delete-button" 
-                            onClick={() => handleDeleteCamera(camera)}
-                            title="Xóa camera"
-                          >
-                          
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredCameras.length === 0 && (
-                      <tr>
-                        <td colSpan="8" className="no-data">
-                          {filterType === "all" 
-                            ? "Không có camera nào" 
-                            : `Không có camera ${filterType === "vao" ? "vào" : filterType === "ra" ? "ra" : filterType}`
-                          }
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              {/* Status Panel */}
+              {showStatusPanel && (
+                <div className="status-summary">
+                  <div className="status-item">
+                    <span className="status-label">Tổng số:</span>
+                    <span className="status-value">{cameraStatus.tongSo}</span>
+                  </div>
+                  <div className="status-item">
+                    <span className="status-label">Vào:</span>
+                    <span className="status-value">{cameraStatus.cameraVao.length}</span>
+                  </div>
+                  <div className="status-item">
+                    <span className="status-label">Ra:</span>
+                    <span className="status-value">{cameraStatus.cameraRa.length}</span>
+                  </div>
+                  <div className="status-item">
+                    <span className="status-label">Online:</span>
+                    <span className="status-value">{cameraStatus.cameraOnline.length}</span>
+                  </div>
+                  <div className="status-item">
+                    <span className="status-label">Offline:</span>
+                    <span className="status-value">{cameraStatus.cameraOffline.length}</span>
+                  </div>
+                </div>
               )}
+              
+              <div className="camera-table-container">
+                {loading ? (
+                  <div className="loading">Đang tải...</div>
+                ) : (
+                  <table className="camera-table">
+                    <thead>
+                      <tr>
+                        <th>Trạng thái</th>
+                        <th>Mã Camera</th>
+                        <th>Tên Camera</th>
+                        <th>Loại</th>
+                        <th>Chức năng</th>
+                        <th>Khu vực</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredCameras.map((camera) => (
+                        <tr key={camera.maCamera}>
+                          <td className="status-cell">
+                            <span className="status-icon" title={getCameraStatusText(camera)}>
+                              {getCameraStatusIcon(camera)}
+                            </span>
+                            <small>{getCameraStatusText(camera)}</small>
+                          </td>
+                          <td>{camera.maCamera}</td>
+                          <td>{camera.tenCamera}</td>
+                          <td>{getCameraTypeText(camera.loaiCamera)}</td>
+                          <td>{getCameraFunctionText(camera.chucNangCamera)}</td>
+                          <td>{camera.maKhuVuc}</td>
+                          <td className="actions-cell">
+                            <button 
+                              className="btn btn-primary test-button" 
+                              onClick={() => testCameraRTSP(camera)}
+                              disabled={testingCamera === camera.maCamera}
+                              title="Test kết nối RTSP"
+                            >
+                              {testingCamera === camera.maCamera ? "Đang test..." : "Test"}
+                            </button>
+                            <button 
+                              className="btn btn-secondary edit-button" 
+                              onClick={() => handleEditCamera(camera)}
+                              title="Chỉnh sửa camera"
+                            >
+                              Sửa
+                            </button>
+                            <button 
+                              className="btn btn-danger delete-button" 
+                              onClick={() => handleDeleteCamera(camera)}
+                              title="Xóa camera"
+                            >
+                              Xóa
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredCameras.length === 0 && (
+                        <tr>
+                          <td colSpan="7" className="no-data">
+                            {filterType === "all" 
+                              ? "Không có camera nào" 
+                              : `Không có camera ${filterType === "vao" ? "vào" : filterType === "ra" ? "ra" : filterType}`
+                            }
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+
+            {/* Right Panel - Filters and Controls */}
+            <div className="camera-form-panel">
+              <div className="panel-header">
+                <h4>Bộ Lọc & Điều Khiển</h4>
+              </div>
+              
+              <div className="panel-content">
+                {/* Filter Section */}
+                <div className="filter-section">
+                  <div className="filter-row">
+                    <div className="filter-group">
+                      <label>Khu vực:</label>
+                      <select value={selectedZone} onChange={handleZoneChange}>
+                        <option value="">Tất cả khu vực</option>
+                        {zones.map((zone) => (
+                          <option key={zone.maKhuVuc} value={zone.maKhuVuc}>
+                            {zone.tenKhuVuc}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div className="filter-group">
+                      <label>Loại camera:</label>
+                      <select value={filterType} onChange={handleFilterTypeChange}>
+                        <option value="all">Tất cả</option>
+                        <option value="vao">Camera vào</option>
+                        <option value="ra">Camera ra</option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="form-actions">
+                    <button className="btn btn-primary add-button" onClick={handleAddCamera}>
+                      Thêm Camera
+                    </button>
+                    {!showStatusPanel && (
+                      <button 
+                        className="btn btn-secondary" 
+                        onClick={() => setShowStatusPanel(true)}
+                      >
+                        Hiện trạng thái
+                      </button>
+                    )}
+                    {showStatusPanel && (
+                      <button 
+                        className="btn btn-secondary" 
+                        onClick={() => setShowStatusPanel(false)}
+                      >
+                        Ẩn trạng thái
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Camera Details */}
+                <div className="camera-details">
+                  <h5>Thông tin chi tiết</h5>
+                  <p>Tổng số camera: <strong>{cameraStatus.tongSo}</strong></p>
+                  <p>Camera vào: <strong>{cameraStatus.cameraVao.length}</strong></p>
+                  <p>Camera ra: <strong>{cameraStatus.cameraRa.length}</strong></p>
+                  <p>Đang online: <strong>{cameraStatus.cameraOnline.length}</strong></p>
+                  <p>Đang offline: <strong>{cameraStatus.cameraOffline.length}</strong></p>
+                  
+                  {Object.keys(cameraTestResults).length > 0 && (
+                    <div className="test-results">
+                      <h6>Kết quả test gần nhất:</h6>
+                      {Object.entries(cameraTestResults).map(([cameraId, result]) => (
+                        <div key={cameraId} className={`test-result ${result.success ? 'success' : 'error'}`}>
+                          <strong>{result.camera}:</strong> {result.message}
+                          <small> ({new Date(result.timestamp).toLocaleTimeString()})</small>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

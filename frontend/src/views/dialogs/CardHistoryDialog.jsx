@@ -152,31 +152,55 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                 {history.map((session) => (
                   <div key={session.maPhien} className="session-card">
                     <div className="session-header" onClick={() => toggleSessionDetails(session.maPhien)}>
-                      <div className="session-info">
-                        <div className="session-title">
+                      <div className="session-main-info">
+                        <div className="session-id-row">
                           <span className="session-id">Phiên: {session.maPhien}</span>
-                          <span className="session-date">{session.ngay}</span>
-                        </div>
-                        <div className="session-details">
-                          <span className="license-plate">Biển số: {session.bienSo || "N/A"}</span>
-                          <span className="parking-spot">Vị trí: {session.viTriGui || "N/A"}</span>
                           <span className={`session-status ${getStatusClass(session.trangThai)}`}>
                             {getStatusText(session.trangThai)}
                           </span>
                         </div>
-                      </div>
-                      <div className="session-summary">
-                        <div className="time-info">
-                          <div>Vào: {formatDateTime(session.gioVao)}</div>
-                          {session.gioRa && <div>Ra: {formatDateTime(session.gioRa)}</div>}
+                        <div className="session-details-row">
+                          <div className="detail-item">
+                            <span className="detail-label">Ngày:</span>
+                            <span className="detail-value">{session.ngay}</span>
+                          </div>
+                          <div className="detail-item">
+                            <span className="detail-label">Biển số:</span>
+                            <span className="detail-value">{session.bienSo || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <span className="detail-label">Vị trí:</span>
+                            <span className="detail-value">{session.viTriGui || "N/A"}</span>
+                          </div>
                         </div>
-                        <div className="fee-info">
-                          {session.phi > 0 && (
-                            <span className="fee">{formatCurrency(session.phi)}</span>
+                        <div className="session-time-row">
+                          <div className="time-item">
+                            <span className="time-label">Giờ vào:</span>
+                            <span className="time-value">{formatDateTime(session.gioVao)}</span>
+                          </div>
+                          {session.gioRa && (
+                            <div className="time-item">
+                              <span className="time-label">Giờ ra:</span>
+                              <span className="time-value">{formatDateTime(session.gioRa)}</span>
+                            </div>
+                          )}
+                          {session.tongPhut && (
+                            <div className="time-item">
+                              <span className="time-label">Thời gian:</span>
+                              <span className="time-value">{session.tongPhut} phút</span>
+                            </div>
                           )}
                         </div>
+                      </div>
+                      <div className="session-actions">
+                        {session.phi > 0 && (
+                          <div className="fee-display">
+                            <span className="fee-label">Phí:</span>
+                            <span className="fee-value">{formatCurrency(session.phi)}</span>
+                          </div>
+                        )}
                         <button className="expand-button">
-                          {expandedSession === session.maPhien ? "▼" : "▶"}
+                          {expandedSession === session.maPhien ? "Thu gọn ▲" : "Chi tiết ▼"}
                         </button>
                       </div>
                     </div>
@@ -184,108 +208,115 @@ const CardHistoryDialog = ({ cardId, onClose }) => {
                     {expandedSession === session.maPhien && (
                       <div className="session-expanded">
                         <div className="session-expanded-content">
-                          <div className="session-row">
-                            <div className="info-group">
-                              <label>Cổng vào:</label>
-                              <span>{session.congVao || "N/A"}</span>
+                          {/* Technical Information */}
+                          <div className="expanded-section">
+                            <h5 className="section-title">Thông tin kỹ thuật</h5>
+                            <div className="info-grid">
+                              <div className="info-item">
+                                <label>Cổng vào:</label>
+                                <span>{session.congVao || "N/A"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>Cổng ra:</label>
+                                <span>{session.congRa || "N/A"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>Loại phương tiện:</label>
+                                <span>{session.loaiPhuongTien || "N/A"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>Chính sách:</label>
+                                <span>{session.maChinhSach || "N/A"}</span>
+                              </div>
                             </div>
-                            <div className="info-group">
-                              <label>Cổng ra:</label>
-                              <span>{session.congRa || "N/A"}</span>
-                            </div>
-                            <div className="info-group">
-                              <label>Thời gian gửi:</label>
-                              <span>{session.tongPhut ? `${session.tongPhut} phút` : "N/A"}</span>
-                            </div>
-                          </div>
-
-                          <div className="session-row">
-                            <div className="info-group">
-                              <label>Loại phương tiện:</label>
-                              <span>{session.loaiPhuongTien || "N/A"}</span>
-                            </div>
-                            <div className="info-group">
-                              <label>Chính sách:</label>
-                              <span>{session.maChinhSach || "N/A"}</span>
-                            </div>
-                          </div>
-
-                          {session.ghiChu && (
-                            <div className="session-row">
-                              <div className="info-group full-width">
+                            {session.ghiChu && (
+                              <div className="note-section">
                                 <label>Ghi chú:</label>
                                 <span>{session.ghiChu}</span>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
 
-                          {/* Images */}
+                          {/* Images Section */}
                           {(session.anhVao || session.anhRa) && (
-                            <div className="images-section">
-                              <h4>Hình ảnh:</h4>
-                              <div className="images-row">
+                            <div className="expanded-section">
+                              <h5 className="section-title">Hình ảnh gửi xe</h5>
+                              <div className="main-images-grid">
                                 {session.anhVao && (
-                                  <div className="image-item">
-                                    <label>Ảnh vào:</label>
-                                    <FallbackImage 
-                                      filename={session.anhVao} 
-                                      alt="Ảnh vào" 
-                                      className="session-image"
-                                      placeholder={
-                                        <div style={{ height: '120px', width: '160px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '12px' }}>
-                                          Không có ảnh vào
-                                        </div>
-                                      }
-                                    />
+                                  <div className="main-image-item">
+                                    <div className="image-header">
+                                      <span className="image-label">Ảnh xe vào</span>
+                                      <span className="image-time">{formatDateTime(session.gioVao)}</span>
+                                    </div>
+                                    <div className="image-container">
+                                      <FallbackImage 
+                                        filename={session.anhVao} 
+                                        alt="Ảnh xe vào" 
+                                        className="main-session-image"
+                                        placeholder={
+                                          <div className="image-placeholder">
+                                            <div className="placeholder-icon">📷</div>
+                                            <div className="placeholder-text">Không có ảnh vào</div>
+                                          </div>
+                                        }
+                                      />
+                                    </div>
                                   </div>
                                 )}
                                 {session.anhRa && (
-                                  <div className="image-item">
-                                    <label>Ảnh ra:</label>
-                                    <FallbackImage 
-                                      filename={session.anhRa} 
-                                      alt="Ảnh ra" 
-                                      className="session-image"
-                                      placeholder={
-                                        <div style={{ height: '120px', width: '160px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '12px' }}>
-                                          Không có ảnh ra
-                                        </div>
-                                      }
-                                    />
+                                  <div className="main-image-item">
+                                    <div className="image-header">
+                                      <span className="image-label">Ảnh xe ra</span>
+                                      <span className="image-time">{formatDateTime(session.gioRa)}</span>
+                                    </div>
+                                    <div className="image-container">
+                                      <FallbackImage 
+                                        filename={session.anhRa} 
+                                        alt="Ảnh xe ra" 
+                                        className="main-session-image"
+                                        placeholder={
+                                          <div className="image-placeholder">
+                                            <div className="placeholder-icon">📷</div>
+                                            <div className="placeholder-text">Không có ảnh ra</div>
+                                          </div>
+                                        }
+                                      />
+                                    </div>
                                   </div>
                                 )}
                               </div>
                             </div>
                           )}
 
-                          {/* Detailed logs */}
+                          {/* Detailed Scan Logs */}
                           {session.nhatKy && session.nhatKy.length > 0 && (
-                            <div className="logs-section">
-                              <h4>Chi tiết quét:</h4>
-                              <div className="logs-list">
-                                {session.nhatKy.map((log) => (
-                                  <div key={log.idNhatKy} className="log-item">
-                                    <div className="log-time">
-                                      {formatDateTime(log.thoiGianQuet)}
-                                    </div>
-                                    <div className="log-camera">
-                                      {log.tenCamera || `Camera ${log.maCamera}`}
-                                    </div>
-                                    <div className="log-direction">
-                                      {log.huongQuet === "VAO" ? "Vào" : "Ra"}
-                                    </div>
-                                    <div className="log-match">
-                                      {log.khopBienSo ? "Khớp biển số" : "Không khớp"}
+                            <div className="expanded-section">
+                              <h5 className="section-title">Lịch sử quét thẻ ({session.nhatKy.length} lần quét)</h5>
+                              <div className="scan-logs-list">
+                                {session.nhatKy.map((log, index) => (
+                                  <div key={log.idNhatKy || index} className="scan-log-item">
+                                    <div className="scan-log-header">
+                                      <div className="scan-info">
+                                        <span className="scan-time">{formatDateTime(log.thoiGianQuet)}</span>
+                                        <span className="scan-camera">{log.tenCamera || `Camera ${log.maCamera}`}</span>
+                                        <span className={`scan-direction ${log.huongQuet === "VAO" ? "direction-in" : "direction-out"}`}>
+                                          {log.huongQuet === "VAO" ? "🔵 Vào" : "🔴 Ra"}
+                                        </span>
+                                        <span className={`scan-match ${log.khopBienSo ? "match-yes" : "match-no"}`}>
+                                          {log.khopBienSo ? "✅ Khớp biển số" : "❌ Không khớp"}
+                                        </span>
+                                      </div>
                                     </div>
                                     {log.anhQuet && (
-                                      <div className="log-image">
+                                      <div className="scan-image-container">
                                         <FallbackImage 
                                           filename={log.anhQuet} 
-                                          alt="Ảnh quét" 
-                                          className="log-scan-image"
+                                          alt={`Ảnh quét lần ${index + 1}`}
+                                          className="scan-log-image"
                                           placeholder={
-                                            <div style={{ height: '80px', width: '120px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '11px' }}>
-                                              Không có ảnh
+                                            <div className="scan-image-placeholder">
+                                              <span>🚫</span>
+                                              <span>Không tải được ảnh</span>
                                             </div>
                                           }
                                         />
