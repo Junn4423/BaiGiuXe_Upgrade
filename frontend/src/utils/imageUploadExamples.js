@@ -19,21 +19,29 @@ export async function handleVehicleEntryImage(imageFile) {
     const uploadResult = await uploadLicensePlateImage(imageFile);
     
     if (uploadResult.success) {
-      console.log('Entry image uploaded successfully:', {
+      const logData = {
         filename: uploadResult.filename,
-        servers: uploadResult.results.filter(r => r.status === 'success').length,
-        primaryUrl: uploadResult.primaryUrl
-      });
+        primaryUrl: uploadResult.primaryUrl,
+        isLocal: uploadResult.isLocal || false
+      };
+      
+      if (uploadResult.isLocal) {
+        console.log('Entry image saved locally (MinIO timeout):', logData);
+      } else {
+        logData.servers = uploadResult.results?.filter(r => r.status === 'success').length || 0;
+        console.log('Entry image uploaded to MinIO successfully:', logData);
+      }
       
       // Use the primary URL for database storage
       return {
         success: true,
         filename: uploadResult.filename,
         imageUrl: uploadResult.primaryUrl,
-        backupUrls: uploadResult.urls
+        backupUrls: uploadResult.urls,
+        isLocal: uploadResult.isLocal
       };
     } else {
-      throw new Error('Upload failed to all servers');
+      throw new Error('Upload failed completely');
     }
   } catch (error) {
     console.error('Failed to upload entry image:', error);

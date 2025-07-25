@@ -1,12 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react'
 
-const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
+const Toast = ({ message, type = 'success', duration = 1000, onClose }) => {
+  const [isVisible, setIsVisible] = useState(true)
+
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Start fade out animation before duration ends
+    const fadeOutTimer = setTimeout(() => {
+      setIsVisible(false)
+    }, duration - 300) // Start fade out 300ms before end
+
+    // Complete removal after fade out
+    const removeTimer = setTimeout(() => {
       onClose && onClose()
     }, duration)
 
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(fadeOutTimer)
+      clearTimeout(removeTimer)
+    }
   }, [duration, onClose])
 
   const bgColor = type === 'success' ? '#10b981' : 
@@ -27,7 +38,10 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
       fontSize: '14px',
       fontWeight: '500',
       maxWidth: '300px',
-      animation: 'slideIn 0.3s ease-out'
+      transition: 'all 0.3s ease-out',
+      transform: isVisible ? 'translateX(0)' : 'translateX(100%)',
+      opacity: isVisible ? 1 : 0,
+      animation: isVisible ? 'slideIn 0.3s ease-out' : 'slideOut 0.3s ease-out'
     }}>
       {message}
     </div>
@@ -36,27 +50,63 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
 
 export const useToast = () => {
   const [toasts, setToasts] = useState([])
+  const [toastQueue, setToastQueue] = useState([])
+  const [isProcessing, setIsProcessing] = useState(false)
 
-  const showToast = useCallback((message, type = 'success', duration = 3000) => {
-    const id = Date.now()
-    const toast = { id, message, type, duration }
+  // Process toast queue sequentially
+  useEffect(() => {
+    const processNext = async () => {
+      if (isProcessing || toastQueue.length === 0) return;
+
+      setIsProcessing(true);
+      const nextToast = toastQueue[0];
+      
+      // Remove from queue
+      setToastQueue(prev => prev.slice(1));
+      
+      // Show toast
+      setToasts([nextToast]);
+      
+      // Wait for display duration (1 second as requested)
+      await new Promise(resolve => setTimeout(resolve, nextToast.duration || 1000));
+      
+      // Remove toast
+      setToasts([]);
+      
+      // Small delay between toasts
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      setIsProcessing(false);
+    };
+
+    processNext();
+  }, [toastQueue.length, isProcessing]);
+
+  const showToast = useCallback((message, type = 'success', duration = 1000) => {
+    const id = Date.now() + Math.random(); // Ensure unique ID
+    const toast = { id, message, type, duration };
     
-    setToasts(prev => [...prev, toast])
-    
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id))
-    }, duration)
-  }, []) // Empty dependency array để function không thay đổi reference
+    // Add to queue instead of showing immediately
+    setToastQueue(prev => [...prev, toast]);
+  }, []); // Remove dependency array to prevent infinite re-creation
 
   const ToastContainer = () => (
-    <div>
+    <div style={{ 
+      position: 'fixed', 
+      top: '20px', 
+      right: '20px', 
+      zIndex: 9999,
+      pointerEvents: 'none' 
+    }}>
       {toasts.map(toast => (
         <Toast
           key={toast.id}
           message={toast.message}
           type={toast.type}
           duration={toast.duration}
-          onClose={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+          onClose={() => {
+            // Toasts are auto-managed by queue system
+          }}
         />
       ))}
       <style jsx>{`
@@ -68,6 +118,16 @@ export const useToast = () => {
           to {
             transform: translateX(0);
             opacity: 1;
+          }
+        }
+        @keyframes slideOut {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%);
+            opacity: 0;
           }
         }
       `}</style>
