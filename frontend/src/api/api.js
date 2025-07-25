@@ -552,9 +552,12 @@ export function blobToBase64(blob) {
  * Upload image to MinIO servers with automatic filename generation
  * @param {Blob|File} imageBlob - Image file to upload
  * @param {string} prefix - Filename prefix (license_plate, license_plate_out, khuon_mat, etc.)
+ * @param {Object} options - Additional options for background upload
+ * @param {string} options.sessionId - Session ID for database update
+ * @param {string} options.updateType - Type of update (plate_in, plate_out, face_in, face_out)
  * @returns {Promise<Object>} - Upload results from all MinIO servers
  */
-export async function uploadImageToMinIO(imageBlob, prefix = 'image') {
+export async function uploadImageToMinIO(imageBlob, prefix = 'image', options = {}) {
   try {
     console.log('🔄 Starting MinIO image upload...', {
       blob: imageBlob,
@@ -568,85 +571,246 @@ export async function uploadImageToMinIO(imageBlob, prefix = 'image') {
     const extension = getFileExtension(imageBlob);
     const filename = `${prefix}_${timestamp}.${extension}`;
 
-    // Create FormData
-    const formData = new FormData();
-    
-    // Ensure file has proper format
-    const file = new File([imageBlob], filename, {
-      type: imageBlob.type || 'image/jpeg',
-      lastModified: Date.now()
-    });
-
-    formData.append('image', file);
-    formData.append('filename', filename);
-
-    // Log FormData for debugging
-    console.log('📤 MinIO Upload FormData:', {
-      filename: filename,
-      fileSize: file.size,
-      fileType: file.type
-    });
-
-    // Upload to MinIO backend
-    const uploadUrl = url_api.replace('/index.php', '/upload.php');
-    
-    const response = await fetch(uploadUrl, {
-      method: 'POST',
-      body: formData
-      // Don't set Content-Type to let browser set multipart/form-data boundary
-    });
-
-    console.log('📡 MinIO Upload Response Status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ MinIO Upload Error:', errorText);
-      throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+    // Try MinIO upload with 2 second timeout
+    try {
+      const minioResult = await uploadToMinIOWithTimeout(imageBlob, filename, 2000);
+      if (minioResult.success) {
+        console.log('✅ MinIO Upload Success:', minioResult);
+        return minioResult;
+      }
+    } catch (timeoutError) {
+      console.warn('⏱️ MinIO upload timeout or failed, falling back to local storage:', timeoutError.message);
     }
 
-    const result = await response.json();
-    console.log('✅ MinIO Upload Success:', result);
+    // Fallback to local storage
+    console.log('📁 Falling back to local storage...');
+    const localResult = await saveToLocalStorage(imageBlob, filename, prefix);
+    
+    // Add to background upload queue for retry
+    try {
+      const { default: backgroundUploadService } = await import('../services/backgroundUploadService.js');
+      
+      const queueId = backgroundUploadService.addToQueue({
+        blob: imageBlob,
+        filename: filename,
+        prefix: prefix,
+        originalType: prefix,
+        localPath: localResult.filePath,
+        addedReason: 'fallback_after_timeout',
+        sessionId: options.sessionId || null,
+        updateType: options.updateType || null
+      });
+      
+      console.log(`Added to background upload queue: ${filename} (ID: ${queueId})`);
+    } catch (bgError) {
+      console.warn('Failed to add to background upload queue:', bgError.message);
+      // Don't fail the main upload for this
+    }
     
     return {
       success: true,
       filename: filename,
-      results: result,
-      // Extract URLs for easy access
-      urls: result.map(r => r.url).filter(url => url),
-      primaryUrl: result.find(r => r.status === 'success')?.url
+      isLocal: true,
+      localPath: localResult.filePath,
+      primaryUrl: localResult.filePath,
+      urls: [localResult.filePath],
+      backgroundUploadQueued: true // Flag to indicate background upload is queued
     };
 
   } catch (error) {
-    console.error('❌ MinIO Upload Error:', error);
-    throw new Error(`MinIO upload failed: ${error.message}`);
+    console.error('Both MinIO and local storage failed:', error);
+    throw new Error(`Image upload completely failed: ${error.message}`);
+  }
+}
+
+// Helper function for MinIO upload with timeout
+export async function uploadToMinIOWithTimeout(imageBlob, filename, timeoutMs) {
+  return new Promise(async (resolve, reject) => {
+    // Set timeout
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`MinIO upload timeout after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    try {
+      // Create FormData
+      const formData = new FormData();
+      
+      // Ensure file has proper format
+      const file = new File([imageBlob], filename, {
+        type: imageBlob.type || 'image/jpeg',
+        lastModified: Date.now()
+      });
+
+      formData.append('image', file);
+      formData.append('filename', filename);
+
+      // Log FormData for debugging
+      console.log('MinIO Upload FormData:', {
+        filename: filename,
+        fileSize: file.size,
+        fileType: file.type
+      });
+
+      // Upload to MinIO backend
+      const uploadUrl = url_api.replace('/index.php', '/upload.php');
+      
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData
+        // Don't set Content-Type to let browser set multipart/form-data boundary
+      });
+
+      console.log('MinIO Upload Response Status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('MinIO Upload Error:', errorText);
+        clearTimeout(timeoutId);
+        reject(new Error(`Upload failed: ${response.status} - ${errorText}`));
+        return;
+      }
+
+      const result = await response.json();
+      clearTimeout(timeoutId);
+      
+      // Check if at least one server succeeded
+      const successfulUploads = result.filter(r => r.status === 'success');
+      if (successfulUploads.length === 0) {
+        reject(new Error('All MinIO servers failed'));
+        return;
+      }
+
+      resolve({
+        success: true,
+        filename: filename,
+        results: result,
+        urls: result.map(r => r.url).filter(url => url),
+        primaryUrl: successfulUploads[0]?.url
+      });
+
+    } catch (error) {
+      clearTimeout(timeoutId);
+      reject(error);
+    }
+  });
+}
+
+// Helper function for local storage fallback
+async function saveToLocalStorage(imageBlob, filename, prefix) {
+  try {
+    const folderName = prefix === 'license_plate' || prefix === 'license_plate_out' ? 'anhchup_bienso' : 'anhchup_khuonmat';
+    const basePath = 'C:\\Users\\Chung\\Documents\\ParkingLotApp\\assets\\imgAnhChup';
+    const fullFolderPath = `${basePath}\\${folderName}`;
+    
+    console.log(`💾 Saving to local storage: ${fullFolderPath}\\${filename}`);
+
+    // Check if running in Electron
+    if (window.electronAPI && window.electronAPI.saveImage) {
+      try {
+        // Create directory if not exists
+        if (window.electronAPI.createDirectory) {
+          console.log(`Creating directory: ${fullFolderPath}`);
+          await window.electronAPI.createDirectory(fullFolderPath);
+          console.log(`Directory ensured: ${fullFolderPath}`);
+        }
+
+        const arrayBuffer = await imageBlob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        
+        const saveData = {
+          data: Array.from(uint8Array),
+          fileName: filename,
+          folder: `assets\\imgAnhChup\\${folderName}` // Relative path for Electron
+        };
+        
+        const filePath = await window.electronAPI.saveImage(saveData);
+        console.log(`Local storage save successful: ${filePath}`);
+        
+        return {
+          success: true,
+          filePath: filePath
+        };
+      } catch (electronError) {
+        console.error('Electron save failed:', electronError);
+        throw electronError;
+      }
+    } else {
+      // Fallback for web version - auto download
+      console.log('Web version - using auto download');
+      
+      // Try to create directory structure in browser (limited support)
+      try {
+        if ('showDirectoryPicker' in window) {
+          // Modern browser with File System Access API
+          console.log('Browser supports File System Access API');
+        }
+      } catch (fsError) {
+        console.log('Using download fallback');
+      }
+      
+      const url = URL.createObjectURL(imageBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'none';
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      return {
+        success: true,
+        filePath: `Downloads\\${filename}`
+      };
+    }
+  } catch (error) {
+    console.error('Local storage save failed:', error);
+    throw error;
   }
 }
 
 /**
  * Upload license plate image (entry)
  * @param {Blob|File} imageBlob - License plate image
+ * @param {Object} options - Additional options
+ * @param {string} options.sessionId - Session ID for database update
  * @returns {Promise<Object>} - Upload results
  */
-export async function uploadLicensePlateImage(imageBlob) {
-  return uploadImageToMinIO(imageBlob, 'license_plate');
+export async function uploadLicensePlateImage(imageBlob, options = {}) {
+  return uploadImageToMinIO(imageBlob, 'license_plate', {
+    ...options,
+    updateType: 'plate_in'
+  });
 }
 
 /**
  * Upload license plate image (exit)
  * @param {Blob|File} imageBlob - License plate image
+ * @param {Object} options - Additional options
+ * @param {string} options.sessionId - Session ID for database update
  * @returns {Promise<Object>} - Upload results
  */
-export async function uploadLicensePlateOutImage(imageBlob) {
-  return uploadImageToMinIO(imageBlob, 'license_plate_out');
+export async function uploadLicensePlateOutImage(imageBlob, options = {}) {
+  return uploadImageToMinIO(imageBlob, 'license_plate_out', {
+    ...options,
+    updateType: 'plate_out'
+  });
 }
 
 /**
  * Upload face/driver image
  * @param {Blob|File} imageBlob - Face/driver image
+ * @param {Object} options - Additional options
+ * @param {string} options.sessionId - Session ID for database update
+ * @param {string} options.updateType - face_in or face_out
  * @returns {Promise<Object>} - Upload results
  */
-export async function uploadFaceImage(imageBlob) {
-  return uploadImageToMinIO(imageBlob, 'khuon_mat');
+export async function uploadFaceImage(imageBlob, options = {}) {
+  return uploadImageToMinIO(imageBlob, 'khuon_mat', {
+    ...options,
+    updateType: options.updateType || 'face_in'
+  });
 }
 
 /**

@@ -32,6 +32,7 @@ import ImageCaptureModal from "../../components/ImageCaptureModal";
 import LicensePlateConfirmDialog from "../../components/LicensePlateConfirmDialog";
 import AttendanceDialog from "../../components/AttendanceDialog";
 import { useToast } from "../../components/Toast";
+import BackgroundUploadManager from "../../components/BackgroundUploadManager";
 import { layDanhSachCamera, layDanhSachKhu } from "../../api/api";
 import {
   cleanupObjectUrls,
@@ -2406,6 +2407,9 @@ const MainUI = () => {
 
       {/* Toast Notifications */}
       <ToastContainer />
+
+      {/* Background Upload Manager */}
+      <BackgroundUploadManager />
 
       {/* Statistics Page Overlay */}
       {showStatistics && (

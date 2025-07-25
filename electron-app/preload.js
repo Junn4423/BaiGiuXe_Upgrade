@@ -8,6 +8,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return await ipcRenderer.invoke('save-image', imageData)
   },
   
+  // Create directory
+  createDirectory: async (dirPath) => {
+    return await ipcRenderer.invoke('create-directory', dirPath)
+  },
+  
   // Choose custom save directory
   chooseSaveDirectory: async () => {
     return await ipcRenderer.invoke('choose-save-directory')

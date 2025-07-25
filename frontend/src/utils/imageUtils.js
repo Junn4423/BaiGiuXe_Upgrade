@@ -29,7 +29,29 @@ export const saveImageToAssets = async (blob, fileName, type) => {
     const objectUrl = URL.createObjectURL(blob)
     createdUrls.add(objectUrl)
     
-    // AUTO SAVE: Try to save automatically (PRIORITY: Electron first)
+    // Try the new MinIO + local fallback system
+    try {
+      const { uploadImageToMinIO } = await import('../api/api.js')
+      const prefix = type === 'plate' ? 'license_plate' : 'khuon_mat'
+      
+      const uploadResult = await uploadImageToMinIO(blob, prefix)
+      
+      if (uploadResult.success) {
+        console.log(`✅ Image upload successful:`, uploadResult)
+        
+        return {
+          url: objectUrl,
+          blob: blob,
+          filePath: uploadResult.primaryUrl,
+          isLocal: uploadResult.isLocal || false,
+          localPath: uploadResult.localPath
+        }
+      }
+    } catch (uploadError) {
+      console.error('Upload system failed, falling back to legacy save:', uploadError)
+    }
+    
+    // Legacy fallback - use the old auto-save system
     const savedPath = await autoSaveImage(blob, fileName, folderName)
     
     // Only try localStorage as absolute last resort

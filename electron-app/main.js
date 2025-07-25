@@ -149,6 +149,18 @@ ipcMain.handle('save-image', async (event, { data, fileName, folder }) => {
   }
 })
 
+// IPC Handler for creating directories
+ipcMain.handle('create-directory', async (event, dirPath) => {
+  try {
+    await fs.mkdir(dirPath, { recursive: true })
+    console.log(`✅ Directory created: ${dirPath}`)
+    return true
+  } catch (error) {
+    console.error('❌ Error creating directory:', error)
+    throw error
+  }
+})
+
 // IPC Handler for choosing custom save directory
 ipcMain.handle('choose-save-directory', async () => {
   try {
