@@ -438,27 +438,39 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
 
                 {/* Main Parking Spots Grid */}
                 <div className="spots-grid">
-                  {filteredSpots.map(spot => (
-                    <div
-                      key={spot.id}
-                      className={`parking-spot ${getSpotColor(spot.status)}`}
-                      onClick={() => handleSpotClick(spot)}
-                      title={`${spot.position} - ${getStatusText(spot.status)}${spot.licensePlate ? ` - ${spot.licensePlate}` : ""}`}
-                    >
-                      <div className="spot-icon">
-                        {spot.status === "occupied" && ""}
-                        {spot.status === "reserved" && ""}
-                      </div>
-                      <div className="spot-number">
-                        {spot.position.split("-").pop()}
-                      </div>
-                      {spot.licensePlate && (
-                        <div className="spot-license">
-                          {spot.licensePlate.split("-").pop()}
+                  {filteredSpots.length > 0 ? (
+                    filteredSpots.map(spot => (
+                      <div
+                        key={spot.id}
+                        className={`parking-spot ${getSpotColor(spot.status)}`}
+                        onClick={() => handleSpotClick(spot)}
+                        title={`${spot.position} - ${getStatusText(spot.status)}${spot.licensePlate ? ` - ${spot.licensePlate}` : ""}`}
+                      >
+                        <div className="spot-icon">
+                          {spot.status === "occupied" && "🚗"}
+                          {spot.status === "reserved" && "📅"}
+                          {spot.status === "available" && "⬜"}
                         </div>
-                      )}
+                        <div className="spot-number">
+                          {spot.position.includes("-") ? spot.position.split("-").pop() : spot.position}
+                        </div>
+                        {spot.licensePlate && (
+                          <div className="spot-license">
+                            {spot.licensePlate.length > 6 ? spot.licensePlate.slice(-4) : spot.licensePlate}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-spots-message">
+                      <div className="no-spots-content">
+                        <div className="no-spots-icon">🚫</div>
+                        <h4>Không có vị trí đỗ xe</h4>
+                        <p>Không tìm thấy vị trí nào trong khu vực này</p>
+                        <p>Vui lòng chọn khu vực khác hoặc điều chỉnh bộ lọc</p>
+                      </div>
                     </div>
-                  ))}
+                  )}
                 </div>
 
                 {/* Legend */}
@@ -470,6 +482,10 @@ const ParkingLotManagement = ({ selectedVehicle, onClose }) => {
                   <div className="legend-item">
                     <div className="legend-color occupied"></div>
                     <span>Đang đỗ ({stats.occupied})</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-color reserved"></div>
+                    <span>Đã đặt (0)</span>
                   </div>
                 </div>
               </div>
