@@ -355,12 +355,15 @@
 .parking-grid-container {
   flex: 1;
   padding: 24px 32px;
-  overflow: auto;
+  overflow: hidden;
   background: rgba(248, 250, 252, 0.3);
+  display: flex;
+  flex-direction: column;
 }
 
 .grid-header {
   margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .grid-header h3 {
@@ -378,6 +381,9 @@
   border-radius: 20px;
   border: 1px solid rgba(226, 232, 240, 0.5);
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   box-shadow: 
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -406,68 +412,153 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Parking Layout Enhancements */
 .parking-layout {
-  padding: 40px;
+  padding: 30px 40px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  margin: 20px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 600px;
+  max-height: calc(100vh - 400px);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Scrollbar */
+.parking-layout::-webkit-scrollbar {
+  width: 8px;
+}
+
+.parking-layout::-webkit-scrollbar-track {
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 4px;
+}
+
+.parking-layout::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.parking-layout::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
 }
 
 .layout-labels {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 40px;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 0 20px;
 }
 
 .entrance-label,
 .exit-label {
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   color: #1e40af;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border: 2px solid #93c5fd;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+  padding: 14px 28px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: 3px solid #93c5fd;
+  box-shadow: 
+    0 6px 12px -2px rgba(59, 130, 246, 0.15),
+    0 4px 8px -2px rgba(59, 130, 246, 0.1);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.entrance-label::before,
+.exit-label::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s ease;
 }
 
 .entrance-label:hover,
 .exit-label:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 
+    0 12px 20px -4px rgba(59, 130, 246, 0.25),
+    0 8px 16px -4px rgba(59, 130, 246, 0.15);
+  border-color: #60a5fa;
 }
 
-/* Parking Spots Grid - New 3D Design */
+.entrance-label:hover::before,
+.exit-label:hover::before {
+  left: 100%;
+}
+
+.entrance-label::after {
+  content: '→';
+  margin-left: 8px;
+  font-size: 1.2rem;
+}
+
+.exit-label::after {
+  content: '←';
+  margin-left: 8px;
+  font-size: 1.2rem;
+}
+
+/* Parking Spots Grid - Enhanced 3D Design */
 .spots-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-auto-rows: max-content;
+  gap: 24px;
   margin-bottom: 40px;
   min-height: 400px;
-  padding: 20px;
+  padding: 30px;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 16px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.08);
+  justify-content: center;
+  align-content: start;
+  max-width: 100%;
+  overflow: visible;
+  place-items: center;
+  flex: 1;
 }
 
 .parking-spot {
   position: relative;
-  width: 90px;
-  height: 110px;
-  border-radius: 12px;
+  width: 140px;
+  height: 160px;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   font-weight: 700;
-  font-size: 0.8rem;
-  border: 3px solid transparent;
+  font-size: 0.9rem;
+  border: 4px solid transparent;
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    0 6px 12px -2px rgba(0, 0, 0, 0.12),
+    0 4px 8px -2px rgba(0, 0, 0, 0.08);
   transform-style: preserve-3d;
-  perspective: 1000px;
+  perspective: 1200px;
+  backdrop-filter: blur(10px);
+  margin: 0;
+  min-width: 140px;
+  min-height: 160px;
+  justify-self: center;
+  align-self: center;
 }
 
 .parking-spot::before {
@@ -477,56 +568,75 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 12px;
+  border-radius: 16px;
   background: inherit;
-  filter: blur(8px);
+  filter: blur(12px);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
   z-index: -1;
 }
 
 .parking-spot:hover {
-  transform: translateY(-8px) rotateX(5deg);
+  transform: translateY(-12px) rotateX(8deg) scale(1.05);
   box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.15),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    0 25px 40px -8px rgba(0, 0, 0, 0.2),
+    0 15px 20px -8px rgba(0, 0, 0, 0.08);
+  z-index: 100;
 }
 
 .parking-spot:hover::before {
-  opacity: 0.4;
+  opacity: 0.5;
 }
 
 .parking-spot.available {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border-color: #059669;
+  box-shadow: 
+    0 6px 12px -2px rgba(16, 185, 129, 0.3),
+    0 4px 8px -2px rgba(16, 185, 129, 0.2);
 }
 
 .parking-spot.available:hover {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   border-color: #047857;
+  box-shadow: 
+    0 25px 40px -8px rgba(16, 185, 129, 0.4),
+    0 15px 20px -8px rgba(16, 185, 129, 0.25);
 }
 
 .parking-spot.occupied {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   border-color: #dc2626;
+  box-shadow: 
+    0 6px 12px -2px rgba(239, 68, 68, 0.3),
+    0 4px 8px -2px rgba(239, 68, 68, 0.2);
 }
 
 .parking-spot.occupied:hover {
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   border-color: #b91c1c;
+  box-shadow: 
+    0 25px 40px -8px rgba(239, 68, 68, 0.4),
+    0 15px 20px -8px rgba(239, 68, 68, 0.25);
 }
 
 .parking-spot.reserved {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
   border-color: #d97706;
+  box-shadow: 
+    0 6px 12px -2px rgba(245, 158, 11, 0.3),
+    0 4px 8px -2px rgba(245, 158, 11, 0.2);
 }
 
 .parking-spot.reserved:hover {
   background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
   border-color: #b45309;
+  box-shadow: 
+    0 25px 40px -8px rgba(245, 158, 11, 0.4),
+    0 15px 20px -8px rgba(245, 158, 11, 0.25);
 }
 
 .parking-spot.unavailable {
@@ -534,70 +644,132 @@
   color: #d1d5db;
   cursor: not-allowed;
   opacity: 0.7;
+  box-shadow: 
+    0 6px 12px -2px rgba(107, 114, 128, 0.2),
+    0 4px 8px -2px rgba(107, 114, 128, 0.15);
 }
 
 .parking-spot.unavailable:hover {
   transform: none;
+  box-shadow: 
+    0 6px 12px -2px rgba(107, 114, 128, 0.2),
+    0 4px 8px -2px rgba(107, 114, 128, 0.15);
 }
 
 .spot-icon {
-  font-size: 1.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  font-size: 1.8rem;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+  margin-bottom: 4px;
 }
 
 .spot-number {
-  font-size: 0.875rem;
-  font-weight: 800;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  font-weight: 900;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .spot-license {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  font-size: 0.7rem;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 4px 6px;
-  border-radius: 0 0 9px 9px;
-  text-align: center;
-  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 6px;
+  max-width: 100px;
   text-overflow: ellipsis;
+  overflow: hidden;
   white-space: nowrap;
-  backdrop-filter: blur(4px);
 }
 
-/* Parking Legend */
+/* No spots message */
+.no-spots-message {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  min-height: 300px;
+}
+
+.no-spots-content {
+  text-align: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+  padding: 40px 30px;
+  border-radius: 20px;
+  border: 2px dashed rgba(156, 163, 175, 0.5);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+}
+
+.no-spots-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.no-spots-content h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 12px 0;
+}
+
+.no-spots-content p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+/* Parking Legend - Enhanced */
 .parking-legend {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  padding-top: 32px;
-  border-top: 1px solid rgba(226, 232, 240, 0.5);
+  align-items: center;
+  gap: 35px;
+  padding: 25px 30px;
+  margin-top: 25px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border-radius: 20px;
+  border: 2px solid rgba(226, 232, 240, 0.6);
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 2px 4px -1px rgba(0, 0, 0, 0.04);
 }
 
 .legend-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: #475569;
+  padding: 8px 16px;
+  border-radius: 12px;
   transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
 }
 
 .legend-item:hover {
-  transform: scale(1.05);
+  transform: scale(1.08) translateY(-2px);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.12);
 }
 
 .legend-color {
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  box-shadow: 
+    0 4px 8px -2px rgba(0, 0, 0, 0.15),
+    0 2px 4px -1px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.8);
 }
 
 .legend-color::after {
@@ -606,23 +778,33 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
+  width: 120%;
+  height: 120%;
   background: inherit;
-  filter: blur(8px);
-  opacity: 0.4;
+  filter: blur(12px);
+  opacity: 0.3;
+  z-index: -1;
 }
 
 .legend-color.available {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 
+    0 4px 8px -2px rgba(16, 185, 129, 0.3),
+    0 2px 4px -1px rgba(16, 185, 129, 0.2);
 }
 
 .legend-color.occupied {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 
+    0 4px 8px -2px rgba(239, 68, 68, 0.3),
+    0 2px 4px -1px rgba(239, 68, 68, 0.2);
 }
 
 .legend-color.reserved {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 
+    0 4px 8px -2px rgba(245, 158, 11, 0.3),
+    0 2px 4px -1px rgba(245, 158, 11, 0.2);
 }
 
 /* Dialog - Modern Glass Design */
@@ -1144,5 +1326,171 @@
   
   .detail-item span {
     color: #e2e8f0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .management-container {
+    width: 90vw;
+    height: 85vh;
+  }
+  
+  .spots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 20px;
+    padding: 25px;
+  }
+  
+  .parking-spot {
+    width: 130px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .spots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 18px;
+    padding: 20px;
+  }
+  
+  .parking-spot {
+    width: 120px;
+    height: 140px;
+  }
+  
+  .spot-icon {
+    font-size: 1.6rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .management-container {
+    width: 95vw;
+    height: 90vh;
+    margin: 10px;
+  }
+  
+  .management-header {
+    padding: 20px 24px;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .management-controls {
+    padding: 15px 20px;
+  }
+  
+  .controls-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .control-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 15px 20px;
+  }
+  
+  .spots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .parking-spot {
+    width: 100px;
+    height: 120px;
+    font-size: 0.8rem;
+  }
+  
+  .spot-icon {
+    font-size: 1.4rem;
+  }
+  
+  .spot-number {
+    font-size: 0.9rem;
+  }
+  
+  .spot-license {
+    font-size: 0.7rem;
+    padding: 1px 4px;
+  }
+  
+  .parking-layout {
+    padding: 20px;
+    margin: 15px;
+  }
+  
+  .layout-labels {
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .entrance-label,
+  .exit-label {
+    font-size: 0.9rem;
+    padding: 12px 20px;
+  }
+  
+  .parking-legend {
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .legend-item {
+    font-size: 0.85rem;
+  }
+  
+  .legend-color {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .spots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .parking-spot {
+    width: 85px;
+    height: 100px;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+  
+  .spot-icon {
+    font-size: 1.2rem;
+  }
+  
+  .spot-number {
+    font-size: 0.8rem;
+  }
+  
+  .spot-license {
+    font-size: 0.65rem;
   }
 }
