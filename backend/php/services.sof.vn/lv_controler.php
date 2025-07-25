@@ -35,31 +35,50 @@ class lv_controler
 	public $domainrel = "http://192.168.100.2/staff";
 	public $domain = "http://192.168.100.2/staff";
 
-	public function Set_User($vCheckAdmin, $vUserID, $vright)
-	{
+	// public function Set_User($vCheckAdmin, $vUserID, $vright)
+	// {
 	
-		$inputJSON = file_get_contents('php://input');
-		$input = json_decode($inputJSON, true);
+	// 	$inputJSON = file_get_contents('php://input');
+	// 	$input = json_decode($inputJSON, true);
 
-		$vToken = isset($_SERVER['HTTP_X_USER_TOKEN'])
-			? $_SERVER['HTTP_X_USER_TOKEN']
-			: (isset($_POST['code']) ? $_POST['code'] : $_GET['code']);
+	// 	$vToken = isset($_SERVER['HTTP_X_USER_TOKEN'])
+	// 		? $_SERVER['HTTP_X_USER_TOKEN']
+	// 		: (isset($_POST['code']) ? $_POST['code'] : $_GET['code']);
 
-		$vCode = isset($_SERVER['HTTP_X_USER_CODE'])
-			? $_SERVER['HTTP_X_USER_CODE']
-			: (isset($_POST['token']) ? $_POST['token'] : $_GET['token']);
+	// 	$vCode = isset($_SERVER['HTTP_X_USER_CODE'])
+	// 		? $_SERVER['HTTP_X_USER_CODE']
+	// 		: (isset($_POST['token']) ? $_POST['token'] : $_GET['token']);
 	
-		if ($this->CheckStaff_Valid($vCode, $vToken)) {
-			echo '';
-		} else {
+	// 	if ($this->CheckStaff_Valid($vCode, $vToken)) {
+	// 		echo '';
+	// 	} else {
 
-			echo '{"message":"invalid"}';
-			exit();
-		}
+	// 		echo '{"message":"invalid"}';
+	// 		exit();
+	// 	}
 			
-		$this->UserID = $vUserID;
-		$this->isRight = $vCheckAdmin;
-		$this->LV_UserID = $this->Get_User($vUserID, 'lv006');
+	// 	$this->UserID = $vUserID;
+	// 	$this->isRight = $vCheckAdmin;
+	// 	$this->LV_UserID = $this->Get_User($vUserID, 'lv006');
+	// }
+	public function Set_User($vCheckAdmin,$vUserID,$vright)
+	{
+		$this->UserID=$vUserID;
+		$this->isRight=$vCheckAdmin;
+		$this->LV_UserID=$this->Get_User($vUserID,'lv006');
+		$this->isAdd=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Add");
+		$this->isEdit=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Edit");
+		$this->isDel=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Del");
+		$this->isFil=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Fil");
+		$this->isRpt=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Rpt");
+		$this->isRel=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Rel");
+		$this->isHelp=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Help");
+		$this->isApr=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Apr");
+		$this->isUnApr=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"UnApr");
+		$this->isView=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"View");
+		$this->isConfig=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"Config");
+		$this->isFKho=$this->SetOnce($vCheckAdmin,$vUserID,$vright,"FKho");
+		
 	}
 	public function CheckStaff_Valid($vCode, $vToken)
 	{

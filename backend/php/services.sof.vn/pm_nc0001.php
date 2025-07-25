@@ -10,17 +10,17 @@ class pm_nc0001 extends lv_controler {
 	// function __construct($vCheckAdmin,$vUserID,$vright)
 	// {
 		
-		// $this->DateCurrent=GetServerDate()." ".GetServerTime();
-		// $this->Set_User($vCheckAdmin,$vUserID,$vright);
+	// 	$this->DateCurrent=GetServerDate()." ".GetServerTime();
+	// 	$this->Set_User($vCheckAdmin,$vUserID,$vright);
 		
-		// $this->isRel=1;		
-	 	// $this->isHelp=1;	
-		// $this->isConfig=0;
-		// $this->isRpt=0;		
-	 	// $this->isFil=1;	
-		// $this->isApr=0;		
-		// $this->isUnApr=0;
-		// $this->lang=$_GET['lang'];
+	// 	$this->isRel=1;		
+	//  	$this->isHelp=1;	
+	// 	$this->isConfig=0;
+	// 	$this->isRpt=0;		
+	//  	$this->isFil=1;	
+	// 	$this->isApr=0;		
+	// 	$this->isUnApr=0;
+	// 	$this->lang=$_GET['lang'];
 		
 		
 	// }

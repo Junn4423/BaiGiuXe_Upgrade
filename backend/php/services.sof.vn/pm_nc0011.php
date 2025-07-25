@@ -58,5 +58,9 @@ class pm_nc0011 extends lv_controler {
         $vsql = "SELECT * FROM pm_nc0011 where lv002 = '$lv002'";
             return db_query($vsql);
     }
+    function KB_XoaAll() {
+    $lvsql = "DELETE FROM pm_nc0011 WHERE lv002 = '$this->lv002'";
+    return db_query($lvsql);
+}
 }
 ?>

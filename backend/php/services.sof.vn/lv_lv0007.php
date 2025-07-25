@@ -36,7 +36,6 @@ class lv_lv0007 extends lv_controler {
 		$vsql="INSERT INTO lv_lv0007(lv001, lv003, lv004, lv005, lv006,lv009,lv900) 
 		VALUES ('$this->lv001', '$this->lv003', '$this->lv004', '".md5($this->lv005)."', '$this->lv006',CURDATE(),'$this->lv900')";
 		$result=db_query($vsql);
-
 		return $result;
 	}
 
@@ -48,15 +47,16 @@ class lv_lv0007 extends lv_controler {
 					lv005 = '$hashed_lv005', 
 					lv006 = '$this->lv006', 
 					lv007 = CURDATE(), 
-					lv900 = '$this->lv900', 
+					lv900 = '$this->lv900'
 				WHERE lv001 = '$this->lv001'";
 		
 		$result = db_query($vsql);
 		return $result;		
 	}
-
-
-	
-	
+	function LV_Delete() {
+		$vsql = "DELETE FROM lv_lv0007 WHERE lv001 = '$this->lv001'";
+		$result = db_query($vsql);
+		return $result;
+	}
 }
 ?>
