@@ -1,6 +1,47 @@
 const { spawn } = require("child_process")
 const WebSocket = require("ws")
-const ffmpegPath = require("ffmpeg-static")
+const path = require("path")
+const fs = require("fs")
+
+// Handle ffmpeg path for both development and production
+let ffmpegPath
+try {
+  // In development, use ffmpeg-static
+  if (process.env.NODE_ENV === 'development') {
+    ffmpegPath = require("ffmpeg-static")
+  } else {
+    // In production (packaged app), look for ffmpeg in resources
+    const isDev = process.env.NODE_ENV === 'development'
+    
+    if (isDev) {
+      ffmpegPath = require("ffmpeg-static")
+    } else {
+      // Try multiple possible paths for packaged app
+      const possiblePaths = [
+        path.join(__dirname, 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
+        path.join(__dirname, 'node_modules', 'ffmpeg-static', 'bin', 'win32', 'x64', 'ffmpeg.exe'),
+        path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
+        path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'ffmpeg-static', 'bin', 'win32', 'x64', 'ffmpeg.exe'),
+        path.join(process.resourcesPath, 'ffmpeg.exe'),
+        'ffmpeg' // Fallback to system ffmpeg
+      ]
+      
+      ffmpegPath = possiblePaths.find(p => {
+        try {
+          return fs.existsSync(p)
+        } catch (e) {
+          return false
+        }
+      }) || 'ffmpeg'
+      
+      console.log(`🔧 Using FFmpeg path in production: ${ffmpegPath}`)
+    }
+  }
+} catch (error) {
+  console.error('❌ Error loading ffmpeg-static, falling back to system ffmpeg:', error)
+  ffmpegPath = 'ffmpeg'
+}
+
 const url = require("url")
 
 const WS_PORT = 9999
