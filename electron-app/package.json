@@ -7,14 +7,14 @@
     "start": "electron .",
     "dev": "cross-env NODE_ENV=development electron .",
     "build-frontend": "cd ../frontend && npm run build",
-    "prebuild": "npm run build-frontend",
+    "prebuild": "node prebuild.js && npm run build-frontend",
     "build": "electron-builder",
     "build-win": "electron-builder --win",
     "build-mac": "electron-builder --mac",
     "build-linux": "electron-builder --linux",
     "build-all": "electron-builder --win --mac --linux",
     "pack": "electron-builder --dir",
-    "dist": "npm run build-frontend && electron-builder"
+    "dist": "npm run prebuild && electron-builder"
   },
   "keywords": ["parking", "management", "electron", "car", "parking-lot"],
   "author": "Parking Lot Management Team",
@@ -52,7 +52,12 @@
       "main.js",
       "preload.js",
       "rtsp-streaming-server.js",
+      "debug-ffmpeg.js",
+      "ffmpeg-downloader.js",
+      "prebuild.js",
       "package.json",
+      "ffmpeg-binary/**/*",
+      "node_modules/ffmpeg-static/**/*",
       {
         "from": "../frontend/build",
         "to": "build",
@@ -69,6 +74,10 @@
           "**/*"
         ]
       }
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**/*",
+      "ffmpeg-binary/**/*"
     ],
     "win": {
       "target": [

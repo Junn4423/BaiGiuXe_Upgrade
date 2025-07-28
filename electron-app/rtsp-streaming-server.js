@@ -1,6 +1,92 @@
 const { spawn } = require("child_process")
 const WebSocket = require("ws")
-const ffmpegPath = require("ffmpeg-static")
+const path = require("path")
+const fs = require("fs")
+
+// Handle ffmpeg path for both development and production
+let ffmpegPath
+try {
+  console.log('🔍 [DEBUG] Initializing FFmpeg path resolution...')
+  console.log('🔍 [DEBUG] NODE_ENV:', process.env.NODE_ENV)
+  console.log('🔍 [DEBUG] __dirname:', __dirname)
+  console.log('🔍 [DEBUG] process.resourcesPath:', process.resourcesPath)
+  
+  // In development, use ffmpeg-static
+  if (process.env.NODE_ENV === 'development') {
+    ffmpegPath = require("ffmpeg-static")
+    console.log('🔍 [DEBUG] Using development FFmpeg:', ffmpegPath)
+  } else {
+    console.log('🔍 [DEBUG] Production mode - checking for packaged FFmpeg...')
+    
+    // Try multiple possible paths for packaged app - PRIORITIZE app.asar.unpacked paths
+    const possiblePaths = [
+      // FIRST: ASAR unpacked paths (these can be executed)
+      ...(process.resourcesPath ? [
+        path.join(process.resourcesPath, 'app.asar.unpacked', 'ffmpeg-binary', 'ffmpeg.exe'),
+        path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
+        path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'ffmpeg-static', 'bin', 'win32', 'x64', 'ffmpeg.exe'),
+        path.join(process.resourcesPath, 'ffmpeg.exe')
+      ] : []),
+      
+      // SECOND: Development-style paths (for when running from source)
+      path.join(__dirname, 'ffmpeg-binary', 'ffmpeg.exe'),
+      path.join(__dirname, 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
+      path.join(__dirname, 'node_modules', 'ffmpeg-static', 'bin', 'win32', 'x64', 'ffmpeg.exe'),
+      
+      // LAST: System ffmpeg as fallback
+      'ffmpeg'
+    ]
+    
+    console.log('🔍 [DEBUG] Checking possible FFmpeg paths:')
+    possiblePaths.forEach((p, index) => {
+      try {
+        const exists = p === 'ffmpeg' || fs.existsSync(p)
+        console.log(`🔍 [DEBUG] ${index + 1}. ${p} - ${exists ? '✅ EXISTS' : '❌ NOT FOUND'}`)
+        if (exists && p !== 'ffmpeg') {
+          const stats = fs.statSync(p)
+          console.log(`🔍 [DEBUG]    Size: ${stats.size} bytes`)
+        }
+      } catch (e) {
+        console.log(`� [DEBUG] ${index + 1}. ${p} - ❌ ERROR: ${e.message}`)
+      }
+    })
+    
+    ffmpegPath = possiblePaths.find(p => {
+      try {
+        const exists = p === 'ffmpeg' || fs.existsSync(p)
+        if (exists && p !== 'ffmpeg') {
+          console.log(`🔍 [DEBUG] ✅ Selected FFmpeg path: ${p}`)
+        }
+        return exists
+      } catch (e) {
+        console.log(`🔍 [DEBUG] ❌ Error checking ${p}: ${e.message}`)
+        return false
+      }
+    }) || 'ffmpeg'
+    
+    console.log(`🔍 [DEBUG] Final FFmpeg path: ${ffmpegPath}`)
+    
+    // If no FFmpeg found, try to setup
+    if (ffmpegPath === 'ffmpeg') {
+      console.log('🔍 [DEBUG] ⚠️ No bundled FFmpeg found, attempting to setup...')
+      try {
+        const { downloadFFmpeg } = require('./ffmpeg-downloader')
+        downloadFFmpeg().then(path => {
+          ffmpegPath = path
+          console.log(`🔍 [DEBUG] ✅ FFmpeg setup complete: ${path}`)
+        }).catch(e => {
+          console.error('🔍 [DEBUG] ❌ Failed to setup FFmpeg:', e)
+        })
+      } catch (e) {
+        console.error('🔍 [DEBUG] ❌ FFmpeg downloader error:', e)
+      }
+    }
+  }
+} catch (error) {
+  console.error('🔍 [DEBUG] ❌ Error loading ffmpeg-static, falling back to system ffmpeg:', error)
+  ffmpegPath = 'ffmpeg'
+}
+
 const url = require("url")
 
 class RTSPStreamingServer {
@@ -27,9 +113,13 @@ class RTSPStreamingServer {
 
       console.log(`📹 New client connected for camera ${cameraId}`)
       console.log(`🔗 RTSP URL: ${rtspUrl}`)
+      console.log(`🔍 [DEBUG] Client count: ${this.wss.clients.size}`)
+      console.log(`🔍 [DEBUG] Query params:`, query)
 
       if (!rtspUrl) {
         console.error("❌ No RTSP URL provided")
+        console.error("🔍 [DEBUG] Request URL:", req.url)
+        console.error("🔍 [DEBUG] Query object:", query)
         ws.close(1008, "RTSP URL required")
         return
       }
@@ -129,6 +219,19 @@ class RTSPStreamingServer {
 
       // Create new FFmpeg process
       console.log(`🎬 Starting new FFmpeg process for camera ${cameraId}`)
+      console.log(`🔍 [DEBUG] Using FFmpeg binary: ${ffmpegPath}`)
+      console.log(`🔍 [DEBUG] FFmpeg exists check: ${fs.existsSync(ffmpegPath)}`)
+      
+      // Test FFmpeg binary before spawning
+      if (ffmpegPath !== 'ffmpeg') {
+        try {
+          const stats = fs.statSync(ffmpegPath)
+          console.log(`🔍 [DEBUG] FFmpeg file size: ${stats.size} bytes`)
+          console.log(`🔍 [DEBUG] FFmpeg permissions: ${stats.mode.toString(8)}`)
+        } catch (e) {
+          console.error(`🔍 [DEBUG] ❌ Error reading FFmpeg stats: ${e.message}`)
+        }
+      }
 
       // Simple FFmpeg args based on source-stream-camera-success
       const ffmpegArgs = [
@@ -176,10 +279,16 @@ class RTSPStreamingServer {
       ]
 
       console.log(`🔧 FFmpeg command: ${ffmpegPath} ${ffmpegArgs.join(" ")}`)
+      console.log(`🔍 [DEBUG] Spawning FFmpeg with:`)
+      console.log(`🔍 [DEBUG] - Binary: ${ffmpegPath}`)
+      console.log(`🔍 [DEBUG] - Args: [${ffmpegArgs.slice(0, 10).join(', ')}...]`)
+      console.log(`🔍 [DEBUG] - Working dir: ${process.cwd()}`)
 
       const ffmpeg = spawn(ffmpegPath, ffmpegArgs, {
         stdio: ["ignore", "pipe", "pipe"],
       })
+      
+      console.log(`🔍 [DEBUG] FFmpeg process spawned with PID: ${ffmpeg.pid}`)
 
       streamInfo = {
         ffmpeg: ffmpeg,
@@ -200,8 +309,10 @@ class RTSPStreamingServer {
         streamInfo.dataCount++
         streamInfo.lastDataTime = Date.now()
         
-        // Log data flow periodically
-        if (streamInfo.dataCount % 100 === 0) {
+        // Log data flow periodically and first few chunks
+        if (streamInfo.dataCount <= 5) {
+          console.log(`🔍 [DEBUG] Camera ${cameraId}: Received chunk ${streamInfo.dataCount}, size: ${chunk.length} bytes`)
+        } else if (streamInfo.dataCount % 100 === 0) {
           console.log(`📊 Camera ${cameraId}: ${streamInfo.dataCount} chunks sent to ${streamInfo.clients.size} clients`)
         }
         
@@ -212,10 +323,12 @@ class RTSPStreamingServer {
               client.send(chunk)
             } catch (err) {
               console.error("❌ Error sending data to client:", err)
+              console.error(`🔍 [DEBUG] Client state: ${client.readyState}`)
               streamInfo.clients.delete(client)
             }
           } else {
             // Remove dead clients
+            console.log(`🔍 [DEBUG] Removing dead client (state: ${client.readyState})`)
             streamInfo.clients.delete(client)
           }
         })
@@ -328,6 +441,13 @@ class RTSPStreamingServer {
 
       ffmpeg.on("error", (err) => {
         console.error(`💥 FFmpeg process error for camera ${cameraId}:`, err)
+        console.error(`🔍 [DEBUG] Error details:`)
+        console.error(`🔍 [DEBUG] - Code: ${err.code}`)
+        console.error(`🔍 [DEBUG] - Errno: ${err.errno}`)
+        console.error(`🔍 [DEBUG] - Syscall: ${err.syscall}`)
+        console.error(`🔍 [DEBUG] - Path: ${err.path}`)
+        console.error(`🔍 [DEBUG] - FFmpeg path used: ${ffmpegPath}`)
+        console.error(`🔍 [DEBUG] - FFmpeg exists: ${fs.existsSync(ffmpegPath)}`)
         this.activeStreams.delete(rtspUrl)
       })
     }

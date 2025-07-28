@@ -33,6 +33,16 @@ function createWindow() {
     console.error('Failed to load:', errorCode, errorDescription)
   })
 
+  // Debug FFmpeg in production
+  if (process.env.NODE_ENV !== 'development') {
+    try {
+      const { debugFFmpegPath } = require('./debug-ffmpeg')
+      debugFFmpegPath()
+    } catch (e) {
+      console.error('Debug FFmpeg error:', e)
+    }
+  }
+
   // Load the React app
   const isDev = process.env.NODE_ENV === "development"
 
@@ -80,14 +90,22 @@ function createWindow() {
 }
 
 function startRTSPStreamingServer() {
-  console.log("Starting RTSP streaming server...")
+  console.log("🔍 [DEBUG] Starting RTSP streaming server...")
+  console.log("🔍 [DEBUG] Environment:", process.env.NODE_ENV)
+  console.log("🔍 [DEBUG] App path:", __dirname)
+  console.log("🔍 [DEBUG] Process:", process.execPath)
 
   try {
     rtspServer = new RTSPStreamingServer(9999)
     rtspServer.start()
-    console.log("RTSP streaming server started successfully")
+    console.log("✅ RTSP streaming server started successfully on port 9999")
+    console.log("🔍 [DEBUG] Server instance created and started")
   } catch (err) {
-    console.error("Failed to start RTSP streaming server:", err)
+    console.error("❌ Failed to start RTSP streaming server:", err)
+    console.error("🔍 [DEBUG] Error details:", {
+      message: err.message,
+      stack: err.stack
+    })
   }
 }
 
