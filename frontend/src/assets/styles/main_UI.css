@@ -2,10 +2,14 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100vw;
+  max-height: 100vh;
+  max-width: 100vw;
   background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 100%);
   color: white;
   overflow: hidden;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
 }
 
 .top-toolbar {
@@ -19,12 +23,18 @@
   flex-shrink: 0;
   min-height: 60px;
   max-height: 60px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .toolbar-left {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .app-title {
@@ -34,6 +44,11 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .config-info {
@@ -47,6 +62,11 @@
   padding: 6px 12px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .config-zone {
@@ -75,6 +95,11 @@
   padding: 6px 12px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .user-name {
@@ -106,6 +131,8 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .toolbar-btn {
@@ -167,6 +194,9 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
   height: 50px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .tab-btn {
@@ -215,31 +245,46 @@
   flex: 1;
   overflow: hidden;
   min-height: 0;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
 }
 
 .management-layout {
   display: grid;
   grid-template-columns: 1fr 380px;
   height: 100%;
+  width: 100%;
+  max-width: 100%;
   gap: 0;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .camera-section {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .vehicle-info-section {
   background: linear-gradient(135deg, #2a4a7c 0%, #1c315c 100%);
   overflow: hidden;
+  width: 100%;
+  max-width: 380px;
+  box-sizing: border-box;
 }
 
 .list-layout {
   height: 100%;
+  width: 100%;
+  max-width: 100%;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Responsive adjustments */
@@ -247,11 +292,19 @@
   .management-layout {
     grid-template-columns: 1fr 350px;
   }
+  
+  .vehicle-info-section {
+    max-width: 350px;
+  }
 }
 
 @media (max-width: 1400px) {
   .management-layout {
     grid-template-columns: 1fr 320px;
+  }
+
+  .vehicle-info-section {
+    max-width: 320px;
   }
 
   .top-toolbar {
@@ -283,17 +336,24 @@
   .management-layout {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 280px;
+    max-width: 100vw;
   }
 
   .camera-section {
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 100%;
+  }
+
+  .vehicle-info-section {
+    max-width: 100%;
   }
 
   .toolbar-left {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    min-width: 0;
   }
 
   .config-info,
@@ -310,12 +370,15 @@
     padding: 12px;
     min-height: auto;
     max-height: none;
+    height: auto;
   }
 
   .toolbar-left {
     width: 100%;
     justify-content: center;
     text-align: center;
+    flex-direction: column;
+    min-width: 0;
   }
 
   .toolbar-right {
@@ -336,6 +399,7 @@
 
   .management-layout {
     grid-template-rows: 2fr 1fr;
+    max-width: 100vw;
   }
 
   .config-info,
@@ -343,6 +407,49 @@
     flex-direction: column;
     gap: 2px;
     text-align: center;
+    white-space: normal;
+  }
+
+  .app-title {
+    font-size: 14px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .main-ui-container {
+    font-size: 12px;
+  }
+
+  .app-title {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .toolbar-btn {
+    padding: 4px 6px;
+    font-size: 8px;
+    gap: 4px;
+  }
+
+  .tab-btn {
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+
+  .config-info,
+  .user-info {
+    font-size: 10px;
+    padding: 3px 6px;
+    gap: 1px;
+  }
+
+  .top-toolbar {
+    padding: 8px;
+  }
+
+  .management-layout {
+    grid-template-rows: 3fr 2fr;
   }
 }
 
@@ -492,10 +599,32 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 #root {
   height: 100vh;
+  width: 100vw;
   overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Additional constraints to prevent overflow */
+.main-ui-container * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Prevent any element from creating horizontal scroll */
+.main-ui-container,
+.main-ui-container * {
+  max-width: 100vw;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
