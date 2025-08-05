@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getBackupImageUrls, getImageUrl } from '../api/api.js';
+// import hybridImageService from '../services/localImageService.js'; // DEPRECATED - now using direct folder storage
 
 /**
- * FallbackImage Component - Hiển thị ảnh với fallback system cho MinIO servers
- * Tự động thử load từ các server khác nhau cho đến khi thành công
+ * FallbackImage Component - Hiển thị ảnh với direct folder storage
+ * Simplified from MinIO fallback system
  */
 const FallbackImage = ({ 
   filename, 
@@ -32,24 +33,45 @@ const FallbackImage = ({
     setError(false);
     setTriedUrls([]);
 
-    // Tạo danh sách URLs để thử theo thứ tự ưu tiên
-    const urls = [];
-    
-    // Nếu đã là full URL, thử nó trước
-    if (filename.startsWith('http://') || filename.startsWith('https://')) {
-      urls.push(filename);
-    } else {
-      // Thử tất cả server MinIO
-      const backupUrls = getBackupImageUrls(filename);
-      urls.push(...backupUrls);
-    }
-
-    console.log(`Trying to load image: ${filename}`, urls);
-
-    // Bắt đầu thử load từ URL đầu tiên
-    tryLoadImage(urls, 0);
-
+    loadImageWithFallback();
   }, [filename]);
+
+  const loadImageWithFallback = async () => {
+    try {
+      // Sử dụng hybrid service để lấy image src với fallback
+      const src = await hybridImageService.getImageSrc(filename);
+      
+      if (src) {
+        console.log(`Successfully loaded from hybrid service: ${src}`);
+        setCurrentSrc(src);
+        setLoading(false);
+        setError(false);
+        
+        if (onLoadSuccess) {
+          onLoadSuccess(src, 0);
+        }
+      } else {
+        throw new Error('No image source found from hybrid service');
+      }
+    } catch (error) {
+      console.error(`Hybrid service failed, falling back to original method:`, error);
+      
+      // Fallback to original MinIO URLs method
+      const urls = [];
+      
+      // Nếu đã là full URL, thử nó trước
+      if (filename.startsWith('http://') || filename.startsWith('https://')) {
+        urls.push(filename);
+      } else {
+        // Thử tất cả server MinIO
+        const backupUrls = getBackupImageUrls(filename);
+        urls.push(...backupUrls);
+      }
+
+      console.log(`Trying to load image with original method: ${filename}`, urls);
+      tryLoadImage(urls, 0);
+    }
+  };
 
   const tryLoadImage = (urls, index) => {
     if (index >= urls.length) {
@@ -182,52 +204,74 @@ export const useFallbackImage = (filename) => {
       triedUrls: []
     }));
 
-    const urls = filename.startsWith('http://') || filename.startsWith('https://') 
-      ? [filename] 
-      : getBackupImageUrls(filename);
-
-    const tryLoad = async (urlList, index = 0) => {
-      if (index >= urlList.length) {
-        setImageState(prev => ({
-          ...prev,
-          loading: false,
-          error: true
-        }));
-        return;
-      }
-
-      const url = urlList[index];
-      
+    const loadImage = async () => {
       try {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
+        // Sử dụng hybrid service trước
+        const src = await hybridImageService.getImageSrc(filename);
         
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = url;
-        });
-
-        setImageState(prev => ({
-          ...prev,
-          src: url,
-          loading: false,
-          error: false,
-          triedUrls: [...prev.triedUrls, { url, status: 'success' }]
-        }));
-
+        if (src) {
+          setImageState(prev => ({
+            ...prev,
+            src,
+            loading: false,
+            error: false,
+            triedUrls: [...prev.triedUrls, { url: src, status: 'success' }]
+          }));
+          return;
+        }
+        
+        throw new Error('Hybrid service failed');
       } catch (error) {
-        setImageState(prev => ({
-          ...prev,
-          triedUrls: [...prev.triedUrls, { url, status: 'failed' }]
-        }));
-        
-        setTimeout(() => tryLoad(urlList, index + 1), 500);
+        // Fallback to original method
+        const urls = filename.startsWith('http://') || filename.startsWith('https://') 
+          ? [filename] 
+          : getBackupImageUrls(filename);
+
+        const tryLoad = async (urlList, index = 0) => {
+          if (index >= urlList.length) {
+            setImageState(prev => ({
+              ...prev,
+              loading: false,
+              error: true
+            }));
+            return;
+          }
+
+          const url = urlList[index];
+          
+          try {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = url;
+            });
+
+            setImageState(prev => ({
+              ...prev,
+              src: url,
+              loading: false,
+              error: false,
+              triedUrls: [...prev.triedUrls, { url, status: 'success' }]
+            }));
+
+          } catch (error) {
+            setImageState(prev => ({
+              ...prev,
+              triedUrls: [...prev.triedUrls, { url, status: 'failed' }]
+            }));
+            
+            setTimeout(() => tryLoad(urlList, index + 1), 500);
+          }
+        };
+
+        tryLoad(urls);
       }
     };
 
-    tryLoad(urls);
-
+    loadImage();
   }, [filename]);
 
   return imageState;

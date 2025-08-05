@@ -28,7 +28,7 @@ const Toast = ({ message, type = 'success', duration = 1000, onClose }) => {
     <div style={{
       position: 'fixed',
       top: '20px',
-      right: '20px',
+      left: '20px', // Changed from right to left
       backgroundColor: bgColor,
       color: 'white',
       padding: '12px 20px',
@@ -39,9 +39,9 @@ const Toast = ({ message, type = 'success', duration = 1000, onClose }) => {
       fontWeight: '500',
       maxWidth: '300px',
       transition: 'all 0.3s ease-out',
-      transform: isVisible ? 'translateX(0)' : 'translateX(100%)',
+      transform: isVisible ? 'translateX(0)' : 'translateX(-100%)', // Changed direction
       opacity: isVisible ? 1 : 0,
-      animation: isVisible ? 'slideIn 0.3s ease-out' : 'slideOut 0.3s ease-out'
+      animation: isVisible ? 'slideInLeft 0.3s ease-out' : 'slideOutLeft 0.3s ease-out'
     }}>
       {message}
     </div>
@@ -94,7 +94,7 @@ export const useToast = () => {
     <div style={{ 
       position: 'fixed', 
       top: '20px', 
-      right: '20px', 
+      left: '20px', // Changed from right to left
       zIndex: 9999,
       pointerEvents: 'none' 
     }}>
@@ -110,9 +110,30 @@ export const useToast = () => {
         />
       ))}
       <style jsx>{`
+        @keyframes slideInLeft {
+          from {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        @keyframes slideOutLeft {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+        /* Keep original animations as fallback */
         @keyframes slideIn {
           from {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
           }
           to {
@@ -126,7 +147,7 @@ export const useToast = () => {
             opacity: 1;
           }
           to {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
           }
         }

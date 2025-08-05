@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import RTSPPlayer from "./RTSPPlayer";
+import { getImageUrl } from "../api/api";
 import "../assets/styles/CameraComponent.css";
 
 const CameraComponent = React.forwardRef(
@@ -122,7 +123,7 @@ const CameraComponent = React.forwardRef(
     };
 
     // Display captured image on capture panel
-    const displayCapturedImage = (imagePath, panelNumber = 1) => {
+    const displayCapturedImage = async (imagePath, panelNumber = 1) => {
       console.log(`CameraComponent.displayCapturedImage called with:`, {
         imagePath,
         panelNumber,
@@ -136,11 +137,26 @@ const CameraComponent = React.forwardRef(
         clearTimeout(restoreTimer.current);
       }
 
+      // Extract filename from path and get proper URL
+      let displayUrl = imagePath;
+      
+      // If it's a relative path like "Nam_2025/Thang_08/Ngay_05/filename.jpg"
+      if (imagePath.includes('/') && !imagePath.startsWith('http') && !imagePath.startsWith('data:')) {
+        const filename = imagePath.split('/').pop(); // Get filename
+        try {
+          displayUrl = await getImageUrl(filename);
+          console.log(`✅ Got image URL from API: ${displayUrl}`);
+        } catch (error) {
+          console.warn(`Failed to get image URL via API, using original path:`, error);
+          // Fallback to original path
+        }
+      }
+
       const panelKey = `capturePanel${panelNumber}`;
       setStaticImageStates((prev) => ({ ...prev, [panelKey]: true }));
-      setCameraFeeds((prev) => ({ ...prev, [panelKey]: imagePath }));
+      setCameraFeeds((prev) => ({ ...prev, [panelKey]: displayUrl }));
 
-      console.log(`Displayed captured image on ${panelKey}: ${imagePath}`);
+      console.log(`Displayed captured image on ${panelKey}: ${displayUrl}`);
       restoreTimer.current = setTimeout(restoreCaptureFeeds, 10000); // Tăng thời gian hiển thị lên 10 giây
     };
 

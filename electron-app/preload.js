@@ -28,6 +28,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return await ipcRenderer.invoke('show-in-explorer', filePath)
   },
   
+  // Check if path exists
+  pathExists: async (pathToCheck) => {
+    return await ipcRenderer.invoke('path-exists', pathToCheck)
+  },
+  
   // Check if running in Electron
   isElectron: true,
   

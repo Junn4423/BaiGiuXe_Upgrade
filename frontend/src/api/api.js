@@ -546,20 +546,20 @@ export function blobToBase64(blob) {
   });
 }
 
-// -------------------- MinIO Image Upload API --------------------
+// -------------------- DIRECT FOLDER Image Upload API (MinIO Disabled) --------------------
 
 /**
- * Upload image to MinIO servers with automatic filename generation
+ * Upload image to direct folder storage with automatic date-based directory structure
  * @param {Blob|File} imageBlob - Image file to upload
  * @param {string} prefix - Filename prefix (license_plate, license_plate_out, khuon_mat, etc.)
- * @param {Object} options - Additional options for background upload
+ * @param {Object} options - Additional options (for future compatibility)
  * @param {string} options.sessionId - Session ID for database update
  * @param {string} options.updateType - Type of update (plate_in, plate_out, face_in, face_out)
- * @returns {Promise<Object>} - Upload results from all MinIO servers
+ * @returns {Promise<Object>} - Upload results from direct folder storage
  */
-export async function uploadImageToMinIO(imageBlob, prefix = 'image', options = {}) {
+export async function uploadImageToLocal(imageBlob, prefix = 'image', options = {}) {
   try {
-    console.log('🔄 Starting MinIO image upload...', {
+    console.log('🔄 Starting image upload...', {
       blob: imageBlob,
       type: imageBlob.type,
       size: imageBlob.size,
@@ -571,58 +571,198 @@ export async function uploadImageToMinIO(imageBlob, prefix = 'image', options = 
     const extension = getFileExtension(imageBlob);
     const filename = `${prefix}_${timestamp}.${extension}`;
 
-    // Try MinIO upload with 2 second timeout
-    try {
-      const minioResult = await uploadToMinIOWithTimeout(imageBlob, filename, 2000);
-      if (minioResult.success) {
-        console.log('✅ MinIO Upload Success:', minioResult);
-        return minioResult;
+    // Try local storage first if enabled
+    if (await isLocalStorageEnabled()) {
+      try {
+        const localResult = await saveToUserDefinedFolder(imageBlob, filename, prefix);
+        if (localResult.success) {
+          console.log('✅ Local Storage Success:', localResult);
+          return {
+            success: true,
+            filename: filename,
+            filePath: localResult.filePath,
+            fullPath: localResult.fullPath,
+            primaryUrl: localResult.url || filename, // Return filename for database
+            urls: [localResult.url || filename],
+            isLocal: true,
+            message: 'Lưu ảnh local thành công'
+          };
+        }
+      } catch (localError) {
+        console.warn('Local storage failed, falling back to server:', localError);
       }
-    } catch (timeoutError) {
-      console.warn('⏱️ MinIO upload timeout or failed, falling back to local storage:', timeoutError.message);
     }
 
-    // Fallback to local storage
-    console.log('📁 Falling back to local storage...');
-    const localResult = await saveToLocalStorage(imageBlob, filename, prefix);
+    // Fallback to server storage
+    const serverResult = await uploadToLocalServer(imageBlob, filename);
     
-    // Add to background upload queue for retry
-    try {
-      const { default: backgroundUploadService } = await import('../services/backgroundUploadService.js');
-      
-      const queueId = backgroundUploadService.addToQueue({
-        blob: imageBlob,
+    if (serverResult.success) {
+      console.log('✅ Server Storage Success:', serverResult);
+      return {
+        success: true,
         filename: filename,
-        prefix: prefix,
-        originalType: prefix,
-        localPath: localResult.filePath,
-        addedReason: 'fallback_after_timeout',
-        sessionId: options.sessionId || null,
-        updateType: options.updateType || null
-      });
-      
-      console.log(`Added to background upload queue: ${filename} (ID: ${queueId})`);
-    } catch (bgError) {
-      console.warn('Failed to add to background upload queue:', bgError.message);
-      // Don't fail the main upload for this
+        filePath: serverResult.filePath,
+        fullPath: serverResult.fullPath,
+        primaryUrl: filename, // Return filename for database
+        urls: [filename],
+        isLocal: false,
+        message: serverResult.message
+      };
+    } else {
+      throw new Error(serverResult.message || 'Upload failed');
     }
-    
-    return {
-      success: true,
-      filename: filename,
-      isLocal: true,
-      localPath: localResult.filePath,
-      primaryUrl: localResult.filePath,
-      urls: [localResult.filePath],
-      backgroundUploadQueued: true // Flag to indicate background upload is queued
-    };
 
   } catch (error) {
-    console.error('Both MinIO and local storage failed:', error);
-    throw new Error(`Image upload completely failed: ${error.message}`);
+    console.error('Image upload failed:', error);
+    throw new Error(`Image upload failed: ${error.message}`);
   }
 }
 
+// Alias for backward compatibility - now uses direct folder storage instead of MinIO
+export const uploadImageToMinIO = uploadImageToLocal;
+
+// Helper functions for local storage
+async function isLocalStorageEnabled() {
+  try {
+    const enabled = localStorage.getItem('local_storage_enabled') === 'true';
+    const path = localStorage.getItem('image_storage_path');
+    return enabled && path && path.trim() !== '';
+  } catch (error) {
+    return false;
+  }
+}
+
+async function saveToUserDefinedFolder(imageBlob, filename, prefix) {
+  try {
+    let basePath = localStorage.getItem('image_storage_path');
+    
+    // Check if saved path is old Documents path and use default instead
+    if (!basePath || basePath.includes('Documents') || basePath.includes('ParkingLotApp')) {
+      console.warn('⚠️ Old or missing storage path detected, using default: C:/ParkingLot_Images/');
+      basePath = 'C:/ParkingLot_Images';
+      // Don't update localStorage here to avoid infinite loops
+    }
+
+    // Create date-based subdirectory structure (same as backend)
+    const year = new Date().getFullYear();
+    const month = String(new Date().getMonth() + 1).padStart(2, '0');
+    const day = String(new Date().getDate()).padStart(2, '0');
+    
+    const subFolder = `Nam_${year}/Thang_${month}/Ngay_${day}`;
+    const fullFolderPath = `${basePath}/${subFolder}`;
+    
+    console.log(`💾 Saving to storage folder: ${fullFolderPath}/${filename}`);
+
+    // Check if running in Electron
+    if (window.electronAPI && window.electronAPI.saveImage) {
+      // Create directory if not exists
+      if (window.electronAPI.createDirectory) {
+        console.log(`Creating directory: ${fullFolderPath}`);
+        await window.electronAPI.createDirectory(fullFolderPath);
+        console.log(`Directory ensured: ${fullFolderPath}`);
+      }
+
+      const arrayBuffer = await imageBlob.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      // Save using absolute path - ĐỒNG BỘ với backend path structure
+      const electronSaveData = {
+        data: Array.from(uint8Array),
+        fileName: filename,
+        folder: fullFolderPath // Use absolute path matching backend
+      };
+      
+      const filePath = await window.electronAPI.saveImage(electronSaveData);
+      console.log(`✅ Local storage save successful: ${filePath}`);
+      
+      return {
+        success: true,
+        filePath: filePath,
+        fullPath: `${fullFolderPath}/${filename}`,
+        url: `${subFolder}/${filename}` // Return relative path for database storage (matches backend expectation)
+      };
+    } else {
+      throw new Error('Electron API không khả dụng');
+    }
+  } catch (error) {
+    console.error('Save to user-defined folder failed:', error);
+    throw error;
+  }
+}
+
+// Helper function for direct folder storage upload
+export async function uploadToLocalServer(imageBlob, filename) {
+  try {
+    console.log('📁 Uploading to direct folder storage...', { filename, size: imageBlob.size });
+
+    // Create FormData
+    const formData = new FormData();
+    
+    // Ensure file has proper format
+    const file = new File([imageBlob], filename, {
+      type: imageBlob.type || 'image/jpeg',
+      lastModified: Date.now()
+    });
+
+    formData.append('image', file);
+    formData.append('filename', filename);
+    
+    // Add storage path if available from localStorage
+    const storagePath = localStorage.getItem('image_storage_path');
+    if (storagePath && storagePath.trim() !== '') {
+      // Check if the custom path contains the old Documents path - if so, don't use it
+      if (storagePath.includes('Documents\\ParkingLotApp') || storagePath.includes('Documents/ParkingLotApp')) {
+        console.warn('⚠️ Old storage path detected, using default instead:', storagePath);
+        console.log('Using default storage path: C:/ParkingLot_Images/');
+        // Don't add storage_path to formData - let backend use default
+      } else {
+        formData.append('storage_path', storagePath);
+        console.log('Using custom storage path:', storagePath);
+      }
+    } else {
+      console.log('No custom storage path set, using default: C:/ParkingLot_Images/');
+    }
+
+    // Log FormData for debugging
+    console.log('Direct Folder Upload FormData:', {
+      filename: filename,
+      fileSize: file.size,
+      fileType: file.type
+    });
+
+    // Upload to local backend using upload1.php (direct folder storage)
+    const uploadUrl = url_api.replace('/index.php', '/upload1.php');
+    
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      body: formData
+      // Don't set Content-Type to let browser set multipart/form-data boundary
+    });
+
+    console.log('Direct Folder Upload Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Direct Folder Upload Error:', errorText);
+      throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Upload failed');
+    }
+
+    return result;
+
+  } catch (error) {
+    console.error('Direct folder storage upload failed:', error);
+    throw error;
+  }
+}
+
+// COMMENTED OUT: MinIO upload functions
+/*
 // Helper function for MinIO upload with timeout
 export async function uploadToMinIOWithTimeout(imageBlob, filename, timeoutMs) {
   return new Promise(async (resolve, reject) => {
@@ -694,7 +834,10 @@ export async function uploadToMinIOWithTimeout(imageBlob, filename, timeoutMs) {
     }
   });
 }
+*/
 
+// COMMENTED OUT: Local storage fallback (no longer needed)
+/*
 // Helper function for local storage fallback
 async function saveToLocalStorage(imageBlob, filename, prefix) {
   try {
@@ -769,6 +912,7 @@ async function saveToLocalStorage(imageBlob, filename, prefix) {
     throw error;
   }
 }
+*/
 
 /**
  * Upload license plate image (entry)
@@ -778,7 +922,7 @@ async function saveToLocalStorage(imageBlob, filename, prefix) {
  * @returns {Promise<Object>} - Upload results
  */
 export async function uploadLicensePlateImage(imageBlob, options = {}) {
-  return uploadImageToMinIO(imageBlob, 'license_plate', {
+  return uploadImageToLocal(imageBlob, 'license_plate_in', {
     ...options,
     updateType: 'plate_in'
   });
@@ -792,7 +936,7 @@ export async function uploadLicensePlateImage(imageBlob, options = {}) {
  * @returns {Promise<Object>} - Upload results
  */
 export async function uploadLicensePlateOutImage(imageBlob, options = {}) {
-  return uploadImageToMinIO(imageBlob, 'license_plate_out', {
+  return uploadImageToLocal(imageBlob, 'license_plate_out', {
     ...options,
     updateType: 'plate_out'
   });
@@ -807,17 +951,97 @@ export async function uploadLicensePlateOutImage(imageBlob, options = {}) {
  * @returns {Promise<Object>} - Upload results
  */
 export async function uploadFaceImage(imageBlob, options = {}) {
-  return uploadImageToMinIO(imageBlob, 'khuon_mat', {
+  // Xác định prefix dựa trên updateType
+  const prefix = options.updateType === 'face_out' ? 'face_out' : 'face_in';
+  
+  return uploadImageToLocal(imageBlob, prefix, {
     ...options,
     updateType: options.updateType || 'face_in'
   });
 }
 
 /**
+ * Get local image URL from filename using POST method
+ * @param {string} filename - Image filename stored in database
+ * @returns {Promise<string>} - Base64 data URL of the image
+ */
+export async function getImageUrl(filename) {
+  if (!filename) return '';
+  
+  // If it's already a full URL, return as is
+  if (filename.startsWith('http://') || filename.startsWith('https://') || filename.startsWith('data:')) {
+    return filename;
+  }
+  
+  try {
+    // Extract date from filename timestamp like "2025-08-05T11-40-10-594Z"
+    let year, month, day;
+    const timestampMatch = filename.match(/(\d{4})-(\d{2})-(\d{2})T/);
+    
+    if (timestampMatch) {
+      year = timestampMatch[1];
+      month = timestampMatch[2];
+      day = timestampMatch[3];
+    } else {
+      // Fallback to current date if can't extract from filename
+      year = new Date().getFullYear();
+      month = String(new Date().getMonth() + 1).padStart(2, '0');
+      day = String(new Date().getDate()).padStart(2, '0');
+    }
+    
+    console.log(`🔍 Looking for image: ${filename} on date ${year}-${month}-${day}`);
+    
+    const baseUrl = url_api.replace('/index.php', '');
+    const response = await fetch(`${baseUrl}/getImage.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        year: year,
+        month: month,
+        day: day,
+        file: filename
+      })
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      if (result.base64) {
+        console.log(`✅ Successfully loaded image: ${filename}`);
+        return result.base64; // Return base64 data URL
+      }
+    }
+    
+    console.warn(`Failed to load image: ${filename}, status: ${response.status}`);
+    return ''; // Return empty string on failure
+  } catch (error) {
+    console.error(`Error loading image ${filename}:`, error);
+    return '';
+  }
+}
+
+/**
+ * Get backup URLs - for local storage, return same URL multiple times for compatibility
+ * @param {string} filename - Image filename stored in database
+ * @returns {Array<string>} - Array of URLs (same URL repeated for compatibility)
+ */
+export function getBackupImageUrls(filename) {
+  if (!filename) return [];
+  
+  const primaryUrl = getImageUrl(filename);
+  // Return same URL 3 times for compatibility with existing fallback logic
+  return [primaryUrl, primaryUrl, primaryUrl];
+}
+
+// COMMENTED OUT: MinIO URL functions
+/*
+/**
  * Get full MinIO image URL from filename
  * @param {string} filename - Image filename stored in database
  * @returns {string} - Full MinIO URL (primary server)
  */
+/*
 export function getImageUrl(filename) {
   if (!filename) return '';
   
@@ -829,13 +1053,16 @@ export function getImageUrl(filename) {
   // Construct MinIO URL from filename - sử dụng server đầu tiên làm primary
   return `http://192.168.1.19:9000/parking-lot-images/${filename}`;
 }
+*/
 
+/*
 /**
  * Get backup MinIO URLs from filename for redundancy
  * Thứ tự ưu tiên: 192.168.1.19, 192.168.1.90, 192.168.1.94
  * @param {string} filename - Image filename stored in database
  * @returns {Array<string>} - Array of all MinIO URLs in priority order
  */
+/*
 export function getBackupImageUrls(filename) {
   if (!filename) return [];
   
@@ -860,9 +1087,10 @@ export function getBackupImageUrls(filename) {
   const servers = ['192.168.1.19:9000', '192.168.1.90:9000', '192.168.1.94:9000'];
   return servers.map(server => `http://${server}/parking-lot-images/${filename}`);
 }
+*/
 
 /**
- * Check if image URL is accessible
+ * Check if image URL is accessible (simplified for local storage)
  * @param {string} url - Image URL to check
  * @returns {Promise<boolean>} - True if accessible
  */
@@ -870,27 +1098,9 @@ export async function checkImageUrl(url) {
   if (!url) return false;
   
   try {
-    // Tạo Image object để test load
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    
-    return new Promise((resolve) => {
-      const timeout = setTimeout(() => {
-        resolve(false);
-      }, 3000); // 3 second timeout
-      
-      img.onload = () => {
-        clearTimeout(timeout);
-        resolve(true);
-      };
-      
-      img.onerror = () => {
-        clearTimeout(timeout);
-        resolve(false);
-      };
-      
-      img.src = url;
-    });
+    // For local server, try a simple fetch to check if file exists
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
   } catch (error) {
     console.warn('Error checking image URL:', error);
     return false;
@@ -898,27 +1108,23 @@ export async function checkImageUrl(url) {
 }
 
 /**
- * Get first working image URL from filename
+ * Get working image URL from filename (simplified for local storage)
  * @param {string} filename - Image filename stored in database
- * @returns {Promise<string>} - First working URL or empty string
+ * @returns {Promise<string>} - Working URL or empty string
  */
 export async function getWorkingImageUrl(filename) {
-  const urls = getBackupImageUrls(filename);
+  const url = getImageUrl(filename);
   
-  for (const url of urls) {
-    console.log(`Checking image URL: ${url}`);
-    const isWorking = await checkImageUrl(url);
-    
-    if (isWorking) {
-      console.log(`Found working image URL: ${url}`);
-      return url;
-    } else {
-      console.log(`URL not working: ${url}`);
-    }
+  console.log(`Checking local image URL: ${url}`);
+  const isWorking = await checkImageUrl(url);
+  
+  if (isWorking) {
+    console.log(`Local image URL working: ${url}`);
+    return url;
+  } else {
+    console.warn(`Local image URL not working: ${url}`);
+    return '';
   }
-  
-  console.warn(`No working URLs found for: ${filename}`);
-  return '';
 }
 
 /**

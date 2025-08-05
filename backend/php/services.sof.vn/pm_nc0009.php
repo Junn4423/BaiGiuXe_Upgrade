@@ -190,6 +190,7 @@ class pm_nc0009 extends lv_controler{
                     lv009='{$this->lv009}',
                     lv010='{$phutGui}',
                     lv012='{$this->lv012}',
+                    lv013= '{$this->lv013}',
                     lv014='DA_RA',
                     lv016='{$this->lv016}' 
                 WHERE lv001='{$this->lv001}'";

@@ -184,24 +184,31 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
     const blob = await captureVideoFrame(videoElement)
     
     try {
-      // Upload to MinIO instead of saving locally
-      console.log(`Uploading ${type} image to MinIO...`)
+      // Upload with correct direction and type
+      console.log(`Uploading ${type} image with direction: ${mode}...`)
       let uploadResult
       
       if (type === 'plate') {
         if (mode === 'ra') {
-          uploadResult = await uploadLicensePlateOutImage(blob)
+          uploadResult = await uploadLicensePlateOutImage(blob, {
+            updateType: 'plate_out'
+          })
         } else {
-          uploadResult = await uploadLicensePlateImage(blob)
+          uploadResult = await uploadLicensePlateImage(blob, {
+            updateType: 'plate_in'
+          })
         }
       } else if (type === 'face') {
-        uploadResult = await uploadFaceImage(blob)
+        const updateType = mode === 'ra' ? 'face_out' : 'face_in'
+        uploadResult = await uploadFaceImage(blob, {
+          updateType: updateType
+        })
       }
 
       if (uploadResult && uploadResult.success) {
-        console.log(`Image uploaded to MinIO: ${uploadResult.primaryUrl}`)
+        console.log(`Image uploaded successfully: ${uploadResult.primaryUrl}`)
         
-        // Tách filename từ URL để lưu vào database
+        // Tách filename từ response để lưu vào database
         const imageFilename = uploadResult.filename || uploadResult.primaryUrl.split('/').pop()
         console.log(`Extracted filename for database: ${imageFilename}`)
         
@@ -209,13 +216,14 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
           url: uploadResult.primaryUrl, // URL đầy đủ để hiển thị ngay
           filename: imageFilename, // Chỉ filename để lưu vào database
           blob: blob,
-          backupUrls: uploadResult.urls
+          backupUrls: uploadResult.urls,
+          isLocal: uploadResult.isLocal
         }
       } else {
-        throw new Error('Upload failed to all MinIO servers')
+        throw new Error('Upload failed')
       }
     } catch (error) {
-      console.error(`MinIO upload failed for ${type} image:`, error)
+      console.error(`Image upload failed for ${type} image:`, error)
       // Fallback: Create object URL for immediate display
       const objectUrl = URL.createObjectURL(blob)
       console.log(`Using local fallback URL: ${objectUrl}`)

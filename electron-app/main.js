@@ -142,30 +142,37 @@ app.on("before-quit", () => {
 // IPC Handler for saving images automatically
 ipcMain.handle('save-image', async (event, { data, fileName, folder }) => {
   try {
-    // Get app data directory or user documents
-    const documentsPath = app.getPath('documents')
-    const appFolderPath = path.join(documentsPath, 'ParkingLotApp')
-    const fullFolderPath = path.join(appFolderPath, folder)
+    let fullFolderPath;
+    
+    // Check if folder is an absolute path
+    if (path.isAbsolute(folder)) {
+      fullFolderPath = folder;
+    } else {
+      // Use relative path from app documents folder
+      const documentsPath = app.getPath('documents');
+      const appFolderPath = path.join(documentsPath, 'ParkingLotApp');
+      fullFolderPath = path.join(appFolderPath, folder);
+    }
     
     // Create directory if it doesn't exist
-    await fs.mkdir(fullFolderPath, { recursive: true })
+    await fs.mkdir(fullFolderPath, { recursive: true });
     
     // Full file path
-    const filePath = path.join(fullFolderPath, fileName)
+    const filePath = path.join(fullFolderPath, fileName);
     
     // Convert array back to buffer
-    const buffer = Buffer.from(data)
+    const buffer = Buffer.from(data);
     
     // Write file
-    await fs.writeFile(filePath, buffer)
+    await fs.writeFile(filePath, buffer);
     
-    console.log(`✅ Image auto-saved to: ${filePath}`)
-    return filePath
+    console.log(`✅ Image auto-saved to: ${filePath}`);
+    return filePath;
   } catch (error) {
-    console.error('❌ Error auto-saving image:', error)
-    throw error
+    console.error('❌ Error auto-saving image:', error);
+    throw error;
   }
-})
+});
 
 // IPC Handler for creating directories
 ipcMain.handle('create-directory', async (event, dirPath) => {
@@ -176,6 +183,16 @@ ipcMain.handle('create-directory', async (event, dirPath) => {
   } catch (error) {
     console.error('❌ Error creating directory:', error)
     throw error
+  }
+})
+
+// IPC Handler for checking if path exists
+ipcMain.handle('path-exists', async (event, pathToCheck) => {
+  try {
+    await fs.access(pathToCheck)
+    return true
+  } catch (error) {
+    return false
   }
 })
 
@@ -224,3 +241,6 @@ ipcMain.handle('show-in-explorer', async (event, filePath) => {
     return false
   }
 })
+
+// IPC Handler for checking if path exists
+
