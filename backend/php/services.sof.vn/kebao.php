@@ -412,6 +412,7 @@ switch ($vtable) {
                     $pm_nc0009->lv007 = $input['congRa'] ?? $_POST['lv007'] ?? null;
                     $pm_nc0009->lv009 = $input['gioRa'] ?? $_POST['lv009'] ?? null;
                     $pm_nc0009->lv012 = $input['anhRa'] ?? $_POST['lv012'] ?? null;
+                    $pm_nc0009->lv013 = $input['phi'] ?? $_POST['lv013'] ?? null;
                     $pm_nc0009->lv016 = $input['anhMatRa'] ?? $_POST['lv016'] ?? null;
                     $plateRa = $input['plate'] ?? null; 
 

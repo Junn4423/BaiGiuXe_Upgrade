@@ -19,9 +19,10 @@ export const cleanupObjectUrls = () => {
  * @param {Blob} blob - Image blob
  * @param {string} fileName - File name
  * @param {string} type - 'plate' or 'face'
+ * @param {string} direction - 'in' or 'out' (default: 'in')
  * @returns {Promise<{url: string, blob: Blob}>} - Object URL and original blob
  */
-export const saveImageToAssets = async (blob, fileName, type) => {
+export const saveImageToAssets = async (blob, fileName, type, direction = 'in') => {
   try {
     const folderName = type === 'plate' ? 'anhchup_bienso' : 'anhchup_khuonmat'
     
@@ -29,26 +30,37 @@ export const saveImageToAssets = async (blob, fileName, type) => {
     const objectUrl = URL.createObjectURL(blob)
     createdUrls.add(objectUrl)
     
-    // Try the new MinIO + local fallback system
+    // Use direct folder storage via upload API
     try {
-      const { uploadImageToMinIO } = await import('../api/api.js')
-      const prefix = type === 'plate' ? 'license_plate' : 'khuon_mat'
+      const { uploadImageToLocal } = await import('../api/api.js')
       
-      const uploadResult = await uploadImageToMinIO(blob, prefix)
+      // Determine correct prefix based on type and direction
+      let prefix = '';
+      if (type === 'plate') {
+        prefix = direction === 'out' ? 'license_plate_out' : 'license_plate_in';
+      } else if (type === 'face') {
+        prefix = direction === 'out' ? 'face_out' : 'face_in';
+      } else {
+        prefix = type; // Fallback to original type
+      }
+      
+      const uploadResult = await uploadImageToLocal(blob, prefix)
       
       if (uploadResult.success) {
-        console.log(`✅ Image upload successful:`, uploadResult)
+        console.log(`✅ Image storage successful (${prefix}):`, uploadResult)
         
         return {
           url: objectUrl,
           blob: blob,
           filePath: uploadResult.primaryUrl,
-          isLocal: uploadResult.isLocal || false,
-          localPath: uploadResult.localPath
+          isLocal: uploadResult.isLocal,
+          localPath: uploadResult.filePath,
+          filename: uploadResult.filename,
+          uploadMethod: uploadResult.isLocal ? 'local_storage' : 'server_storage'
         }
       }
     } catch (uploadError) {
-      console.error('Upload system failed, falling back to legacy save:', uploadError)
+      console.warn('Upload failed, falling back to legacy system:', uploadError)
     }
     
     // Legacy fallback - use the old auto-save system
@@ -115,10 +127,28 @@ const autoSaveImage = async (blob, fileName, folderName) => {
         
         console.log(`Image data size: ${uint8Array.length} bytes`)
         
+        // Get storage path from localStorage or use default
+        const customStoragePath = localStorage.getItem('image_storage_path')
+        let targetFolder
+        
+        if (customStoragePath && !customStoragePath.includes('Documents') && !customStoragePath.includes('ParkingLotApp')) {
+          // Use custom path with date-based structure
+          const year = new Date().getFullYear()
+          const month = String(new Date().getMonth() + 1).padStart(2, '0')
+          const day = String(new Date().getDate()).padStart(2, '0')
+          targetFolder = `${customStoragePath}/Nam_${year}/Thang_${month}/Ngay_${day}`
+        } else {
+          // Use default path with date-based structure
+          const year = new Date().getFullYear()
+          const month = String(new Date().getMonth() + 1).padStart(2, '0')
+          const day = String(new Date().getDate()).padStart(2, '0')
+          targetFolder = `C:/ParkingLot_Images/Nam_${year}/Thang_${month}/Ngay_${day}`
+        }
+        
         const saveData = {
           data: Array.from(uint8Array),
           fileName: fileName,
-          folder: `assets/imgAnhChup/${folderName}`
+          folder: targetFolder
         }
         
         console.log(`Save data prepared:`, {
@@ -209,11 +239,29 @@ const saveWithElectron = async (blob, fileName, folderName) => {
     const arrayBuffer = await blob.arrayBuffer()
     const uint8Array = new Uint8Array(arrayBuffer)
     
+    // Get storage path from localStorage or use default
+    const customStoragePath = localStorage.getItem('image_storage_path')
+    let targetFolder
+    
+    if (customStoragePath && !customStoragePath.includes('Documents') && !customStoragePath.includes('ParkingLotApp')) {
+      // Use custom path with date-based structure
+      const year = new Date().getFullYear()
+      const month = String(new Date().getMonth() + 1).padStart(2, '0')
+      const day = String(new Date().getDate()).padStart(2, '0')
+      targetFolder = `${customStoragePath}/Nam_${year}/Thang_${month}/Ngay_${day}`
+    } else {
+      // Use default path with date-based structure
+      const year = new Date().getFullYear()
+      const month = String(new Date().getMonth() + 1).padStart(2, '0')
+      const day = String(new Date().getDate()).padStart(2, '0')
+      targetFolder = `C:/ParkingLot_Images/Nam_${year}/Thang_${month}/Ngay_${day}`
+    }
+    
     // Call Electron IPC to save file
     const filePath = await window.electronAPI.saveImage({
       data: Array.from(uint8Array),
       fileName: fileName,
-      folder: `assets/imgAnhChup/${folderName}`
+      folder: targetFolder
     })
     
     return filePath
@@ -267,7 +315,20 @@ const saveWithFileSystemAPI = async (blob, fileName, folderName) => {
     await writable.close()
     
     console.log(`File saved to file system: ${folderName}/${fileName}`)
-    return `assets/imgAnhChup/${folderName}/${fileName}`
+    
+    // Return path based on configured storage location
+    const customStoragePath = localStorage.getItem('image_storage_path')
+    if (customStoragePath && !customStoragePath.includes('Documents') && !customStoragePath.includes('ParkingLotApp')) {
+      const year = new Date().getFullYear()
+      const month = String(new Date().getMonth() + 1).padStart(2, '0')
+      const day = String(new Date().getDate()).padStart(2, '0')
+      return `${customStoragePath}/Nam_${year}/Thang_${month}/Ngay_${day}/${fileName}`
+    } else {
+      const year = new Date().getFullYear()
+      const month = String(new Date().getMonth() + 1).padStart(2, '0')
+      const day = String(new Date().getDate()).padStart(2, '0')
+      return `C:/ParkingLot_Images/Nam_${year}/Thang_${month}/Ngay_${day}/${fileName}`
+    }
     
   } catch (error) {
     console.error('File System API error:', error)

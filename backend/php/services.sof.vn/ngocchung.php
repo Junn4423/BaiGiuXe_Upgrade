@@ -211,19 +211,15 @@ switch ($vtable) {
                 }
 
                 // Cập nhật phí và thời gian tính được vào phiên gửi xe
-                $updateQuery = "UPDATE pm_nc0009 SET lv013 = $phi, lv010 = $tongPhut WHERE lv001 = '$maPhien'";
-                $updateResult = db_query($updateQuery);
+                // $updateQuery = "UPDATE pm_nc0009 SET lv013 = $phi, lv010 = $tongPhut WHERE lv001 = '$maPhien'";
+                // $updateResult = db_query($updateQuery);
 
-                if ($updateResult) {
                     $vOutput = [
                         'success' => true,
                         'message' => 'Tính phí thành công',
                         'phi' => $phi,
                         'tongPhut' => $tongPhut
                     ];
-                } else {
-                    $vOutput = ['success'=>false, 'message'=>'Lỗi khi cập nhật phí'];
-                }
                 break;
 
 			case "layChinhSachTuPT":
@@ -455,6 +451,14 @@ switch ($vtable) {
 
     // Statistics (Thống kê)
     case "statistics":
+        include_once("pm_statistics.php");
+        $pm_statistics = new pm_statistics();
+        
+        // Set parameters from request
+        $pm_statistics->lv002 = $input['fromDate'] ?? $_POST['fromDate'] ?? $_GET['fromDate'] ?? null;
+        $pm_statistics->lv003 = $input['toDate'] ?? $_POST['toDate'] ?? $_GET['toDate'] ?? null;
+        $pm_statistics->lv004 = $input['limit'] ?? $_POST['limit'] ?? $_GET['limit'] ?? null;
+        
         switch ($vfun) {
             /* --------------------------------------------------
              * 1. Thống kê doanh thu (revenue)
@@ -578,6 +582,93 @@ switch ($vtable) {
                     'occupied'=>$busy,
                     'ratio'=>$ratio // %
                 ];
+                break;
+
+            /* --------------------------------------------------
+             * 4. Thống kê tổng quan hệ thống (systemOverview)
+             * --------------------------------------------------*/
+            case "systemOverview":
+                $vOutput = $pm_statistics->GET_SYSTEM_OVERVIEW();
+                break;
+
+            /* --------------------------------------------------
+             * 5. Thống kê xe trong bãi (vehiclesInParking)
+             * --------------------------------------------------*/
+            case "vehiclesInParking":
+                $vOutput = $pm_statistics->GET_VEHICLES_IN_PARKING();
+                break;
+
+            /* --------------------------------------------------
+             * 6. Thống kê doanh thu theo loại thẻ (revenueByCardType)
+             * --------------------------------------------------*/
+            case "revenueByCardType":
+                $vOutput = $pm_statistics->GET_REVENUE_BY_CARD_TYPE();
+                break;
+
+            /* --------------------------------------------------
+             * 7. Thống kê hiệu suất camera (cameraPerformance)
+             * --------------------------------------------------*/
+            case "cameraPerformance":
+                $vOutput = $pm_statistics->GET_CAMERA_PERFORMANCE();
+                break;
+
+            /* --------------------------------------------------
+             * 8. Thống kê theo khu vực (zoneStatistics)
+             * --------------------------------------------------*/
+            case "zoneStatistics":
+                $vOutput = $pm_statistics->GET_ZONE_STATISTICS();
+                break;
+
+            /* --------------------------------------------------
+             * 9. Thống kê hoạt động nhân viên (employeeActivity)
+             * --------------------------------------------------*/
+            case "employeeActivity":
+                $vOutput = $pm_statistics->GET_EMPLOYEE_ACTIVITY();
+                break;
+
+            /* --------------------------------------------------
+             * 10. Thống kê thời gian gửi xe trung bình (averageParkingTime)
+             * --------------------------------------------------*/
+            case "averageParkingTime":
+                // Calculate average parking time
+                $fromDate = $pm_statistics->lv002 ?? date('Y-m-d');
+                $toDate = $pm_statistics->lv003 ?? $fromDate;
+                
+                $sql = "SELECT 
+                            AVG(TIMESTAMPDIFF(MINUTE, lv008, lv009)) as avgMinutes
+                        FROM pm_nc0009 
+                        WHERE DATE(lv008) BETWEEN '$fromDate' AND '$toDate'
+                        AND lv014 = 'DA_RA'
+                        AND lv009 IS NOT NULL";
+                
+                $result = db_query($sql);
+                $avgMinutes = 0;
+                if ($row = db_fetch_array($result)) {
+                    $avgMinutes = (float)($row['avgMinutes'] ?? 0);
+                }
+                
+                $vOutput = [
+                    'success' => true,
+                    'data' => [
+                        'averageTime' => round($avgMinutes, 2),
+                        'byVehicleType' => [],
+                        'distribution' => []
+                    ]
+                ];
+                break;
+
+            /* --------------------------------------------------
+             * 11. Top thẻ sử dụng nhiều nhất (topCards)
+             * --------------------------------------------------*/
+            case "topCards":
+                $vOutput = $pm_statistics->GET_TOP_CARDS();
+                break;
+
+            /* --------------------------------------------------
+             * 12. Thống kê lỗi và sự cố (errorAnalysis)
+             * --------------------------------------------------*/
+            case "errorAnalysis":
+                $vOutput = $pm_statistics->GET_ERROR_ANALYSIS();
                 break;
 
             default:

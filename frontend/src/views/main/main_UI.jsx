@@ -41,6 +41,7 @@ import {
 } from "../../utils/imageUtils";
 import { layALLLoaiPhuongTien } from "../../api/api";
 import StatisticsPage from "../../components/StatisticsPage";
+import SystemSettings from "../SystemSettings";
 import { processAttendanceImage } from "../../api/apiChamCong";
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
@@ -105,6 +106,7 @@ const MainUI = () => {
   const [showEmployeePermission, setShowEmployeePermission] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
   const [showAttendance, setShowAttendance] = useState(false);
+  const [showSystemSettings, setShowSystemSettings] = useState(false);
 
   // Card scanning and image capture
   const [showImageCaptureModal, setShowImageCaptureModal] = useState(false);
@@ -518,6 +520,7 @@ const MainUI = () => {
   const openVehicleManagement = () => setShowVehicleManagement(true);
   const openVehicleType = () => setShowVehicleType(true);
   const openEmployeePermission = () => setShowEmployeePermission(true);
+  const openSystemSettings = () => setShowSystemSettings(true);
 
   const reloadMainUI = () => {
     window.location.reload();
@@ -2221,6 +2224,13 @@ const MainUI = () => {
           >
             CHẤM CÔNG
           </button>
+          <button 
+            className="toolbar-btn settings-btn" 
+            onClick={openSystemSettings}
+            title="Cài đặt hệ thống"
+          >
+            CÀI ĐẶT
+          </button>
           <button className="toolbar-btn logout-btn" onClick={logout}>
             ĐĂNG XUẤT
           </button>
@@ -2414,6 +2424,11 @@ const MainUI = () => {
       {/* Statistics Page Overlay */}
       {showStatistics && (
         <StatisticsPage onClose={() => setShowStatistics(false)} />
+      )}
+
+      {/* System Settings Dialog */}
+      {showSystemSettings && (
+        <SystemSettings onClose={() => setShowSystemSettings(false)} />
       )}
     </div>
   );
