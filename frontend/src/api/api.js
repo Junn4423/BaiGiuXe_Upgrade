@@ -1022,16 +1022,19 @@ export async function getImageUrl(filename) {
 }
 
 /**
- * Get backup URLs - for local storage, return same URL multiple times for compatibility
+ * Get backup URLs - for local storage, return direct URLs instead of promises
  * @param {string} filename - Image filename stored in database
- * @returns {Array<string>} - Array of URLs (same URL repeated for compatibility)
+ * @returns {Array<string>} - Array of direct URLs (no promises)
  */
 export function getBackupImageUrls(filename) {
   if (!filename) return [];
   
-  const primaryUrl = getImageUrl(filename);
-  // Return same URL 3 times for compatibility with existing fallback logic
-  return [primaryUrl, primaryUrl, primaryUrl];
+  // Create direct URLs to the API endpoint instead of calling getImageUrl (which returns Promise)
+  const baseUrl = `${url_api}/get_image.php`;
+  
+  // For compatibility with existing fallback logic, return the same URL 3 times
+  const directUrl = `${baseUrl}?file=${encodeURIComponent(filename)}`;
+  return [directUrl, directUrl, directUrl];
 }
 
 // COMMENTED OUT: MinIO URL functions
