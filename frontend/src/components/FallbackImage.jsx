@@ -38,11 +38,11 @@ const FallbackImage = ({
 
   const loadImageWithFallback = async () => {
     try {
-      // Sử dụng hybrid service để lấy image src với fallback
-      const src = await hybridImageService.getImageSrc(filename);
+      // Sử dụng getImageUrl để lấy image src với API backend
+      const src = await getImageUrl(filename);
       
       if (src) {
-        console.log(`Successfully loaded from hybrid service: ${src}`);
+        console.log(`Successfully loaded from API: ${src}`);
         setCurrentSrc(src);
         setLoading(false);
         setError(false);
@@ -51,24 +51,24 @@ const FallbackImage = ({
           onLoadSuccess(src, 0);
         }
       } else {
-        throw new Error('No image source found from hybrid service');
+        throw new Error('No image source found from API');
       }
     } catch (error) {
-      console.error(`Hybrid service failed, falling back to original method:`, error);
+      console.error(`API failed, falling back to backup URLs:`, error);
       
-      // Fallback to original MinIO URLs method
+      // Fallback to backup URLs method
       const urls = [];
       
       // Nếu đã là full URL, thử nó trước
       if (filename.startsWith('http://') || filename.startsWith('https://')) {
         urls.push(filename);
       } else {
-        // Thử tất cả server MinIO
+        // Thử tất cả server backup URLs
         const backupUrls = getBackupImageUrls(filename);
         urls.push(...backupUrls);
       }
 
-      console.log(`Trying to load image with original method: ${filename}`, urls);
+      console.log(`Trying to load image with backup URLs: ${filename}`, urls);
       tryLoadImage(urls, 0);
     }
   };
@@ -206,8 +206,8 @@ export const useFallbackImage = (filename) => {
 
     const loadImage = async () => {
       try {
-        // Sử dụng hybrid service trước
-        const src = await hybridImageService.getImageSrc(filename);
+        // Sử dụng getImageUrl API trước
+        const src = await getImageUrl(filename);
         
         if (src) {
           setImageState(prev => ({
@@ -220,9 +220,9 @@ export const useFallbackImage = (filename) => {
           return;
         }
         
-        throw new Error('Hybrid service failed');
+        throw new Error('API service failed');
       } catch (error) {
-        // Fallback to original method
+        // Fallback to backup URLs method
         const urls = filename.startsWith('http://') || filename.startsWith('https://') 
           ? [filename] 
           : getBackupImageUrls(filename);
