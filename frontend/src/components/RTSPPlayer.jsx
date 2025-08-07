@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 
-const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onConnected, className = "", cameraType }) => {
+const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onConnected, className = "", cameraType, onPlateDetected = () => {} }) => {
   const videoRef = useRef(null)
   const wsRef = useRef(null)
   const mediaSourceRef = useRef(null)
@@ -16,6 +16,13 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
   const reconnectAttemptsRef = useRef(0)
   const maxReconnectAttempts = 3
   const mountedRef = useRef(true)
+
+  // ====== Realtime ALPR detection overlay ======
+  const overlayCanvasRef = useRef(null);
+  const lastDetectionsRef = useRef([]);
+  const lastCaptureTimeRef = useRef(0);
+  const isSendingRef = useRef(false);
+  const SNAP_INTERVAL = 1000 / 5; // ~5 fps (was 15 fps) - Less frequent to avoid overload
   const initializingRef = useRef(false)
 
   // Stable references to prevent re-renders
@@ -418,6 +425,132 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
     }
   }, []) // Empty dependency array - only run once per mount
 
+  // ================== Realtime ALPR Detection Loop ==================
+  useEffect(() => {
+    if (!hasVideoData) return;
+
+    const video = videoRef.current;
+    const overlay = overlayCanvasRef.current;
+    if (!video || !overlay) return;
+
+    const resize = () => {
+      overlay.width = video.videoWidth;
+      overlay.height = video.videoHeight;
+    };
+    resize();
+    video.addEventListener('loadedmetadata', resize);
+
+    const snapshot = document.createElement('canvas');
+    snapshot.width = video.videoWidth;
+    snapshot.height = video.videoHeight;
+    const snapCtx = snapshot.getContext('2d');
+    const ctx = overlay.getContext('2d');
+
+    let cancelled = false;
+
+    const step = () => {
+      if (cancelled) return;
+      requestAnimationFrame(step);
+      
+      // Better video readiness check
+      if (video.paused || video.readyState < 3 || video.videoWidth === 0 || video.videoHeight === 0) {
+        return;
+      }
+
+      const now = performance.now();
+      if (now - lastCaptureTimeRef.current >= SNAP_INTERVAL && !isSendingRef.current) {
+        try {
+          // Ensure canvas dimensions match video
+          if (snapshot.width !== video.videoWidth || snapshot.height !== video.videoHeight) {
+            snapshot.width = video.videoWidth;
+            snapshot.height = video.videoHeight;
+          }
+          
+          console.log('📸 Capturing frame for ALPR detection...'); // Debug log
+          snapCtx.drawImage(video, 0, 0, snapshot.width, snapshot.height);
+          
+          snapshot.toBlob(async (blob) => {
+            if (!blob || blob.size < 500) { // Reduced minimum size for test
+              console.log('❌ Failed to create blob from frame or blob too small:', blob?.size || 0); // Debug log
+              return;
+            }
+            console.log('🔄 Frame blob created, size:', blob.size); // Debug log
+            isSendingRef.current = true;
+            lastCaptureTimeRef.current = now;
+            
+            const fd = new FormData();
+            fd.append('file', blob, 'frame.jpg');
+            
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 5000); // Increase to 5 seconds
+              
+              const response = await fetch('http://127.0.0.1:5001/detect', { 
+                method: 'POST', 
+                body: fd,
+                signal: controller.signal,
+                headers: {
+                  'Cache-Control': 'no-cache',
+                }
+              });
+              
+              clearTimeout(timeoutId);
+              
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              
+              const data = await response.json();
+              console.log('🎯 ALPR Detection result:', data); // Debug log
+              
+              if (data.success && Array.isArray(data.results)) {
+                lastDetectionsRef.current = data.results;
+                if (data.results.length > 0) {
+                  const bestPlate = data.results[0];
+                  console.log('✅ Plate detected:', bestPlate.plate, 'confidence:', bestPlate.confidence); // Debug log
+                  onPlateDetected(bestPlate.plate || '');
+                } else {
+                  console.log('⚠️ No plates detected in frame'); // Debug log
+                }
+              } else {
+                console.log('❌ Invalid ALPR response:', data); // Debug log
+              }
+            } catch (fetchError) {
+              if (fetchError.name === 'AbortError') {
+                console.warn('⏰ ALPR request timeout (5s)'); // More specific timeout log
+              } else {
+                console.error('🚫 ALPR fetch error:', fetchError.message); // Debug log
+              }
+            } finally {
+              isSendingRef.current = false;
+            }
+          }, 'image/jpeg', 0.9); // Increase quality for better detection
+          
+        } catch (captureError) {
+          console.error('🚫 Frame capture error:', captureError.message);
+        }
+      }
+
+      // Draw overlay bounding boxes
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+      ctx.strokeStyle = 'lime';
+      ctx.lineWidth = 2;
+      lastDetectionsRef.current.forEach(det => {
+        if (det && det.bbox) {
+          const { x, y, w, h } = det.bbox;
+          ctx.strokeRect(x, y, w, h);
+        }
+      });
+    };
+
+    requestAnimationFrame(step);
+
+    return () => {
+      cancelled = true;
+      video.removeEventListener('loadedmetadata', resize);
+    };
+  }, [hasVideoData, onPlateDetected]);
+
   return (
     <div className={`rtsp-player ${className}`} style={{ width, height, position: "relative" }}>
       <video
@@ -432,6 +565,18 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
           height: "100%",
           objectFit: "cover",
           background: "#000",
+        }}
+      />
+      {/* Overlay canvas for bounding boxes */}
+      <canvas
+        ref={overlayCanvasRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
         }}
       />
 

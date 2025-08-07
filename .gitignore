@@ -1,34 +1,227 @@
+# =============================================
+# NODE.JS / FRONTEND
+# =============================================
 # Node modules
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
 
 # Build output
 dist/
 build/
+frontend/build/
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# =============================================
+# PYTHON / BACKEND
+# =============================================
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 
-# OS files
-.DS_Store
-Thumbs.db
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+backend/bienso/venv/
 
-# Electron
-*.asar
+# Python distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Env files
-.env
-.env.*
+# PyInstaller
+*.manifest
+*.spec
 
-# VSCode
-.vscode/
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Misc
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# =============================================
+# LOGS AND TEMPORARY FILES
+# =============================================
+# Application logs
 *.log
+*.log.*
+backend/bienso/*.log
+backend/bienso/api_integration.log
+backend/bienso/realtime_license_plate.log
+
+# Process files
 *.pid
 *.seed
+*.pid.lock
+
+# =============================================
+# IMAGES AND MEDIA
+# =============================================
+# Parking lot images (if they contain sensitive data)
+# static/faces/
+# MInio/parking-lot-images/
+
+# Temporary image files
+temp_*.jpg
+temp_*.png
+frame_*.jpg
+*.tmp
+
+# =============================================
+# DATABASE
+# =============================================
+# Database files (if using SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# Database dumps (uncomment if needed)
+# *.sql
+
+# =============================================
+# ELECTRON
+# =============================================
+# Electron build output
+electron-app/dist/
+electron-app/build/
+*.asar
+
+# =============================================
+# ENVIRONMENT AND CONFIG
+# =============================================
+# Environment files
+.env
+.env.*
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Config files with sensitive data
+config/local.php
+config/production.php
+
+# =============================================
+# OPERATING SYSTEM
+# =============================================
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# =============================================
+# DEVELOPMENT TOOLS
+# =============================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# =============================================
+# PACKAGE MANAGERS
+# =============================================
+# Composer (PHP)
+backend/php/*/vendor/
+backend/php/*/composer.lock
+
+# =============================================
+# MISC
+# =============================================
+# Compressed files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
 *.tgz
 
-# Ignore frontend build if needed
-../frontend/build/
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Documentation build
+docs/_build/
+
+# MacOS
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk

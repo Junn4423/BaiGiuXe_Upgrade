@@ -506,11 +506,16 @@ async function nhanDangBienSoFormData(imageBlob) {
     );
   }
 
-  const response = await fetch(api_BienSo, {
-    method: "POST",
-    body: formData,
-    // Không set Content-Type để browser tự động thêm boundary cho multipart/form-data
-  });
+  const response = await Promise.race([
+    fetch(api_BienSo, {
+      method: "POST",
+      body: formData,
+      // Không set Content-Type để browser tự động thêm boundary cho multipart/form-data
+    }),
+    new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("License plate API timeout (1 second)")), 1000)
+    )
+  ]);
 
   console.log("📡 Response status (FormData):", response.status);
   console.log(

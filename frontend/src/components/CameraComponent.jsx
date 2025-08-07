@@ -33,6 +33,9 @@ const CameraComponent = React.forwardRef(
 
     const restoreTimer = useRef(null);
 
+    // Latest detected plates from realtime overlay
+    const lastDetectedPlateRef = useRef({ in: "", out: "" });
+
     // Convert camera key to camera type format for video element identification
     const getCameraTypeFromKey = (cameraKey) => {
       const keyMap = {
@@ -208,6 +211,13 @@ const CameraComponent = React.forwardRef(
       }));
     };
 
+    // Realtime detection callback generator
+    const createPlateDetectedHandler = (direction) => (plateText) => {
+      if (!plateText) return;
+      lastDetectedPlateRef.current[direction] = plateText;
+      updateLicensePlateDisplay(plateText, null, direction);
+    };
+
     // Update camera frame with live feed
     const updateCameraFrame = (cameraType, imageData) => {
       // This method is kept for compatibility but live feeds are handled by RTSPPlayer
@@ -248,6 +258,7 @@ const CameraComponent = React.forwardRef(
       restoreCaptureFeeds,
       updateCameraFrame,
       setCameraStatus: setCameraStatusState,
+      getLastDetectedPlate: (dir) => lastDetectedPlateRef.current[dir] || "",
     }));
 
     const renderCameraFrame = (
@@ -312,6 +323,7 @@ const CameraComponent = React.forwardRef(
                 onError={(error) => handleCameraError(cameraKey, error)}
                 className="live-feed"
                 cameraType={getCameraTypeFromKey(cameraKey)} // Convert cameraKey to proper format
+                onPlateDetected={showLicensePlate ? createPlateDetectedHandler(direction) : undefined}
               />
             ) : (
               <div
