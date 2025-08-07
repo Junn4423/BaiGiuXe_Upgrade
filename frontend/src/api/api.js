@@ -568,13 +568,22 @@ export async function uploadImageToLocal(imageBlob, prefix = 'image', options = 
       blob: imageBlob,
       type: imageBlob.type,
       size: imageBlob.size,
-      prefix: prefix
+      prefix: prefix,
+      options: options
     });
 
-    // Generate timestamp-based filename
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', 'T').slice(0, -1) + 'Z';
-    const extension = getFileExtension(imageBlob);
-    const filename = `${prefix}_${timestamp}.${extension}`;
+    // Use provided filename if available, otherwise generate new one
+    let filename;
+    if (options.filename) {
+      filename = options.filename;
+      console.log('🏷️ Using provided filename:', filename);
+    } else {
+      // Generate timestamp-based filename
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', 'T').slice(0, -1) + 'Z';
+      const extension = getFileExtension(imageBlob);
+      filename = `${prefix}_${timestamp}.${extension}`;
+      console.log('🏷️ Generated new filename:', filename);
+    }
 
     // Try local storage first if enabled
     if (await isLocalStorageEnabled()) {
@@ -924,6 +933,7 @@ async function saveToLocalStorage(imageBlob, filename, prefix) {
  * @param {Blob|File} imageBlob - License plate image
  * @param {Object} options - Additional options
  * @param {string} options.sessionId - Session ID for database update
+ * @param {string} options.filename - Custom filename to use
  * @returns {Promise<Object>} - Upload results
  */
 export async function uploadLicensePlateImage(imageBlob, options = {}) {
@@ -938,6 +948,7 @@ export async function uploadLicensePlateImage(imageBlob, options = {}) {
  * @param {Blob|File} imageBlob - License plate image
  * @param {Object} options - Additional options
  * @param {string} options.sessionId - Session ID for database update
+ * @param {string} options.filename - Custom filename to use
  * @returns {Promise<Object>} - Upload results
  */
 export async function uploadLicensePlateOutImage(imageBlob, options = {}) {
@@ -953,6 +964,7 @@ export async function uploadLicensePlateOutImage(imageBlob, options = {}) {
  * @param {Object} options - Additional options
  * @param {string} options.sessionId - Session ID for database update
  * @param {string} options.updateType - face_in or face_out
+ * @param {string} options.filename - Custom filename to use
  * @returns {Promise<Object>} - Upload results
  */
 export async function uploadFaceImage(imageBlob, options = {}) {
@@ -971,10 +983,14 @@ export async function uploadFaceImage(imageBlob, options = {}) {
  * @returns {Promise<string>} - Base64 data URL of the image
  */
 export async function getImageUrl(filename) {
-  if (!filename) return '';
+  if (!filename) {
+    console.warn('🚫 getImageUrl: Empty filename provided');
+    return '';
+  }
   
   // If it's already a full URL, return as is
   if (filename.startsWith('http://') || filename.startsWith('https://') || filename.startsWith('data:')) {
+    console.log(`🔗 getImageUrl: Returning existing URL for ${filename}`);
     return filename;
   }
   
@@ -987,17 +1003,23 @@ export async function getImageUrl(filename) {
       year = timestampMatch[1];
       month = timestampMatch[2];
       day = timestampMatch[3];
+      console.log(`📅 getImageUrl: Extracted date from ${filename} -> ${year}-${month}-${day}`);
     } else {
       // Fallback to current date if can't extract from filename
       year = new Date().getFullYear();
       month = String(new Date().getMonth() + 1).padStart(2, '0');
       day = String(new Date().getDate()).padStart(2, '0');
+      console.warn(`⚠️ getImageUrl: Could not extract date from ${filename}, using current date: ${year}-${month}-${day}`);
     }
     
-    console.log(`🔍 Looking for image: ${filename} on date ${year}-${month}-${day}`);
+    console.log(`🔍 getImageUrl: Looking for image: ${filename} on date ${year}-${month}-${day}`);
     
     const baseUrl = url_api.replace('/index.php', '');
-    const response = await fetch(`${baseUrl}/getImage.php`, {
+    const apiUrl = `${baseUrl}/getImage.php`;
+    
+    console.log(`🌐 getImageUrl: Making request to ${apiUrl}`);
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1010,36 +1032,41 @@ export async function getImageUrl(filename) {
       })
     });
     
+    console.log(`📡 getImageUrl: Response status ${response.status} for ${filename}`);
+    
     if (response.ok) {
       const result = await response.json();
       if (result.base64) {
-        console.log(`✅ Successfully loaded image: ${filename}`);
+        console.log(`✅ getImageUrl: Successfully loaded image: ${filename} (${result.base64.length} chars)`);
         return result.base64; // Return base64 data URL
+      } else {
+        console.warn(`❌ getImageUrl: No base64 data in response for ${filename}:`, result);
       }
+    } else {
+      const errorText = await response.text();
+      console.warn(`❌ getImageUrl: Failed to load image: ${filename}, status: ${response.status}, error: ${errorText}`);
     }
     
-    console.warn(`Failed to load image: ${filename}, status: ${response.status}`);
     return ''; // Return empty string on failure
   } catch (error) {
-    console.error(`Error loading image ${filename}:`, error);
+    console.error(`💥 getImageUrl: Error loading image ${filename}:`, error);
     return '';
   }
 }
 
 /**
- * Get backup URLs - for local storage, return direct URLs instead of promises
+ * Get backup URLs - for local storage, return empty array since we only have one endpoint
+ * FallbackImage will rely on getImageUrl as primary source
  * @param {string} filename - Image filename stored in database
- * @returns {Array<string>} - Array of direct URLs (no promises)
+ * @returns {Array<string>} - Array of direct URLs (empty for local storage)
  */
 export function getBackupImageUrls(filename) {
   if (!filename) return [];
   
-  // Create direct URLs to the API endpoint instead of calling getImageUrl (which returns Promise)
-  const baseUrl = `${url_api}/get_image.php`;
-  
-  // For compatibility with existing fallback logic, return the same URL 3 times
-  const directUrl = `${baseUrl}?file=${encodeURIComponent(filename)}`;
-  return [directUrl, directUrl, directUrl];
+  // For local storage with single endpoint, return empty array
+  // FallbackImage will use getImageUrl() as primary source
+  console.log(`getBackupImageUrls called for ${filename} - using primary getImageUrl only`);
+  return [];
 }
 
 // COMMENTED OUT: MinIO URL functions

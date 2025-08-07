@@ -143,8 +143,14 @@ const CameraComponent = React.forwardRef(
       // Extract filename from path and get proper URL
       let displayUrl = imagePath;
       
+      // **MỚI: Kiểm tra nếu là object URL (blob:) thì sử dụng trực tiếp**
+      if (imagePath.startsWith('blob:') || imagePath.startsWith('data:')) {
+        // Object URL hoặc Data URL - sử dụng trực tiếp, không cần gọi API
+        displayUrl = imagePath;
+        console.log(`✅ Using direct object/data URL: ${imagePath.substring(0, 50)}...`);
+      }
       // If it's a relative path like "Nam_2025/Thang_08/Ngay_05/filename.jpg"
-      if (imagePath.includes('/') && !imagePath.startsWith('http') && !imagePath.startsWith('data:')) {
+      else if (imagePath.includes('/') && !imagePath.startsWith('http')) {
         const filename = imagePath.split('/').pop(); // Get filename
         try {
           displayUrl = await getImageUrl(filename);
@@ -152,7 +158,13 @@ const CameraComponent = React.forwardRef(
         } catch (error) {
           console.warn(`Failed to get image URL via API, using original path:`, error);
           // Fallback to original path
+          displayUrl = imagePath;
         }
+      }
+      // If it's already a full HTTP URL, use as is
+      else if (imagePath.startsWith('http')) {
+        displayUrl = imagePath;
+        console.log(`✅ Using full HTTP URL: ${imagePath}`);
       }
 
       const panelKey = `capturePanel${panelNumber}`;
