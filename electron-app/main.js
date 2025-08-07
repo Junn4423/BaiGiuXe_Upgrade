@@ -4,21 +4,228 @@ const fs = require("fs").promises
 const RTSPStreamingServer = require("./rtsp-streaming-server")
 const { spawn } = require("child_process");
 let alprProcess;
+let pythonInstallProcess;
+
+/**
+ * Check if Python is installed and accessible
+ */
+function checkPythonInstallation() {
+  return new Promise((resolve) => {
+    const pythonCheck = spawn("python", ["--version"], { stdio: "pipe" });
+    
+    pythonCheck.on("close", (code) => {
+      if (code === 0) {
+        console.log("✅ Python is installed and accessible");
+        resolve(true);
+      } else {
+        console.log("❌ Python is not installed or not in PATH");
+        resolve(false);
+      }
+    });
+    
+    pythonCheck.on("error", () => {
+      console.log("❌ Python command not found");
+      resolve(false);
+    });
+  });
+}
+
+/**
+ * Install Python dependencies if needed
+ */
+async function installPythonDependencies() {
+  console.log("🐍 Checking Python virtual environment...");
+  
+  // Determine virtual environment path based on app packaging
+  let venvPath;
+  let biensoDirPath;
+  
+  const devVenvPath = path.join(__dirname, "..", "backend", "bienso", "venv");
+  const prodVenvPath = path.join(__dirname, "backend", "bienso", "venv");
+  const devBiensoDirPath = path.join(__dirname, "..", "backend", "bienso");
+  const prodBiensoDirPath = path.join(__dirname, "backend", "bienso");
+  
+  // Check which virtual environment exists
+  try {
+    await fs.access(prodVenvPath);
+    venvPath = prodVenvPath;
+    biensoDirPath = prodBiensoDirPath;
+    console.log("📄 Found virtual environment in app bundle");
+  } catch {
+    try {
+      await fs.access(devVenvPath);
+      venvPath = devVenvPath;
+      biensoDirPath = devBiensoDirPath;
+      console.log("📄 Found virtual environment in development structure");
+    } catch {
+      console.error("❌ Virtual environment not found in either location");
+      console.log("🔧 Creating virtual environment...");
+      
+      // Try to create virtual environment
+      try {
+        await fs.access(prodBiensoDirPath);
+        biensoDirPath = prodBiensoDirPath;
+        venvPath = prodVenvPath;
+      } catch {
+        biensoDirPath = devBiensoDirPath;
+        venvPath = devVenvPath;
+      }
+      
+      // Create virtual environment
+      const createVenv = spawn("python", ["-m", "venv", "venv"], {
+        cwd: biensoDirPath,
+        stdio: "inherit"
+      });
+      
+      await new Promise((resolve) => {
+        createVenv.on("close", (code) => {
+          if (code === 0) {
+            console.log("✅ Virtual environment created successfully");
+          } else {
+            console.error("❌ Failed to create virtual environment");
+          }
+          resolve();
+        });
+      });
+    }
+  }
+  
+  // Check if virtual environment is properly set up
+  const pythonExePath = path.join(venvPath, "Scripts", "python.exe");
+  const pipExePath = path.join(venvPath, "Scripts", "pip.exe");
+  
+  try {
+    await fs.access(pythonExePath);
+    await fs.access(pipExePath);
+    console.log("✅ Virtual environment is properly set up");
+  } catch {
+    console.error("❌ Virtual environment is not properly set up");
+    return false;
+  }
+  
+  return new Promise((resolve) => {
+    console.log(`📦 Installing Python dependencies in virtual environment: ${venvPath}`);
+    
+    // Install required packages directly instead of using requirements.txt
+    const packages = ["fastapi", "uvicorn", "fast_alpr", "opencv-python", "numpy", "requests"];
+    
+    pythonInstallProcess = spawn(pipExePath, ["install", "--upgrade", "pip"], {
+      stdio: "inherit",
+      env: { 
+        ...process.env,
+        VIRTUAL_ENV: venvPath,
+        PATH: `${path.join(venvPath, "Scripts")};${process.env.PATH}`
+      }
+    });
+    
+    pythonInstallProcess.on("close", (code) => {
+      if (code === 0) {
+        console.log("✅ Pip upgraded successfully");
+        
+        // Install packages
+        const installPackages = spawn(pipExePath, ["install", ...packages], {
+          stdio: "inherit",
+          env: { 
+            ...process.env,
+            VIRTUAL_ENV: venvPath,
+            PATH: `${path.join(venvPath, "Scripts")};${process.env.PATH}`
+          }
+        });
+        
+        installPackages.on("close", (installCode) => {
+          if (installCode === 0) {
+            console.log("✅ Python dependencies installed successfully in virtual environment");
+            resolve(true);
+          } else {
+            console.error("❌ Failed to install Python dependencies in virtual environment");
+            resolve(false);
+          }
+        });
+        
+        installPackages.on("error", (err) => {
+          console.error("❌ Error installing Python dependencies:", err);
+          resolve(false);
+        });
+        
+      } else {
+        console.error("❌ Failed to upgrade pip");
+        resolve(false);
+      }
+    });
+    
+    pythonInstallProcess.on("error", (err) => {
+      console.error("❌ Error upgrading pip:", err);
+      resolve(false);
+    });
+  });
+}
 
 /**
  * Spawn the Fast ALPR Python micro-service so that licence-plate
  * detection is available for the React/Electron frontend.
  */
-function startALPRService() {
-  // Resolve script path relative to project root:
-  // electron-app/main.js -> ../backend/bienso/fast_alpr_service.py
-  const scriptPath = path.join(__dirname, "..", "backend", "bienso", "fast_alpr_service.py");
+async function startALPRService() {
+  // Check Python installation first
+  const pythonAvailable = await checkPythonInstallation();
+  if (!pythonAvailable) {
+    console.error("❌ Cannot start ALPR service: Python not available");
+    return false;
+  }
+  
+  // Determine paths based on app packaging
+  let venvPath;
+  let scriptPath;
+  let pythonExePath;
+  
+  const devVenvPath = path.join(__dirname, "..", "backend", "bienso", "venv");
+  const prodVenvPath = path.join(__dirname, "backend", "bienso", "venv");
+  const devScriptPath = path.join(__dirname, "..", "backend", "bienso", "fast_alpr_service.py");
+  const prodScriptPath = path.join(__dirname, "backend", "bienso", "fast_alpr_service.py");
+  
+  // Check for virtual environment and script paths
+  try {
+    await fs.access(prodVenvPath);
+    await fs.access(prodScriptPath);
+    venvPath = prodVenvPath;
+    scriptPath = prodScriptPath;
+    pythonExePath = path.join(prodVenvPath, "Scripts", "python.exe");
+    console.log("🔧 Using production ALPR service path with virtual environment");
+  } catch {
+    try {
+      await fs.access(devVenvPath);
+      await fs.access(devScriptPath);
+      venvPath = devVenvPath;
+      scriptPath = devScriptPath;
+      pythonExePath = path.join(devVenvPath, "Scripts", "python.exe");
+      console.log("🔧 Using development ALPR service path with virtual environment");
+    } catch {
+      console.error("❌ ALPR service script or virtual environment not found in either location");
+      return false;
+    }
+  }
 
-  console.log("🚀 Spawning Fast ALPR service:", scriptPath);
+  // Check if Python executable exists in virtual environment
+  try {
+    await fs.access(pythonExePath);
+    console.log("✅ Virtual environment Python executable found:", pythonExePath);
+  } catch {
+    console.error("❌ Python executable not found in virtual environment:", pythonExePath);
+    console.log("🔄 Falling back to system Python...");
+    pythonExePath = "python";
+  }
 
-  alprProcess = spawn("python", [scriptPath], {
+  console.log("🚀 Spawning Fast ALPR service with virtual environment:");
+  console.log("   Script:", scriptPath);
+  console.log("   Python:", pythonExePath);
+
+  alprProcess = spawn(pythonExePath, [scriptPath, "--host", "127.0.0.1", "--port", "5001"], {
     stdio: "inherit",
-    env: { ...process.env, PYTHONUNBUFFERED: "1" }, // ensure real-time logging
+    env: { 
+      ...process.env, 
+      PYTHONUNBUFFERED: "1",
+      VIRTUAL_ENV: venvPath,
+      PATH: `${path.join(venvPath, "Scripts")};${process.env.PATH}`
+    },
   });
 
   alprProcess.on("error", (err) => {
@@ -27,7 +234,14 @@ function startALPRService() {
 
   alprProcess.on("exit", (code, signal) => {
     console.log(`ℹ️ Fast ALPR service exited with code=${code} signal=${signal}`);
+    // Auto-restart if exit was unexpected
+    if (code !== 0 && signal !== "SIGTERM" && signal !== "SIGKILL") {
+      console.log("🔄 Attempting to restart ALPR service...");
+      setTimeout(() => startALPRService(), 5000);
+    }
   });
+  
+  return true;
 }
 
 let mainWindow
@@ -137,9 +351,31 @@ function startRTSPStreamingServer() {
 }
 
 // This method will be called when Electron has finished initialization
-app.whenReady().then(() => {
-  startALPRService();
-  createWindow()
+app.whenReady().then(async () => {
+  console.log("🚀 Starting Parking Lot Management System...");
+  
+  // Install Python dependencies first
+  console.log("🐍 Setting up Python environment...");
+  const depsInstalled = await installPythonDependencies();
+  
+  if (depsInstalled) {
+    console.log("✅ Python environment ready");
+    
+    // Start ALPR service
+    console.log("🐍 Initializing Python ALPR service...");
+    const alprStarted = await startALPRService();
+    
+    if (alprStarted) {
+      console.log("✅ ALPR service started successfully");
+    } else {
+      console.warn("⚠️ ALPR service failed to start - continuing without license plate recognition");
+    }
+  } else {
+    console.warn("⚠️ Python environment setup failed - continuing without license plate recognition");
+  }
+  
+  // Create the main window
+  createWindow();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -163,14 +399,28 @@ app.on("window-all-closed", () => {
 })
 
 app.on("before-quit", () => {
-  // Stop RTSP streaming server before quitting
+  // Stop all processes before quitting
   if (rtspServer) {
-    console.log("Stopping RTSP streaming server before quit...");
+    console.log("🛑 Stopping RTSP streaming server before quit...");
     rtspServer.stop();
   }
+  
+  if (pythonInstallProcess) {
+    console.log("🛑 Stopping Python installation process...");
+    pythonInstallProcess.kill();
+  }
+  
   if (alprProcess) {
-    console.log("Stopping Fast ALPR service before quit...");
-    alprProcess.kill();
+    console.log("🛑 Stopping Fast ALPR service before quit...");
+    alprProcess.kill("SIGTERM");
+    
+    // Force kill if not responsive
+    setTimeout(() => {
+      if (alprProcess && !alprProcess.killed) {
+        console.log("🛑 Force killing ALPR service...");
+        alprProcess.kill("SIGKILL");
+      }
+    }, 3000);
   }
 })
 
