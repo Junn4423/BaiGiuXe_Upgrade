@@ -7,8 +7,15 @@ import LicensePlateErrorDialog from "./LicensePlateErrorDialog";
 import VehicleStatusNotification, {
   VehicleNotificationContainer,
 } from "./VehicleStatusNotification";
+import { 
+  themPhienGuiXe, 
+  loadPhienGuiXeTheoMaThe, 
+  capNhatPhienGuiXe, 
+  tinhPhiGuiXe, 
+  loadPhienGuiXeTheoMaThe_XeRa 
+} from "../api/api";
 
-const QuanLyXe = ({ workConfig }) => {
+const QuanLyXe = React.forwardRef(({ workConfig }, ref) => {
   const {
     vehicles,
     activeSessions,
@@ -124,10 +131,8 @@ const QuanLyXe = ({ workConfig }) => {
         localStorage.setItem(`session_${cardId}`, JSON.stringify(sessionData));
         console.log(`✅ Đã lưu mã phiên ${sessionId} cho thẻ ${cardId} với timestamp ${sessionData.timestamp}`);
         
-        // Cập nhật session với maPhien
-        const sessionWithId = { ...session, maPhien: sessionId };
-        setActiveParkingSessions((prev) => ({ ...prev, [cardId]: sessionWithId }));
-
+        // Session is managed by the hook internally, no need to set it manually
+        
         // Update vehicle info in UI
         if (ui) {
           const vehicleEntryData = {
@@ -601,41 +606,19 @@ const QuanLyXe = ({ workConfig }) => {
 
   // Update vehicle in list
   const updateVehicleInList = (vehicleData) => {
-    // Create list if it doesn't exist
-    if (!Array.isArray(vehicles)) {
-      setVehicles([]);
-    }
-
-    const cardId = vehicleData.ma_the;
-    const licensePlate = vehicleData.bien_so;
-
-    // Find vehicle in list
-    const existingVehicleIndex = vehicles.findIndex(
-      (vehicle) => vehicle.ma_the === cardId
-    );
-
-    if (existingVehicleIndex !== -1) {
-      // Update existing vehicle
-      const updatedVehicles = [...vehicles];
-      updatedVehicles[existingVehicleIndex] = {
-        ...updatedVehicles[existingVehicleIndex],
-        ...vehicleData,
-      };
-      setVehicles(updatedVehicles);
-    } else {
-      // Add new vehicle
-      setVehicles((prev) => [...prev, vehicleData]);
-    }
+    // Instead of directly manipulating the vehicles state,
+    // we refresh the data from the hook which will update the state properly
+    refreshVehicleData();
   };
 
   // Set UI reference
   const setUIReference = (uiRef) => {
-    setUi(uiRef);
+    setUI(uiRef);
   };
 
   // Expose methods to parent component
   React.useImperativeHandle(
-    React.forwardRef(() => null),
+    ref,
     () => ({
       processVehicleEntry: handleProcessVehicleEntry,
       processVehicleExit: handleProcessVehicleExit,
@@ -650,6 +633,6 @@ const QuanLyXe = ({ workConfig }) => {
       {/* Vehicle management logic only */}
     </div>
   );
-};
+});
 
 export default QuanLyXe;

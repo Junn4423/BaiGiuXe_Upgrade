@@ -9,7 +9,7 @@ import {
 } from "../api/api";
 import ParkingLotManagement from "../views/ParkingLotManagement";
 
-const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
+const VehicleListComponent = React.memo(React.forwardRef(({ onVehicleSelect, workConfig }, ref) => {
   const [vehicles, setVehicles] = useState([]);
   const [statistics, setStatistics] = useState({
     totalVehicles: 0,
@@ -532,13 +532,14 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
 
   // Expose methods to parent component
   React.useImperativeHandle(
-    React.forwardRef(() => null),
+    ref,
     () => ({
       updateVehicleList,
       updateStatistics,
       refreshVehicleList,
       fetchVehicles,
-    })
+    }),
+    [updateVehicleList, updateStatistics, refreshVehicleList, fetchVehicles]
   );
 
   return (
@@ -728,6 +729,6 @@ const VehicleListComponent = ({ onVehicleSelect, workConfig }) => {
       )}
     </div>
   );
-};
+}));
 
 export default VehicleListComponent;

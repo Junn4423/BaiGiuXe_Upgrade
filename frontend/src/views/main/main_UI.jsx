@@ -1007,17 +1007,40 @@ const MainUI = () => {
                 "Error recognizing license plate:",
                 recognitionError
               );
-              if (vehicleInfoComponentRef.current) {
-                vehicleInfoComponentRef.current.updateCardReaderStatus(
-                  "LỖI NHẬN DẠNG BIỂN SỐ",
-                  "#ef4444"
+
+              // FALLBACK: Try to get detected plate from realtime detection
+              const mode = actualMode === "vao" ? "in" : "out";
+              const realtimeDetectedPlate = cameraComponentRef.current?.getLastDetectedPlate?.(mode);
+              
+              if (realtimeDetectedPlate) {
+                recognizedLicensePlate = realtimeDetectedPlate;
+                console.log(`✅ Using realtime detected plate as fallback: ${recognizedLicensePlate}`);
+                
+                if (vehicleInfoComponentRef.current) {
+                  vehicleInfoComponentRef.current.updateCardReaderStatus(
+                    `BIỂN SỐ (REALTIME): ${recognizedLicensePlate}`,
+                    "#10b981"
+                  );
+                }
+                
+                showToast(
+                  `Sử dụng biển số từ nhận dạng realtime: ${recognizedLicensePlate}`,
+                  "success",
+                  4000
+                );
+              } else {
+                if (vehicleInfoComponentRef.current) {
+                  vehicleInfoComponentRef.current.updateCardReaderStatus(
+                    "LỖI NHẬN DẠNG BIỂN SỐ",
+                    "#ef4444"
+                  );
+                }
+                showToast(
+                  `Lỗi nhận dạng biển số: ${recognitionError.message}`,
+                  "error",
+                  4000
                 );
               }
-              showToast(
-                `Lỗi nhận dạng biển số: ${recognitionError.message}`,
-                "error",
-                4000
-              );
             }
           }
 

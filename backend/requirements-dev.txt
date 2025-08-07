@@ -1,0 +1,27 @@
+# Include production requirements
+-r requirements.txt
+
+# Development and testing tools
+pytest
+pytest-asyncio
+pytest-cov
+
+# Code formatting and linting
+black
+flake8
+isort
+mypy
+
+# Documentation
+sphinx
+sphinx-rtd-theme
+
+# Debugging and profiling
+ipdb
+memory-profiler
+
+# Development server with auto-reload
+watchdog
+
+# API testing
+httpx

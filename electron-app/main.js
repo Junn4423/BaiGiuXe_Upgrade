@@ -2,6 +2,33 @@ const { app, BrowserWindow, ipcMain, dialog } = require("electron")
 const path = require("path")
 const fs = require("fs").promises
 const RTSPStreamingServer = require("./rtsp-streaming-server")
+const { spawn } = require("child_process");
+let alprProcess;
+
+/**
+ * Spawn the Fast ALPR Python micro-service so that licence-plate
+ * detection is available for the React/Electron frontend.
+ */
+function startALPRService() {
+  // Resolve script path relative to project root:
+  // electron-app/main.js -> ../backend/bienso/fast_alpr_service.py
+  const scriptPath = path.join(__dirname, "..", "backend", "bienso", "fast_alpr_service.py");
+
+  console.log("🚀 Spawning Fast ALPR service:", scriptPath);
+
+  alprProcess = spawn("python", [scriptPath], {
+    stdio: "inherit",
+    env: { ...process.env, PYTHONUNBUFFERED: "1" }, // ensure real-time logging
+  });
+
+  alprProcess.on("error", (err) => {
+    console.error("❌ Failed to launch Fast ALPR service:", err);
+  });
+
+  alprProcess.on("exit", (code, signal) => {
+    console.log(`ℹ️ Fast ALPR service exited with code=${code} signal=${signal}`);
+  });
+}
 
 let mainWindow
 let rtspServer
@@ -111,6 +138,7 @@ function startRTSPStreamingServer() {
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
+  startALPRService();
   createWindow()
 
   app.on("activate", () => {
@@ -126,14 +154,23 @@ app.on("window-all-closed", () => {
     rtspServer.stop()
   }
 
+  if (alprProcess) {
+    console.log("Stopping Fast ALPR service...");
+    alprProcess.kill();
+  }
+
   if (process.platform !== "darwin") app.quit()
 })
 
 app.on("before-quit", () => {
   // Stop RTSP streaming server before quitting
   if (rtspServer) {
-    console.log("Stopping RTSP streaming server before quit...")
-    rtspServer.stop()
+    console.log("Stopping RTSP streaming server before quit...");
+    rtspServer.stop();
+  }
+  if (alprProcess) {
+    console.log("Stopping Fast ALPR service before quit...");
+    alprProcess.kill();
   }
 })
 
