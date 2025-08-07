@@ -38,11 +38,14 @@ const FallbackImage = ({
 
   const loadImageWithFallback = async () => {
     try {
+      console.log(`🔍 FallbackImage: Loading image ${filename}`);
+      
       // Sử dụng getImageUrl để lấy image src với API backend
       const src = await getImageUrl(filename);
       
       if (src) {
-        console.log(`Successfully loaded from API: ${src}`);
+        console.log(`✅ FallbackImage: Successfully loaded from API: ${filename}`);
+        console.log(`📏 FallbackImage: Base64 length: ${src.length} chars`);
         setCurrentSrc(src);
         setLoading(false);
         setError(false);
@@ -51,25 +54,20 @@ const FallbackImage = ({
           onLoadSuccess(src, 0);
         }
       } else {
+        console.warn(`❌ FallbackImage: No image source found from API for ${filename}`);
         throw new Error('No image source found from API');
       }
     } catch (error) {
-      console.error(`API failed, falling back to backup URLs:`, error);
+      console.error(`❌ FallbackImage: API failed for ${filename}:`, error);
       
-      // Fallback to backup URLs method
-      const urls = [];
-      
-      // Nếu đã là full URL, thử nó trước
-      if (filename.startsWith('http://') || filename.startsWith('https://')) {
-        urls.push(filename);
-      } else {
-        // Thử tất cả server backup URLs
-        const backupUrls = getBackupImageUrls(filename);
-        urls.push(...backupUrls);
+      // For local storage system, no backup URLs available
+      // Display error state directly
+      console.error(`Failed to load image from primary source: ${filename}`);
+      setLoading(false);
+      setError(true);
+      if (onLoadError) {
+        onLoadError(new Error(`Failed to load image: ${filename}`));
       }
-
-      console.log(`Trying to load image with backup URLs: ${filename}`, urls);
-      tryLoadImage(urls, 0);
     }
   };
 

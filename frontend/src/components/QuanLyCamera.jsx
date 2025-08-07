@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { createPlaceholderImage, captureVideoFrame } from "../utils/imageUtils"
+import { createPlaceholderImage, captureVideoFrame, saveImageToAssets } from "../utils/imageUtils"
 import { uploadLicensePlateImage, uploadLicensePlateOutImage, uploadFaceImage } from "../api/api"
 
 const QuanLyCamera = React.forwardRef((props, ref) => {
@@ -42,10 +42,90 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
     // Implementation for loading cameras
   }
 
-  // Capture image
+  // Upload images after successful session creation - CHỈ KHI PHIÊN GỬI XE THÀNH CÔNG
+  const uploadCapturedImages = async (plateImage, faceImage) => {
+    console.log('📀 Starting upload to disk after successful session...')
+    const results = {
+      plateUpload: null,
+      faceUpload: null,
+      errors: []
+    }
+
+    try {
+      // Upload plate image if available and has blob data
+      if (plateImage && plateImage.blob && plateImage.pendingUpload) {
+        console.log('💾 Uploading plate image to disk...', {
+          filename: plateImage.filename,
+          mode: plateImage.mode,
+          hasBlob: !!plateImage.blob
+        })
+        
+        let uploadResult
+        
+        if (plateImage.mode === 'ra') {
+          uploadResult = await uploadLicensePlateOutImage(plateImage.blob, {
+            updateType: 'plate_out',
+            filename: plateImage.filename // ✅ Use original filename
+          })
+        } else {
+          uploadResult = await uploadLicensePlateImage(plateImage.blob, {
+            updateType: 'plate_in',
+            filename: plateImage.filename // ✅ Use original filename
+          })
+        }
+        
+        if (uploadResult && uploadResult.success) {
+          results.plateUpload = uploadResult
+          plateImage.uploaded = true
+          plateImage.pendingUpload = false
+          console.log('✅ Plate image uploaded to disk successfully:', uploadResult.primaryUrl)
+        } else {
+          throw new Error('Plate image disk upload failed')
+        }
+      } else {
+        console.log('⚠️ No plate image data for disk upload')
+      }
+
+      // Upload face image if available and has blob data
+      if (faceImage && faceImage.blob && faceImage.pendingUpload) {
+        console.log('💾 Uploading face image to disk...', {
+          filename: faceImage.filename,
+          mode: faceImage.mode,
+          hasBlob: !!faceImage.blob
+        })
+        
+        const updateType = faceImage.mode === 'ra' ? 'face_out' : 'face_in'
+        const uploadResult = await uploadFaceImage(faceImage.blob, {
+          updateType: updateType,
+          filename: faceImage.filename // ✅ Use original filename
+        })
+        
+        if (uploadResult && uploadResult.success) {
+          results.faceUpload = uploadResult
+          faceImage.uploaded = true
+          faceImage.pendingUpload = false
+          console.log('✅ Face image uploaded to disk successfully:', uploadResult.primaryUrl)
+        } else {
+          throw new Error('Face image disk upload failed')
+        }
+      } else {
+        console.log('⚠️ No face image data for disk upload')
+      }
+
+      console.log('✅ All images uploaded to disk successfully after session success:', results)
+      return results
+
+    } catch (error) {
+      console.error('❌ Error uploading images to disk:', error)
+      results.errors.push(error.message)
+      return results
+    }
+  }
+
+  // Capture image - CHỈ CHỤP VÀ HIỂN THỊ, CHƯA LƯU VÀO Ổ ĐĨA
   const captureImage = async (cardId, mode = "vao") => {
     try {
-      console.log(`Capturing image for card ${cardId} in ${mode} mode`)
+      console.log(`📸 Capturing image for card ${cardId} in ${mode} mode (memory only, no disk save yet)`)
       
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
       
@@ -57,30 +137,32 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
       
       const licensePlate = `29A-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`
 
-      // Display captured images on UI panels immediately
+      // **HIỂN THỊ ẢNH NGAY SAU KHI CHỤP** (trước khi lưu vào ổ đĩa)
       if (ui && ui.displayCapturedImage && plateImagePath) {
-        console.log(`QuanLyCamera: Displaying plate image on panel 1`)
+        console.log(`📸 QuanLyCamera: Displaying plate image on panel 1`)
         ui.displayCapturedImage(plateImagePath?.url || plateImagePath, 1)
       } else {
-        console.log(`QuanLyCamera: Cannot display plate image:`, {
+        console.log(`⚠️ QuanLyCamera: Cannot display plate image:`, {
           hasUI: !!ui,
           hasDisplayMethod: !!(ui && ui.displayCapturedImage),
-          hasPlateImage: !!plateImagePath
+          hasPlateImage: !!plateImagePath,
+          plateImageUrl: plateImagePath?.url
         })
       }
       
       if (ui && ui.displayCapturedFaceImage && faceImagePath) {
-        console.log(`QuanLyCamera: Displaying face image on panel 2`)
+        console.log(`📸 QuanLyCamera: Displaying face image on panel 2`)
         ui.displayCapturedFaceImage(faceImagePath?.url || faceImagePath)
       } else {
-        console.log(`QuanLyCamera: Cannot display face image:`, {
+        console.log(`⚠️ QuanLyCamera: Cannot display face image:`, {
           hasUI: !!ui,
           hasDisplayMethod: !!(ui && ui.displayCapturedFaceImage),
-          hasFaceImage: !!faceImagePath
+          hasFaceImage: !!faceImagePath,
+          faceImageUrl: faceImagePath?.url
         })
       }
 
-      console.log(`All images captured and auto-saved for card ${cardId}`)
+      console.log(`✅ Images captured and displayed for card ${cardId} (in memory only, awaiting session success for disk save)`)
       return [plateImagePath, licensePlate, faceImagePath]
     } catch (error) {
       console.error("Error capturing image:", error)
@@ -150,13 +232,58 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
         }
         
         console.error(`No suitable camera found for ${type} capture in ${mode} mode`)
-        return createPlaceholderImage(type, cardId, timestamp, mode)
+        return await createFallbackImageObject(type, cardId, timestamp, mode)
       }
 
       return await captureFromVideoElement(videoElement, type, cardId, timestamp, mode)
     } catch (error) {
       console.error(`Error capturing ${type} image:`, error)
-      return createPlaceholderImage(type, cardId, timestamp, mode)
+      return await createFallbackImageObject(type, cardId, timestamp, mode)
+    }
+  }
+
+  // Helper function to create fallback image object (consistency with new format)
+  const createFallbackImageObject = async (type, cardId, timestamp, mode) => {
+    try {
+      const placeholderUrl = createPlaceholderImage(type, cardId, timestamp, mode)
+      
+      // Convert data URL to blob for consistency
+      const response = await fetch(placeholderUrl)
+      const blob = await response.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      
+      return {
+        url: objectUrl,
+        blob: blob,
+        timestamp: timestamp,
+        cardId: cardId,
+        type: type,
+        mode: mode,
+        filename: `${cardId}_${timestamp}_${type}_${mode}_placeholder.jpg`,
+        uploaded: false,
+        pendingUpload: true,
+        temporaryOnly: true,
+        isPlaceholder: true // Mark as placeholder
+      }
+    } catch (error) {
+      console.error('Error creating fallback image object:', error)
+      const placeholderUrl = createPlaceholderImage(type, cardId, timestamp, mode)
+      
+      // Emergency fallback - return minimal object with data URL
+      return {
+        url: placeholderUrl, // Use data URL directly
+        blob: null,
+        timestamp: timestamp,
+        cardId: cardId,
+        type: type,
+        mode: mode,
+        filename: `${cardId}_${timestamp}_${type}_${mode}_placeholder.jpg`,
+        uploaded: false,
+        pendingUpload: false, // Can't upload data URL
+        temporaryOnly: true,
+        isPlaceholder: true,
+        error: 'Failed to create blob from placeholder'
+      }
     }
   }
 
@@ -173,7 +300,7 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
     // Check if video is actually playing
     if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
       console.log(`Video not ready for ${type} in ${mode} mode - using placeholder`)
-      return createPlaceholderImage(type, cardId, timestamp, mode)
+      return await createFallbackImageObject(type, cardId, timestamp, mode)
     }
 
     // Wait a bit for stable frame
@@ -184,54 +311,46 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
     const blob = await captureVideoFrame(videoElement)
     
     try {
-      // Upload with correct direction and type
-      console.log(`Uploading ${type} image with direction: ${mode}...`)
-      let uploadResult
+      // **CHANGE: Chỉ tạo object URL tạm thời, KHÔNG lưu vào ổ đĩa ngay lập tức**
+      console.log(`Creating temporary object URL for ${type} image (mode: ${mode}) - NOT saving to disk yet...`)
       
-      if (type === 'plate') {
-        if (mode === 'ra') {
-          uploadResult = await uploadLicensePlateOutImage(blob, {
-            updateType: 'plate_out'
-          })
-        } else {
-          uploadResult = await uploadLicensePlateImage(blob, {
-            updateType: 'plate_in'
-          })
-        }
-      } else if (type === 'face') {
-        const updateType = mode === 'ra' ? 'face_out' : 'face_in'
-        uploadResult = await uploadFaceImage(blob, {
-          updateType: updateType
-        })
-      }
-
-      if (uploadResult && uploadResult.success) {
-        console.log(`Image uploaded successfully: ${uploadResult.primaryUrl}`)
-        
-        // Tách filename từ response để lưu vào database
-        const imageFilename = uploadResult.filename || uploadResult.primaryUrl.split('/').pop()
-        console.log(`Extracted filename for database: ${imageFilename}`)
-        
-        return {
-          url: uploadResult.primaryUrl, // URL đầy đủ để hiển thị ngay
-          filename: imageFilename, // Chỉ filename để lưu vào database
-          blob: blob,
-          backupUrls: uploadResult.urls,
-          isLocal: uploadResult.isLocal
-        }
-      } else {
-        throw new Error('Upload failed')
-      }
-    } catch (error) {
-      console.error(`Image upload failed for ${type} image:`, error)
-      // Fallback: Create object URL for immediate display
+      // Create object URL for immediate display only
       const objectUrl = URL.createObjectURL(blob)
-      console.log(`Using local fallback URL: ${objectUrl}`)
+      
+      // Return result with blob for later upload (only when session succeeds)
+      const finalResult = {
+        url: objectUrl, // For immediate display
+        blob: blob, // For later upload
+        timestamp: timestamp,
+        cardId: cardId,
+        type: type,
+        mode: mode,
+        filename: `${cardId}_${timestamp}_${type}_${mode}.jpg`,
+        // Mark as not yet uploaded to disk
+        uploaded: false,
+        pendingUpload: true,
+        temporaryOnly: true // Flag indicating this is only in memory
+      }
+      
+      console.log(`${type} image prepared for ${mode} (in memory only, awaiting session success):`, {
+        filename: finalResult.filename,
+        hasBlob: !!finalResult.blob,
+        hasUrl: !!finalResult.url,
+        pendingUpload: finalResult.pendingUpload
+      })
+      return finalResult
+    } catch (error) {
+      console.error(`Temporary image processing failed for ${type} image:`, error)
+      // Fallback: Create object URL for immediate display only
+      const objectUrl = URL.createObjectURL(blob)
+      console.log(`Using emergency fallback URL (memory only): ${objectUrl}`)
       return {
         url: objectUrl,
         blob: blob,
         filename: `${cardId}_${timestamp}_${type}_${mode}.jpg`,
-        error: error.message
+        error: error.message,
+        temporaryOnly: true,
+        pendingUpload: true // Still mark as pending for potential retry
       }
     }
   }
@@ -248,6 +367,7 @@ const QuanLyCamera = React.forwardRef((props, ref) => {
     switchCamera,
     loadCameraList,
     captureImage,
+    uploadCapturedImages,
     updateConfiguration,
     setUIReference,
     isRunning,

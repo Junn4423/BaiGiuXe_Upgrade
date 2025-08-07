@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { nhanDangBienSo } from "../api/api"
 import "../assets/styles/ImageCaptureModal.css"
 
-const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
+const ImageCaptureModal = ({ isOpen, onClose, images, cardId, saveToDisc = false }) => {
   const [licensePlateResult, setLicensePlateResult] = useState(null)
   const [isRecognizing, setIsRecognizing] = useState(false)
   const [recognitionError, setRecognitionError] = useState(null)
@@ -150,12 +150,14 @@ const ImageCaptureModal = ({ isOpen, onClose, images, cardId }) => {
           <div className="card-info">
             <h3>Mã Thẻ: <span className="card-id">{cardId}</span></h3>
             <p style={{ 
-              color: '#059669', 
+              color: saveToDisc ? '#059669' : '#f59e0b', 
               fontWeight: '600', 
               margin: '8px 0 0 0',
               fontSize: '14px'
             }}>
-              Ảnh đã được tự động lưu vào thư mục Downloads
+              {saveToDisc 
+                ? 'Ảnh đã được tự động lưu vào thư mục sau khi xe vào thành công' 
+                : 'Ảnh tạm thời - sẽ lưu vào ổ đĩa khi phiên gửi xe thành công'}
             </p>
           </div>
 

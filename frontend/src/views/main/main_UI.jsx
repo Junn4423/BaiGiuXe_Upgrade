@@ -117,6 +117,7 @@ const MainUI = () => {
     faceImageBlob: null,
   });
   const [scannedCardId, setScannedCardId] = useState("");
+  const [imagesSavedToDisc, setImagesSavedToDisc] = useState(false); // **NEW: Track if images are saved to disc**
   const [environmentInfo, setEnvironmentInfo] = useState(null);
   const rfidBuffer = useRef("");
 
@@ -841,9 +842,11 @@ const MainUI = () => {
             plateImage: plateImage ? "có" : "không có",
             plateImageType: typeof plateImage,
             plateImageUrl: plateImage?.url,
+            plateImageIsPlaceholder: plateImage?.isPlaceholder,
             faceImage: faceImage ? "có" : "không có",
             faceImageType: typeof faceImage,
             faceImageUrl: faceImage?.url,
+            faceImageIsPlaceholder: faceImage?.isPlaceholder,
             licensePlate,
           });
 
@@ -854,75 +857,55 @@ const MainUI = () => {
             faceImageBlob: faceImage?.blob,
           });
 
-          // Display captured images on camera panels
-          if (cameraComponentRef.current) {
-            if (plateImage?.url || plateImage) {
-              console.log(
-                "Displaying plate image:",
-                plateImage?.url || plateImage
-              );
-              cameraComponentRef.current.displayCapturedImage(
-                plateImage?.url || plateImage,
-                1
-              );
-            } else {
-              console.warn("No plate image to display");
-            }
+          // ✅ IMAGES ALREADY DISPLAYED BY QuanLyCamera - No need to display again
+          console.log("✅ Images captured and should be displayed by QuanLyCamera:", {
+            plateImageUrl: plateImage?.url,
+            faceImageUrl: faceImage?.url,
+            hasPlateBlob: !!plateImage?.blob,
+            hasFaceBlob: !!faceImage?.blob
+          });
 
-            if (faceImage?.url || faceImage) {
-              console.log(
-                "Displaying face image:",
-                faceImage?.url || faceImage
-              );
-              cameraComponentRef.current.displayCapturedFaceImage(
-                faceImage?.url || faceImage
-              );
-              
-              // Xử lý chấm công khi có ảnh khuôn mặt - CHỈ ở chế độ xe vào
-              if (actualMode === "vao" && faceImage?.blob) {
-                console.log('🎯 Bắt đầu xử lý chấm công với ảnh khuôn mặt (mode: vào)');
-                
-                // Lấy biển số từ div plate-text trong camera panel (tối ưu)
-                const getDisplayedLicensePlate = () => {
-                  try {
-                    // Sử dụng querySelector với cache element nếu có thể
-                    const plateTextDiv = document.querySelector('.plate-text');
-                    if (plateTextDiv && plateTextDiv.textContent) {
-                      const plateText = plateTextDiv.textContent.trim();
-                      if (plateText && plateText !== '' && plateText !== 'N/A') {
-                        console.log('Biển số từ plate-text div:', plateText);
-                        return plateText;
-                      }
-                    }
-                    return null;
-                  } catch (error) {
-                    console.warn('Không thể lấy biển số từ plate-text div:', error);
-                    return null;
+          // Xử lý chấm công khi có ảnh khuôn mặt - CHỈ ở chế độ xe vào
+          if (actualMode === "vao" && faceImage?.blob) {
+            console.log('🎯 Bắt đầu xử lý chấm công với ảnh khuôn mặt (mode: vào)');
+            
+            // Lấy biển số từ div plate-text trong camera panel (tối ưu)
+            const getDisplayedLicensePlate = () => {
+              try {
+                // Sử dụng querySelector với cache element nếu có thể
+                const plateTextDiv = document.querySelector('.plate-text');
+                if (plateTextDiv && plateTextDiv.textContent) {
+                  const plateText = plateTextDiv.textContent.trim();
+                  if (plateText && plateText !== '' && plateText !== 'N/A') {
+                    console.log('Biển số từ plate-text div:', plateText);
+                    return plateText;
                   }
-                };
-
-                const displayedPlate = getDisplayedLicensePlate();
-                const finalLicensePlate = displayedPlate || licensePlate || recognizedLicensePlate || '';
-                
-                console.log('Biển số cuối cùng sử dụng cho chấm công:', finalLicensePlate);
-                
-                // Chạy chấm công bất đồng bộ để không chặn UI
-                setTimeout(async () => {
-                  try {
-                    await processAttendanceImage(
-                      faceImage.blob,
-                      finalLicensePlate,
-                      showToast,
-                      actualMode
-                    );
-                  } catch (error) {
-                    console.error('❌ Lỗi chấm công:', error);
-                  }
-                }, 50); // Giảm delay để responsive hơn
+                }
+                return null;
+              } catch (error) {
+                console.warn('Không thể lấy biển số từ plate-text div:', error);
+                return null;
               }
-            } else {
-              console.warn("No face image to display");
-            }
+            };
+
+            const displayedPlate = getDisplayedLicensePlate();
+            const finalLicensePlate = displayedPlate || licensePlate || recognizedLicensePlate || '';
+            
+            console.log('Biển số cuối cùng sử dụng cho chấm công:', finalLicensePlate);
+            
+            // Chạy chấm công bất đồng bộ để không chặn UI
+            setTimeout(async () => {
+              try {
+                await processAttendanceImage(
+                  faceImage.blob,
+                  finalLicensePlate,
+                  showToast,
+                  actualMode
+                );
+              } catch (error) {
+                console.error('❌ Lỗi chấm công:', error);
+              }
+            }, 50); // Giảm delay để responsive hơn
           }
 
           // Update status after capture and display
@@ -931,9 +914,7 @@ const MainUI = () => {
               "ẢNH ĐÃ HIỂN THỊ",
               "#10b981"
             );
-          }
-
-          // Auto recognize license plate after capture
+          }          // Auto recognize license plate after capture
           let recognizedLicensePlate = null;
           if (plateImage?.blob || capturedImages.plateImageBlob) {
             if (vehicleInfoComponentRef.current) {
@@ -1539,6 +1520,24 @@ const MainUI = () => {
               const result = await themPhienGuiXeWithValidation(sessionData);
 
               if (result && result.success) {
+                // **MỚI: UPLOAD ẢNH VÀO Ổ ĐĨA CHỈ SAU KHI PHIÊN GỬI XE THÀNH CÔNG**
+                if (cameraManagerRef.current && cameraManagerRef.current.uploadCapturedImages) {
+                  try {
+                    console.log('🚀 Session created successfully, now uploading images to disk...')
+                    const uploadResults = await cameraManagerRef.current.uploadCapturedImages(plateImage, faceImage)
+                    if (uploadResults.errors.length === 0) {
+                      console.log('✅ All images uploaded to disk after successful session')
+                      showToast('Ảnh đã được lưu vào ổ đĩa thành công', 'success', 2000)
+                    } else {
+                      console.warn('⚠️ Some images failed to upload:', uploadResults.errors)
+                      showToast('Một số ảnh không lưu được vào ổ đĩa', 'warning', 3000)
+                    }
+                  } catch (uploadError) {
+                    console.error('❌ Error uploading images after session:', uploadError)
+                    showToast('Lỗi lưu ảnh vào ổ đĩa', 'error', 3000)
+                  }
+                }
+
                 // Calculate estimated parking fee
                 const estimatedFee = calculateEstimatedFee(pricingPolicy);
 
@@ -1606,11 +1605,15 @@ const MainUI = () => {
                   "#ef4444"
                 );
               }
+              
+              // Thông báo rõ ràng rằng ảnh sẽ không được lưu do lỗi phiên gửi xe
               showToast(
-                `Lỗi lưu phiên gửi xe: ${sessionError.message}`,
+                `Lỗi lưu phiên gửi xe: ${sessionError.message}. Ảnh không được lưu vào ổ đĩa.`,
                 "error",
-                5000
+                6000
               );
+              
+              console.log('⚠️ Session creation failed - images will NOT be saved to disk')
             }
           } else {
             // For "ra" mode, process vehicle exit
@@ -1916,6 +1919,24 @@ const MainUI = () => {
       const updateResult = await capNhatPhienGuiXe(exitSessionData);
 
       if (updateResult && updateResult.success) {
+        // **MỚI: UPLOAD ẢNH XE RA VÀ KHUÔN MẶT RA VÀO Ổ ĐĨA CHỈ SAU KHI CẬP NHẬT PHIÊN THÀNH CÔNG**
+        if (cameraManagerRef.current && cameraManagerRef.current.uploadCapturedImages) {
+          try {
+            console.log('Exit session updated successfully, now uploading exit images to disk...')
+            const uploadResults = await cameraManagerRef.current.uploadCapturedImages(plateImage, faceImage)
+            if (uploadResults.errors.length === 0) {
+              console.log('All exit images uploaded to disk after successful session update')
+              showToast('Ảnh xe ra đã được lưu vào ổ đĩa thành công', 'success', 2000)
+            } else {
+              console.warn('Some exit images failed to upload:', uploadResults.errors)
+              showToast('Một số ảnh xe ra không lưu được vào ổ đĩa', 'warning', 3000)
+            }
+          } catch (uploadError) {
+            console.error('Error uploading exit images after session update:', uploadError)
+            showToast('Lỗi lưu ảnh xe ra vào ổ đĩa', 'error', 3000)
+          }
+        }
+
         // Calculate parking fee
         try {
           const feeResult = await tinhPhiGuiXe(activeSession.maPhien, cardId);
