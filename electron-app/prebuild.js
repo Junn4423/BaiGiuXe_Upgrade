@@ -53,3 +53,13 @@ try {
 }
 
 console.log('✅ Pre-build setup complete')
+
+// Run build optimization for production
+if (process.env.NODE_ENV === 'production') {
+  console.log('🎯 Running production optimizations...')
+  try {
+    require('./optimize-build.js')
+  } catch (e) {
+    console.error('❌ Production optimization failed:', e.message)
+  }
+}
