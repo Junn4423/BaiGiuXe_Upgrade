@@ -107,7 +107,7 @@ async function installPythonDependencies() {
     console.log(`📦 Installing Python dependencies in virtual environment: ${venvPath}`);
     
     // Install required packages directly instead of using requirements.txt
-    const packages = ["fastapi", "uvicorn", "fast_alpr", "opencv-python", "numpy", "requests"];
+    const packages = ["fastapi", "uvicorn", "fast_alpr", "opencv-python", "numpy", "requests", "onnxruntime", "python-multipart"];
     
     pythonInstallProcess = spawn(pipExePath, ["install", "--upgrade", "pip"], {
       stdio: "inherit",

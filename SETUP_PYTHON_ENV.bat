@@ -60,6 +60,22 @@ if %errorlevel% neq 0 (
     )
 )
 
+echo Installing onnxruntime...
+pip install onnxruntime
+if %errorlevel% neq 0 (
+    echo ❌ Failed to install onnxruntime
+    pause
+    exit /b 1
+)
+
+echo Installing python-multipart...
+pip install python-multipart
+if %errorlevel% neq 0 (
+    echo ❌ Failed to install python-multipart
+    pause
+    exit /b 1
+)
+
 echo.
 echo ✅ Python environment setup completed!
 echo.
@@ -68,6 +84,8 @@ python -c "import cv2; print('✅ OpenCV imported successfully')"
 python -c "import numpy; print('✅ NumPy imported successfully')"
 python -c "import fastapi; print('✅ FastAPI imported successfully')"
 python -c "import uvicorn; print('✅ Uvicorn imported successfully')"
+python -c "import onnxruntime; print('✅ onnxruntime imported successfully')"
+python -c "import multipart; print('✅ python-multipart imported successfully')"
 
 REM Test fast_alpr import
 python -c "try: import fast_alpr; print('✅ fast_alpr imported successfully')
