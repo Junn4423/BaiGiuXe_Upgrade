@@ -1,0 +1,21 @@
+Add Size
+Filter Size
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit Size
+AutoID
+CategorySizeID
+Size name
+CategorySizeID is not empty
+Size name is not empty
+Sort

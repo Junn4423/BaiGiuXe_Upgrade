@@ -1,0 +1,10 @@
+SOF CO., LTD
+Save
+Cancel
+Refresh
+Help
+Edit a group
+Group ID 
+Group Name 
+Update successfull 
+Update error:

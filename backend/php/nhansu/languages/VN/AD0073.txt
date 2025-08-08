@@ -1,0 +1,21 @@
+…
+Thêm thành công
+Thêm bị lỗi vì: 
+Cập nhật thành công
+Cập nhật bị lỗi vì: 
+Lưu
+Lưu
+Hủy bỏ
+Hủy bỏ
+Nạp lại trang này
+Nạp lại
+Trợ giúp về trang này
+Trợ giúp
+Cho:
+Mã NV:
+Tên hình:
+Chú ý:
+Tên hình phải là số và phải là số có từ 1 đến 10 chữ số.
+Tên hình tương ứng với mã nhân viên.
+Tên hình phải có phần mở rộng (ví dụ: *.jpg hay *.gif hay *.JPG)
+Ví dụ một tên hình đúng quy cách: 80880503.jpg

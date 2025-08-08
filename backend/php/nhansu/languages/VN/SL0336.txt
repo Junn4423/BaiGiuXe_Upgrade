@@ -1,0 +1,32 @@
+Add DOCS
+Filter DOCS
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit DOCS
+DOC_ID
+DOC_TYPE
+DOC_DATE
+DOC_NO
+User Received
+SUBJECT
+DOC RECEIVED
+GRP_ID
+DOC_COPY
+DOC_REMARK
+SENDER_REF
+Creator
+DateCreate
+DOC_ID
+...//Begin messages part
+RFA Code is empty, please try again
+RFA Name is not empty

@@ -1,0 +1,10 @@
+ERP SOF
+Gửi
+Hủy
+Nạp lại
+Giúp đỡ
+Gửi thông báo
+Đến:
+(Ví dụ: admin or admin;user;manager or * or *-admin-users)
+Chủ đề:
+Ngày:

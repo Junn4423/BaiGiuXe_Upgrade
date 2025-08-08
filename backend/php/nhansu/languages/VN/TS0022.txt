@@ -1,0 +1,54 @@
+BÁO CÁO XUẤT NHẬP TỒN
+Kho
+Ngày bắt đầu
+Ngày kết thúc
+Stt
+Mã BOM
+Tên sản phẩm
+Đơn vị
+Tồn đầu kỳ
+Nhập trong kỳ
+Xuất trong kỳ
+Tồn cuối kỳ
+Báo cáo
+Nạp lại
+Tổng số lượng
+Điện thoại
+Fax
+Mã số thuế
+Địa chỉ
+Ngày in
+Mã phiếu
+Ngày lập
+SL
+Kiểu
+Lô
+Chủ đề
+Nguồn
+Mã tham chiếu
+Chú ý
+VS-Màu
+Đặc điểm
+Mở rộng 1
+Mở rộng 2
+Báo cáo chung
+Báo cáo chi tiết
+Báo cáo theo điều kiện
+Báo cáo theo điều kiện chi tiết
+THỦ KHO
+NGƯỜI QUẢN LÝ
+Loại sản phẩm
+Chỉ hiển thị sản phẩm có nhập xuất
+Chọn cách hiển thị
+BÁO CÁO LÔ HẾT HẠN
+Đã hết hạn
+Còn hạn trong ngày
+Còn hạn 2 ngày
+BÁO CÁO LÔ SẮP HẾT HẠN DÙNG
+Chỉ hiển thị sản phẩm có phát sinh theo điều kiện
+Xuất bỏ
+Xuất defect
+Tồn cuối kỳ quy đổi
+Thấy hình
+Hình ảnh
+Ngày hết hạn

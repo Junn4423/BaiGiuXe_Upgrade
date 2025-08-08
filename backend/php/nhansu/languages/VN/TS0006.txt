@@ -1,0 +1,26 @@
+Thêm Mục Kiểm Kho
+Lọc Mục Kiểm Kho
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Kiểm Kho
+Mã kiểm kho
+Mã kho
+Mã NV
+Chủ đề
+Ngày kiểm kho
+Ghi nhận
+Trạng thái
+0.Chưa xác nhận
+1.Đã xác nhận
+Bạn phải nhập mã kho
+Chủ đề kiểm kho không rỗng

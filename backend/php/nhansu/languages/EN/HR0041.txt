@@ -1,0 +1,17 @@
+SOF CO., LTD
+Save
+Save
+Cancel
+Cancel
+Refresh 
+Refresh 
+Help
+Help
+BenefitID
+ContractDetailID
+Percent
+BenefitDate
+Insert/Update successful 
+Error:
+BenefitDate is not empty
+BenefitID is not empty 

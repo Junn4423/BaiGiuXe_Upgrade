@@ -1,0 +1,55 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+NHẬP THÀNH CÔNG
+Xóa thành công.
+Xóa không được, lỗi: 
+CHI TIẾT ĐÓNG GÓI 
+DANH MỤC ĐÓNG GÓI 
+STT
+Mã đóng gói
+Mã khách hàng
+Mã nhân viên
+Chủ đề đóng gói
+Đợt ĐNNK
+Mã PMH
+Khóa
+Ghi chú
+Ngày đóng gói
+0.Chưa xác nhận
+1.Đã xác nhận
+Mã chi tiết nhập kho
+Mã BOM
+SL
+ĐVT
+Giá
+ĐVG
+Màu
+Cut
+Loại kích thức
+Kích thức
+Sản phẩm  đóng gói
+Tổng trọng lượng
+Trọng lượng thực
+Chú ý
+Ngày hoàn thành
+Đã đóng
+Mã đóng gói
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web
+Số cột hiển thị

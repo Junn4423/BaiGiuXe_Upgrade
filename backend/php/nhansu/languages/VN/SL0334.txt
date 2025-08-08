@@ -1,0 +1,42 @@
+Add Manage RFA
+Filter Manage RFA
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit Manage RFA
+RFA_No
+RFA_Period
+ContractorID
+Subject
+Description
+Expenditure
+Selection Of Contractor
+Commitment Mode
+Signature On Commitment
+AFE
+Others
+Budgeted Item
+None Budgeted Item
+Above
+OthersPLS
+ISLOCK
+RFA_ID
+GRP_ID
+USERS_ID
+RFA_Date
+RevNo
+PR_No
+Creator
+DateCreate
+...//Begin messages part
+RFA Code is empty, please try again
+RFA Name is not empty

@@ -1,0 +1,26 @@
+Thêm Mục Tham Gia Hội Viên
+Lọc Mục Tham Gia Hội Viên
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Tham Gia Hội Viên
+Mã tự động
+Mã nhân viên
+Thành viên
+Mã thành viên
+Chức vụ
+Tiền đóng góp
+Ngày bắt đầu gia nhập hội
+Ngày kết thúc gia nhập hội
+Mã nhân viên không được rỗng
+Chuyên ngành không được rỗng
+Bạn phải nhập ngày

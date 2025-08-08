@@ -1,0 +1,18 @@
+…
+Lưu
+Hủy bỏ
+Nạp lại
+Trợ giúp
+Thay đổi mật khẩu
+Mật khẩu hiện tại:
+Mật khẩu mới:
+Nhập lại mật khẩu:
+Cho:
+Cập nhật thành công
+Cập nhật bị lỗi vì:
+Bạn phải nhập mật khẩu cũ
+Mật khẩu cũ không đúng
+Xin hãy nhập mật khẩu mới
+Mật khẩu phải nhiều hơn 5 ký tự và ít hơn 20 ký tự
+Xin nhập lại mật khẩu mới
+Mật khẩu xác nhận phải giống với mật khẩu mới

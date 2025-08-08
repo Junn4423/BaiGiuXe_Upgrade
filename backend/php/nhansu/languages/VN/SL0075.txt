@@ -1,0 +1,70 @@
+BÁO CÁO DOANH THU BÁN HÀNG
+Kho
+Ngày bắt đầu
+Ngày kết thúc
+Stt
+Mã BOM
+Tên sản phẩm
+Đơn vị
+Tồn đầu kỳ
+Nhập trong kỳ
+Xuất trong kỳ
+Tồn cuối kỳ
+Báo cáo
+Nạp lại
+Tổng số lượng
+Điện thoại
+Fax
+Mã số thuế
+Địa chỉ
+Ngày in
+Mã phiếu
+Ngày lập
+Số lượng
+Số Hóa Đơn
+Ngày hóa đơn
+Chủ đề
+NV bán hàng
+Khách hàng
+Chú ý
+Màu
+Đặc điểm
+Mở rộng 1
+Mở rộng 2
+Báo cáo chung
+Báo cáo chi tiết
+Báo cáo theo điều kiện
+Báo cáo theo điều kiện chi tiết
+NHÂN VIÊN BÁN HÀNG 
+NGƯỜI QUẢN LÝ
+Loại sản phẩm
+Tổng số lương nhập đầu kỳ
+Tổng chi nhập đầu kỳ
+Tổng số lương bán đầu kỳ
+Doanh thu bán đầu kỳ
+Tổng tiền trung bình tồn đầu kỳ
+Tổng chi nhập trong kỳ
+Doanh thu bán trong kỳ
+Tổng tiền cuối kỳ theo giá trung bình
+Giá
+Thuế
+Chiết khấu
+Thành tiền
+Nhân viên bán hàng
+Chương trình bán hàng
+Tiền chiết khấu
+Tổng tiền có VAT
+Điểm 
+Tiền thuế
+CK TM
+Số tiền mặt CK
+Quà tặng
+Mã khách hàng
+Tên khách hàng
+Chọn loại báo cáo
+Báo cáo chi tiết theo phiếu
+Báo cáo chi tiết theo sản phẩm
+Báo cáo nhóm theo sản phẩm
+Báo cáo nhóm theo khách hàng
+Báo cáo nhóm theo nhân viên
+Mã NV

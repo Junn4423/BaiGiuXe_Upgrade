@@ -1,0 +1,22 @@
+Thêm Mục Phần Trăm Theo Mã Chấm Công
+Lọc Mục Phần Trăm Theo Mã Chấm Công
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Phần Trăm Theo Mã Chấm Công
+Mã
+Lần tính
+Mã chấm công
+Tỉ lệ(%)
+Mã lần tính không được rỗng
+Mã chấm công được rỗng
+Tỉ lệ không được rỗng.

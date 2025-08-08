@@ -1,0 +1,22 @@
+Add New Educated
+Save
+Save
+Back
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Educated
+ID:
+Name:
+...//Begin messages part
+The ID is empty, please try again
+The Name is not empty
+Day probation
+Order

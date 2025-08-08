@@ -1,0 +1,21 @@
+ERP SOF
+Logtime
+AddPer
+New
+Edit
+Delete
+Refresh
+Help
+List users
+Order
+UserID 
+User Name
+User Group
+Right
+Reset password for user
+RePass
+Kind of user
+KindOf
+Filter user
+Filter
+EmployeeID

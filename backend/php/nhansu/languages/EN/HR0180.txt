@@ -1,0 +1,71 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+List Candidate
+Order
+ID
+PositionRecuimentID
+FirstName
+MiddleName
+LastName
+NickName
+SSNNo
+SSNDate
+SSNPlace
+Birthdate
+BirthPlace
+Gender
+NationID
+Nationality
+ReligionID
+MaritalStatus
+CountryOrRegion
+StateOrProvince
+Street1
+Street2
+HomePhone
+WorkPhone
+MobilePhone
+WorkEmail
+OrtherEmail
+CurrentNetSalary
+DesiredNetSalary
+AcademicQualifications
+OtherAcademicQualifications
+JobHistory
+TravellingExperience
+LanguageSkill
+ComputerSkill
+Strengths
+Weaknesses
+Reference
+Comment
+PathPicture
+PersonCreate
+DateCreate
+State
+DateJoin
+StatePersonClose
+EmploymentStatus
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+ResultInterview

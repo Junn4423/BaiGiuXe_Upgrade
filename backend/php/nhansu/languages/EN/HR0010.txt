@@ -1,0 +1,22 @@
+...//Begin control icon part
+Save
+Save
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin show data part
+Jobs
+Department:
+Job Category:
+Title:
+Descriptions:
+...//Begin messages part
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error 
+Name is not empty
+Description is not empty

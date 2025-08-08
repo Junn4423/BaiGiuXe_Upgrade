@@ -1,0 +1,17 @@
+...//Begin control icon part
+Qua lại
+Qua lại
+Nạp lại
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+...//Begin control icon part
+Call Off Contract Function
+Schedules Items
+Un-Schedules Items
+Milestone
+Contractor Person
+Group Shares
+Attach Files
+History
+Delivery Status

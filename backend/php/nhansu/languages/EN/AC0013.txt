@@ -1,0 +1,13 @@
+...//Begin control icon part
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin control icon part
+Detail Income
+Detail Bill
+Detail Outcome
+Detail Invoice
+Document

@@ -1,0 +1,24 @@
+Add Manage Trade Term List
+Filter Manage Trade Term List
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Manage Trade Term List
+Trade Term Code
+Trade Term Name
+Active/De-active
+Remark
+Creator
+Create Date
+...//Begin messages part
+The Trade Term Code is empty, please try again
+Trade Term Name is not empty

@@ -1,0 +1,38 @@
+SOF CO., LTD
+Employee
+InfoYear
+InfoWeek
+Sheet
+Calandar
+EnterTime
+New
+Edit
+Delete
+Refresh
+Help
+Control employees
+Order
+EmployeeID
+First Name
+Middle Name 
+Last Name
+Title
+Birthdate
+Manager password of employees
+ManPwd
+Manager images of employees
+ManImg
+Fillter employee
+Fillter
+Expenses
+Performances
+Perform...
+Training
+Training
+Employment Contracts
+Contract
+Violate
+View Violate
+View ...
+View history about books borrow of Employee
+History

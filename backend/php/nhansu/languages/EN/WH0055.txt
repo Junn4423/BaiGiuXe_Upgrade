@@ -1,0 +1,38 @@
+Add Detail PackingList Detail
+Filter Detail PackingList Detail
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Detail PackingList Detail
+AutoID 
+PackageID
+ItemID
+Quantity
+UnitID
+Price
+Currency
+Color
+Cut
+Type Size
+Size
+PackageItem
+Weight Gross
+Weight Net
+Note
+DateClose
+Is close
+PackageNo
+ItemID is not empty
+You must enter number 
+ReceiptionID is not empty
+Choose file template of PackingList
+Download file template

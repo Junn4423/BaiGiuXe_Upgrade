@@ -1,0 +1,20 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Lọc
+Lọc
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Lọc theo tài liệu
+Loại tài liệu
+Quyền truy cập loại TL
+Được xem mục con
+Không được xem mục con
+Tên tài liệu
+Quyền truy cập tên TL
+Được xem thông tin
+Không được xem thông tin
+...///Bắt đầu từ phần thông báo

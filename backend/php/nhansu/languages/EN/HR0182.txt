@@ -1,0 +1,35 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List Times Interview
+Order
+Select All
+ID
+CandidateID
+InterviewCircleID
+DateInterwiew
+TimeStartInterview
+TimeEndInterview
+Comment
+ResultInterview
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file

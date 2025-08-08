@@ -1,0 +1,10 @@
+SOF CO., LTD
+Send
+Cancel
+Refresh
+Help
+Send Message 
+To:
+(EX: admin or admin;user;manager or * or *-admin-users)
+Subject:
+Date: 

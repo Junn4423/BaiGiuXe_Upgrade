@@ -1,0 +1,32 @@
+Tạo E-Mail Mới
+Lọc Mail
+Gửi
+Quay lại danh sách mail
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp về trang này
+Thêm Mail
+Gửi mail thành công.
+Gửi mail không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa E-Mail Mới
+Mã mail
+Loại
+Người dùng
+Ngày mail
+Chủ đề
+Từ
+Đến
+Thêm gửi
+Nội dung
+Tập tin đính kèm 
+Mới
+Xóa
+Ẩn file
+Giờ mail
+Xin vui lòng chọn email ngươi gửi
+Xin vui lòng chọn email ngươi đến
+Bạn có muốn gử không có chủ đề không?

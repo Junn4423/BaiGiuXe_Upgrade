@@ -1,0 +1,20 @@
+Thêm Mục Loại Thu Chi
+Lọc Mục Loại Thu Chi
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Loại Thu Chi
+Mã loại
+Tên
+Mô tả
+Mã kiểu tính lương không được rỗng
+Tên không được rỗng

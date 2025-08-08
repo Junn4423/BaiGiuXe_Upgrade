@@ -1,0 +1,63 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Mục Tài Sản Cố Định
+Stt
+Mã tài sản
+Tên tài sản
+Loại tài sản
+Phòng ban sử dụng
+Số lượng
+Số hiệu tài sản
+Công xuất
+Năm sản xuất
+Nước sản xuất
+Bảo hành
+Điều kiện bảo hành
+Mô tả
+Phụ kiện đi kèm
+Nhà cung cấp
+Ngày mua
+Ngày ghi tăng
+Ngày sử dụng
+Ngày tính khấu hao
+Tài khoản nguyên giá
+Tài khoản khấu hao
+Tài khoản chi phí
+Trạng thái khấu hao
+Đối tượng tập hợp chi phí
+Vốn ngân sách
+Vốn vai
+Vốn chủ sở hữu
+Vốn liên doanh
+Vốn khác
+Nguyên giá
+Hoa mòn lũy kế
+Giá trị còn lại
+Giá trị tính khấu hao
+Thời gian sử dụng
+Tỷ lệ tính khấu hao
+Giá trị khấu hao theo năm
+Phương pháp khấu hao
+Hình ảnh tài sản
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web

@@ -1,0 +1,28 @@
+…
+Save
+Cancel
+Reload
+Help
+Change Infomation
+Contact Information
+Email:
+Address:
+City:
+State Or Province: 
+Postal Code:
+Country Or Region:
+Home Phone:
+Work Phone:
+Orther Information
+Spounse Name:
+Emrgcy Contact Name:
+Emrgcy Contact Phone:
+Update successfull 
+Update error:
+You must enter number 
+Email is not valid 
+Address is not empty 
+City is not empty 
+State or Province is not empty 
+Postal is not empty and have to enter number
+Country is not empty 

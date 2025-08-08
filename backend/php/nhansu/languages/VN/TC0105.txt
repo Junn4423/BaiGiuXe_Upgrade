@@ -1,0 +1,31 @@
+Thêm Mục Nhân Viên Thuộc Phòng Ban
+Lọc Mục Nhân Viên Thuộc Phòng Ban
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi:
+Sửa thành công.
+Sửa không được, lỗi:
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nhân Viên Thuộc Phòng Ban
+Mã tự động
+Lần tính
+Mã nhân viên
+Mã phòng ban
+Trạng thái NV
+Có quyết toán PIT
+Kiểu tính lương
+Ngày làm trong tháng
+Ngày kết thúc làm trong tháng
+Sắp ca thêm
+Cho phép sắp ca thêm
+Ưu tiên tính KPI
+Mã lần tính không được rỗng
+Mã nhân viên không được rỗng
+Phòng ban không được rỗng.
+Chọn tập tin để nạp

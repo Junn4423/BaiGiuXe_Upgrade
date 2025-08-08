@@ -1,0 +1,24 @@
+Add Staff Belong To Department
+Filter Staff Belong To Department
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error:
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Staff Belong To Department
+ID
+CalculateTimesID
+EmployeeID
+DepartmentID
+Note
+CalculateTimesID is not empty
+EmployeeID is not empty
+Department revenue is not empty
+Select file to load

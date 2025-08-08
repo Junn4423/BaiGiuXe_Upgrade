@@ -1,0 +1,30 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Mục Bảng Quyền
+STT
+Chọn hết
+Mã quyền
+Diễn giải
+Liên kết tới
+Trạng thái
+Điều khiển
+Mã cha
+Cấp bậc
+Lưu
+Số dòng hiển thị
+Cách hiển thị

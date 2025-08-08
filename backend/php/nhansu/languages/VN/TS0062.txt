@@ -1,0 +1,28 @@
+Thêm Mục Phiếu Tạm Nhập
+Lọc Mục Phiếu Tạm Nhập
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Phiếu Tạm Nhập
+Mã nhập kho
+Mã kho
+Mã nhân viên
+Chủ đề nhập kho
+Đợt ĐNNK
+Mã PMH
+Khóa
+Ghi chú
+Ngày nhập kho
+0.Chưa xác nhận
+1.Đã xác nhận
+Bạn phải nhập mã nhập kho
+Chủ đề kiểm kho không rỗng

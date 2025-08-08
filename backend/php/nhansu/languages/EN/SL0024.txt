@@ -1,0 +1,29 @@
+Add Detail Quotations
+Filter Detail Quotations
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Detail Quotations
+AutoID
+QuotationID
+ItemID
+Quantity
+UnitID
+Price
+UnitPrice
+SalesTaxRate
+Characteristic
+Qualitative
+Extention1
+Extention2
+ItemID is not empty
+You must enter number 

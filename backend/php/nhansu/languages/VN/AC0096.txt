@@ -1,0 +1,52 @@
+Thêm Mục Tài Sản Cố Định
+Lọc Mục Tài Sản Cố Định
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Tài Sản Cố Định
+Mã tài sản
+Tên tài sản
+Loại tài sản
+Phòng ban sử dụng
+Số lượng
+Số hiệu tài sản
+Công xuất
+Năm sản xuất
+Nước sản xuất
+Bảo hành
+Điều kiện bảo hành
+Mô tả
+Phụ kiện đi kèm
+Nhà cung cấp
+Ngày mua
+Ngày ghi tăng
+Ngày sử dụng
+Ngày tính khấu hao
+Tài khoản nguyên giá
+Tài khoản khấu hao
+Tài khoản chi phí
+Trạng thái khấu hao
+Đối tượng tập hợp chi phí
+Vốn ngân sách
+Vốn vai
+Vốn chủ sở hữu
+Vốn liên doanh
+Vốn khác
+Nguyên giá
+Hoa mòn lũy kế
+Giá trị còn lại
+Giá trị tính khấu hao
+Thời gian sử dụng
+Tỷ lệ tính khấu hao
+Giá trị khấu hao theo năm
+Phương pháp khấu hao
+Hình ảnh tài sản

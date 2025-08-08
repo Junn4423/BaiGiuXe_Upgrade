@@ -1,0 +1,18 @@
+ERP SOF
+Lưu
+Lưu
+Hủy
+Hủy
+Nạp lại
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+Mã đào tạo
+Ngày cấp bằng
+Tên hình của bằng
+Thêm/Sửa thành công 
+Lỗi:
+Mã huấn luyện không được rỗng 
+Ngày cấp bằng không được rổng 
+Cập nhật hình về việc xác  nhận bằng
+Cập nhật

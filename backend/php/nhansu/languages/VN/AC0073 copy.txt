@@ -1,0 +1,40 @@
+Thêm Mục Cấu Hình Kế Toán
+Lọc Mục Cấu Hình Kế Toán
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Cấu Hình Kế Toán
+Mã kế toán
+Chủ đề
+Mã công ty
+Ngày bắt đầu
+Ngày kết thúc
+Năm tài chính
+Kế toán trưởng
+Phương pháp kho
+Cơ quan thuế cấp cục
+Cơ quan quản lý thuế
+Khóa
+Tài khoản ngân hàng
+Ngành nghề kinh doanh
+Nhân viên khai thuế
+Hình thức báo cáo thuế
+Phần trăm thuế TNDN(%)
+Mã không có dữ liệu, xin hãy thử lại.
+Bạn phải nhập phần chủ đề.
+BC lưu chuyển tiền tệ
+Trực tiếp
+Gián tiếp
+Kiểu khấu hao
+Khấu hao theo năm
+Khấu hao theo tháng
+Kiểm tra năm cho phép nhập

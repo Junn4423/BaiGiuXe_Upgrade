@@ -1,0 +1,60 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Bảng Mã Hoá Bảng Tính
+STT
+Mã tự động
+Mã loại sản phẩm
+Mã  nhóm đọc
+Thứ tự
+Cột 1
+Cột 2
+Cột 3
+Cột 4
+Cột 5
+Cột 6
+Cột 7
+Cột 8
+Cột 9
+Cột 10
+Cột 11
+Cột 12
+Cột 13
+Cột 14
+Cột 15
+Cột 16
+Mã tạo
+Ngày giờ tạo
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web
+Cột 17
+Cột 18
+Cột 19
+Cột 20
+Cột 21
+Cột 22
+Cột 23
+Cột 24
+Cột 25
+Cột 26
+Cột 27
+Cột 28

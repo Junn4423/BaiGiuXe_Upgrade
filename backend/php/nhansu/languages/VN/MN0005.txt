@@ -1,0 +1,29 @@
+Thêm Mục Nguyên Vật Liệu
+Lọc Mục Nguyên Vật Liệu
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nguyên Vật Liệu
+Mã tự đồng
+Mã cha
+Tên sản phẩm
+Số lương định mức
+Mã đơn vị
+Tỷ lệ hao hụt
+GRADE/Loại
+Màu
+Ghi chú
+Khóa
+Số lượng tồn
+Số lượng mua
+Số lượng dự phòng
+Tổng số lượng mua

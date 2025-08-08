@@ -1,0 +1,27 @@
+ERP SOF
+Lưu
+Lưu
+Hủy
+Hủy
+Nạp lại
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+Mã
+Tên
+Địa chỉ trường
+Công việc phải làm
+Bang
+Mã số bưu điện
+Số điện thoại
+Số fax
+Địa chỉ email
+Địa chỉ website
+Bạn phải nhập số 
+Mã trường không được rỗng 
+Tên trường không rỗng 
+E-mail không hợp lệ 
+Địa chỉ trường không được rỗng 
+Tỉnh/TP không được rổng 
+Lỗi:
+Thành công

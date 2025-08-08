@@ -1,0 +1,23 @@
+Add Manage Mission Monthly
+Filter Manage Mission Monthly
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Manage Mission Monthly
+CommissionID
+ConfigID
+DateFrom
+DateTo
+TotalAmountMonthly
+Approval
+You must choose date
+Configure commission is not active

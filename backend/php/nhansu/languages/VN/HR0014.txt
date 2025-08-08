@@ -1,0 +1,26 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Lưu
+Lưu
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Hợp đồng
+Nhân viên:
+Tên hợp đồng:
+Ngày bắt đầu làm việc:
+Ngày kết thúc làm việc:
+Nội dung:
+...///Bắt đầu từ phần thông báo
+Bạn phải chọn ngày bắt đầu
+Bạn phải chọn ngày kết thúc
+Ngày bắt đầu phải nhỏ hơn ngày kết thúc
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+Bạn phải nhập tên hợp đồng
+Ngày nghỉ phải lá số

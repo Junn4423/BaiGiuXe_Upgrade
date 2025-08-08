@@ -1,0 +1,50 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Don't have data of IncomeID in detail data.<br> IncomeID don't mark with IncomeID in detail data.Please! load  IncomeID again.
+Could not add new, error:
+Input Income Salary Detail
+Input Income Salary
+Order
+IncomeID
+CategoryVoteID
+Source
+ReferenceID
+Name
+Address
+Description
+EmployeeID
+DateBillPO
+Account
+Currency
+Scale
+VoiceLinkID
+PaymentDate
+InvoiceSourceID
+Lock
+EmployeeID
+Quantity
+UnitID
+Money Salary
+Currency
+Converted
+CompanyID
+No
+Co
+CategoryID
+Note
+DateInStock
+IncomeID is not empty
+Name is not empty
+VoiceID is not empty

@@ -1,0 +1,36 @@
+Thêm Mục Hóa Đơn Bán Hàng Lẻ
+Lọc Mục Hóa Đơn Bán Hàng Lẻ
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Hóa Đơn Bán Hàng Lẽ
+Mã hóa đơn bán hàng lẻ
+Loại phiếu
+Nguồn phiếu
+Mã tham chiếu
+Tên
+Địa chỉ
+Mô tả
+Mã nhân viên
+Ngày ghi
+Tài khoản quỹ
+Mã tiền tệ
+Tỷ giá quy đổi
+Chứng từ gốc
+Ngày chứng từ
+Khóa
+Mã kết sổ
+Bạn phải nhập tài khoản quỹ
+Mã tiền tệ không được rỗng
+Tỷ giá quy đổi khác không
+Địa chỉ không rỗng;
+Tên không rỗng.

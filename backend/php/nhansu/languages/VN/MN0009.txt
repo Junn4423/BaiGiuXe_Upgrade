@@ -1,0 +1,32 @@
+Thêm Mục Kế Hoạch Sản Xuất
+Lọc Mục Kế Hoạch Sản Xuất
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Kế Hoạch Sản Xuất
+Mã lệnh
+Work Center
+Ngày phát lệnh
+Ngày kết thúc lệnh
+Nội dung lệnh
+Mã nhân viên
+Nguồn phát LSX
+Trạng thái
+Nguồn tạo
+% KPIs hiệu suất máy(B1)
+% HS máy chạy thực tế (B2)
+%Hàng AA (B3)
+Tốc độ chạy
+DE
+Ngày giờ tạo
+Mã lệnh không được rỗng
+Tên loại kế hoạch không được rỗng

@@ -1,0 +1,25 @@
+Add Units
+Filter Units
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Units
+Unit Code
+Unit Name
+Rate
+Active/De-active
+Remark
+Creator
+Create Date
+...//Begin messages part
+The ID is empty, please try again
+The Description is not empty

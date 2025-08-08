@@ -1,0 +1,32 @@
+Add Offical Documents
+Filter Offical Documents
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Offical Documents
+ID
+EmployeeID
+TypeOfficalID
+DateOffical
+DateCreate
+Title
+Comment
+TemplateID
+Approval
+Title VN
+Title EN
+Title Law VN
+Title Law EN
+Contract Labor ID
+EmployeeID is not empty
+Type Offical Document is not empty
+You must input date

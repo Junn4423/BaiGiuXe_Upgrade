@@ -1,0 +1,15 @@
+...//Begin control icon part
+Qua lại
+Qua lại
+Nạp lại
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+...//Begin control icon part
+Chi tiết bảo hành
+Bảo hành
+QRCode bảo hành
+Cảnh báo bảo hành
+Xử lý bảo hành
+Trả SPBH = sửa
+Bảo hành = thay thế

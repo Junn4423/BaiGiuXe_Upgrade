@@ -1,0 +1,21 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Lưu
+Lưu
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Thêm / Sửa Chủ Đề Công Việc
+Mã:
+Chủ đề
+--Lựa chọn--
+Trạng thái tuyển dụng:
+...///Bắt đầu từ phần thông báo
+Xin hãy chọn trạng thái tuyển dụng.

@@ -1,0 +1,28 @@
+...//Begin control icon part
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+Salary Currency List 
+Order
+Select All
+ID
+Paygrade
+Currency
+Min Salary
+Max Salary
+Step Salary
+Paygrade ID
+Currency ID

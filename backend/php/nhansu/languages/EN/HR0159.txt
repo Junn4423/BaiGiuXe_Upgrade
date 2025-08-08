@@ -1,0 +1,20 @@
+Add Type Document
+Filter Type Document
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Type Document
+ID:
+Description:
+...//Begin messages part
+ID is empty, please try again
+Description is not empty

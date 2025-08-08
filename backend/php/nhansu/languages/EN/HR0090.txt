@@ -1,0 +1,35 @@
+...//Begin control icon part
+Print priview
+Priview
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin show data
+Select employee and option for report
+Select
+Emergency
+Dependents
+Immigrations
+Contracts
+Payments
+Experiences
+Educations
+Skills
+Languages
+Licenses
+Membership
+Performances
+...//Messages
+Note, have no option selected, please select unless once option for preview
+Personal
+Contacts
+Jobs
+--Select employee--
+Please select an employee and then select unless once option for preview
+Select:
+All
+None
+View image

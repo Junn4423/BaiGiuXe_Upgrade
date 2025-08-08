@@ -1,0 +1,24 @@
+Thêm Mục Chi Tiết Kết Chuyển Lãi Lỗ
+Lọc Mục Chi Tiết Kết Chuyển Lãi Lỗ
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết Kết Chuyển Lãi Lỗ
+Mã tự động
+Mã phiếu
+Tiền
+Qui đổi
+Tài khoản nợ
+Tài khoản có
+Mô tả
+Bạn phải nhập phiếu
+Tiền không được nhỏ hợn 0.

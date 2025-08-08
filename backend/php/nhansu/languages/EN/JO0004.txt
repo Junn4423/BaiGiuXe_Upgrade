@@ -1,0 +1,20 @@
+Add State Job
+Filter State Job
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit State Job
+ID:
+Name:
+...//Begin messages part
+The ID is empty, please try again
+The Name is not empty

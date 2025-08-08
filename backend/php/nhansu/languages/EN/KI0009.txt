@@ -1,0 +1,23 @@
+Add KPI Monthly
+Filter KPI Monthly
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error:
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit KPI Monthly
+ID
+EmployeeID
+CalculateTimesID
+Mã KPI
+Note
+PersonAproval
+Lock
+KPI is not emtpty!

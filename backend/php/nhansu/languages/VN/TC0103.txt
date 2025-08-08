@@ -1,0 +1,32 @@
+Thêm Mục Chi Tiết Đánh Giá
+Lọc Mục Chi Tiết Đánh Giá
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Sách Chi Tiết Đánh Giá
+Mã tự động
+Mã đánh giá
+Mã nhân viên
+Đánh giá%
+Loại đánh giá GĐ
+Loại đánh giá HCNS
+Loại đánh giá QL
+Loại đánh giá NV
+Ghi chú GĐ
+Ghi chú HCNS
+Ghi chú QL
+Ghi chú NV
+Người đánh giá GĐ
+Người đánh giá NS
+Người đánh giá QL
+Người đánh giá NV
+Mã không được rỗng

@@ -1,0 +1,14 @@
+TỰ ĐỘNG GỬI EMAIL THEO CẤU HÌNH
+Số email cho một lần gửi
+Khoản thời gian gửi tiếp theo
+Chọn mẫu email để gửi
+File đính kèm khi gửi
+Nội dung liên hệ
+Nội dung quảng cáo
+Giờ hiện tại
+Bắt đầu chạy
+Dừng chạy
+Chèn danh sách email để gửi
+Xem báo cáo kết quả thực hiện
+Báo cáo
+Nạp lại

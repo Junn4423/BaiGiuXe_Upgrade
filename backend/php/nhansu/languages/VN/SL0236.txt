@@ -1,0 +1,32 @@
+Thêm Mục Nhà Phân Phối Bán Hàng
+Lọc Mục Nhà Phân Phối Bán Hàng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nhà Phân Phối Bán Hàng
+Mã tự động
+Mã hợp đồng
+Mã BOM
+Số lượng
+Đơn vị tính
+Giá
+Đơn vị giá
+Thuế
+Mã lần tính lương
+Quy đổi
+Chiết khấu
+Số lượng mua
+Ngày giao
+Ngày hoàn thành
+Số lượng tồn đầu
+Mã nhà phân phối
+Số lượng tồn cuối

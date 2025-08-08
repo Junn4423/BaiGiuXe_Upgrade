@@ -1,0 +1,59 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Sách Bảo Hiểm
+STT
+Chọn hết
+Mã bảo hiểm
+Chủ đề
+Mã tính lương
+Ngày tạo bảo hiểm
+Nhân viên báo
+Chấp nhận
+...//Phần thêm
+Lọc Bảo Hiểm
+Lọc
+Tham gia bh
+Thông tin
+Chấp nhận
+Khóa bảo hiểm
+Mở khóa
+Mở khóa bảo hiểm
+Thêm mới / sửa phần bảo hiểm 
+Điều chỉnh
+Chủ đề không được rổng
+Mã tính lương không được bỏ trống
+..////////////////////////Insurance detail//////////////////
+Danh Sách Chi Tiết Bảo Hiểm
+Mã NV
+Tên NV
+Bệnh viện
+Mã số
+Chú ý
+Lưu chi tiết
+Sao chép bảo hiểm
+Tham gia bh ngoài tỉnh
+Số lần bệnh
+Đối tượng bệnh
+0:Bản thân ốm ngắn ngày
+1:Con
+Thời gian đóng BHXH
+Đau ốm
+Danh Sách Chi Tiết Bảo Hiểm Đau Ốm
+2:Bản thân ốm dài ngày
+Số thẻ BHYT
+Thai sản

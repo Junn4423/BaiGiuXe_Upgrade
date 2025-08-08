@@ -1,0 +1,33 @@
+SOF CO., LTD
+Filter
+Filter
+Cancel
+Cancel
+Refresh
+Refresh
+Help
+Help
+Filter employees
+Year Performance
+EmployeeID
+SSN No
+First Name 
+Last Name
+Title
+Nick Name
+Birthday
+to
+Department 
+Job Category
+Nationality
+Ethnic Race 
+//Begin show select
+Select JobCategory
+Select Nationality
+Select Ethnic Race
+Report
+Choose condition to report  performance of employees
+State of Rest
+All
+Hide
+Show

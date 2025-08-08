@@ -1,0 +1,21 @@
+Add Timecard Code
+Filter Timecard Code
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Timecard Code
+TimeCardCode
+Name
+Description
+TimeCardCode is not empty
+Name is not empty
+Shift Reference

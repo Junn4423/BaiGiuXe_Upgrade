@@ -1,0 +1,26 @@
+Thêm Mục Lô Sản Phẩm
+Lọc Mục Lô Sản Phẩm
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Lô
+Mã Lô
+Mã BOM
+Mã kho
+Ngày hết hạn sử dụng
+Số m
+Số kg
+Ngày tạo
+Mở rộng 2
+Mã Lô không được rỗng
+Mã kho không được rỗng
+Mã BOM không được rỗng

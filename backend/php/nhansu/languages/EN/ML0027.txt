@@ -1,0 +1,21 @@
+Add Template Email Marketing
+Filter Template Email Marketing
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Template Email Marketing
+ID
+Name
+Template
+...//Begin messages part
+The ID is empty, please try again
+Name is not empty

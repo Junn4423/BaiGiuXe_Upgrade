@@ -1,0 +1,24 @@
+Thêm  Bảo Hiểm Công Trình 
+Lọc  Bảo Hiểm Công Trình 
+Lưu 
+Lọc 
+Quay lại 
+Nạp lại trang này 
+Nạp lại 
+Trợ giúp 
+Trợ giúp 
+Thêm thành công. 
+Thêm không được, lỗi: 
+Sửa thành công. 
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng 
+Sửa  Bảo Hiểm Công Trình 
+Mã bảo hiểm 
+Mã nhà cung cấp 
+Ngày bắt đầu 
+Ngày hết hạn 
+Nhân viên tạo 
+Ngày tạo 
+Ghi chú 
+Trạng thái 
+Mã không được rổng 

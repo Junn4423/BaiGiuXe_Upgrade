@@ -1,0 +1,16 @@
+...//Begin control icon part
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin control icon part
+Contract
+Quotation
+Product
+History
+Document
+Income Money
+Outcome Money
+Contact

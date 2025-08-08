@@ -1,0 +1,37 @@
+Thêm Mục Chi Tiết Xuất Kho
+Lọc Mục Chi Tiết Xuất Kho
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết  Xuất Kho
+Mã tự động
+Mã liên kết
+Mã BOM
+Số lượng
+Mã đơn vị
+Giá
+Đơn vị giá
+Số tiền quy đổi
+Mã kho
+Nợ
+Có
+Lô
+Chú ý
+Ngày xuất kho
+Mã BOM không rổng
+Bạn phải nhập số
+Mã ngày nhập không rổng
+Số HD
+Ngày ghi phiếu
+Tên đối tượng
+Số phiếu liên kết
+

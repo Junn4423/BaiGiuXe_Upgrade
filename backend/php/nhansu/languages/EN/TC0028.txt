@@ -1,0 +1,33 @@
+Add Work Anually
+Filter Work Anually
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Work Anually
+AutoID
+EmployeeID
+ALMonth
+NumYear
+YearsWork
+HoursWork
+Shift
+CreateID
+DateCreate
+EmployeeID is not empty
+Month is invalid
+Years is invalid
+TimeCard Compensation (B)
+TimeCard Compensation (B) Used
+TimeCard Compensation (B) Again
+Num Rest Used
+Num Rest Agian
+AL Year

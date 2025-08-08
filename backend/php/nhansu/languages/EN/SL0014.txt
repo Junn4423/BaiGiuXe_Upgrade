@@ -1,0 +1,45 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+List Items
+Order
+ItemID
+ItemName
+ItemCategory
+UnitID
+KeyPress
+Formula
+Price
+CurrencyID
+Composition
+Note
+Tax
+Type
+Owe
+Own
+StateStop
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+View Report Web
+WarehouseID
+Code
+Min Balance
+Max Balance

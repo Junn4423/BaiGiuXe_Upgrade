@@ -1,0 +1,31 @@
+Add Enter Items TimeCard
+Filter Enter Items TimeCard
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Enter Items TimeCard
+AutoID
+EmployeeID
+CalculateTimeID
+DateWork
+ItemID
+Quantity
+ProductCategoryID
+Note
+CreateID
+Shift
+Lock
+EmployeeID is not empty
+CalculateTimeID is invalid
+Years is invalid
+Type Calcualate
+DepartmentID

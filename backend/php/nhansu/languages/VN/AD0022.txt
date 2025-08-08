@@ -1,0 +1,87 @@
+Thêm Mục Nhân Viên Làm Việc
+Lọc Mục Nhân Viên Làm Việc
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nhân Viên Làm Việc
+Mã nhân viên
+Tên
+Tên Việt viết ngắn bán hàng
+Tên Anh viết ngắn bán hàng
+Chức vụ
+Tên tiếng anh
+Hình
+Thứ hạng công ty
+Trạng thái
+Mã CMND
+Ngày cấp CMND
+Nơi cấp
+Mã số thuế
+Số tài khoản/Thông tin
+Ngày sinh
+Nơi sinh
+Tình trang gia đình
+Phái
+Báo cáo công việc
+Số sổ BHXH
+Ngày cấp
+Quốc tịch
+Dân tộc
+Tôn giáo
+Màu da
+Chức danh chuyên môn
+Nhóm chấm công
+Trình độ văn hóa
+Mã phòng ban
+Ngày bắt đầu làm việc
+Mã quốc gia
+Mã tỉnh
+Công việc phải làm
+Địa chỉ hộ khẩu hay thường trú
+Địa chỉ tạm trú
+Nghề nghiệp
+Số điện thoại nhà
+Số điện thoại công ty
+Số điện thoại di động
+Email công ty
+Email khác
+Người quản lý
+Nơi cấp bảo hiểm
+Ngày nghỉ việc
+Bạn phải nhập phần tên nhân viên.
+Số điện thoại không hợp lệ
+Bạn phải nhập phần mã nhân viên.
+Nguyên quán
+Chức vụ EN BBG
+Chức vụ VN BBG
+Khu vực dự án
+Địa chỉ CMND
+Chi nhánh công ty
+Ngoại ngữ
+Tin học
+Chức vụ VN viết tắt
+Trường đào tạo
+Bằng lái xe hơi
+Du lịch hàng năm
+Tình trạng sức khỏe
+Không ăn cơm
+Code Machine
+Phép năm vào làm
+Phép năm/Năm
+Tiền SN
+Phòng ban cha
+Số người phụ thuộc
+Chi nhánh ngân hàng
+Tên Hoa
+Chỉ năm sinh
+Số thẻ
+

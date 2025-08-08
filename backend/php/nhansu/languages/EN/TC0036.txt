@@ -1,0 +1,42 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+REPORT COSTS OF TEMPORARY
+List Costs Of Temporary
+Order
+Select All
+AutoID
+EmployeeID
+CalculateTimesID
+CategoryCostOfTemporaryID
+Money
+CurrencyID
+Note
+Lock
+CreateID
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Department
+Add Multi Cost
+Month
+Years
+Department
+Sign

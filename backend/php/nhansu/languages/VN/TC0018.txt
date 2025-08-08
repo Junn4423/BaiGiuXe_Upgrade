@@ -1,0 +1,15 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...//Begin control icon part
+quản lý thời gian
+Thông tin năm
+Thông tin tháng
+Lịch
+Chi phí
+Nhập thời gian
+Nhập sản phẩm

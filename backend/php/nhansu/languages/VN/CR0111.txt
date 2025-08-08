@@ -1,0 +1,29 @@
+THÊM MỤC DANH SÁCH PHIẾU BẢO HÀNH PBH
+LỌC MỤC DANH SÁCH PHIẾU BẢO HÀNH PBH
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+SỬA MỤC DANH SÁCH PHIẾU BẢO HÀNH PBH
+Số BBNBH
+Tên khách hàng
+Chù đề
+Ngày bắt đầu bảo hành
+Ngày hết kết thúc bảo hành
+Khoá
+Phương thức thanh toán
+Phương thức vận chuyển
+Ghi chú
+Mã nhân viên
+Ngày giờ tạo
+Mã công việc
+
+

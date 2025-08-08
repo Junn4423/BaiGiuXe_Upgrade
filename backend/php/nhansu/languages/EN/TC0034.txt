@@ -1,0 +1,28 @@
+Add View Calendar Created
+Filter View Calendar Created
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit View Calendar Created
+AutoID
+CalandarID
+MonthID
+DateWork
+Time Enter
+Time In
+Time Out
+Note
+CreateID
+Shift
+CalendarID is not empty
+MonthID is not empty
+You must input date

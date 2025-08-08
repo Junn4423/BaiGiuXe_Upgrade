@@ -1,0 +1,35 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List Warehouse
+Order
+Select All
+WarehouseID
+CompanyName
+Name
+Location
+Phone
+Fax
+Keeper
+Comment
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file

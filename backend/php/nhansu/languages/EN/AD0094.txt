@@ -1,0 +1,15 @@
+...
+Search employees
+Search employees
+Order
+ID
+Department
+First Name
+Middle
+Last Name
+Nick Name
+Search
+Search
+Go back last page
+Back
+There aren't employee, please try again

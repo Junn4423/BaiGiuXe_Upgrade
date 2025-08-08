@@ -1,0 +1,18 @@
+.../////////////////////////////////////
+Báo cáo về đào tạo
+Thông Tin Chi Tiết Các Khóa
+Tên nhân viên:
+Mã nhân viên:
+Tên khóa học:
+Ghi chú:
+Bắt đầu khóa học:
+Kết thúc khóa học:
+Tổng số giờ:
+Tổng tiền khóa học:
+Tổng chi phí:
+Tình trạng bằng cấp:
+Ngày cấp bằng:
+Chưa có bằng cấp
+Không có thông tin chi tiết trong phần này
+Đã có
+Chưa có

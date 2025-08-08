@@ -1,0 +1,90 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+ENTER SUCCESSFULL 
+Delete successfully!
+Could not deleted, error:
+CONTRACT DETAIL
+LIST CONTRACTS 
+Order
+ContractID
+CustomerID
+Title
+StartDate contract
+ExpireDate contract
+SalesTaxRate
+PaymentMethod
+ShippingMethod
+Contents
+Saler
+State
+ContactDetailID
+CONTRACT NO 
+ITEM NAME
+QUANTITY 
+UNIT
+PRICE 
+UNIT PRICE
+TAX RATE
+PROGRAM
+NOTE
+DISCOUNT 
+SCORE
+OB DATE
+DATE CLOSE
+ORDER
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web
+QuotationID
+Other language contens
+QuotationID
+Title English
+No Contract/PO
+ParentID
+(0=Sale/1=Purchase)
+Contents english
+SupplierID
+SALE RESTAURANT
+Amount
+Contract is not empty
+CustomerID is not empty
+DiscountCash
+ENTER ORDER
+ALL ROOM
+CUSTOMER ROOM
+EMPTY ROOM
+DATE:
+ZOOM SCREEN
+RETURN SCREEN
+Enter order
+Enter more
+Payment
+Prepaid
+More
+Add more
+Print
+Move Room
+Gross 
+Gross
+Finish
+Debut
+Total
+Room wait
+Room clear
+Prepaid
+Paid

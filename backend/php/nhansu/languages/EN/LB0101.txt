@@ -1,0 +1,16 @@
+//Phân cho build danh mục me nu
+My Account Information
+Print My Information
+View My TimeSheet
+Input My TimeSheet
+Print My TimeSheet
+Open report after select day
+View Time Log
+View Resources
+View Contract Detail
+View Performance Detail
+View Training Detail
+Contract Information
+Performance Information
+Training Information
+History Borrow Books

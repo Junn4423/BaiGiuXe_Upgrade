@@ -1,0 +1,28 @@
+Thêm Mục Dự Án
+Lọc Mục Dự Án
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Dự Án
+Mã dự án
+Mã phòng ban
+Tên dự án
+Mô tả dự án
+Ngày bắt đầu
+Ngày kết thúc
+Số giờ làm
+Hoạt động
+Ngày tạo
+0.Không hoạt động
+1.Hoạt động
+Bạn phải nhập mã dự án
+Chủ đề kiểm kho không rỗng

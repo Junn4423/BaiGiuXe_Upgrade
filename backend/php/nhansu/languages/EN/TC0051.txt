@@ -1,0 +1,46 @@
+PAYROLL EMPLOYEE
+TimeSheetID
+Name
+Percent
+TimeWork
+Salary/hour
+Salary to hour
+Total salary to hour(1)
+ProductID
+Name
+Category
+Number
+Percent Category
+Price
+Salary to product
+Total salary to product(2)
+EmployeeID
+Employee Name
+Department
+Gender
+IndentifireNo
+Birthday
+Salary to Insurance
+Salary to no Insurance
+Total salary
+Insurance
+SocialInsurance
+HospitalInsurance
+UnEmploymentInsurance
+Total Pay Insurance(3)
+Plus Money
+SalaryBenefit
+Expensive
+Sum Plus Money(4)
+Subtract  Money
+Subtract  Salary
+Cost
+Sum Subtract  Money(5)
+Tax income
+Wage personal income tax itself(7)
+Wages excluding dependents
+Wages paid personal income tax :(6)-(7)-(8)
+Personal income taxes (9)
+Total wage has no personal income tax (6):
+Total salary is the personal income tax (6)-(9):
+Account

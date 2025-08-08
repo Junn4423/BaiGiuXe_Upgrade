@@ -1,0 +1,25 @@
+Add Level FieldWork Passed
+Filter Level FieldWork Passed
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Level FieldWork Passed
+AutoID
+EmployeeID
+Level FieldWork
+Start Date
+End Date
+Comments
+EmployeeID is not empty
+Level FieldWork is not empty
+You must input date
+SchoolID

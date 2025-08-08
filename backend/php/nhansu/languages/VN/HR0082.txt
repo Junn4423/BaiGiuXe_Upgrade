@@ -1,0 +1,29 @@
+/*------------------------------------*/
+Thêm thông tin cá nhân nhân viên
+Thêm thông tin cá nhân nhân viên
+Lưu
+Lưu
+Quay lại trang trước
+Quay lại
+Thêm dữ liệu thành công
+Quá trình thêm bị lỗi, nguyên nhân:
+Sửa dữ liệu thành công
+Quá trình sửa bị lỗi, nguyên nhân:
+/*------------------------------------*/
+Mã NV
+Quốc gia:
+--Chọn quốc gia--
+Tỉnh:
+Thành phố:
+Số đt nhà:
+Số đt cơ quan:
+Tên đường 1:
+Tên đường 2:
+Mã vùng:
+Số đt di động:
+Thư điện cơ quan:
+Thư điện tử khác:
+/*------------------------------------*/
+Có lỗi xảy ra trong quá trình lấy mã nhân viên, xin vui lòng thử lại
+Xin hãy nhập số
+Sai định dạng thư điện tử

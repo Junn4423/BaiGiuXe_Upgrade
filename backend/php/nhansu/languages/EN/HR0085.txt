@@ -1,0 +1,21 @@
+Add Language
+Filter Language
+Save
+Filter
+Back
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Language
+ID:
+Name:
+...//Begin messages part
+The ID is empty, please try again
+The Name is not empty

@@ -1,0 +1,44 @@
+…
+Bảng chấm công
+Bảng chấm công
+Thông tin chung:
+Mã nhân viên:
+Ngày:
+Tên nhân viên:
+Tuần:
+Ghi chú về các ký hiệu ngày nghỉ
+FN: phép năm;
+H: nghỉ lễ;
+TCBT: tăng ca bình thường;
+TCCN: tăng ca chủ nhật;
+NKP: nghỉ không phép (không lương);
+ES: cúp điện;
+MS: máy móc hư;
+Chi tiết bảng chấm công
+Ngày
+Thứ
+Chấm Công
+Giờ Làm
+Trong Ngày
+Tăng Ca
+Mã Nghỉ
+Dự Án
+Thông tin thời gian nghỉ
+Flex Leave:
+Tổng hợp trong thời gian in báo cáo:
+Thời gian nghỉ còn lại trong năm:
+Tổng thời gian làm việc bình thường:
+Thời gian đã nghỉ:
+Thời gian làm việc tăng ca:
+Thời gian nghỉ trong tuần này:
+Tổng số giờ làm việc:
+Tổng hợp thời gian nghỉ:
+In báo cáo
+Đóng cửa sổ
+Từ ngày:
+Đến ngày:
+Không nghỉ:
+M: cưới hỏi;
+TCH: tăng ca ngày nghỉ;
+CV: công ty tổ chức đi chơi, cho nghỉ;
+D: ma chay;

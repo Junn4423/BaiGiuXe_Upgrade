@@ -1,0 +1,24 @@
+Add Type Attach File
+Filter Type Attach File
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Manage Priority List
+Type Code
+Type Name
+Active/De-active
+Remark
+Creator
+Create Date
+...//Begin messages part
+The Type Code is empty, please try again
+Type Name is not empty

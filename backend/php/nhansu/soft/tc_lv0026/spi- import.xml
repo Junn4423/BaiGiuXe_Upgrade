@@ -1,0 +1,1386 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>TUYET</Author>
+  <LastAuthor>TUYET</LastAuthor>
+  <Created>2014-11-25T08:11:23Z</Created>
+  <LastSaved>2014-12-25T08:14:01Z</LastSaved>
+  <Version>12.00</Version>
+ </DocumentProperties>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>7995</WindowHeight>
+  <WindowWidth>20115</WindowWidth>
+  <WindowTopX>240</WindowTopX>
+  <WindowTopY>45</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Comma 11">
+   <NumberFormat ss:Format="_(* #,##0.00_);_(* \(#,##0.00\);_(* &quot;-&quot;??_);_(@_)"/>
+  </Style>
+  <Style ss:ID="s63" ss:Name="Normal 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s64" ss:Name="Normal 2 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Arial" x:Family="Swiss"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s65" ss:Name="Normal 2 2 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Arial" x:Family="Swiss"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s66" ss:Name="Normal 2 3">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Arial" x:Family="Swiss"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s94" ss:Name="Normal 5">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s68" ss:Parent="s63">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12"
+    ss:Color="#000000"/>
+   <Interior ss:Color="#DDD9C3" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s70" ss:Parent="s65">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Bold="1"/>
+   <Interior ss:Color="#DDD9C3" ss:Pattern="Solid"/>
+   <NumberFormat ss:Format="#,##0"/>
+  </Style>
+  <Style ss:ID="s72" ss:Parent="s64">
+   <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12" ss:Bold="1"/>
+   <Interior ss:Color="#DDD9C3" ss:Pattern="Solid"/>
+   <NumberFormat ss:Format="#,##0"/>
+  </Style>
+  <Style ss:ID="s74" ss:Parent="s66">
+   <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12" ss:Bold="1"/>
+   <Interior ss:Color="#DDD9C3" ss:Pattern="Solid"/>
+   <NumberFormat ss:Format="#,##0"/>
+  </Style>
+  <Style ss:ID="s75" ss:Parent="s63">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12"
+    ss:Color="#000000" ss:Bold="1"/>
+   <Interior ss:Color="#DDD9C3" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s76">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Interior ss:Color="#DDD9C3" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s77" ss:Parent="s63">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12"
+    ss:Color="#000000"/>
+   <Interior ss:Color="#F2DDDC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s78" ss:Parent="s63">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12"
+    ss:Color="#000000"/>
+   <Interior ss:Color="#F2DDDC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s80" ss:Parent="s62">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12"/>
+   <Interior ss:Color="#F2DDDC" ss:Pattern="Solid"/>
+   <NumberFormat ss:Format="_(* #,##0_);_(* \(#,##0\);_(* &quot;-&quot;??_);_(@_)"/>
+  </Style>
+  <Style ss:ID="s81" ss:Parent="s63">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12"
+    ss:Color="#000000"/>
+   <Interior ss:Color="#F2DDDC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s82">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="s83">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Interior ss:Color="#FFFF00" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s84" ss:Parent="s64">
+   <Alignment ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman"/>
+   <Interior ss:Color="#FFFF00" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s85">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <NumberFormat ss:Format="#,##0"/>
+  </Style>
+  <Style ss:ID="s86">
+   <Interior/>
+  </Style>
+  <Style ss:ID="s87">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Interior ss:Color="#C5D9F1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s88">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="s89">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Cambria" x:CharSet="163" x:Family="Roman" ss:Size="12"
+    ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s90">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Cambria" x:CharSet="163" x:Family="Roman" ss:Size="12"/>
+   <NumberFormat ss:Format="Short Date"/>
+  </Style>
+  <Style ss:ID="s91">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11"/>
+   <Interior/>
+   <NumberFormat ss:Format="Short Date"/>
+  </Style>
+  <Style ss:ID="s92">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s104">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="s108">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="s109" ss:Parent="s63">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Times New Roman" x:Family="Roman" ss:Size="12"
+    ss:Color="#000000"/>
+   <Interior ss:Color="#F2DDDC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s110">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Interior ss:Color="#C5D9F1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s111" ss:Parent="s94">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Sheet1">
+  <Table ss:ExpandedColumnCount="12" ss:ExpandedRowCount="71" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Width="105.75"/>
+   <Column ss:Width="144"/>
+   <Column ss:Width="32.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="90.75"/>
+   <Column ss:Index="11" ss:Width="67.5"/>
+   <Row ss:AutoFitHeight="0" ss:Height="47.25">
+    <Cell ss:StyleID="s68"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">employee</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Actual</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">SalesTurnover</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">NoOutletDisplayed</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">POoutlet</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">PHOSUADA</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Average</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Canxi-day</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">AvarageSales</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">Sale</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">PERCENT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+    <Cell ss:StyleID="s77"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="Number">1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+    <Cell ss:StyleID="s78"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+    <Cell ss:StyleID="s78"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="Number">0</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF0374</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Trần Xuân Điệp</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">125.5</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">165</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">112</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">80</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.04</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.63</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1503</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Thị Hồng Thư</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">55.3</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">160</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">108</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">410</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">5.16</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">12</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.16</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1195</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Huy Trung</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">180.6</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">162</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">105</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">390</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">4.8600000000000003</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.18</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1847</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Dương Công Việt</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">3.8</Data></Cell>
+    <Cell ss:StyleID="s111"/>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">60</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.43</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1849</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Lê Hữu Hùng</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">3.5</Data></Cell>
+    <Cell ss:StyleID="s111"/>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">30</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.28999999999999998</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s83"><Data ss:Type="String">SOF1851</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Trần Văn Cẩn</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">22.4</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">160</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">86</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">197</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.23</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">20</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s84"><Data ss:Type="String">SOF1875</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> Nguyễn Thị Hồng</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">28.3</Data></Cell>
+    <Cell ss:StyleID="s111"/>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">156</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">16</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1725</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Hữu Khuynh</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">41</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">166</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">110</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">240</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.95</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">80</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.12</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1393</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Anh Tuấn</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">28</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">165</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">81</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">280</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.66</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">40</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.03</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1772</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Đức Anh</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">7</Data></Cell>
+    <Cell ss:StyleID="s111"/>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">5.39</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1536</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Lê Văn Công </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">55.2</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">176</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">116</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">360</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">3.52</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">120</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.19</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.2</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1852</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Phạm Thúy Hường</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">53</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">156</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">111</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">360</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.5299999999999998</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">160</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.15</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s83"><Data ss:Type="String">SOF1853</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Khuất Văn Phòng</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">34</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">171</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">104</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">360</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.86</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">40</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.17</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1600</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Tạ Văn Trung</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">50</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">169</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">112</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">280</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.6</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">80</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.19</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1721</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Phạm Thị Try Túc</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">37.6</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">151</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">86</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">200</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.2599999999999998</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">24</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.03</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1729</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Lê Thị Dậu</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">41.3</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">151</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">106</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">280</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.54</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">53</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.03</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1855</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Hoài Thu</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">24.7</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">140</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">82</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">148</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.73</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">27</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.08</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1727</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Trần Văn Nga</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">50.5</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">155</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">110</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">640</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">18</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1556</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Bùi Văn Tiền</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">39.799999999999997</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">80</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">317</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">4.12</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">24</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.6</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Chưa HS</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Bùi Xuân Thụy</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">12.8</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">141</Data></Cell>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">190</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">4.3899999999999997</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">12</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1714</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Đức Quyết</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">27.3</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">143</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">60</Data></Cell>
+    <Cell ss:StyleID="s85"><Data ss:Type="Number">257</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.02</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">12</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1715</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Đoàn Xuân Thành</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">20.2</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">142</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">60</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">166</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.66</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">12</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.5</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1723</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Phạm Chí Kiên</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">23.6</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">145</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">60</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">248</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.89</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">8</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.08</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1734</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Bùi Đức Anh</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">8.3000000000000007</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">90</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">33</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.62</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1728</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Trịnh Gia Bảo</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">40.9</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">105</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">270</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.66</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">30</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.1000000000000001</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1858</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Bùi Thị Thanh Hồng</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">16.2</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">105</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">120</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.1599999999999999</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">25</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1322</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Dương Văn Tư</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">50.3</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">140</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">100</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">419</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.5099999999999998</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">8</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.01</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1277</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Trịnh Vũ Hoàng</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">123</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">143</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">100</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">859</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">4.55</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">58</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1718</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Phùng Xuân Đại</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">53.4</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">140</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">100</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">578</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">4.54</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.13</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">7.8</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s84"><Data ss:Type="String">SOF1878</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Phùng Xuân Thanh</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">10.6</Data></Cell>
+    <Cell ss:StyleID="s111"/>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Chưa HS</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Minh Tuấn</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">6.5</Data></Cell>
+    <Cell ss:StyleID="s111"/>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF0956</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Thị Luyến</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">82.7</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">135</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">85</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.08</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1848</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Lưu Mạnh Hà</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">29.9</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">145</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">81</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">121</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">74</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.25</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1757</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Đinh Trọng Tiến</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">43.4</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">145</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">85</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">160</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">96</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Chưa HS</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Lương Văn Hải</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">44.7</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">135</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">85</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">234</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">1.23</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">30</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.5</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1330</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Văn Đông</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">59</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">160</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">102</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">443</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.48</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">40</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.5</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1850</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Ngô Văn Nam</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">50.9</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">155</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">105</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.5</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">14</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.5</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1758</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Đỗ Văn Tuấn</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">47.9</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">155</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">110</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">254</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">4.63</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">14</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2.5</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1001</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Bùi Thị Hiền</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">74.099999999999994</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">100</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">60</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.33</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1000</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Phạm Văn Đại</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">75.099999999999994</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">100</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">56</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.2</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1046</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Triệu Đình Chương</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">70.3</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">100</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">70</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF0882</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Văn Bình</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">40.4</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">160</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">80</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">50</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">35</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1440</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Lê Đức Cảnh</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">40.5</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">170</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">85</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">50</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">35</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1524</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Phạm Quý Đôn</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">69.599999999999994</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">160</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">80</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">30</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF0881</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Vũ Văn Tiệp</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">69.599999999999994</Data></Cell>
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">180</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">85</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">30</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1525</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">NGUYEN THI HAU Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">240.8</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s110"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1513</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">NGUYEN THI THUONG Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">166</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1661</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">NGUYEN THI LIEN Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">407</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s88"><Data ss:Type="String">SOF1203</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Hoàng Thị Thu Hà</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">30.8</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s88"><Data ss:Type="String">SOF1204</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Nguyễn Thị Oanh</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">60.5</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s88"><Data ss:Type="String">SOF1544</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Nguyễn Thị Thúy Nga</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">13.3</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s88"><Data ss:Type="String">SOF1543</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Nguyễn Thị Huyền</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">61.8</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s88"><Data ss:Type="String">SOF1716</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Nguyễn Thị Thao</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">14</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1538</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">NGUYEN QUANG NGOC  Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">691</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">29.18</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">14.4</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.8</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">2.81</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1720</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">PHAM DUY KHANH  Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">28</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">3.9</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.4</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1354</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">TRUONG TIEN DO Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">65</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">10.58</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">2.4</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">1.38</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1530</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">LE DUC LONG Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">124</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">40.03</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">14.1</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">1.7</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.68</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1526</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">NGUYEN TUAN ANH  Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">268</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">47</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">20.5</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">13</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.84</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">11</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1659</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">CAO THI ANH TUYET  Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">154</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">31.7</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">4.5</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">3.05</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.15</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1512</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Phung Xuan Tinh total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">244</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">46.4</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">11.6</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">1.65</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.13</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">14</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1495</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Vu Ngoc Dai Duong SUP Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">202</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">27.03</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">9.5</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">2.4500000000000002</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.05</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">10</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF1731</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">HOANG DUC KY SUP Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">156</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">7.03</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.1</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">4.25</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.25</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SOF0984</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">PHAM VAN NHUAN Total</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">219</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">4.6500000000000004</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.2</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String"> -     </Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">0.53</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s86">
+    <Cell ss:StyleID="s92"><Data ss:Type="String">SOF1370</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">NGUYEN THANH CHUNG Total</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="Number">846</Data></Cell>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF0022</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyen Van Hau</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">203</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1344</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Nguyễn Danh Lợi</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">203</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1242</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Tran Hanh Nhu</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">108</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s82"><Data ss:Type="String">SOF1468</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Duong Minh Thuy</Data></Cell>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s82"><Data ss:Type="Number">108</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>11</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Sheet2">
+  <Table ss:ExpandedColumnCount="1" ss:ExpandedRowCount="1" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Row ss:AutoFitHeight="0"/>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Sheet3">
+  <Table ss:ExpandedColumnCount="1" ss:ExpandedRowCount="1" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Row ss:AutoFitHeight="0"/>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

@@ -1,0 +1,20 @@
+Add Struct's Leave
+Filter Struct's Leave
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Struct's Leave
+AutoID
+CallID
+SourceID
+EmployeeID
+LevelCode

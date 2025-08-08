@@ -1,0 +1,13 @@
+CALCULATE TIMECARD BELONG TO DAY
+DateCalculate
+Option department to process
+(EX:from 1 to 100 is: 0,99)
+Date load
+Choose data to load
+Start Process
+Load data successful
+Load data no successful
+Please! Choose data to load
+Do you want continue (Y/N)?
+Please! Choose date to process.
+Help

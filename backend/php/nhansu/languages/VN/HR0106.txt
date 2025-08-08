@@ -1,0 +1,22 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Lưu
+Lưu
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Thêm / Sửa Con Của Nhân Viên
+Tên:
+Ngày sinh:
+--Lựa chọn--
+...///Bắt đầu từ phần thông báo
+Tên không có, xin hãy thử lại.
+Mã nhân viên không có, xin hãy thử lại.
+Ngày sinh không được rổng, xin thử lại.

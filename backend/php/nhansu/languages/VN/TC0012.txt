@@ -1,0 +1,47 @@
+Thêm Mục Thiết Lập Lần Tính Lương Hàng Tháng
+Lọc Mục Thiết Lập Lần Tính Lương Hàng Tháng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Thiết Lập Lần Tính Lương Hàng Tháng
+Mã
+Chủ đề
+Cách tính
+Ngày bắt đầu
+Ngày kết thúc
+Tháng
+Năm
+Tính cộng thêm một công cho ngày lễ
+Tính lương công trình & khoản cộng theo hợp đồng 
+Chú ý
+Khóa
+Phần trăm bhxh
+Phần trăm y tế
+Phần trăm thất nghiệm
+Mốc tính thuế TNCN
+...///Bắt đầu từ phần thông báo
+Mã không có dữ liệu, xin hãy thử lại.
+Bạn phải nhập phần chủ đề.
+Phần trăm Phí Công Đoàn
+Phần trăm bhxh cty đóng
+Phần trăm y tế cty đóng
+Phần trăm thất nghiệp cty đóng
+Bảo hiểm nước ngoài
+Tính lương tháng 13
+Phần trăm phí công đoàn công ty
+Lương/1 người phụ thuộc
+0. Tính công chuẩn 26 ngày / tháng
+1. Tính công nghỉ Chủ Nhật/1 Tuần
+2. Tính công nghỉ CN & T7/1 tuần
+3. Tính công nghỉ CN & nửa ngày T7/1 tuần
+Qui đổi sang USD
+Tiền cơm/lần ăn

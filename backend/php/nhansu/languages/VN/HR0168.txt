@@ -1,0 +1,35 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Sách Nghỉ Bệnh Hưởng Lương
+STT
+Chọn hết
+Mã tự động
+Mã thông số bảo hiểm
+Mã nhân viên
+Số lần
+Trạng thái bệnh
+Thời gian đóng bảo hiểm
+Ghi chú
+Điều kiệnn tính hưởng
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web

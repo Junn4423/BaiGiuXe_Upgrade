@@ -1,0 +1,54 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+Manage Contractor List
+Order
+Contractor Code
+Contractor Name
+Contact Name
+Contractor's Name
+Contractor's Title
+Address
+State Or Province
+Country Or Region
+District
+Tel
+Mobil phone
+Fax
+TaxID
+Website
+Email
+Account
+Date of birth
+Delivery country
+Delivery address
+Delivery madness
+Remark
+Services
+Active/De-active
+Create Date
+Create Person
+Contact Name
+Title
+Mobile phone
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+View Report Web

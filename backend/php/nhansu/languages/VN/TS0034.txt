@@ -1,0 +1,27 @@
+Thêm Mục Ghi Nhận Quá Trình Công Tác Với NCC
+Lọc Mục Ghi Nhận Quá Trình Công Tác Với NCC
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Ghi Nhận Quá Trình Công Tác Với NCC
+Mã tự động
+Mã NCC
+Công việc liên hệ
+Người liên hệ
+Phone
+Ngày liên hệ
+Ngày tạo
+Ghi nhận
+Mã khách hàng không được rỗng
+Công việc liên hệ không được rỗng
+Bạn phải nhập ngày
+Số điện thoại không hợp lệ

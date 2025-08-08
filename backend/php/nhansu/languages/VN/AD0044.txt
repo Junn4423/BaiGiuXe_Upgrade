@@ -1,0 +1,21 @@
+ERP SOF
+TG ĐN
+QuyềnSQ
+Thêm
+Sửa
+Xóa
+Nạp lại
+Giúp đỡ
+Liệt kê danh sách ngưới dùng
+STT
+Mã người dùng
+Tên người dùng
+Nhóm quản lý
+Quyền
+Đặt lại mật khẩu
+Mật khẩu
+Loại người dùng
+LoạiND
+Lọc người dùng
+Lọc
+Mã nhân viên

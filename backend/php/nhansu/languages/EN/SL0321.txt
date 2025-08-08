@@ -1,0 +1,17 @@
+...//Begin control icon part
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin control icon part
+Call Off Contract Function
+Schedules Items
+Un-Schedules Items
+Milestone
+Contractor Person
+Group Shares
+Attach Files
+History
+Delivery Status

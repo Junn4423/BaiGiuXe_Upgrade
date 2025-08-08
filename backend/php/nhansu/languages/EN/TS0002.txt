@@ -1,0 +1,27 @@
+Add Warehouse
+Filter Warehouse
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+List Warehouse
+WarehouseID
+CompanyName
+Name
+Location
+Phone
+Fax
+Keeper
+Comment
+WarehouseID is not empty
+Name is not empty
+You must input numeric.
+Phone is invalid

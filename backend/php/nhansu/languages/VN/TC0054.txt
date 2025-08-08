@@ -1,0 +1,24 @@
+Thêm Mục Định Mức Doanh Thu Kinh Doanh
+Lọc Mục Định Mức Doanh Thu Kinh Doanh
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Định Mức Doanh Thu Kinh Doanh
+Mã tự động
+Lần tính
+Mã phòng ban
+Định mực doanh thu
+Định mức số lượng
+Mã lần tính không được rỗng
+Mã nhân viên không được rỗng
+Tổng doanh thu không được rỗng.
+Chọn tập tin để nạp

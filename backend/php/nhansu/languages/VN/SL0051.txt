@@ -1,0 +1,27 @@
+Add Category Customer
+Filter Category Customer
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa nhóm đối tượng
+Mã
+Tên
+Mô tả
+Hoạt động/Không hoạt động
+Tỉ lệ % giá
+Người tạo
+Ngày giờ tạo/sửa
+Thứ tự
+Mã hiển thị
+...//Begin messages part
+The ID is empty, please try again
+The Description is not empty

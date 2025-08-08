@@ -1,0 +1,10 @@
+...//Begin control icon part
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin control icon part
+inventory detail
+Input balance warehouse

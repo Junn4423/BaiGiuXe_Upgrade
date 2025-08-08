@@ -1,0 +1,44 @@
+Thêm Mục Chi Tiết Nhận Hàng
+Lọc Mục Chi Tiết Nhận Hàng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết nhận hàng
+Mã tự động
+Mã nhận hàng
+Mã BOM
+SL
+ĐVT
+Ngày nhập
+Mã nhân viên
+Giá
+ĐVG
+Thuế
+Kiểu nhận hàng
+Nợ
+Có
+Lô
+Ghi chú
+Ngày tạo
+Mã BOM không rổng
+Bạn phải nhập số
+Mã nhận hàng không rổng
+Chọn mẫu tập tin kho theo mẫu
+Tải phải mẫu nhận hàng về
+Xin vui lòng! Giải nén tập tin, mở tập tin MAU_NHAP_KHO.xml bằng microsoft excel, bằng open office
+Cut#
+Màu
+Kích thước
+Loại kích thước
+Sản phẩm đóng gói
+Ngày tạo
+Ngày hết hạn lô

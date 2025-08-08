@@ -1,0 +1,44 @@
+Thêm Đề Nghị Giao Hàng
+Lọc Đề Nghị Giao Hàng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Đề Nghị Giao Hàng
+Mã tự động
+Mã ĐNGH
+Mã BOM
+SL
+ĐVT
+Ngày giao hàng
+Mã nhân viên
+Giá
+ĐVG
+Thuế
+Chiết khấu
+Nợ
+Có
+Lô
+Ghi chú
+Ngày tạo
+Mã BOM không rổng
+Bạn phải nhập số
+Mã xuất kho không rổng
+Cut#
+Màu
+Kích thước
+Loại kích thước
+Sản phẩm đóng gói
+Mã đóng gói
+Trọng lượng tổng
+Trọng lượng thực
+Ngày tạo
+Tên sản phẩm

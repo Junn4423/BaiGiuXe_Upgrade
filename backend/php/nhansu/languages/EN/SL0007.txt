@@ -1,0 +1,35 @@
+Add History Negotiation Customer
+Filter History Negotiation Customer
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit History Negotiation Customer
+AutoID
+CustomerID
+Job Contact
+Contacter
+Số điện thoại
+DateContact
+Create Date
+Comment
+CustomerID is not empty
+Job contract is not empty
+You must input date
+Phone is invalid
+Comment Is not empty!
+TypeHistory
+EmployeeID
+TimeContact
+LimitTime
+TypeSource
+ReferenceID
+Lock

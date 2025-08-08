@@ -1,0 +1,28 @@
+Thêm Mục Kinh Nghiệm Làm Việc
+Lọc Mục Kinh Nghiệm Làm Việc
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Kinh Nghiệm Làm Việc
+Mã tự động
+Mã nhân viên
+Nhà tuyển dụng
+Mô tả công việc
+Trong nước/nước ngoài
+Ngày bắt đầu
+Ngày kết thúc
+Ghi chú
+Trong nước
+Nước ngoài
+Mã nhân viên không được rỗng
+Chuyên ngành không được rỗng
+Bạn phải nhập ngày

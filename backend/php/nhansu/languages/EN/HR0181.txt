@@ -1,0 +1,71 @@
+Add Candidates
+Filter Candidates
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Candidate
+ID
+PositionRecuimentID
+FirstName
+MiddleName
+LastName
+NickName
+SSNNo
+SSNDate
+SSNPlace
+Birthdate
+BirthPlace
+Gender
+NationID
+Nationality
+ReligionID
+MaritalStatus
+CountryOrRegion
+StateOrProvince
+Street1
+Street2
+HomePhone
+WorkPhone
+MobilePhone
+WorkEmail
+OrtherEmail
+CurrentNetSalary
+DesiredNetSalary
+AcademicQualifications
+OtherAcademicQualifications
+JobHistory
+TravellingExperience
+LanguageSkill
+ComputerSkill
+Strengths
+Weaknesses
+Reference
+Comment
+PathPicture
+PersonCreate
+DateCreate
+State
+DateJoin
+StatePersonClose
+EmploymentStatus
+FirstName is not empty
+LastName is invalid
+CandidateID is not empty
+SSNNo is not empty!
+SSNDate is not empty!
+SSNPlace is not empty!
+Birthdate is not empty!
+BirthPlace is not empty!
+Streeet is not empty!
+JobHistory is not empty!
+Strengths is not empty!
+Weaknesses is not empty!

@@ -1,0 +1,55 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+ENTER SUCCESSFULL  
+Delete successfully!
+Could not deleted, error:
+PACKINGLIST DETAIL
+LIST PACKINGLIST
+Order
+PackinglistID
+CustomerID
+EmployeeID
+Title
+Source
+ReferenceID
+Locked
+Note
+Date packinglist
+0.No confirm
+1.Confirm
+ReceiptionDetailID
+ItemID
+Quantity
+UnitID
+Price
+Currency
+Color
+Cut
+Type Size
+Size
+PackageItem
+Weight Gross
+Weight Net
+Note
+DateClose
+Is close
+PackageNo
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Column view

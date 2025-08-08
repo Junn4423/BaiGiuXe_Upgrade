@@ -1,0 +1,12 @@
+...//Begin control icon part 
+Back 
+Back 
+Reload 
+Reload 
+Help 
+Help 
+...//Begin control icon part 
+Create insurance of staff 
+Increase insurance of staff 
+Decrease insurance of staff 
+Cancel insurance of staff 

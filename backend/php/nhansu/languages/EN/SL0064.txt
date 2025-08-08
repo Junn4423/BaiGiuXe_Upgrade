@@ -1,0 +1,23 @@
+Add Detail Commission
+Filter Detail Commission
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+List Detail Commission
+AutoID
+CommissionID
+EmployeeID
+MarkSale
+MarkIntroduce
+MarkManager
+TotalAmount
+ConfigID is not empty

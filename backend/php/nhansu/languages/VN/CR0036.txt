@@ -1,0 +1,45 @@
+Thêm Mục Đối Thủ
+Lọc Mục Đối Thủ
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Đối Thủ
+Mã Đối Thủ
+Tên công ty
+Tên người liên hệ
+Tên người ký hợp đồng
+Chức vụ
+Địa chỉ
+Tỉnh
+Quốc gia
+Quận/Huyện
+Điện thoại
+Điện thoại di động
+Fax
+Mã số thuế
+Website
+E-mail
+Số tài khoản
+Ghi chú
+Quốc gia giao hàng
+Địa chỉ giao hàng
+Điên thoại giao hàng
+Ghi chú 
+Nhóm Đối Thủ
+Hoạt động/Không hoạt động
+Ngày tạo
+Người tạo
+Tên người liên hệ không trống!
+Số điện thoại không hợp lệ!
+Mã Đối Thủ không trống!
+Địa chỉ không trống!
+Fax không hợp lệ!

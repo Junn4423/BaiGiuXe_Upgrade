@@ -1,0 +1,23 @@
+Thêm Mục Thành Viên
+Lọc Mục Thành Viên
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Thành Viên
+Mã:
+Tên:
+Loại thành viên:
+--Lựa chọn--
+...///Bắt đầu từ phần thông báo
+Mã không có dữ liệu, xin hãy thử lại.
+Xin hãy nhập tên.
+Xin hãy chọn loại thành viên.

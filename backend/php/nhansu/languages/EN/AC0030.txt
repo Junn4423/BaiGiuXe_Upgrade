@@ -1,0 +1,50 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Don't have data of employee in detail outcome.<br> EmployeeID don't mark with employee in detail outcome.Please! load employee againt.
+Could not add new, error:
+Input Detail Outcome Insurance
+List Voice Outcome Insurance
+Order
+VoiceOutcomeID
+CategoryVoteID
+Source
+ReferenceID
+Name
+Address
+Description
+EmployeeID
+DateWrite
+Account
+Currency
+Scale
+CalculateSalaryID
+PaymentDate
+InvoiceSourceID
+Lock
+Money
+Converted
+DebitAccount
+CreditAccount
+Description
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+EmployeeID is not empty
+Name is not empty
+VoiceID is not empty

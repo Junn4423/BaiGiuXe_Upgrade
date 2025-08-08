@@ -1,0 +1,14 @@
+ERP SOF
+Gửi TN
+Hiển thị
+Hủy
+Xóa
+Nạp lại
+Giúp đỡ
+Danh sách thông báo 
+STT
+Mã
+Chủ đề
+Ngày gửi
+Giờ gửi
+Từ

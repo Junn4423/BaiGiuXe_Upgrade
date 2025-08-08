@@ -1,0 +1,32 @@
+ADD  PURCHASE ORDER
+FILTER PURCHASE ORDER
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+EDIT PURCHASEORDERs
+AutoID
+SupplierID
+Title
+StartDate PurchaseOrder
+DeliveryDate
+SalesTaxRate
+PaymentMethod
+ShippingMethod
+Note
+EmployeeID
+State
+Currency
+Scale
+Account Payment
+Company name is not empty
+Date is not empty
+SupplierID is not empty

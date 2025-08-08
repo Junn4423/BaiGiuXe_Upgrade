@@ -1,0 +1,36 @@
+Add Voice OutStock WH
+Filter Voice OutStock WH
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Voice OutStock WH
+OutStockID
+CategoryVoteID
+Source
+ReferenceID
+Name
+Address
+Description
+EmployeeID
+DateVoice
+Account
+Currency
+Scale
+POID
+PaymentDate
+InvoiceSourceID
+Lock
+Account is not empty
+Currency is not empty
+Scale is not balance zero
+Address is not empty
+Nam is not  empty.

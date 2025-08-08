@@ -1,0 +1,43 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+List Detail Retail
+Order
+AutoID 
+RetailID
+ItemID
+Quantity
+UnitID
+OtherQuantity
+OtherUnitID
+Price
+Currency
+Tax
+Discount
+No
+Co
+LotID
+Note
+Create Date
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+View Report Web
+Amount

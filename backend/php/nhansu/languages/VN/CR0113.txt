@@ -1,0 +1,34 @@
+Thêm Chi Phí
+Lọc Chi Phí
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Chi Phí
+Mã tự động
+Mã cha
+Loại TK kế toán
+Tên phí
+Số tiền
+Loại phí
+Phí bảo hiểm
+Tham chiếu
+Người tạo
+Ngày tạo
+Stt
+Nội dung
+ĐVT
+Bản gốc
+Bản sao y công chứng
+Bản sao y
+Ghi chú
+Số
+Ngày phát hành

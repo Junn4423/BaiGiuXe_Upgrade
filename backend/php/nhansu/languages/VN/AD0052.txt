@@ -1,0 +1,23 @@
+Thêm Mục Phòng Ban
+Lọc Mục Phòng Ban
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Sửa phòng ban
+Mã phòng ban:
+Tên phòng ban:
+Danh sách ca:
+Mã công ty:
+Tên viết tắt
+Mã phòng ban không được bỏ trống
+Thêm thành công
+Thêm bị lỗi vì: 
+Cập nhật thành công
+Cập nhật bị lỗi vì: 
+Tên phòng ban không trống
+FN tháng
+Tính cơm tăng ca

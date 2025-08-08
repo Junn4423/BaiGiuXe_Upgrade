@@ -1,0 +1,73 @@
+Config
+Add New
+New
+Edit
+Edit
+Report
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+Purchare Requisition List
+Order
+AutoID
+To
+Project
+Date
+ExpireDate
+Value quotation:
+Area
+Project type
+Phone
+USERS_ID
+PR Stutus
+Project
+Ref.
+No.
+Ký hiệu Ref.
+Sale Project
+Group
+Admin
+Received Date
+Approved by
+
+Warranty:
+UserEdit
+Priority
+Delivery time
+Long_TermID
+ISLOCK
+Attn Title
+Remark
+Attn
+AreaCode
+Dept
+Add
+Email
+DateCreate
+Payment
+
+Extra Discount.
+Shipping Cost
+VAT Tax.
+CONTRACT SIGNED DATE
+JobID
+PR Description
+PlanJobsID
+Contract No
+ParentID
+
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web

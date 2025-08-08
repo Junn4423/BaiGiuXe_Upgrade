@@ -1,0 +1,44 @@
+THÊM MỤC ĐƠN ĐẶT HÀNG
+LỌC MỤC ĐƠN ĐẶT HÀNG
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+SỬA MỤC ĐƠN ĐẶT HÀNG
+Mã tự động
+Mã NCC
+Thương hiệu
+Ngày bắt đầu đặt hàng
+Ngày giao hàng
+Tỷ lệ thuế(%)
+Thanh toán
+Loading
+Ghi chú
+Mã nhân viên
+Trạng thái
+Mã tiền tệ
+Tỷ giá quy đổi
+Ngày hủy
+Bạn phải nhập tên sản phẩm
+Bạn phải nhập ngày
+Mã NCC không rổng
+Vận chuyển đến
+Hiệu lực mua hàng
+Bảo hành
+Thời gian giao hàng
+Thanh toán 
+Chiết khấu
+Phí bảo hành
+Phí chứng từ
+Phí đóng gói
+Phí vận chuyển trong nước
+Phí vận chuyển ngoài nước
+Mã công việc

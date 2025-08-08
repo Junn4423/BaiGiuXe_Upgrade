@@ -1,0 +1,33 @@
+Thêm Mục Phản Hồi
+Lọc Mục Phản Hồi
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Phản Hồi
+Mã phản hồi
+Mã tác vụ
+Thông tin liên hệ
+Nội dung công việc
+Ngày giờ thực hiện
+Nội dung quản lý phản hồi
+Ngày giờ trả lời
+Người tạo
+Trạng thái cảnh báo
+Người trả lời
+Địa chỉ gặp
+Kết quả
+Trạng thái công việc
+Công ty
+Ngày tạo
+Đến giờ
+Bạn phải nhập chủ đề
+Nội dung không được rỗng

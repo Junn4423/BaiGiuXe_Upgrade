@@ -1,0 +1,19 @@
+SOF CO., LTD
+Add new instructor
+New
+Edit this instructor
+Edit
+Delete school
+Delete
+Reload This Page
+Reload
+Help
+Help
+List of instructor
+Order
+ID
+Name
+Phone
+Fax
+Email
+Back

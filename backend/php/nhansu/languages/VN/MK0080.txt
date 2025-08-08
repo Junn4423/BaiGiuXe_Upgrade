@@ -1,0 +1,20 @@
+..
+Tìm hợp đồng
+Mã hợp đồng
+Tên hợp đồng
+Mã khách hàng
+Tên
+Từ ngày
+đến
+Tìm
+Trở về trang củ
+Không có dữ liệu, xin thử lại 
+...///////////////////////////////
+STT
+Mã hợp đồng
+Tên hợp đồng
+Mã khách hàng
+Tên công ty khách hàng
+Ngày hợp đồng
+PT vận chuyển
+Phương thức thanh toán

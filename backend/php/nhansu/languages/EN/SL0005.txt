@@ -1,0 +1,28 @@
+Add Save Document
+Filter Save Document
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Save Document
+ID
+Customer code
+Type Document
+Document name
+File
+Type File
+Status
+Access Right
+Creator
+Date create
+CustomerID is not empty
+Name is not empty
+Date create is not empty

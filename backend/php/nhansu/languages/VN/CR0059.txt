@@ -1,0 +1,28 @@
+Thêm Chi Tiết Mã Hoá
+Lọc Chi Tiết Mã Hoá
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Chi Tiết Mã Hoá
+Mã tự động
+Mã Catalogue
+Mã cột
+Tên cột VN
+Tên cột EN
+Thứ tự
+Hiện/Ẩn
+Ghi chú
+Mã nhân viên
+Ngày tạo
+
+
+

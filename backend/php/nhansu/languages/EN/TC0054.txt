@@ -1,0 +1,24 @@
+Add Target Revenue Sales
+Filter Target Revenue Sales
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Target Revenue Sales
+ID
+CalculateTimesID
+EmployeeID
+TargetSalesShipment 
+TargetQty
+CalculateTimesID is not empty
+EmployeeID is not empty
+Total revenue is not empty
+Select file to load

@@ -1,0 +1,16 @@
+ERP SOF
+Thêm vòng ngày ký hợp đồng
+Thêm
+Sửa vòng ngày ký hợp đồng
+Sửa
+Xóa 
+Xóa 
+Nạp lại trang
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+Danh sách của vòng ký hợp đồng
+STT
+Mã
+Ngày
+Trở lại

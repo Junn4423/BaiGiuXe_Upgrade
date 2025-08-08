@@ -1,0 +1,58 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List View Calendar Created
+Order
+Select All
+AutoID
+CalandarID
+MonthID
+DateWork
+Regularhours
+ParaWork
+TimeCodeID
+Note
+CreateID
+Eat
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Time In-Out
+Coefficients payroll
+Name
+Do you want display information timesheet
+EmployeeID
+EmployeeName
+Department
+Birthday
+TIMESHEET OF EMPLOYEE
+Month
+Year
+Grade rating
+Overtimehours
+Shift
+ClearTime
+KeepTime
+After22Time
+InLate
+OutSoon
+ContractID
+Hiden

@@ -1,0 +1,30 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Lưu
+Lưu
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Thêm / Sửa Chủ Đề Công Việc
+Mã:
+Mức lương
+--Lựa chọn--
+Tiền tệ:
+Mức lương nhỏ nhất:
+Mức lương lớn nhất:
+Bậc nâng lương:
+...///Bắt đầu từ phần thông báo
+Xin hãy chọn đơn vị tiền tệ.
+Xin hãy nhập mức lương nhỏ nhất
+Mức lương nhỏ nhất phải là số nhập số.
+Xin hãy nhập mức lương lớn nhất
+Mức lương lớn nhất phải là số nhập số.
+Xin hãy nhập bậc nâng lương
+Bậc nâng lương phải là số nhập số.

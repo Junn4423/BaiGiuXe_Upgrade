@@ -1,0 +1,52 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List RFA AFE
+Order
+Select All
+RFAStatusID
+RFA_ID
+DGD / HSE GM
+SSF GM
+GAD GM
+IT MGR
+WOD GM / PET MGR
+POD GM / PRD MGR
+FINMGR
+HRMGR
+ADM MGR
+DRG MGR
+SSF MGR
+PRDMGR
+PRDMGR1
+LOG MGR
+EXPMGR
+WI-PIC
+HSE MGR
+SNO MGR
+Closed
+Cancelled
+Creator
+DateCreate
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+View Report Web
+

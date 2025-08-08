@@ -1,0 +1,21 @@
+/*------------------------------------*/
+Thông tin khác của nhân viên để ký hợp đồng
+Thông tin khác của nhân viên để ký hợp đồng
+Lưu
+Lưu
+Quay lại trang trước
+Quay lại
+Thêm dữ liệu thành công
+Quá trình thêm bị lỗi, nguyên nhân:
+Sửa dữ liệu thành công
+Quá trình sửa bị lỗi, nguyên nhân:
+/*------------------------------------*/
+Số sổ BHXH
+Ngày cấp sổ
+Nơi cấp sổ
+Phụ cấp độc hại
+Phụ cấp khác
+Giờ làm trên một ngày
+Chế độ đào tạo
+Mã nhân viên dụng không rỗng, xin thử lại 
+Chọn mức lương

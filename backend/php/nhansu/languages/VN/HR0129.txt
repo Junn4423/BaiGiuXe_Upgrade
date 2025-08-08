@@ -1,0 +1,14 @@
+ERP SOF  
+//………….
+Quản Lý Thông Tin Hợp Đồng Nhân Viên
+In
+Đóng
+Không có dữ liệu
+STT
+Tên phòng ban
+Mã nhân viên
+Tên nhân viên
+Ngày bắt đầu
+Ngày kết thúc
+Số lần ký hợp đồng
+

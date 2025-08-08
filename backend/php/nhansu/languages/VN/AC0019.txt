@@ -1,0 +1,39 @@
+Thêm Mục Chi Tiết Hóa Đơn
+Lọc Mục Chi Tiết Hóa Đơn
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết Hóa Đơn
+Mã tự động
+Mã hóa đơn
+Mã BOM
+Số lượng
+Mã đơn vị
+Giá
+Đơn vị tiền tệ
+Thuế
+Quy đổi
+Tài khoản nợ
+Tài khoản có
+Mô tả
+Hóa đơn
+Ngày hóa đơn
+Loại thuế
+Tiền thuế
+Tiền thuế quy đổi
+Tài khoản thuế
+Thuế xuất khẩu
+Phí vận chuyển
+Thuế tiêu thụ đặc biệt
+Mã BOM không rổng
+Bạn phải nhập số
+Mã hóa đơn bán hàng không rổng

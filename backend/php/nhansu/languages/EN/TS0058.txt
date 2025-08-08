@@ -1,0 +1,43 @@
+PACKING LIST
+Customer
+StartDate Contact
+EndDate Contact
+Order
+ItemID
+STYLE#
+UNIT
+CUT#
+CLR
+SIZE
+OB Date
+Report
+Refresh
+Total quantity
+Phone
+Fax
+TaxNo
+Address
+DatePrint
+Invoice
+CreateDate
+QTY/CTN
+Type
+Lot
+Title
+Source
+ReferenceID
+Note
+Color
+Characteristic
+Extention 1
+Extention 2
+Report public
+Report detail
+Report belong to condition
+Report belong to condition detail
+WAREHOUSE KEEPER
+MANAGER
+Category Item
+MESSRS:
+Date:
+Invoice:

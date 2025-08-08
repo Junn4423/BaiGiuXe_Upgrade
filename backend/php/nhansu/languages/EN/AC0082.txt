@@ -1,0 +1,24 @@
+Add Detail Other Professional Documents
+Filter Detail Other Professional Documents
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Detail Other Professional Documents
+AutoID
+AvoidID
+Money
+Converted
+DebitAccount
+CreditAccount
+Description
+InvoiceID is not empty
+Money is not less than zero.

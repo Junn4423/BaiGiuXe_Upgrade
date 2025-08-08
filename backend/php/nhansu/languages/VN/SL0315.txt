@@ -1,0 +1,46 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+List Schedule of Items
+STT
+Chọn hết
+AutoID
+CONTRACT_ID
+CONTRACT_ITEM_ID
+QUANTITY
+ITEM_UNIT
+AMOUNT
+UNIT_PRICE
+VAT
+ITEM_CODE
+ITEM_DESC
+CONTRACT_REF
+ITEM_ORDER
+ContracNumber
+BudgetCode
+Order
+Creator
+Create Date
+TARIFF_ID
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web
+

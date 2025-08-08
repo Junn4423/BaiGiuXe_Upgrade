@@ -1,0 +1,67 @@
+Add Purchare Requisition
+Filter Purchare Requisition
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Purchare Requisition
+AutoID
+To
+Project
+Date
+ExpireDate
+Value quotation:
+Area
+Project type
+Phone
+USERS_ID
+PR Stutus
+Project
+Ref.
+No.
+Ký hiệu Ref.
+Sale Project
+Group
+Admin
+Received Date
+Approved by
+
+Warranty:
+UserEdit
+Priority
+Delivery time
+Long_TermID
+ISLOCK
+Attn Title
+Remark
+Attn
+AreaCode
+Dept
+Add
+Email
+DateCreate
+Payment
+
+Extra Discount.
+Shipping Cost
+VAT Tax.
+CONTRACT SIGNED DATE
+JobID
+PR Description
+PlanJobsID
+Contract No
+ParentID
+
+Company name is not empty
+Date is not empty
+CustomerID is not empty
+Other language contens
+Load data template to content contract

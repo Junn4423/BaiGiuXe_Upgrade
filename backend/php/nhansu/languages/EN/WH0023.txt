@@ -1,0 +1,12 @@
+...//Begin control icon part
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin control icon part
+Purchase Order
+Product Supplier
+History
+Document

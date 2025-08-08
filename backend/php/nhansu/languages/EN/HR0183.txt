@@ -1,0 +1,27 @@
+Add Times Interview
+Filter Times Interview
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Times Interview
+ID
+CandidateID
+InterviewCircleID
+DateInterwiew
+TimeStartInterview
+TimeEndInterview
+Comment
+ResultInterview
+CandidateID is not empty
+CircleInterview is not empty
+InterviewDate is not emtpy
+TimeInterview is not empty

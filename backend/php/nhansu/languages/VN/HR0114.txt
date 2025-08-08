@@ -1,0 +1,32 @@
+Thêm Mục Giáo Dục
+Lọc Mục Giáo Dục
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Giáo Dục
+Mã tự động
+Mã nhân viên
+Trường
+Chuyên ngành
+Số năm
+Tổng điểm
+Ngày bắt đầu
+Ngày kết thúc
+Mã nhân viên không được rỗng
+Chuyên ngành không được rỗng
+Bạn phải nhập ngày
+Văn bằng
+Mã đào tạo
+Trạng thái
+Kinh phí
+Kinh phí thực chi
+Chênh lệch

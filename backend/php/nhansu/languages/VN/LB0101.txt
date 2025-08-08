@@ -1,0 +1,16 @@
+//Phân cho build danh mục me nu
+Thông tin cá nhân
+In thông tin cá nhân
+Xem bảng chấm công
+Nhập bảng chấm công
+In thông tin bảng chấm công
+Báo cáo theo ngày
+Xem thời gian  truy cap
+Xem nguồn tài liệu
+Xem chi tiết hợp đồng
+Xem đánh giá chi tiết
+Xem chi tiết huấn luyện
+Thông tin hợp đồng
+Thông tin đánh giá
+Thông tin huấn luyện
+Lịch sử mượn sách

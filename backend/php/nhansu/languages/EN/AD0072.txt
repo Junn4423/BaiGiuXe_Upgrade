@@ -1,0 +1,24 @@
+…
+Edit
+Edit
+Set state of employee to enable or hinder login to system.
+State
+Back
+Back
+Reload This Page
+Reload
+Help About This Page
+Help
+Order
+Select All
+Full Name
+Emp ID
+Password
+State
+Manager employee's password
+Set state of employee to enable or hinder login to system successfully.
+Set state of employee to enable or hinder login to system failed, please try again.
+Enabled
+Hindered
+Fillter employee
+Fillter

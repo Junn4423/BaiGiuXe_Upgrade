@@ -1,0 +1,24 @@
+Add Group Shares
+Filter Group Shares
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Group Shares
+AutoID
+StaffID
+Group Code
+Creator
+Create Date
+Group Name
+Group Code is not empty
+
+

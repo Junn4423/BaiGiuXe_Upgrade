@@ -1,0 +1,42 @@
+REPORT BY PRODUCT SIZE REQUIREMENTS OF THE CONTRACT
+Customer
+StartDate Contact From
+EndDate Contact From
+Order
+ItemID
+Item Name
+UnitID
+CUT
+Color
+Scale
+OB Date
+Report
+Refresh
+Total quantity
+Phone
+Fax
+TaxNo
+Address
+DatePrint
+Invoice
+CreateDate
+Quantity
+Type
+Lot
+Title
+Source
+ReferenceID
+Note
+Color
+Characteristic
+Extention 1
+Extention 2
+Report public
+Report detail
+Report belong to condition
+Report belong to condition detail
+WAREHOUSE KEEPER
+MANAGER
+Category Item
+StartDate Contact To
+EndDate Contact To

@@ -1,0 +1,15 @@
+...
+Tìm nhân viên
+Tìm nhân viên
+STT
+Mã NV
+Phòng ban
+Tên
+Đệm
+Họ
+Tên tiếng anh
+Tìm
+Tìm
+Quay lại trang trước
+Quay lại
+Không tìm thấy nhân viên nào thỏa điều kiện tìm kiếm, xin hãy thử lại

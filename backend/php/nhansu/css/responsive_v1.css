@@ -1,0 +1,440 @@
+/******** For mobile device ********/
+/******************************/
+/*---- Responsive base screen witdh ------- */
+/* width - 30 */
+/* Tablet Devices Resizing */
+@media screen and  (max-width: 2024px){
+	.IdTabViewHrHome li{width:160px!important;padding-left:1px;padding-bottom:5px;}
+	#homeid_get_1{display:block;}
+	#homeid_get_2{display:none;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.col {float:left;margin-left:26px;width:500px;}
+	#hd_title_left {width:254px;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:block;width:70%;}
+	.chitietbang {display:block;width:30%;}
+	.chonsanpham {overflow:relative;}
+	.tang_right {width:90%};
+	.lv_functext {display:block;}
+	.menusubT1 {display:block;}
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:520px;height:100%;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.mob_table{width:570px!important;;}
+	.mob_tablepop{width:600px;}
+	#link_SOF { font-size:14px!important;width:1000px!important;}
+}
+@media screen and  (max-width: 1900px){
+	.IdTabViewHrHome li{width:160px!important;padding-left:1px;padding-bottom:5px;}
+	#homeid_get_1{display:block;}
+	#homeid_get_2{display:none;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.col {float:left;margin-left:26px;width:500px;}
+	#hd_title_left {width:254px;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:block;width:70%;}
+	.chitietbang {display:block;width:30%;}
+	.chonsanpham {overflow:relative;}
+	.tang_right {width:90%};
+	.lv_functext {display:block;}
+	.menusubT1 {display:block;}
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:520px;height:100%;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.mob_table{width:550px!important;;}
+	.mob_tablepop{width:550px;}
+	#link_SOF { font-size:14px!important;}
+}
+@media screen and  (max-width: 1024px){
+	.IdTabViewHrHome li{width:191px!important;padding-left:10px;padding-bottom:10px;}
+	#homeid_get_1{display:block;}
+	#homeid_get_2{display:none;}
+	body{float:left!important;width:100%!important;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.col {float:left;margin-left:26px;width:470px;}
+	#hd_title_left {width:254px;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:block;width:70%;}
+	.chitietbang {display:block;width:30%;}
+	.chonsanpham {overflow:relative;}
+	.tang_right {width:85%};
+	.lv_functext {display:block;}
+	.menusubT1 {display:block;}
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:520px;height:100%;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.mob_table{width:480px!important;;}
+	.mob_tablepop{width:480px;}
+	#link_SOF { font-size:14px!important;}
+}
+@media screen and (max-width:768px){
+	.IdTabViewHrHome li{width:177px!important;padding-left:10px;padding-bottom:10px;}
+	#homeid_get_1{display:block;}
+	#homeid_get_2{display:none;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.col {float:left;margin-left:20px;width:354px;}
+	#hd_title_left {width:254px;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:block;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.c.chonsanpham {overflow:relative;}
+	.tang_right {width:85%};
+	.lv_functext {display:block;}
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:520px;height:100%;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.mob_table{width:748px!important;}
+	.mob_tablepop{width:360px;}
+	#link_SOF { font-size:14px!important;width:638px!important;}
+}
+@media screen and (max-width: 736px){
+	.IdTabViewHrHome li{width:169px!important;padding-left:10px;padding-bottom:10px;}
+	#homeid_get_1{display:block;}
+	#homeid_get_2{display:none;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.col {float:left;margin-left:20px;width:338px;}
+	#hd_title_left {width:254px;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:block;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.c.chonsanpham {overflow:relative;}
+	.tang_right {width:85%};
+	.lv_functext {display:block;}
+	.menusubT1 {display:block;}
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:520px;height:100%;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.mob_table{width:716px!important;}
+	.mob_tablepop{width:350px;}
+	#link_SOF { font-size:14px!important;width:616px!important;}
+}
+@media screen and (max-width: 667px){
+	.IdTabViewHrHome li{width:205px!important;padding-left:10px;padding-bottom:10px;}
+	#homeid_get_1{display:block;}
+	#homeid_get_2{display:none;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.tang_leftmini {display:none;}
+	.curday {display:none;}
+	.countdown {display:none;}
+	.licafecur {padding:12px;}
+	.licafe {padding:12px;}
+	.viewcalandarmini {left:0px!important;}
+	.col {float:left;margin-left:12px;width:170px;}
+	#hd_title_left {width:100%!important;}
+	#hd_menumain_left {display:none;}
+	#sof_pages_content {width:100%;}
+	#hd_title_content {display:none;}
+	#hd_title_right {display:none;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:none;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.chonsanpham {overflow:relative;}
+	.sof_pages_footer_left {width:160px;}
+	.tang_right {width:100%};
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:240px;height:100%;}
+	.detailview {max-width:375px;}
+	/*.lv_functext {display:none;}*/
+	.lv_funcshowtext {display:none;}
+	.lviconimg {height:30px;}
+	.lv_funcshowimg {height:30px;}
+	.menusubT1 {display:none;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.homeid{display:block!important;}
+	.noidung_member {width:647px;}
+	.mob_table{width:500px!important;;}
+	.mob_tablepop{width:620px;}
+	#link_SOF { font-size:14px!important;width:500px!important;}
+}
+@media screen and (max-width: 640px){
+	.IdTabViewHrHome li{width:197px!important;padding-left:10px;padding-bottom:10px;}
+	#homeid_get_1{display:block;}
+	#homeid_get_2{display:none;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.tang_leftmini {display:none;}
+	.curday {display:none;}
+	.countdown {display:none;}
+	.licafecur {padding:12px;}
+	.licafe {padding:12px;}
+	.viewcalandarmini {left:0px!important;}
+	.col {float:left;margin-left:12px;width:170px;}
+	#hd_title_left {width:100%!important;}
+	#hd_menumain_left {display:none;}
+	#sof_pages_content {width:100%;}
+	#hd_title_content {display:none;}
+	#hd_title_right {display:none;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:none;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.chonsanpham {overflow:relative;}
+	.sof_pages_footer_left {width:160px;}
+	.tang_right {width:100%};
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:240px;height:100%;}
+	.detailview {max-width:375px;}
+	/*.lv_functext {display:none;}*/
+	.lv_funcshowtext {display:none;}
+	.lviconimg {height:30px;}
+	.lv_funcshowimg {height:30px;}
+	.menusubT1 {display:none;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.homeid{display:block!important;}
+	.noidung_member {width:620px;}
+	.mob_table{width:600px!important;;}
+	.mob_tablepop{width:600px;}
+	#link_SOF { font-size:14px!important;width:600px!important;}
+}
+@media screen and (max-width: 570px){
+	.IdTabViewHrHome li{width:175px!important;padding-left:10px;padding-bottom:10px;}
+	#homeid_get_1{display:none;}
+	#homeid_get_2{display:block;}
+	.mob_table{width:550px!important;;}
+	.mob_tablepop{width:530px;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.tang_leftmini {display:none;}
+	.curday {display:none;}
+	.countdown {display:none;}
+	.licafecur {padding:12px;}
+	.licafe {padding:12px;}
+	.viewcalandarmini {left:0px!important;}
+	.col {float:left;margin-left:12px;width:170px;}
+	#hd_title_left {width:100%!important;}
+	#hd_menumain_left {display:none;}
+	#sof_pages_content {width:100%;}
+	#hd_title_content {display:none;}
+	#hd_title_right {display:none;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:none;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.chonsanpham {overflow:relative;}
+	.sof_pages_footer_left {width:160px;}
+	.tang_right {width:100%};
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:240px;height:100%;}
+	.detailview {max-width:375px;}
+	/*.lv_functext {display:none;}*/
+	.lv_funcshowtext {display:none;}
+	.lviconimg {height:30px;}
+	.lv_funcshowimg {height:30px;}
+	.menusubT1 {display:none;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.hd_title_left_user {width:275px;}
+	.homeid{display:block!important;}
+	.noidung_member {width:550px;}
+	#link_SOF { font-size:12px!important;width:550px!important;}
+}
+@media screen and (max-width:414px){
+	.IdTabViewHrHome li{width:190px!important;padding-left:10px;padding-bottom:10px;}
+	#homeid_get_1{display:none;}
+	#homeid_get_2{display:block;}
+	.mob_table{width:394px!important;;}
+	.mob_tablepop{width:374px;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.tang_leftmini {display:none;}
+	.curday {display:none;}
+	.countdown {display:none;}
+	.licafecur {padding:12px;}
+	.licafe {padding:12px;}
+	.viewcalandarmini {left:0px!important;}
+	.col {float:left;margin-left:12px;width:190px;}
+	#hd_title_left {width:100%!important;}
+	#hd_menumain_left {display:none;}
+	#sof_pages_content {width:100%;}
+	#hd_title_content {display:none;}
+	#hd_title_right {display:none;}
+	.bangtitlemini {width: 120px;}
+	.bangtitlecurmini {width:120px;}
+	.bangleftmini {width:120px;}
+	.monanbang {display:none;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.chonsanpham {overflow:relative;}
+	.sof_pages_footer_left {width:160px;}
+	.tang_right {width:100%};
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:240px;height:100%;}
+	.detailview {max-width:375px;}
+	/*.lv_functext {display:none;}*/
+	.lv_funcshowtext {display:none;}
+	.lviconimg {height:30px;}
+	.lv_funcshowimg {height:30px;}
+	.menusubT1 {display:none;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.hd_title_left_user {width:194px;}
+	.homeid{display:block!important;}
+	.noidung_member {width:394px;}
+	#link_SOF { font-size:12px!important;width:394px!important;}
+}
+@media screen and (max-width: 375px){
+	.IdTabViewHrHome li{width:170px!important;padding-left:10px;padding-bottom:10px;}
+	#homeid_get_1{display:none;}
+	#homeid_get_2{display:block;}
+	.mob_table{width:355px!important;;}
+	.mob_tablepop{width:335px;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.tang_leftmini {display:none;}
+	.curday {display:none;}
+	.countdown {display:none;}
+	.licafecur {padding:12px;}
+	.licafe {padding:12px;}
+	.viewcalandarmini {left:0px!important;}
+	.col {float:left;margin-left:12px;width:170px;}
+	#hd_title_left {width:100%!important;}
+	#hd_menumain_left {display:none;}
+	#sof_pages_content {width:100%;}
+	#hd_title_content {display:none;}
+	#hd_title_right {display:none;}
+	.bangtitlemini {width:105px;}
+	.bangtitlecurmini {width:105px;}
+	.bangleftmini {width:105px;}
+	.monanbang {display:none;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.chonsanpham {overflow:relative;}
+	.sof_pages_footer_left {width:160px;}
+	.tang_right {width:100%};
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:240px;height:100%;}
+	.detailview {max-width:375px;}
+	/*.lv_functext {display:none;}*/
+	.lv_funcshowtext {display:none;}
+	.lviconimg {height:30px;}
+	.lv_funcshowimg {height:30px;}
+	.menusubT1 {display:none;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.hd_title_left_user {width:175px;}
+	.homeid{display:block!important;}
+	.noidung_member {width:355px;}
+	#link_SOF { font-size:10px!important;width:355px!important;}
+}
+@media screen and (max-width: 360px){
+	.IdTabViewHrHome li{width:150px!important;}
+	#homeid_get_1{display:none;}
+	#homeid_get_2{display:block;}
+	.mob_table{width:340px!important;;}
+	.mob_tablepop{width:320px;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.tang_leftmini {display:none;}
+	.curday {display:none;}
+	.countdown {display:none;}
+	.licafecur {padding:12px;}
+	.licafe {padding:12px;}
+	.viewcalandarmini {left:0px!important;}
+	.col {float:left;margin-left:10px;width:160px;}
+	#hd_title_left {width:100%;}
+	#hd_menumain_left {display:none;}
+	#sof_pages_content {width:100%;}
+	#hd_title_content {display:none;}
+	#hd_title_right {display:none;}
+	.bangtitlemini {width:105px;}
+	.bangtitlecurmini {width:105px;}
+	.bangleftmini {width:90px;}
+	.monanbang {display:none;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.chonsanpham {overflow:relative;}
+	.sof_pages_footer_left {width:160px;}
+	.tang_right {width:100%};
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:240px;height:100%;}
+	.detailview {max-width:360px;}
+	/*.lv_functext {display:none;}*/
+	.lv_funcshowtext {display:none;}
+	.lv_funcshowimg {height:30px;}
+	.lviconimg {height:30px;}
+	.menusubT1 {display:none;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.hd_title_left_user {width:180px;}
+	.homeid{display:block!important;}
+	.noidung_member {width:340px;}
+	#link_SOF { font-size:10px!important;width:340px!important;}
+}
+@media screen and (max-width:320px){
+	.IdTabViewHrHome li{width:140px!important;}
+	#homeid_get_1{display:none;}
+	#homeid_get_2{display:block;}
+	.mob_table{width:300px!important;;}
+	.mob_tablepop{width:280px;}
+	#sof_left {display:none;width:100%;}
+	#maytinh {display:none;}
+	#mobil {display:block;padding-top:20px;}
+	.tang_leftmini {display:none;}
+	.curday {display:none;}
+	.countdown {display:none;}
+	.licafecur {padding:12px;}
+	.licafe {padding:12px;}
+	.viewcalandarmini {left:0px!important;}
+	.col {float:left;margin-left:10px;width:150px;}
+	#hd_title_left {width:100%;}
+	#sof_pages_content {width:100%;}
+	#hd_menumain_left {display:none;}
+	#hd_title_content {display:none;}
+	#hd_title_right {display:none;}
+	.bangtitlemini {width:90px;}
+	.bangtitlecurmini {width:90px;}
+	.bangleftmini {width:90px;}
+	.monanbang {display:none;width:100%;}
+	.chitietbang {display:block;width:100%;}
+	.chonsanpham {overflow:relative;}
+	.sof_pages_footer_left {width:160px;}
+	.tang_right {width:100%};
+	.mb_thanhnhom {width:105px;height:100%;}
+	.monsp_sp {width:210px;height:100%;}
+	/*.lv_functext {display:none;}*/
+	.lv_funcshowtext {display:none;}
+	.lv_funcshowimg {height:30px;}
+	.lviconimg {height:30px;}
+	.menusubT1 {display:none;}
+	input {padding:0px;}
+	select {padding:0px;}
+	.hd_title_left_user {width:160px;}
+	.homeid{display:block!important;}
+	.noidung_member {width:300px;}
+	#link_SOF { font-size:9px!important;width:300px!important;}
+}
+
+/*---- end Responsive base screen witdh ------- */

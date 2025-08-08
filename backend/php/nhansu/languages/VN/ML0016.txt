@@ -1,0 +1,29 @@
+Thêm Mục Nối Kết Mail Server
+Lọc Mục Nối Kết Mail Server
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nối Kết Mail Server
+Mã tự động
+Server
+Cổng
+Giao thức
+Nối kết
+Hoạt động
+Loại
+Log người dùng
+Log mật mã
+Tên miền mail
+Server không được rỗng
+Cổng không được rỗng
+Giao Thức không hợp lệ
+Nối kết không hợp lệ

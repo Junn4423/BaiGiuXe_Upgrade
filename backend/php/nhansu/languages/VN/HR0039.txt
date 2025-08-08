@@ -1,0 +1,19 @@
+ERP SOF
+Thêm huấn luyên
+Thêm
+Sửa thông tin huấn luyên
+Sửa
+Xóa huấn luyên
+Xóa 
+Trở lại
+Trở lại
+Nạp lại trang
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+Liệt kê danh sách bằng huấn luyện
+STT
+Mã
+Mã đào tạo
+Ngày cấp bằng
+Tên hình của bằng

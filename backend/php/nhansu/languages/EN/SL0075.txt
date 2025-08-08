@@ -1,0 +1,70 @@
+SALES REVENUE REPORT
+Warehouse
+StartDate
+EndDate
+Order
+ItemID
+Item Name
+UnitID
+Begin Rec-Out
+Receiption
+Outstock
+End Rec-Out
+Report
+Refresh
+Total quantity
+Phone
+Fax
+TaxNo
+Address
+DatePrint
+Invoice
+CreateDate
+Quantity
+InvoiceID
+Date Invoice
+Title
+Saler
+Customer
+Note
+Color
+Characteristic
+Extention 1
+Extention 2
+Report public
+Report detail
+Report belong to condition
+Report belong to condition detail
+SALER
+MANAGER
+Category Item
+Total Number StartEnter
+Total Money StartEnter
+Total Number StartSale
+Total Money StartSale
+Total Money Average StartRec-Out
+Total money middle OutCome
+Middle Revenue
+Total Money Average End Rec-Out
+Price
+Tax
+Discount
+Amount
+Saler
+Sale Program
+Discount Amount
+Net Amount
+Scores
+Tax Amount
+Cash Discount
+Cash Discount Amount
+GiftID
+CustomerID
+CustomerName
+Option report
+Report detail invoice
+Report detail items
+Report group items
+Report group customers
+Report group employees
+EmployeeID

@@ -1,0 +1,63 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+List Gift Program
+Order
+AutoID
+ProgramDetailID
+QuantityQonated
+GiftItemID
+QuantityGift
+UnitID
+Period
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+View Report Web
+
+
+
+EN
+Add Gift Program
+Filter Gift Program
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Gift Program
+AutoID
+ProgramDetailID
+QuantityQonated
+GiftItemID
+QuantityGift
+UnitID
+Period
+You must choose detail program
+You must choose item
+Option template program
+Download template program

@@ -1,0 +1,38 @@
+Add Voice Income
+Filter Voice Income
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Voice Income
+VoteID
+CategoryVoteID
+Source
+ReferenceID
+Name
+Address
+Description
+EmployeeID
+DateWrite
+Account
+Currency
+Scale
+VoiceLinkID
+PaymentDate
+VoiceSourceID
+Lock
+Account is not empty
+Currency is not empty
+Scale is not balance zero
+Address is not empty
+Nam is not  empty.
+SignInvoice
+Amount

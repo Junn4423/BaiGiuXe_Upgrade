@@ -1,0 +1,32 @@
+Thêm Lần Thanh Toán
+Lọc Lần Thanh Toán
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Lần Thanh Toán
+Mã tự động
+Mã nhân viên
+Số bảo lãnh thư
+Đợt bảo lãnh
+Người tạo
+Ngày tạo
+Ngày bảo lãnh thư
+Ngày đến hạn
+Số tiền
+Đã xong
+Ngân hàng
+Chi nhánh
+Liên hệ
+Loại bảo lãnh
+Lần giao không trống!
+
+

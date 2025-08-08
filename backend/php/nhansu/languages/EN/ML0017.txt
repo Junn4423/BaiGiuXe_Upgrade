@@ -1,0 +1,13 @@
+...//Begin control icon part
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin control icon part
+View email
+Reply email
+Attach file
+Reply email html
+Forward mail

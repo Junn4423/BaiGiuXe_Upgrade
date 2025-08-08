@@ -1,0 +1,32 @@
+Add Relation Dependents
+Filter Relation Dependents
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Relation Dependents
+AutoID
+EmployeeID
+Name
+Relationship
+Birthday
+NumberID
+Job 
+Income
+Residence
+UnitID
+EmployeeID is not empty
+Name is not empty
+Birthday is not empty
+IsDependen
+Gender
+DateRegister
+Name Staff

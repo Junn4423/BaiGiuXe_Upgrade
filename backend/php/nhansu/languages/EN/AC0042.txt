@@ -1,0 +1,50 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Don't have data of OutstockID in detail data.<br> OutStockID don't mark with OutStockID in detail data.Please! load  OutStockID again.
+Could not add new, error:
+Input Outstock WH Detail
+Input Outstock WH
+Order
+OutStockID
+CategoryVoteID
+Source
+ReferenceID
+Name
+Address
+Description
+EmployeeID
+DateBillPO
+Account
+Currency
+Scale
+VoiceLinkID
+PaymentDate
+InvoiceSourceID
+Lock
+ItemID
+Quantity
+UnitID
+Price
+Currency
+Converted
+WarehouseID
+No
+Co
+LotID
+Note
+DateInStock
+OutStockID is not empty
+Name is not empty
+VoiceID is not empty

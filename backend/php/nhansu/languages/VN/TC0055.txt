@@ -1,0 +1,26 @@
+Thêm Mục Chi Phí Công Tác XML
+Lọc Mục Chi Phí Công Tác XML
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Phí Công Tác XML
+Mã
+Lần tính
+Mã nhân viên
+Tổng doanh thu
+Mã tiền tệ
+Mã lần tính không được rỗng
+Mã nhân viên không được rỗng
+Tổng doanh thu không được rỗng.
+Chọn tập tin để nạp
+Tải mẫu chi phí công tác về
+Xin vui lòng! Giải nén tập tin, mở tập tin MAU_CHI_PHI_CONG_TAC.xml bằng microsoft excel, bằng open office

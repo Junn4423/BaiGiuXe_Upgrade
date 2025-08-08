@@ -1,0 +1,28 @@
+Add Save Document
+Filter Save Document
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit Save Document
+ID
+Customer code
+Type Document
+Document name
+File
+Type File
+Status
+Access Right
+Creator
+Date create
+CustomerID is not empty
+Name is not empty
+Date create is not empty

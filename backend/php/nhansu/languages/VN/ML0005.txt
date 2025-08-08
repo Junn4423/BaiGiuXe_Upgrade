@@ -1,0 +1,36 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Danh mục xóa mail
+STT
+Mã mail
+Loại
+Người dùng
+Ngày mail
+Chủ đề
+Từ
+Đến
+Thêm gửi
+Nội dung
+Tập tin đính kèm 
+Mới
+Xóa
+Ẩn file
+Giờ mail
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web

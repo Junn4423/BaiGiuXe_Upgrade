@@ -1,0 +1,41 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+List Manage DOCS
+STT
+Chọn hết
+DOC_ID
+DOC_TYPE
+DOC_DATE
+DOC_NO
+User Received
+DOC_SUBJECT
+DOC RECEIVED
+GRP_ID
+DOC_COPY
+DOC_REMARK
+SENDER_REF
+Creator
+DateCreate
+DOC_ID
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web

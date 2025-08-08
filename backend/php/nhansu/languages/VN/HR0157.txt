@@ -1,0 +1,20 @@
+Thêm Mục Loại Hợp Đồng
+Lọc Mục Loại Hợp Đồng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Loại Hợp Đồng
+Mã:
+Mô tả:
+...///Bắt đầu từ phần thông báo
+Mã không có dữ liệu, xin hãy thử lại.
+Bạn phải nhập phần mô tả.

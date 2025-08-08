@@ -1,0 +1,71 @@
+Thêm Mục Người Dự Tuyển
+Lọc Mục Người Dự Tuyển
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nhân Viên Làm Việc
+Mã tự động
+Mã vị trí tuyển dụng
+Tên
+Tên lót
+Họ
+Biệt danh
+Mã CMND
+Ngày cấp CMND
+Nơi cấp
+Ngày sinh
+Nơi sinh
+Phái
+Quốc tịch
+Dân tộc
+Tôn giáo
+Tình trang gia đình
+Mã quốc gia
+Mã tỉnh
+Địa chỉ hộ khẩu hay thường trú
+Địa chỉ tạm trú
+Số điện thoại nhà
+Số điện thoại công ty
+Số điện thoại di động
+Email công ty
+Văn hóa
+Mức lương hiện tại
+Mức lương mong muốn
+Trình độ học vấn
+Ghi chú thêm học vấn
+Lịch sử công việc
+Kinh nghiệm đi du lịch
+Ngoại ngữ
+Kỹ năng vi tính
+Điểm mạnh
+Điểm yếu
+Tham chiếu
+Ghi chú
+Hình ảnh
+Người nhập
+Ngày nhập
+Trạng thái
+Ngày bắt đầu làm việc
+Người ghi nhận trạng thái
+Trạng thái tuyển dụng
+Tên không được rỗng !
+Họ không được rỗng !
+Bạn phải nhập phần mã dự tuyển
+CMND không rỗng !
+Ngày cấp không rỗng!
+Nơi cấp không rỗng!
+Ngày sinh không rỗng!
+Nơi sinh không rỗng !
+Địa chỉ thường chú không rỗng! 
+Lịch sử công việc không rỗng!
+Điểm mạnh không rỗng!
+Điểm yếu không rỗng!

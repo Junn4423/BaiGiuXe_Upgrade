@@ -1,0 +1,26 @@
+Add Inventorys
+Filter Inventorys
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Inventorys
+InventoryID
+WarehouseID
+EmployeeID
+Title
+DateInventory
+Comment
+State
+0.No confirm
+1.Confirm
+WarehouseID is not empty
+Title is not empty

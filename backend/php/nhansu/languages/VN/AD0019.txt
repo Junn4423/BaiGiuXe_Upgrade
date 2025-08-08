@@ -1,0 +1,38 @@
+Cấu hình
+Thêm công ty mới
+Thêm
+Sửa công ty
+Sửa
+Xóa công ty
+Xóa
+Lọc
+Nạp lại
+Trợ giúp về trang này
+Trợ giúp
+Danh mục công ty
+STT
+Mã công ty
+Tên công ty
+Tài liệu
+Tài liệu
+Địa chỉ
+Điện thoại
+Web
+Fax
+Mã số thuế
+Đường dẫn logo
+Mã công ty cha
+Cấp bậc
+Giám đốc
+Tỉnh hoặc bang
+Quốc gia
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web
+Database
+Đường dẫn sql
+Trạng thái

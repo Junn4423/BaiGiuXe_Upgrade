@@ -1,0 +1,30 @@
+...//Begin control icon part
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin show data part
+Contracts
+Order
+Select All
+Employee
+Contract Name
+Start Working
+End Working
+View detail
+Detail
+...//Begin messages part
+Delete successfully
+Could not deleted, error: 
+Employment contract's report
+Report
+Document for contract
+Document

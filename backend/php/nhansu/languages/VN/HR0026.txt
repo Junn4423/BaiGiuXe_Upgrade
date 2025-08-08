@@ -1,0 +1,21 @@
+ERP SOF
+Lưu
+Lưu
+Hủy
+Hủy
+Nạp lại
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+Mã
+Tên
+Số điện thoại
+Số fax
+Địa chỉ email
+Số điện thoại không hợp lệ 
+Mã trường không được rỗng 
+Tên trường không rỗng 
+E-mail không hợp lệ 
+Chèn/Cập nhật thành công 
+Lỗi :
+Fax thì không hợp lệ 

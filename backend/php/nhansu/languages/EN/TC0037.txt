@@ -1,0 +1,27 @@
+Add Costs Of Temporary
+Filter Costs Of Temporary
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Costs Of Temporary
+AutoID
+EmployeeID
+CalculateTimesID
+CategoryCostOfTemporaryID
+Money
+CurrencyID
+Note
+Lock
+CreateID
+EmployeeID is not empty
+Month is invalid
+Years is invalid
