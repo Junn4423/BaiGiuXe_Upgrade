@@ -6,27 +6,165 @@ const { spawn } = require("child_process");
 let alprProcess;
 let pythonInstallProcess;
 
+// Global error handlers to prevent app crashes
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  console.error('Stack:', error.stack);
+  // Don't exit the app, just log the error
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('Stack:', reason?.stack);
+  // Don't exit the app, just log the error
+});
+
+/**
+ * Run the Fast ALPR service using the batch file
+ */
+async function startALPRServiceViaBatch() {
+  console.log("🚀 Starting Fast ALPR service via batch file...");
+  
+  // Determine batch file path based on app packaging
+  let batPath;
+  
+  // Production path (when packaged) - use silent version for production
+  const prodBatPath = path.join(__dirname, "backend", "bienso", "run_fast_alpr_service_silent.bat");
+  const prodBatPathVerbose = path.join(__dirname, "backend", "bienso", "run_fast_alpr_service.bat");
+  
+  // Development path
+  const devBatPath = path.join(__dirname, "..", "backend", "bienso", "run_fast_alpr_service.bat");
+  
+  // Check which batch file exists
+  try {
+    await fs.access(prodBatPath);
+    batPath = prodBatPath;
+    console.log("🔧 Using production silent batch file");
+  } catch {
+    try {
+      await fs.access(prodBatPathVerbose);
+      batPath = prodBatPathVerbose;
+      console.log("🔧 Using production verbose batch file");
+    } catch {
+      try {
+        await fs.access(devBatPath);
+        batPath = devBatPath;
+        console.log("🔧 Using development batch file");
+      } catch {
+        console.error("❌ run_fast_alpr_service batch file not found in any location");
+        return false;
+      }
+    }
+  }
+
+  console.log("🎯 Batch file path:", batPath);
+
+  try {
+    // Stop any existing ALPR process first
+    if (alprProcess) {
+      console.log("🛑 Stopping existing ALPR service...");
+      alprProcess.kill();
+      alprProcess = null;
+    }
+
+    // Run the batch file
+    alprProcess = spawn("cmd", ["/c", batPath], {
+      stdio: "pipe", // Capture output for logging
+      cwd: path.dirname(batPath),
+      env: { 
+        ...process.env
+      }
+    });
+
+    // Log output for debugging
+    alprProcess.stdout.on('data', (data) => {
+      const output = data.toString().trim();
+      if (output) {
+        console.log(`ALPR: ${output}`);
+      }
+    });
+
+    alprProcess.stderr.on('data', (data) => {
+      const output = data.toString().trim();
+      if (output) {
+        console.error(`ALPR Error: ${output}`);
+      }
+    });
+
+    alprProcess.on("error", (err) => {
+      console.error("❌ Failed to launch Fast ALPR service via batch:", err);
+      if (err.code === "ENOENT") {
+        console.error("💡 Batch file not found or cmd.exe not available");
+      }
+      alprProcess = null;
+    });
+
+    alprProcess.on("exit", (code, signal) => {
+      console.log(`ℹ️ Fast ALPR batch service exited with code=${code} signal=${signal}`);
+      alprProcess = null;
+      
+      // Auto-restart if exit was unexpected
+      if (code !== 0 && signal !== "SIGTERM" && signal !== "SIGKILL") {
+        console.log("🔄 Attempting to restart ALPR service in 10 seconds...");
+        setTimeout(() => {
+          startALPRServiceViaBatch().catch(err => {
+            console.error("❌ ALPR restart failed:", err.message);
+          });
+        }, 10000);
+      }
+    });
+    
+    // Give the process a moment to start
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    console.log("✅ Fast ALPR service batch started successfully");
+    return true;
+  } catch (err) {
+    console.error("❌ Exception while running ALPR batch:", err);
+    alprProcess = null;
+    return false;
+  }
+}
+
 /**
  * Check if Python is installed and accessible
  */
 function checkPythonInstallation() {
   return new Promise((resolve) => {
-    const pythonCheck = spawn("python", ["--version"], { stdio: "pipe" });
+    // Try multiple Python commands
+    const pythonCommands = ["python", "python3", "py"];
+    let commandIndex = 0;
     
-    pythonCheck.on("close", (code) => {
-      if (code === 0) {
-        console.log("✅ Python is installed and accessible");
-        resolve(true);
-      } else {
-        console.log("❌ Python is not installed or not in PATH");
+    function tryNextCommand() {
+      if (commandIndex >= pythonCommands.length) {
+        console.log("❌ No Python installation found");
         resolve(false);
+        return;
       }
-    });
+      
+      const command = pythonCommands[commandIndex];
+      console.log(`🐍 Trying Python command: ${command}`);
+      
+      const pythonCheck = spawn(command, ["--version"], { stdio: "pipe" });
+      
+      pythonCheck.on("close", (code) => {
+        if (code === 0) {
+          console.log(`✅ Python is accessible via: ${command}`);
+          resolve(true);
+        } else {
+          commandIndex++;
+          tryNextCommand();
+        }
+      });
+      
+      pythonCheck.on("error", (err) => {
+        console.log(`❌ ${command} command failed:`, err.code || err.message);
+        commandIndex++;
+        tryNextCommand();
+      });
+    }
     
-    pythonCheck.on("error", () => {
-      console.log("❌ Python command not found");
-      resolve(false);
-    });
+    tryNextCommand();
   });
 }
 
@@ -72,21 +210,42 @@ async function installPythonDependencies() {
       }
       
       // Create virtual environment
-      const createVenv = spawn("python", ["-m", "venv", "venv"], {
-        cwd: biensoDirPath,
-        stdio: "inherit"
-      });
+      const pythonCommands = ["python", "python3", "py"];
+      let venvCreated = false;
       
-      await new Promise((resolve) => {
-        createVenv.on("close", (code) => {
-          if (code === 0) {
-            console.log("✅ Virtual environment created successfully");
-          } else {
-            console.error("❌ Failed to create virtual environment");
-          }
-          resolve();
-        });
-      });
+      for (const pythonCmd of pythonCommands) {
+        try {
+          console.log(`🔧 Trying to create venv with: ${pythonCmd}`);
+          const createVenv = spawn(pythonCmd, ["-m", "venv", "venv"], {
+            cwd: biensoDirPath,
+            stdio: "inherit"
+          });
+          
+          await new Promise((resolve, reject) => {
+            createVenv.on("close", (code) => {
+              if (code === 0) {
+                console.log("✅ Virtual environment created successfully");
+                venvCreated = true;
+                resolve();
+              } else {
+                reject(new Error(`Exit code: ${code}`));
+              }
+            });
+            
+            createVenv.on("error", (err) => {
+              reject(err);
+            });
+          });
+          
+          if (venvCreated) break;
+        } catch (err) {
+          console.log(`❌ Failed to create venv with ${pythonCmd}:`, err.message);
+        }
+      }
+      
+      if (!venvCreated) {
+        console.error("❌ Failed to create virtual environment with any Python command");
+      }
     }
   }
   
@@ -211,37 +370,86 @@ async function startALPRService() {
   } catch {
     console.error("❌ Python executable not found in virtual environment:", pythonExePath);
     console.log("🔄 Falling back to system Python...");
-    pythonExePath = "python";
+    
+    // Try different Python commands
+    const pythonCommands = ["python", "python3", "py"];
+    let foundPython = false;
+    
+    for (const cmd of pythonCommands) {
+      try {
+        const testProcess = spawn(cmd, ["--version"], { stdio: "pipe" });
+        await new Promise((resolve, reject) => {
+          testProcess.on("close", (code) => {
+            if (code === 0) {
+              pythonExePath = cmd;
+              foundPython = true;
+              console.log(`✅ Found system Python: ${cmd}`);
+              resolve();
+            } else {
+              reject(new Error(`Exit code: ${code}`));
+            }
+          });
+          testProcess.on("error", reject);
+        });
+        if (foundPython) break;
+      } catch (err) {
+        console.log(`❌ ${cmd} not available:`, err.message);
+      }
+    }
+    
+    if (!foundPython) {
+      console.error("❌ No Python installation found! ALPR service cannot start.");
+      return false;
+    }
   }
 
-  console.log("🚀 Spawning Fast ALPR service with virtual environment:");
+  console.log("🚀 Spawning Fast ALPR service:");
   console.log("   Script:", scriptPath);
   console.log("   Python:", pythonExePath);
 
-  alprProcess = spawn(pythonExePath, [scriptPath, "--host", "127.0.0.1", "--port", "5001"], {
-    stdio: "inherit",
-    env: { 
-      ...process.env, 
-      PYTHONUNBUFFERED: "1",
-      VIRTUAL_ENV: venvPath,
-      PATH: `${path.join(venvPath, "Scripts")};${process.env.PATH}`
-    },
-  });
+  try {
+    alprProcess = spawn(pythonExePath, [scriptPath, "--host", "127.0.0.1", "--port", "5001"], {
+      stdio: "inherit",
+      env: { 
+        ...process.env, 
+        PYTHONUNBUFFERED: "1",
+        VIRTUAL_ENV: venvPath,
+        PATH: `${path.join(venvPath, "Scripts")};${process.env.PATH}`
+      },
+    });
 
-  alprProcess.on("error", (err) => {
-    console.error("❌ Failed to launch Fast ALPR service:", err);
-  });
+    alprProcess.on("error", (err) => {
+      console.error("❌ Failed to launch Fast ALPR service:", err);
+      if (err.code === "ENOENT") {
+        console.error("💡 Python executable not found. Please ensure Python is installed and in PATH.");
+        console.error("💡 Tried to use:", pythonExePath);
+      }
+      alprProcess = null; // Reset to prevent hanging references
+    });
 
-  alprProcess.on("exit", (code, signal) => {
-    console.log(`ℹ️ Fast ALPR service exited with code=${code} signal=${signal}`);
-    // Auto-restart if exit was unexpected
-    if (code !== 0 && signal !== "SIGTERM" && signal !== "SIGKILL") {
-      console.log("🔄 Attempting to restart ALPR service...");
-      setTimeout(() => startALPRService(), 5000);
-    }
-  });
-  
-  return true;
+    alprProcess.on("exit", (code, signal) => {
+      console.log(`ℹ️ Fast ALPR service exited with code=${code} signal=${signal}`);
+      alprProcess = null; // Reset to prevent hanging references
+      
+      // Auto-restart if exit was unexpected (but not too frequently)
+      if (code !== 0 && signal !== "SIGTERM" && signal !== "SIGKILL") {
+        console.log("🔄 Attempting to restart ALPR service in 10 seconds...");
+        setTimeout(() => {
+          startALPRService().catch(err => {
+            console.error("❌ ALPR restart failed:", err.message);
+          });
+        }, 10000); // Increased delay to prevent rapid restart loops
+      }
+    });
+    
+    // Give the process a moment to start and verify it's running
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    return true;
+  } catch (err) {
+    console.error("❌ Exception while spawning ALPR service:", err);
+    return false;
+  }
 }
 
 let mainWindow
@@ -352,30 +560,67 @@ function startRTSPStreamingServer() {
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(async () => {
-  console.log("🚀 Starting Parking Lot Management System...");
-  
-  // Install Python dependencies first
-  console.log("🐍 Setting up Python environment...");
-  const depsInstalled = await installPythonDependencies();
-  
-  if (depsInstalled) {
-    console.log("✅ Python environment ready");
+  try {
+    console.log("🚀 Starting Parking Lot Management System...");
     
-    // Start ALPR service
-    console.log("🐍 Initializing Python ALPR service...");
-    const alprStarted = await startALPRService();
-    
-    if (alprStarted) {
-      console.log("✅ ALPR service started successfully");
-    } else {
-      console.warn("⚠️ ALPR service failed to start - continuing without license plate recognition");
+    // Start ALPR service using batch file (for end users)
+    console.log("🐍 Starting Fast ALPR service...");
+    try {
+      const alprStarted = await startALPRServiceViaBatch();
+      
+      if (alprStarted) {
+        console.log("✅ ALPR service started successfully via batch file");
+      } else {
+        console.warn("⚠️ ALPR service failed to start via batch - trying direct method...");
+        
+        // Fallback to direct Python method if batch fails
+        console.log("🔄 Attempting direct Python method as fallback...");
+        const pythonAvailable = await checkPythonInstallation();
+        
+        if (pythonAvailable) {
+          const depsInstalled = await installPythonDependencies();
+          if (depsInstalled) {
+            const directStarted = await startALPRService();
+            if (directStarted) {
+              console.log("✅ ALPR service started successfully via direct method");
+            } else {
+              console.warn("⚠️ Both batch and direct methods failed - continuing without license plate recognition");
+            }
+          } else {
+            console.warn("⚠️ Python dependencies installation failed");
+          }
+        } else {
+          console.warn("⚠️ Python not available for fallback method");
+        }
+      }
+    } catch (alprError) {
+      console.error("❌ ALPR service error:", alprError.message);
+      console.warn("⚠️ Continuing without license plate recognition");
     }
-  } else {
-    console.warn("⚠️ Python environment setup failed - continuing without license plate recognition");
+    
+    // Create the main window (always proceed)
+    console.log("🖥️ Creating main window...");
+    createWindow();
+    console.log("✅ Application started successfully");
+
+  } catch (error) {
+    console.error("❌ Critical error during startup:", error);
+    
+    // Show error dialog to user
+    const { dialog } = require('electron');
+    dialog.showErrorBox(
+      'Startup Error',
+      `Application failed to start properly:\n\n${error.message}\n\nThe app will continue to run but some features may not work.`
+    );
+    
+    // Still try to create window
+    try {
+      createWindow();
+    } catch (windowError) {
+      console.error("❌ Failed to create window:", windowError);
+      app.quit();
+    }
   }
-  
-  // Create the main window
-  createWindow();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
