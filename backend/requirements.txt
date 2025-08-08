@@ -6,6 +6,7 @@ uvicorn
 opencv-python
 numpy
 fast-alpr
+onnxruntime
 
 # Additional dependencies for image processing
 Pillow

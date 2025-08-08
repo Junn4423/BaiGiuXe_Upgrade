@@ -51,7 +51,7 @@ REM Activate virtual environment and install dependencies
 echo Installing Python packages in virtual environment...
 call venv\Scripts\activate.bat
 pip install --upgrade pip
-pip install fastapi uvicorn fast_alpr opencv-python numpy requests
+pip install fastapi uvicorn fast_alpr opencv-python numpy requests onnxruntime python-multipart
 if %errorlevel% neq 0 (
     echo ❌ Error: Failed to install Python dependencies
     pause
@@ -116,11 +116,54 @@ if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\bienso" (
         xcopy "..\backend\bienso\venv" "dist\win-unpacked\resources\app.asar.unpacked\backend\bienso\venv" /E /I /Y
         if %errorlevel% equ 0 (
             echo ✅ Virtual environment copied successfully
+            
+            REM Verify critical packages in copied virtual environment
+            echo 🔍 Verifying packages in copied virtual environment...
+            set "PROD_PYTHON=dist\win-unpacked\resources\app.asar.unpacked\backend\bienso\venv\Scripts\python.exe"
+            set "PROD_PIP=dist\win-unpacked\resources\app.asar.unpacked\backend\bienso\venv\Scripts\pip.exe"
+            
+            if exist "%PROD_PYTHON%" (
+                echo Testing package imports in production environment...
+                "%PROD_PYTHON%" -c "import onnxruntime; print('✅ onnxruntime available')" || (
+                    echo Installing missing onnxruntime...
+                    "%PROD_PIP%" install onnxruntime
+                )
+                "%PROD_PYTHON%" -c "import multipart; print('✅ python-multipart available')" || (
+                    echo Installing missing python-multipart...
+                    "%PROD_PIP%" install python-multipart
+                )
+                "%PROD_PYTHON%" -c "import fast_alpr; print('✅ fast_alpr available')" || (
+                    echo Installing missing fast_alpr...
+                    "%PROD_PIP%" install fast_alpr
+                )
+            ) else (
+                echo ⚠️ Warning: Python executable not found in copied virtual environment
+            )
         ) else (
             echo ⚠️ Warning: Failed to copy virtual environment
         )
     ) else (
         echo ✅ Virtual environment already exists in build
+        
+        REM Still verify packages even if venv exists
+        echo 🔍 Verifying packages in existing virtual environment...
+        set "PROD_PYTHON=dist\win-unpacked\resources\app.asar.unpacked\backend\bienso\venv\Scripts\python.exe"
+        set "PROD_PIP=dist\win-unpacked\resources\app.asar.unpacked\backend\bienso\venv\Scripts\pip.exe"
+        
+        if exist "%PROD_PYTHON%" (
+            "%PROD_PYTHON%" -c "import onnxruntime; print('✅ onnxruntime available')" || (
+                echo Installing missing onnxruntime...
+                "%PROD_PIP%" install onnxruntime
+            )
+            "%PROD_PYTHON%" -c "import multipart; print('✅ python-multipart available')" || (
+                echo Installing missing python-multipart...
+                "%PROD_PIP%" install python-multipart
+            )
+            "%PROD_PYTHON%" -c "import fast_alpr; print('✅ fast_alpr available')" || (
+                echo Installing missing fast_alpr...
+                "%PROD_PIP%" install fast_alpr
+            )
+        )
     )
 ) else (
     echo ❌ Backend directory not found in build
