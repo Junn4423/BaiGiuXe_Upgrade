@@ -1,0 +1,23 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Lưu
+Lưu
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Tài Liệu
+Tên
+Ghi Chú
+...///Bắt đầu từ phần thông báo
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+Bạn phải nhập tên
+Bạn phải nhập ghi chú
+Quyền NV
+Được xem
+Không được xem

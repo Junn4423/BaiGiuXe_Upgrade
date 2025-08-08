@@ -1,0 +1,22 @@
+...//Begin control icon part
+Save
+Save
+Back
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Add / Edit Childrens
+Name:
+Birth Date:
+--Select--
+...//Begin messages part
+The Nam is empty, please try again
+EmployeeID is empty, please try again 
+Birthdate is empty, please try again

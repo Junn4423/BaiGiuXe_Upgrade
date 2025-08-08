@@ -1,0 +1,42 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List Work Anually
+Order
+Select All
+AutoID
+EmployeeID
+ALMonth
+NumYear
+YearsWork
+HoursWork
+Shift
+CreateID
+DateCreate
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+TimeCard Compensation (B)
+TimeCard Compensation (B) Used
+TimeCard Compensation (B) Again
+Num Rest Used
+Num Rest Agian
+AL Year

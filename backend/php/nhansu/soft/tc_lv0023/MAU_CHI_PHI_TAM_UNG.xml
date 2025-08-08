@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:c="urn:schemas-microsoft-com:office:component:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40"
+ xmlns:x2="http://schemas.microsoft.com/office/excel/2003/xml"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Version>12.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <Colors>
+   <Color>
+    <Index>3</Index>
+    <RGB>#C0C0C0</RGB>
+   </Color>
+   <Color>
+    <Index>4</Index>
+    <RGB>#FF0000</RGB>
+   </Color>
+  </Colors>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>9000</WindowHeight>
+  <WindowWidth>13860</WindowWidth>
+  <WindowTopX>240</WindowTopX>
+  <WindowTopY>75</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Default">
+  </Style>
+  <Style ss:ID="s64" ss:Parent="s62">
+   <NumberFormat ss:Format="#,##0;[Red]#,##0"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Sheet1">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="175" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s62" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s62" ss:Width="90"/>
+   <Column ss:StyleID="s62" ss:Width="65.25"/>
+   <Column ss:StyleID="s62" ss:Width="64.5" ss:Span="3"/>
+   <Row ss:AutoFitHeight="0" ss:Height="12.75">
+    <Cell><Data ss:Type="String">Mã nhân viên</Data></Cell>
+    <Cell><Data ss:Type="String">Loại chi phí</Data></Cell>
+    <Cell><Data ss:Type="String">Tiền</Data></Cell>
+    <Cell><Data ss:Type="String">Đơn vị tiền</Data></Cell>
+    <Cell><Data ss:Type="String">Chú ý</Data></Cell>
+    <Cell><Data ss:Type="String">Tên nhân viên</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="12.75">
+    <Cell><Data ss:Type="String">BD018</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">SPCONG</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">VND</Data></Cell>
+    <Cell ss:Index="6" ss:StyleID="Default"><Data ss:Type="String">NGUYỄN HỒNG KỲ</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="12.75">
+    <Cell><Data ss:Type="String">BD018</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">CONGTRU</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">VND</Data></Cell>
+    <Cell ss:Index="6" ss:StyleID="Default"><Data ss:Type="String">NGUYỄN HỒNG KỲ</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="12.75" ss:Span="171"/>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+  <x:WorksheetOptions/>
+ </Worksheet>
+</Workbook>

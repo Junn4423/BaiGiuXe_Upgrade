@@ -1,0 +1,143 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List Schedule of Items
+No.
+AutoID
+ContactID
+BOM
+Order Q'ty
+Unit
+Price
+Currency
+Model
+Order No.
+CATALOGUE 
+Description
+Our ref.
+Time delivery
+Wattage
+Dimension (mm)
+Power Supply (Write)
+No. of Lamps
+Lamp Base
+Power Consumtion (W)
+Luminous Efficacy
+Luminous Flux (Intergrating sphere 'don’t direct eye of sensor')
+Color Temperature: ± 100
+CRI: ± 1
+Beam Angle
+Insulation Cassification (Class)
+IP
+PF
+Body finish color 
+URG
+SDCM
+Lifespan
+Brand driver
+Function
+Brand LED Chip
+Body Material
+Reflector finish Color
+Type Sensor
+Installation Height
+Detection Area (Radius)
+Type  Battery
+Battery Parameter
+Type of Solar Panel
+Solar Panel Parameter
+Discharging Time
+Charging Time
+Outer Ring finish Color
+Wireless
+Symbols on stamps
+Brand
+Original
+Import company
+PO/PI No.
+No. days Warranty
+Amount
+Creator
+DateCreate
+Driver Power-line
+Rated Duration
+State WH
+Warranty Expiry Date
+Picture
+Price VND
+Amount VND
+Delivery times
+Pass
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web
+Type Diffuser & Material
+Optical len/Reflector
+Brand LED Chip
+Lamp holder Acessories
+Driver model
+Connect
+Wiring Length connect for lamp
+Earth
+Optics
+Standard
+Manual
+Loading
+Warranty
+Delivery time
+HS 
+Document 
+Payment
+Engrave Logo
+Lazer/printing logo font of product
+Lazer/printing/sticker back on product
+Label inner box by sticker/printing white with box brown color
+Weight
+Type Obstruction
+Intensity
+Working Mode
+Smart light
+App
+Amh
+Output Voltage
+I rated
+Wiring Length with Driver and Female with Light
+Driver
+Lumen out
+EMC(EMI/ES)
+Photoeletric testing
+LM & Model LED Chip
+Operating Temperature
+Total Harmonic Distortion (THD)
+Used for
+Working Temperature
+Wiring Length connect input with Volt Sticker
+Name's Product
+IP Driver
+Rated load of Driver
+IP Sensor
+Rated load of Sensor
+IK (Fitting & Outdoor..)
+Type Model
+Kiểu dáng đèn
+CE/LEED/ROSH
+
+

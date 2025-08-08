@@ -1,0 +1,27 @@
+Thêm Mục Chi Phí Công Tác
+Lọc Mục Chi Phí Công Tác
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Phí Công Tác
+Mã tự động
+Mã nhân viên
+Lần tính
+Loại chi phí
+Tiền
+Mã tiền tệ
+Ghi chú
+Khóa
+Người tạo
+Mã nhân viên không được rỗng
+Tháng không hợp lệ
+Năm không hợp lệ

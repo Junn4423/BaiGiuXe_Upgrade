@@ -1,0 +1,30 @@
+ADD DETAIL PURCHASE ORDER
+FILTER DETAIL PURCHASE ORDER
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+EDIT DETAIL PURCHASE ORDER
+AUTOID 
+EMPLOYEE ID
+ITEM NAME
+QUANTITY 
+UNIT
+PRICE 
+UNIT PRICE
+TAX RATE
+STYLE
+COLOR NAME
+STANDARDS
+NOTE 
+ItemID is not empty
+You must enter number 
+PurchaseOrderID is not empty

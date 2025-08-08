@@ -1,0 +1,33 @@
+Thêm Mục Sản Phẩm Nhà Cung Cấp
+Lọc Mục Sản Phẩm Nhà Cung Cấp
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Sản Phẩm Nhà Cung Cấp
+Mã tự động
+Mã NCC
+Mã BOM
+Tên sản phẩm
+Đặc điểm
+Định lượng
+Mã hàng
+Ghi chú
+Giá
+Đơn vị
+Ngày tạo
+Mã NCC không được rỗng
+Mã BOM không được rỗng
+Tên sản phẩm không được rỗng
+Thuế (%)
+Chiết khấu(%)
+Giá có thuế/Ck
+Đánh giá

@@ -1,0 +1,26 @@
+Thêm Mục Ca Làm Việc
+Lọc Mục Ca Làm Việc
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Ca Làm Việc
+Mã
+Tên
+Từ giờ
+Đến giờ
+Mã ca không được rỗng
+Tên không được rỗng
+Từ giời không được rỗng.
+Đến giời không được rỗng.
+Giờ nghỉ
+Giờ nghỉ từ
+Giờ nghỉ đến

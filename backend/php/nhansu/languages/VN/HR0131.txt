@@ -1,0 +1,10 @@
+ERP SOF  
+//………….
+Quản Lý Thông Tin Đánh Giá Nhân Viên
+In
+Đóng
+Không có dữ liệu
+STT
+Tên phòng ban
+Mã nhân viên
+Tên nhân viên

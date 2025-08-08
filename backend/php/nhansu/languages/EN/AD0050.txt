@@ -1,0 +1,32 @@
+Add Company
+Filter Company
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Add new company
+Edit company
+Company ID
+Company Name
+Insert successfull 
+Insert error: 
+Update successfull 
+Update error: 
+CompanyID is not empty
+Address
+Phone
+Website
+Fax
+You must enter number 
+No.Tax
+PathLogo
+ParentID
+Level
+Director
+StateOrProvince
+Nation
+Database
+Path SQL
+State

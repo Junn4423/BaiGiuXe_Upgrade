@@ -1,0 +1,31 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Mục Ngày Nghỉ Lễ
+STT
+Chọn hết
+Mã
+Ngày nghỉ
+Mô tả
+Mã chấm công
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web

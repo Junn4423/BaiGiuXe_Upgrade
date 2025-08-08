@@ -1,0 +1,12 @@
+...//Begin control icon part
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin control icon part
+Candidates
+Document
+Times Interview
+Document interview

@@ -1,0 +1,26 @@
+Thêm Nhóm Tài Liệu
+Lọc Nhóm Tài Liệu
+Lưu 
+Lọc 
+Quay lại 
+Nạp lại trang này 
+Nạp lại 
+Trợ giúp 
+Trợ giúp 
+Thêm thành công. 
+Thêm không được, lỗi: 
+Sửa thành công. 
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng 
+Sửa Nhóm Tài Liệu
+Mã
+Tên
+Cha
+Thứ tự
+Hiện/Ẩn
+Người tạo
+Ngày tạo
+...//Begin messages part
+The ID is empty, please try again
+The Description is not empty
+

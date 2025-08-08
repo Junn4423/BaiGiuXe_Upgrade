@@ -1,0 +1,24 @@
+SOF CO., LTD
+Add new benefit
+New
+Edit this benefit
+Edit
+Delete benefit
+Delete
+Back
+Back
+Reload This Page
+Reload
+Help
+Help
+List of benefit contract details
+Order
+ID
+Benefit
+Percent
+Date
+Name
+Contract
+ID
+Control for Benefits Type
+Benefits

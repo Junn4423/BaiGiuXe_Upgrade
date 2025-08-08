@@ -1,0 +1,55 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List Set Times Calcuate Salary Monthly
+Order
+ID
+Title
+Option
+BeginDate
+EndDate
+Month
+Year
+Owe
+Own
+Note
+Lock
+SocialInsurancePercent
+HospitalInsurancePercent
+UnEmployeeInsurancePercent
+SalaryPersonalTaxMark
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Free Union Percent
+SocialInsurancePercent Company
+HospitalInsurancePercent Company
+UnEmployeeInsurancePercent Company
+Insurance for Foreigner
+Salary13Th
+Percent Probationary salary
+Salary/1 Dependen Subtract
+0. Calculate salary 26days/1month
+1. Calculate salary rest sunday/1week
+2. Calculate salary rest Sunday & Saturday/1week
+3. Calculate salary rest sunday & half-day Saturday/1week
+Convert USD
+MealP/Ones

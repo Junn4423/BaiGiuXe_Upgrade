@@ -1,0 +1,36 @@
+Add Payment Account Bank
+Filter Payment Account Bank
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Payment Account Bank
+VoteID
+CategoryVoteID
+Source
+ReferenceID
+Name
+Address
+Description
+EmployeeID
+DateWrite
+Account
+Currency
+Scale
+VoiceSourceID
+VoiceSourceDate
+Lock
+SettleAccountID
+Account is not empty
+Currency is not empty
+Scale is not balance zero
+Address is not empty
+Nam is not  empty.

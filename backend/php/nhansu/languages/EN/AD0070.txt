@@ -1,0 +1,18 @@
+…
+Delete
+Back
+Reload
+Help
+Select time to delete store log time data
+From:
+To:
+Note: Select start day and end day, then press Delete button (above).
+Select day
+Please select start date
+Please select end date
+Please select correct days
+Delete successfully
+Delete unsuccess, please try again
+Selected day not in day stored log, please select again.
+Now, data stored from
+to

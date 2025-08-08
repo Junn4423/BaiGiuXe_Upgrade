@@ -79,6 +79,11 @@ backend/bienso/*.log
 backend/bienso/api_integration.log
 backend/bienso/realtime_license_plate.log
 
+# PHP logs
+backend/php/**/*.log
+backend/php/**/error.log
+backend/php/**/access.log
+
 # Process files
 *.pid
 *.seed
@@ -181,6 +186,30 @@ backend/php/*/vendor/
 backend/php/*/composer.lock
 
 # =============================================
+# PHP / NHANSU APPLICATION
+# =============================================
+# HR application generated files
+backend/php/nhansu/hr.bin
+backend/php/nhansu/hinhnhanvien/*
+backend/php/nhansu/media/*
+backend/php/nhansu/qrcode/*
+backend/php/nhansu/webalizer/*
+backend/php/nhansu/draw/*
+
+# PHP session files
+backend/php/nhansu/sessions/
+backend/php/nhansu/tmp/
+backend/php/nhansu/temp/
+
+# PHP upload folders (if they contain sensitive data)
+backend/php/nhansu/uploads/
+backend/php/nhansu/files/
+
+# Token and auth files
+backend/php/nhansu/token.php
+backend/php/nhansu/auth.php
+
+# =============================================
 # MISC
 # =============================================
 # Compressed files
@@ -225,3 +254,26 @@ docs/_build/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# =============================================
+# PROJECT SPECIFIC IGNORES
+# =============================================
+# Temporary markdown files
+*_SUMMARY.md
+*_TEMP.md
+*_BACKUP.md
+
+# Development notes (keep main docs)
+NOTES.md
+TODO.md
+CHANGELOG_OLD.md
+
+# Test files
+test_*.html
+debug_*.html
+demo_*.html
+
+# Cache and session files
+.cache/
+.sessions/
+.tmp/

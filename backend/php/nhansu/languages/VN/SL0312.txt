@@ -1,0 +1,28 @@
+Thêm Lần Thanh Toán
+Lọc Lần Thanh Toán
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Lần Thanh Toán
+Mã tự động
+Mã đơn hàng
+% Thanh toán
+Lần thanh toán
+Người tạo
+Ngày tạo
+Từ ngày
+Đến ngày
+Ghi chú
+Đã xong
+%Giảm giá không trống!
+
+

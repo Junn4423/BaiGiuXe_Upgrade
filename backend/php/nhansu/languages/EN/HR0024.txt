@@ -1,0 +1,27 @@
+SOF CO., LTD
+Save
+Save
+Cancel
+Cancel
+Refresh 
+Refresh 
+Help
+Help
+ID
+Name
+Address
+City
+State
+Zipcode
+Phone
+Fax
+Email
+Website
+You have to input number
+SchoolID is not empty 
+SchoolName is not empty 
+SchoolEmail is not valid 
+ShoolAddress is not empty 
+State is not empty 
+Error:
+Successfull

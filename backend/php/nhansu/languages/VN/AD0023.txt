@@ -1,0 +1,38 @@
+ERP SOF
+Lịch NV
+TT năm
+TT tuần
+Bảng lịch
+Lập lịch
+NhậpGiờ
+Thêm nv
+Sửa nv
+Xóa
+Nạp lại
+Giúp đỡ
+Điều khiển nhân viên
+STT
+Mã nv
+Tên nv
+Chữ lót
+Họ
+Chức vụ
+Ngày sinh
+Quản lý mật khẩu của nhân viên
+QL MK
+Quản lý hình thẻ của nhân viên
+QL Hình
+Lọc theo điều kiện
+Lọc NV
+Công tác
+Đánh giá
+Đánh giá
+Học tập
+Học tập
+Quản lý hợp đồng làm việc
+H.đồng
+Vi phạm
+Xem vi phạm
+Xem ...
+Xem lịch sử mượn sách của nhân viên
+Lịch sử

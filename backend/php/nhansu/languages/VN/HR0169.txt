@@ -1,0 +1,26 @@
+Thêm Mục Nghỉ Bệnh Hưởng Lương
+Lọc Mục Nghỉ Bệnh Hưởng Lương
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nghỉ Bệnh Hưởng Lương
+Mã tự động
+Mã thông số bảo hiểm
+Mã nhân viên
+Số lần
+Trạng thái bệnh
+Thời gian đóng bảo hiểm
+Ghi chú
+Điều kiện tính hưởng
+Mã nhân viên không được rỗng
+Tên không được rỗng
+Bạn phải nhập số

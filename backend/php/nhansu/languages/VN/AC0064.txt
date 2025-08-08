@@ -1,0 +1,47 @@
+﻿BÁO CÁO SỔ QUỸ TIỀN MẶT
+Nguồn sổ quỹ
+Ngày bắt đầu
+Ngày kết thúc
+Stt
+Mã phiếu
+Ghi chú
+Đơn vị tiền tệ
+Tồn đầu kỳ
+Nhập trong kỳ
+Xuất trong kỳ
+Tồn cuối kỳ
+Báo cáo
+Nạp lại
+Tải khoản nợ
+Tài khoản có
+Báo cáo theo điều kiện
+Báo cáo theo điều kiện chi tiết
+NV KẾ TOÁN
+KẾ TOÁN TRƯỞNG
+Ngày báo cáo
+Ngày chứng từ
+Mã Số hóa đơn
+Số chứng từ
+Số CTGS
+Tên
+Mã khách hàng
+TK KH
+Diễn giải
+Tài khoản đối ứng
+Tên tài khoản đối ứng
+Phát sinh nợ
+Phát sinh có
+Mã vụ việc
+Mã chứng từ
+SỔ CHI TIẾT TÀI KHOẢN
+SỔ NHẬT KÝ CHUNG
+NHẬT KÝ CHI TIỀN
+NHẬT KÝ THU TIỀN
+Tài khoản
+NHẬT KÝ MUA HÀNG
+NHẬT KÝ BÁN HÀNG
+Chọn kiểu báo cáo
+In ra màn hình
+Excel
+Báo cáo tài chính QĐ 15
+Báo cáo tài chính QĐ 48

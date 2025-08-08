@@ -1,0 +1,23 @@
+Add Parameter Salary TimeCard Code
+Filter Parameter Salary TimeCard Code
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Parameter Salary TimeCard Code
+ID
+CalculateTimesID
+ItemID
+PricePerItem
+CurrencyID
+CalculateTimesID is not empty
+ItemID is not empty
+Rate is not empty

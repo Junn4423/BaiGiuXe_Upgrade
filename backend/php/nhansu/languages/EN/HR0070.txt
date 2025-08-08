@@ -1,0 +1,23 @@
+...//Begin control icon part
+Save
+Save
+Back
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Add / Edit Membership
+ID:
+Name:
+Membership type:
+--Select--
+...//Begin messages part
+The ID is empty, please try again
+Please input Name
+Please select Membership Type

@@ -1,0 +1,35 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List Enter Night Shift And OverTime
+Order
+Select All
+AutoID
+CalID
+TimeCodeID
+HoursWork
+DateWork
+EmployeeID
+CreateID
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Price Calculate(only overtime 150% formular:Price*Hours)

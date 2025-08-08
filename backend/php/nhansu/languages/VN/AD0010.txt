@@ -1,0 +1,34 @@
+…
+Thêm quyền cho trang
+Thêm
+Hủy
+Hủy
+Cập nhật ẩn hiện quyền
+Ẩn Hiện
+Sửa quyền cho trang
+Sửa
+Quay lại trang danh sách quyền
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp về trang này
+Trợ giúp
+Cấu hình quyền sử dụng
+Cho:
+Quay lại trang danh sách người sử dụng
+Quay lại
+STT
+Mã quyền
+Diễn giải
+Liên kết tới
+Trạng thái
+STT
+Mã quyền
+Diễn giải
+Liên kết tới
+Trạng thái
+Ẩn Hiện
+Lưu
+Danh sách phân quyền
+Xóa rổng
+Bạn có chắc không?

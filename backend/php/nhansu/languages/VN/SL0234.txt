@@ -1,0 +1,27 @@
+Thêm Mục Nhân Viên Tính SPI Theo Thông Số Lương
+Lọc Mục Nhân Viên Tính SPI Theo Thông Số Lương
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nhân Viên Tính SPI Theo Thông Số Lương
+Mã tự động
+Mã nhà phân phối
+Mã nhân viên
+Mã lần tính
+Công thức tính
+Ghi chú
+Là người quản lý
+Khóa
+Bạn phải chọn mã nhà phân phối
+Bạn phải chọn mã nhân viên
+Bạn phải chọn mã lần tính
+Bạn phải chọn mã công thức

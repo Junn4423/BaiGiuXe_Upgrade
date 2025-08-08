@@ -1,0 +1,10 @@
+/*===================================*/
+Employee Infomation
+Employee Infomation
+Print
+Close
+/*===================================*/
+General Information
+Employee ID:
+Full Name:
+Title:

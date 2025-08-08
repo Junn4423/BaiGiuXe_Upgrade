@@ -1,0 +1,32 @@
+//Phân cho build danh mục me nu
+Home
+Admin
+Public
+
+
+Documents
+
+Employee
+HR
+Payroll
+
+Accout
+
+
+
+
+
+
+
+
+
+Warehouse
+
+
+Maketing
+
+
+Reports
+Public Warehouse
+Manager Warehouse
+

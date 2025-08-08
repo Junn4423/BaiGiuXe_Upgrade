@@ -1,0 +1,35 @@
+Thêm Mục Xử Lý Phí Xe
+Lọc Mục Xử Lý Phí Xe
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+Sửa Xử Lý Phí Xe
+Mã tự động
+Mã tạm ứng
+Tiền
+Phần trăm thuế
+Tiền thuế
+Mã khách hàng
+Tên khách hàng
+Ký hiệu mẫu hóa đơn
+Ký hiệu hóa đơn
+Chứng từ gốc
+Ngày hóa đơn
+Mã BOM
+Ghi chú
+Người khóa
+Ngày khóa
+Khóa
+Loại hóa đơn
+Hình
+Mã công ty
+Ngày hết hạn
+Tổng tiền

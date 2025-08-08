@@ -1,0 +1,33 @@
+Thêm Mục Chi Tiết
+Lọc Mục Chi Tiết
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết 
+Mã tự động
+Mã liên kết
+Mã nhân viên
+Số lượng
+Mã đơn vị
+Tiền lương
+Đơn vị
+Số tiền quy đổi
+Mã công ty
+Nợ
+Có
+Loại
+Chú ý
+Ngày nhập
+Mã nhân viên không rổng
+Bạn phải nhập số
+Mã ngày nhập không rổng
+Tải biểu mẫu nhập thu tiền

@@ -1,0 +1,29 @@
+/*------------------------------------*/
+Add employee contact information
+Add employee contact information
+Save
+Save
+Go back last page
+Back
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error:
+/*------------------------------------*/
+Employee ID
+Country:
+--Select Country--
+State:
+City/Town:
+Home Telephone:
+Work Telephone:
+Street 1:
+Street 2:
+ZIP Code:
+Mobile:
+Work Email:
+Other Email:
+/*------------------------------------*/
+Had error while get Employee ID, please try again
+Must be number
+Wrong email format

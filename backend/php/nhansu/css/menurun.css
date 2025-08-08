@@ -1,0 +1,240 @@
+
+
+ /* START THE CODE FOR THE MENUS */
+
+
+ /* FONT AND COLOR CODES ARE AT THE BOTTOM */
+
+
+#menulocation { LEFT: 16px; POSITION: absolute; TOP: 65px; padding:0px 0px; white-space:nowrap; }
+
+
+.menutrans 	{  filter:alpha(opacity=60);-moz-opacity:.60;opacity:.60; }
+
+
+
+ul#top-nav,
+ul#top-nav ul {
+	margin: 0;
+	padding: 0;
+	background: #FFF;    /* IE6 BUG */
+	}
+
+ul#top-nav li {
+	position: relative;
+	list-style: none;
+	}
+
+
+/* HIDE FROM IE MAC */
+* html ul#top-nav li { float: left; height: 1%; }
+* html ul#top-nav li a { height: 1%; }
+/* END HIDE */
+
+ul#top-nav ul {
+	position: absolute;
+	display: none;
+	left: 152px;
+	top: 0;
+	}
+
+ul#top-nav li:hover ul ul,
+ul#top-nav li:hover ul ul ul,
+ul#top-nav li.over ul ul,
+ul#top-nav li.over ul ul ul { display: none; } /* START WITH HIDDEN MENUS */
+
+ul#top-nav li:hover ul,
+ul#top-nav li li:hover ul,
+ul#top-nav li li li:hover ul,
+ul#top-nav li.over ul,
+ul#top-nav li li.over ul,
+ul#top-nav li li li.over ul { display: block; } /* SHOW MENUS */
+
+
+
+
+
+ /* TOP LEVEL MENU CODES */
+
+
+
+ul#top-nav { 		border-top: 1px solid #9DA5C1;
+		  	border-left: 0px solid #80A173;
+		  	border-right: 0px solid #80A173;
+		  	z-index:2;
+		  	width: 152px;
+			}
+
+ul#top-nav li a {	display: block;
+			text-decoration: none;
+			padding: 4px;
+			text-indent: 3px;
+			color: #688B36;
+			font: 8pt arial, verdana, helvetica, sans-serif; font-weight: bold;
+			}
+
+
+ul#top-nav li.menuT { 		  background-color: #FFFFFF;
+				  border-bottom: 1px solid #9DA5C1;
+				  background-image:url(../images/imgweb/index_12.gif);
+				  }
+
+ul#top-nav li.menuT:hover,
+
+ul#top-nav li.over 		{ background-color: #FFFFFF; background-image: url("picts/menuon.gif"); }
+
+ul#top-nav li a:hover 		{ background-color: #F0F0F0; color: #000000; background-image: url("picts/menuon.gif"); }
+
+
+
+
+
+ /* SUB LEVEL MENU CODES */
+
+ul#sub-nav {		border-top: 1px solid #9DA5C1;
+			border-left: 1px solid #9DA5C1;
+			border-right: 1px solid #9DA5C1;
+			z-index:3;
+			width: 148px;
+			}
+
+
+ul#sub-nav li a {	display: block;
+			text-decoration: none;
+			padding: 5px;
+			color: #688B36;
+			font: 8pt arial, verdana, helvetica, sans-serif; font-weight: normal;
+			}
+
+
+
+
+ul#sub-nav li		{ background-color: #FFFFFF; border-bottom: 1px solid #9DA5C1; background-image: url("picts/spacer.gif");  }
+
+
+
+ul#sub-nav li a:hover	{ background-color: #F0F0F0; COLOR: #000000; background-image: url("picts/spacer.gif"); }
+
+.buttontext
+{
+	font: 8pt arial, verdana, helvetica, sans-serif; 
+}
+.lefttext
+{
+	font: 9pt arial, verdana, helvetica, sans-serif; 
+}
+.contenttext
+{
+	font: 9pt arial, verdana, helvetica, sans-serif;
+}
+.contenttexthigh
+{
+	font: 9pt arial, verdana, helvetica, sans-serif;
+	height:25px; 
+}
+.heardercontenttext
+{
+	font: 9pt arial, verdana, helvetica, sans-serif;font-weight:bold; 
+	height:20px; 	
+}
+.clsflash
+{
+width:120px;
+height:80px;
+}
+.clsprods
+{
+widows:120px;
+height:100px;
+text-align:center;	
+}
+.clsspaceprod
+{
+height:5px;
+}
+.clsspacegraphs
+{
+height:5px;
+}
+
+.clsGraphicCap
+{
+color: #688B36;
+	font: 8pt arial, verdana, helvetica, sans-serif; font-weight: bold;
+}
+
+.clsimgprod
+{
+width:120px;
+height:100px;
+border:0;
+}
+.clsProdSpecCap
+{
+color: #688B36;
+	font: 8pt arial, verdana, helvetica, sans-serif; font-weight: bold;
+}
+
+.clsLinks
+{
+height:25px;
+text-align:left;
+border-bottom: 1px solid #CCCCCC;
+width:100%;
+}
+.clsLinksIcon
+{
+border-bottom: 1px solid #CCCCCC;
+text-decoration:none;
+}
+.clsLinkCap
+{
+color: #688B36;
+font: 8pt arial, verdana, helvetica, sans-serif; font-weight: bold;
+}
+.clsgraphs
+{
+height:80px;
+widows:120px;
+text-align:center;
+}
+.clsimggraphs
+{
+width:120px;
+height:80px;
+}
+clsspacegraphs
+{
+height:5px;
+}
+.hplinktext
+{
+color:#003399;
+font: 9pt arial, verdana, helvetica, sans-serif; 
+text-decoration:none;
+}
+.hplinktext:hover
+{
+color:#6F7793;
+}
+.imgdownup
+{
+cursor:pointer;
+}
+.imgdownup:hover
+{
+border:1;
+size:auto;
+
+}
+.clsmovie
+{
+width:120px;
+height:160px;
+}
+.imgButton
+{
+	cursor:pointer;
+}
+
+

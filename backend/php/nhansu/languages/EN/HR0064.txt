@@ -1,0 +1,25 @@
+Add Education
+Filter Education
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Education
+ID
+Institute
+Address
+Phone
+Fax
+Note
+The ID is empty, please try again
+The Institute is not empty
+Phone is invalid
+Fax is invalid

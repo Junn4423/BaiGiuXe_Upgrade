@@ -1,0 +1,26 @@
+Thêm Mục Bệnh Viện
+Lọc Mục Bệnh Viện
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Bệnh Viện
+Mã
+Tên bện viện
+Địa chỉ
+Điện thoại
+Fax
+Chú ý
+Tỉnh hoặc bang
+Mã không có dữ liệu, xin hãy thử lại.
+Bạn phải nhập phần tên bện viện.
+Số điện thoại không hợp lệ
+Số fax không hợp lệ

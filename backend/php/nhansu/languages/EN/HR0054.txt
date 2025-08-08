@@ -1,0 +1,21 @@
+SOF CO., LTD
+Fillter employees
+Fillter
+Cancel
+Cancel
+Refresh 
+Refresh 
+Help
+Help
+CourseID
+BeginDateFrom
+To
+CompleteDateFrom
+To
+TotalHoursFrom
+To
+TotaCreditFrom
+To
+TotaCostFrom
+To
+Status

@@ -1,0 +1,33 @@
+Thêm Liên Hệ
+Lọc Liên Hệ
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Liên Hệ
+Mã tự động
+Mã chào giá
+Tên liên hệ
+Chức vụ
+Điện thoại di động
+Đối tượng khách hàng
+Email
+Trạng thái
+Mã khách hàng
+Ghi chú
+Người tạo
+Ngày tạo
+CustomerID is not empty
+Job contract is not empty
+You must input date
+Phone is invalid
+Comment Is not empty!
+

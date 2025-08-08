@@ -1,0 +1,23 @@
+Thêm Mục Nhập Ca Đêm Và Tăng Ca
+Lọc Mục Nhập Ca Đêm Và Tăng Ca
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nhập Ca Đêm Và Tăng Ca
+Mã tự động
+Mã lịch
+Mã công
+Giờ làm
+Ngày làm
+Mã nhân viên
+Mã tạo
+Giá tính

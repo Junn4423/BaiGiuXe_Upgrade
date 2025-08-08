@@ -1,0 +1,40 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi:
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Mục Nhân Viên Thuộc Phòng Ban
+STT
+Chọn hết
+Mã tự động
+Lần tính
+Mã nhân viên
+Mã phòng ban
+Trạng thái NV
+Có quyết toán PIT
+Kiểu tính lương
+Ngày làm trong tháng
+Ngày kết thúc làm trong tháng
+Sắp ca thêm
+Cho phép sắp ca thêm
+Ưu tiên tính KPI
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web
+Tên nhân viên

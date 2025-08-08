@@ -1,0 +1,26 @@
+Add Products Customer 
+Filter Products Customer 
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Products Customer 
+AutoID
+CustomerID
+ProductID
+ProductName
+Characteristic
+Qualitative
+ItemID
+Note
+CustomerID is not empty
+ProductID is not empty
+ProductName is not empty

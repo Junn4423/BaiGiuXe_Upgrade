@@ -1,0 +1,28 @@
+Thêm Mục Xem Lịch Đã Tạo
+Lọc Mục Xem Lịch Đã Tạo
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Xem Lịch Đã Tạo
+Mã tự động
+Mã  lịch
+Mã tháng làm việc
+Ngày làm việc
+Giờ đã nhập
+Giờ vào
+Giờ ra
+Ghi chú
+Mã tạo
+Ca
+Mã lịch không được rỗng
+Mã tháng không được rỗng
+Bạn phải nhập ngày

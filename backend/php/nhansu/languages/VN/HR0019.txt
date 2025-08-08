@@ -1,0 +1,24 @@
+.../////////////////////////////////////
+Báo cáo về hợp đồng
+Thông Tin Chi Tiết Hợp Đồng
+Tên nhân viên:
+Mã nhân viên:
+Tên hợp đồng:
+Mã hợp đồng:
+Ngày bắt đầu làm:
+Ngày kết thúc làm:
+Vòng ký hợp đồng:
+Ngày ký mới:
+Trạng thái hợp đồng:
+Hoạt động
+Tạm hoãn
+Diễn giải nội dung:
+Ngày kết thúc hợp đồng:
+Lý do kết thúc:
+Tên phụ cấp:
+Tỷ lệ:
+Ngày quy định:
+Ghi chú:
+Không có thông tin chi tiết về hợp đồng này
+In
+Đóng

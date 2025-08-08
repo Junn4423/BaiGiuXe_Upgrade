@@ -1,0 +1,21 @@
+Add Type History
+Filter Type History
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Type History
+ID
+Name
+Picture
+...//Begin messages part
+The ID is empty, please try again
+Name is not empty

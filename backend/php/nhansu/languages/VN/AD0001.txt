@@ -1,0 +1,24 @@
+﻿QUẢN TRỊ NGƯỜI DÙNG
+QUẢN TRỊ
+Tìm kiếm
+Tìm
+Thông tin người dùng
+Mã nhóm:
+Số nhân viên:
+Ngày:
+Giờ:
+Thoát
+Danh sách mục
+Danh sách nhân viên
+Danh sách thông báo
+Bảo mật người dùng
+Đổi mật mã
+Xem timelog
+Danh sách điều khiển đặc biệt
+Lọc nhân viên
+Tên:
+Giờ:
+Số người dùng:
+Quản lý thư viện
+Cảnh báo ký hợp đồng
+Cảnh báo đánh giá

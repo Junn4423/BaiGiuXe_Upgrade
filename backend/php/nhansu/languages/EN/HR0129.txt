@@ -1,0 +1,14 @@
+SOF CO., LTD  
+//………….
+Manager Information About Employee Of Contracts 
+Print
+Close
+No data
+Order
+Department Name
+Employee ID
+Employee Name
+StartDate Contract
+EndDate Contract
+Times of Contract
+

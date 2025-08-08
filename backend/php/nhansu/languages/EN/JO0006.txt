@@ -1,0 +1,41 @@
+Add Tasks
+Filter Tasks
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Tasks
+TaskID
+Name
+ModuleId
+StateCodeId
+CodeDateConfirm
+StateTestId
+TestDateConfirm
+Description
+CommentCode
+CommentTest
+Department
+EmployeeID
+CoderID
+TesterID
+AnalysisID
+CodeDateFrom
+CodeDateTo
+TestDateFrom
+TestDateTo
+Parent
+State
+Period
+DateCreate
+TaskID is not empty
+Subject is not empty
+Description is not empty

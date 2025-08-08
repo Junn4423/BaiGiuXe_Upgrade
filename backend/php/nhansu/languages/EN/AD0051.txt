@@ -1,0 +1,30 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Reload
+Help
+Help
+Department
+Order
+Department ID
+Department Name
+Phone
+Company ID
+Location
+Jobs
+Contacts
+Phone
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Month FN
+Code Accountant

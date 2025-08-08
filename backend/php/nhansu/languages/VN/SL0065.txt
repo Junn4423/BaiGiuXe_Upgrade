@@ -1,0 +1,40 @@
+REPORT RESULT MARKETING
+Warehouse
+StartDate
+EndDate
+Order
+ItemID
+Item Name
+UnitID
+Begin Rec-Out
+Receiption
+Outstock
+End Rec-Out
+Report
+Refresh
+Total quantity
+Phone
+Fax
+TaxNo
+Address
+DatePrint
+Invoice
+CreateDate
+Quantity
+Type
+Lot
+Title
+Source
+ReferenceID
+Note
+Color
+Characteristic
+Extention 1
+Extention 2
+Report public
+Report detail
+Report belong to condition
+Report belong to condition detail
+SALER
+MANAGER
+Category Item

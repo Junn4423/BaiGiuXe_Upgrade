@@ -1,0 +1,19 @@
+.../////////////////////////////////////
+Báo cáo về nội dung đánh giá
+Thông Tin Chi Tiết Nội Dung Đánh Giá
+Tên nhân viên:
+Mã nhân viên:
+Ngày đánh giá:
+Vòng đánh giá:
+Đánh giá từ ngày:
+Đến ngày:
+Loại:
+Nội dung đánh giá:
+Không có thông tin chi tiết về đánh giá này
+...Các loại đánh giá:
+Công việc loại tốt (A).
+Công việc loại khá tốt (B).
+Công việc loại bình thường (C).
+Công việc loại kém (D).
+In
+Đóng

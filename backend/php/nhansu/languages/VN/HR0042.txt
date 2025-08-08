@@ -1,0 +1,40 @@
+ERP SOF
+Lọc nhân viên
+Lọc
+Hủy
+Hủy
+Nạp lại
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+Tên hợp đồng
+Ngày bắt đầu hợp đồng từ
+đến
+Ngày nghỉ từ
+đến
+Vòng ký hợp đồng
+Ngày ký mới hợp đồng từ
+đến
+Đánh giá
+Ngày đánh giá từ
+đến
+Vòng đánh giá
+Ngày bắt đầu đánh giá từ
+đến
+Ngày kết thúc đánh giá từ
+đến
+Huấn luyện
+Mã khóa
+Ngày bắt đầu huấn luyện từ
+đến
+Ngày hoàn thành huấn luyện từ
+đến
+Tổng giờ từ
+đến
+Tổng tiền khóa học từ
+đến
+Tổng chi phí huấn luyện từ
+đến
+Có bằng
+Hợp đồng
+Loại

@@ -1,0 +1,32 @@
+Thêm Mục Chi Tiết
+Lọc Mục Chi Tiết
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết 
+Mã tự động
+Mã nhập
+Mã sản tài sản
+Số lượng
+Mã đơn vị
+Giá
+Đơn vị giá
+Số tiền quy đổi
+Nợ
+Có
+Chú ý
+Ngày nhập
+Chú ý
+Ngày nhập
+Mã tài sản không rổng
+Bạn phải nhập số
+Mã ngày nhập không rổng

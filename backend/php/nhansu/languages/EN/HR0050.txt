@@ -1,0 +1,20 @@
+...//Begin control icon part
+View detail
+View
+Reload
+Reload
+Help
+Help
+...//Begin show data part
+Resource
+Order
+Select All
+Resource Category Name
+Resource Name
+Authority
+Has right
+Hasn't right
+Select resource category
+All
+You can't view detail about this category.
+...//Begin messages part

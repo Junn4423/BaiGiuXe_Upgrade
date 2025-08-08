@@ -1,0 +1,42 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Lần Thanh Toán
+STT
+Chọn hết
+Mã tự động
+Mã nhân viên
+Mã CV
+Lần giao hàng
+Người tạo
+Ngày tạo
+Từ ngày
+Đến ngày
+Ghi chú
+Đã xong
+Nhà xe
+Địa chỉ
+Liên hệ
+ĐT
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web
+

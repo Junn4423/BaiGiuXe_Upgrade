@@ -1,0 +1,13 @@
+…
+Trang in
+Hủy bỏ
+Nạp lại
+Trợ giúp
+Chọn thời gian in báo cáo
+Từ:
+Đến:
+Hướng dẫn: Chọn ngày bắt đầu và ngày kết thúc, sau đó nhấn nút Trang In (bên trên).
+Chọn ngày
+Hãy chọn ngày bắt đầu
+Hãy chọn ngày kết thúc
+Xin hãy chọn đúng ngày bắt đầu và ngày kết thúc

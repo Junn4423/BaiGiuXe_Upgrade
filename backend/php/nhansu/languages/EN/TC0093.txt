@@ -1,0 +1,20 @@
+Add Week Work
+Filter Week Work
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Week Work
+ID
+Name
+Description
+ID is not empty
+Name is not empty

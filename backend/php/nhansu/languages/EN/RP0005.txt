@@ -1,0 +1,14 @@
+REPORT PRODUCTS DEPARTMENT MONTHLY
+Calculate salary
+Department
+Status Employee
+Type display
+Signed word
+Unsigned word
+
+
+
+
+
+Report
+Refresh

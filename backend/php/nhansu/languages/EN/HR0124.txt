@@ -1,0 +1,50 @@
+Add Contract Labour
+Filter Contract Labour
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error:
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Contract Labour
+AutoID
+EmployeeID
+Type contract
+Start Date
+End Date
+Comment
+Time work per one day
+Template labour contract
+State
+EmployeeID is not empty
+Type contract is not empty
+You must input date
+DeparmentWork
+Off work on week
+TypeCalculate
+Eat Free
+Wash Free
+Union fee
+Phone Free
+Note
+House Free
+TypeSalary
+Parking Free
+Salary Insurance
+Monthly Salary
+Salary Bonus
+Currency
+OtherSalary
+SalarySeniority
+Position VN
+Position EN
+Position Law VN
+Position Law EN
+Reference contract
+Name Staff

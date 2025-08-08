@@ -1,0 +1,18 @@
+…
+Xóa
+Hủy bỏ
+Nạp lại
+Trợ giúp
+Chọn thời gian xóa dữ liệu lưu trữ thời gian đăng nhập
+Từ:
+Đến:
+Hướng dẫn: Chọn ngày bắt đầu và ngày kết thúc, sau đó nhấn nút Xóa (bên trên).
+Chọn ngày
+Hãy chọn ngày bắt đầu
+Hãy chọn ngày kết thúc
+Xin hãy chọn đúng ngày bắt đầu và ngày kết thúc
+Xóa thành công
+Xóa không thành công, xin hãy thử lại
+Ngày đã chọn không nằm trong những ngày chứa thông tin, xin hãy chọn lại.
+Hiện tại, dữ liệu còn lưu trữ từ ngày
+đến

@@ -1,0 +1,20 @@
+...
+Search Contracts
+Contract ID
+Contract Name
+Customer ID
+Name
+Contract date from
+to
+Search
+Go back last page
+There aren't data, please try again
+...///////////////////////////////
+Order
+Contract ID
+Order Name
+Customer ID
+Customer's Company
+Contract date
+Shipping method
+Payment method

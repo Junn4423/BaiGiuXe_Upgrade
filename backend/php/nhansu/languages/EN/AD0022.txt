@@ -1,0 +1,71 @@
+Add Employee
+Filter Employee
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Employee
+Employee ID
+First Name
+Middle Name
+Last Name
+Title
+Nick Name
+Photograph
+Company rankings
+State
+SSNNo
+SSNDate
+SSNPlace
+Tax Num
+BankID/Information
+Birthdate
+BirthPlace
+MaritalStatus
+Gender
+Smoker
+SocialInsuranceNo
+IssueDate
+NationID
+Nationality
+ReligionID
+EthnicRaceID
+JobTitleID
+EmploymentStatusID
+Education Level
+DepartmentID
+JoinedDate
+CountryOrRegion
+StateOrProvince
+City
+Street1
+Street2
+ZIPCode
+HomePhone
+WorkPhone
+MobilePhone
+WorkEmail
+OrtherEmail
+Manager
+Insurance Place
+DateOutJob
+Name is not empty
+Phone is invalid
+EmployeeID is not empty
+Origin
+Title EN
+Title Law VN
+Group
+AddCMND
+Training Local
+Foreign Language
+IT
+Title Law EN

@@ -1,0 +1,27 @@
+Add History Negotiation Supplier
+Filter History Negotiation Supplier
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit History Negotiation Supplier
+AutoID
+SupplierID
+Job Contact
+Contacter
+Số điện thoại
+DateContact
+DateCreate
+Comment
+CustomerID is not empty
+Job contract is not empty
+You must input date
+Phone is invalid

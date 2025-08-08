@@ -1,0 +1,87 @@
+BÁO CÁO NHÂN VIÊN
+Làm từ ngày
+Làm đến ngày
+Báo cáo từ ngày
+Báo cáo đến ngày
+Giới tính
+Loại báo cáo
+Lấy theo ngày nghỉ nhân viên
+Số tuổi
+Quan hệ
+Theo ngày/tháng/năm sinh
+Phụ thuộc
+Số cấp lấy
+Hiển thị tiêu đề
+Chọn mục hợp đồng
+Ngày hết hạn HĐ từ
+Ngày hết hạn HĐ đến
+Danh Mục Nhân Viên Làm Việc
+STT
+Mã nhân viên
+Tên
+Tên Đệm
+Họ
+Chức vụ
+Tên tiếng anh
+Hình
+Thứ hạng công ty
+Trạng thái
+Mã CMND
+Ngày cấp CMND
+Nơi cấp
+Mã số thuế
+Số tài khoản/Thông tin
+Ngày sinh
+Nơi sinh
+Tình trang gia đình
+Phái
+Báo cáo công việc
+Số sổ BHXH
+Ngày cấp
+Quốc tịch
+Dân tộc
+Tôn giáo
+Màu da
+Mã chủ đề công việc
+Mã trạng thái tuyển dụng
+Trình độ văn hóa
+Mã phòng ban
+Ngày bắt đầu làm việc
+Mã quốc gia
+Mã tỉnh
+Công việc phải làm
+Địa chỉ hộ khẩu hay thường trú
+Địa chỉ tạm trú
+Nghề nghiệp
+Số điện thoại nhà
+Số điện thoại công ty
+Số điện thoại di động
+Email công ty
+Email khác
+Chuyên môn
+Nơi cấp bảo hiểm
+Ngày nghỉ việc
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web
+Tính
+Nguyên quán
+Tuổi
+Thâm  niên
+BL CB
+Số người phụ thuộc
+Hệ số căn bản
+Bằng cấp
+Hội viên
+Lương tính bảo hiểm
+Chức vụ EN BBG
+Chức vụ luật
+Nhóm
+Địa chỉ CMND
+Chi nhánh công ty
+Ngoại ngữ
+Tin học

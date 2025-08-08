@@ -1,0 +1,23 @@
+Thêm KPI Hàng Tháng
+Lọc KPI Hàng Tháng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Thiết Lập KPI Hàng Tháng
+Mã tự động
+Mã nhân viên
+Lần tính
+Mã KPI
+Ghi chú
+Người khoá
+Khóa
+Mã không được rỗng!

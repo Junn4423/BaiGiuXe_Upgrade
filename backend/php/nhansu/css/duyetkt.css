@@ -1,0 +1,29 @@
+.csduyetcap1
+{
+	background:url(../duyet.png) no-repeat top center;
+	width:150px;
+	height:124px;
+}
+.csduyetcap1_ten
+{
+	padding-top:60px;
+	width:100%;
+	text-align:center;
+	min-height:20px;
+	font:bold 14px Arial,tahoma;
+	
+}
+.csduyetcap1_title
+{
+	width:100%;
+	text-align:center;
+	height:20px;
+	
+	font:bold 14px Arial,tahoma;
+}
+.csduyetcap1_ngay
+{
+	width:100%;
+	text-align:center;
+	font:10px Arial,tahoma;
+}

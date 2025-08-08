@@ -1,0 +1,16 @@
+…
+Save
+Save
+Cancel
+Cancel
+Reload This Page
+Reload
+Help
+Help
+Category ID
+Description
+Insert successfull 
+Insert error:
+Update successfull 
+Update error:
+CategoryID is not empty

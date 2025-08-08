@@ -1,0 +1,25 @@
+Add Email Marketing
+Filter Email Marketing
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Email Marketing
+AutoID
+UserID
+Email
+Name
+Note
+No/Yes send
+Orders
+UserID is not empty
+Name is not empty
+Email is invalid

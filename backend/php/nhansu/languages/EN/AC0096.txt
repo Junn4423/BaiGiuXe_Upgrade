@@ -1,0 +1,52 @@
+Add Fixed Asset
+Filter Fixed Asset
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Fixed Asset
+FixedID
+Name
+CategoryID
+DepartmentUsed
+Quantity
+AssetLabels
+Power
+YearCreate
+ContryCreateID
+Insurance
+ConditionInsurance
+Description
+AttachAccessories
+SupplierID
+DateBuy
+DateSave
+DateUsed
+DateCal
+AccountCost
+AccountDepreciation
+AccountSpent
+StateDepreciation
+AccountCollectionCost
+CapitalBudget
+Loans
+Equity
+VentureCapital 
+OtherCapital
+Cost
+AccumulatedDepreciation
+ResidualValue 
+ValueDepreciation
+TimeUsed
+ScaleDepreciation
+ValuePerYear
+DepreciationMethod 
+Picture

@@ -1,0 +1,20 @@
+…
+Save
+Cancel
+Reload
+Help
+Reset Password
+New Password:
+Confirm Password:
+for:
+Update successfull 
+Update error:
+Please enter new password
+Password must be longer than 5 letters and shorter than 20 letters
+Please enter confirm new password
+Confirm passoword must be as same as new password
+Set State:
+Enable
+Hinder
+Please select the state
+ID:

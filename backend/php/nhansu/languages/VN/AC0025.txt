@@ -1,0 +1,24 @@
+Thêm Mục Chi Tiết Phiếu Chi
+Lọc Mục Chi Tiết Phiếu Chi
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết Phiếu Chi
+Mã tự động
+Mã phiếu chi
+Tiền
+Qui đổi
+Tài khoản nợ
+Tài khoản có
+Mô tả
+Bạn phải nhập phiếu thu
+Tiền không được nhỏ hợn 0.

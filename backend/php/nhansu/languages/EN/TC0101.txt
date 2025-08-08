@@ -1,0 +1,25 @@
+Thêm Mục Đánh Giá
+Lọc Mục Đánh Giá
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Đánh Giá
+Mã đánh giá
+Tiêu đề
+Từ ngày
+Đến ngày
+NV Tạo
+Ngày tạo
+Người duyệt
+Chấp nhận
+Bạn phải chọn ngày
+

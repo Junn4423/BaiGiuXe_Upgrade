@@ -1,0 +1,33 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+List Customers
+Order
+AutoID
+EmployeeID
+IntroduceID
+ManagerID
+Create Date
+Comment
+Sales revenue
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web

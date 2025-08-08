@@ -1,0 +1,20 @@
+...//Begin control icon part
+Fillter
+Fillter
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin show data part
+Fillter by resources
+Resource categories
+Authority with categories
+Has view
+Hasn't view content
+Resource name content
+Authority with name
+Has right view detail
+Hasn't right view detail
+...//Begin messages part

@@ -1,0 +1,24 @@
+Thêm Thương hiệu
+Lọc Thương hiệu
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Thương hiệu
+Mã
+Tên hhương hiệu
+Hoạt động/ Không hoạt động
+Ghi chú
+Người tạo
+Ngày giờ tạo
+...//Begin messages part
+Mã không trống!
+Tên không trống!

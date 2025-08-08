@@ -1,0 +1,21 @@
+...//Begin control icon part
+Save
+Save
+Back
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Add / Edit Job Title Employee Status
+ID:
+Job Title
+--Select--
+Employment Status:
+...//Begin messages part
+Please select Employment Status.

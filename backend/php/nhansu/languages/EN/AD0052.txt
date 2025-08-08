@@ -1,0 +1,23 @@
+Add Department
+Filter Department
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Edit Department
+Department ID
+Department Name
+Contact information
+CompanyID
+Location
+DepartmentID is not empty
+Insert successfull 
+Insert error: 
+Update successfull 
+Update error: 
+Department Name is not empty
+Month FN
+Code Accountant

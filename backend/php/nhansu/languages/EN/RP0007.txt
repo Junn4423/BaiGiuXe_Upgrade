@@ -1,0 +1,14 @@
+REPORT EAT
+Report Date
+Department
+Type Eat
+Both
+Eat None
+Eat OverTime
+Enter Title To Report
+REPORT EAT OVERTIME
+REPORT EAT ALL
+REPORT EAT
+REPORT MONEY++
+Report
+Refresh

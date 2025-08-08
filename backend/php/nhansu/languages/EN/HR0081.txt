@@ -1,0 +1,45 @@
+/*------------------------------------*/
+Add employee personal information
+Add employee personal information
+Save
+Save
+Go back last page
+Back
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error:
+/*------------------------------------*/
+Employee ID
+SSN No:
+SIN No:
+Other ID:
+Smoke:
+Driver's License Number:
+Military Service:
+Nationality:
+--Select Nationality--
+Date of Birth:
+Marital Status:
+--Select--
+Unmaried
+Married
+Divorced
+Others
+Gender:
+Male
+Female
+License Expiry Date:
+Ethnic Race:
+--Select Ethnic Race--
+/*------------------------------------*/
+Double click to clear date
+Must be number
+Please select Birth Date
+Please select License Expiry Date
+Personal Information
+Yes
+No
+SSN Date
+SSN Place 
+Birth Place 

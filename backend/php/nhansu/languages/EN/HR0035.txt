@@ -1,0 +1,24 @@
+SOF CO., LTD
+Add new courses
+New
+Edit this courses
+Edit
+Delete courses
+Delete
+Reload This Page
+Reload
+Help
+Help
+List of coursedetails
+Order
+ID
+Section
+Instrutctor
+StartDate
+EndDate
+Course
+Back
+Back
+Go to section list
+Section
+Back

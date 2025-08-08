@@ -1,0 +1,19 @@
+SOF CO., LTD
+Add new  school
+New
+Edit this school
+Edit
+Delete school
+Delete
+Reload This Page
+Reload
+Help
+Help
+List of school
+Order
+ID
+Name
+City
+Email
+Phone
+Back 

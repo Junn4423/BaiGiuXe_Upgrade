@@ -1,0 +1,9 @@
+BÁO CÁO CHUNG
+Loại báo cáo
+Ngày bắt đầu
+Ngày kết thúc
+Báo cáo
+Quay lại
+1.Báo cáo tổng hợp vận chuyển container 
+2.Báo cáo bảng theo dõi container 
+3.Báo cáo tổng hợp vận chuyển xe tải 

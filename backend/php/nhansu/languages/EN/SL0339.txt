@@ -1,0 +1,29 @@
+Add Send From
+Filter Send From
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Sender From
+AutoID
+StaffID
+Code
+Creator
+Create Date
+Name
+Group
+Attention
+Title
+Fax
+Tel
+Code is not empty
+
+

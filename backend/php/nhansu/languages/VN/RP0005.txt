@@ -1,0 +1,14 @@
+BÁO CÁO SẢN PHẨM THEO TỔ HÀNG THÁNG
+Tháng tính lương
+Phòng ban
+Trạng thái nhân viên
+Chọn cách hiển thị
+Chữ có dấu
+Chữ không dấu
+
+
+
+
+
+Báo cáo
+Nạp lại

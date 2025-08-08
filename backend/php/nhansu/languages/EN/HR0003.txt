@@ -1,0 +1,33 @@
+...//Begin control icon part
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin show data part
+Resource
+Order
+Select All
+Resource Category Name
+Company Name
+Resource Name
+Descriptions
+...//Begin messages part
+Delete successfully
+Could not deleted, error: 
+View detail
+View
+Add categories
+Category
+Authority
+Has right
+Hasn't right
+Fillter for resources
+Fillter

@@ -1,0 +1,28 @@
+Add Program Promotion
+Filter Program Promotion
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+Edit Program Promotion
+
+ProgramID
+Title
+DateFrom
+DateTo
+PersonCreate
+Create Date
+DateApproval
+Approval
+PercentDiscount
+MemberDiscount
+LastYearDiscount
+CodeLastYearDiscount
+ProgramID is not empty

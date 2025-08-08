@@ -1,0 +1,48 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+PURCHASE ORDER DETAIL
+LIST PURCHASE ORDER
+Order
+PurchaseOrderID
+SupplierID
+Title
+StartDate PurchaseOrder
+DeliveryDate
+SalesTaxRate
+PaymentMethod
+ShippingMethod
+Note
+EmployeeID
+State
+AutoID
+ITEM NAME
+QUANTITY 
+UNIT
+PRICE 
+UNIT PRICE
+TAX RATE
+STYLE
+COLOR NAME
+STANDARDS
+NOTE 
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file

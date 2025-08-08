@@ -1,0 +1,30 @@
+Add Delivery Status
+Filter Delivery Status
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Delivery Status
+AutoID
+CONTRACT_ID
+DELIVERY_DATE
+ACTUAL_DELIVERY_DATE
+MRDV
+DAYS_ALLOWANCE
+DELIVERY_STATUS
+CREATOR
+CREATE DATE
+CONTRACT_ID is not empty
+DELIVERY_DATE is not empty
+You must input date
+Phone is invalid
+Comment Is not empty!
+

@@ -1,0 +1,37 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Lưu
+Lưu
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Chi tiết bản hợp đồng
+Nhân viên
+Hợp đồng
+Mã
+Vòng ký hợp đồng:
+Ngày ký mới:
+Trạng thái hiện tại:
+Hoạt động
+Tạm hoãn
+Mô tả thông tin hợp đồng:
+Ngày kết thúc hợp đồng:
+Lý do kết thúc hợp đồng:
+...///Bắt đầu từ phần thông báo
+Bạn phải chọn ngày ký lại hợp đồng
+Bạn phải chọn ngày kết thúc hợp đồng
+Ngày bắt đầu phải nhỏ hơn ngày kết thúc
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+Sửa
+Sửa
+Xóa
+Xóa
+Xóa thành công.
+Xóa không được, lỗi: 
+Bạn chắc chắn muốn xóa bản chi tiết đánh giá này?

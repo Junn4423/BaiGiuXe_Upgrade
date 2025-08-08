@@ -1,0 +1,20 @@
+Add Identifier
+Filter Identifier
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Identifier
+CategoryID
+Name
+Description
+CategoryID is not empty
+Name is not empty

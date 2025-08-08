@@ -1,0 +1,116 @@
+/* CSS Document */
+table
+{
+	border:0px;
+	word-spacing:1px;
+	/*table-layout:center;*/
+	/*background-color:#FBFBFB;*/
+	/*background-color:#F7F3F7;*/
+}
+td
+{
+	height:20px;
+	/*background-color:#E6E8FF;*/
+}
+.tdheader{
+	border:0;
+	padding:1px;
+	padding-left:2px;
+	padding-right:2px;
+	padding-top:1px;
+	padding-bottom:1px;
+	background-color:#F4F4F7;
+	
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	/*font-weight:bold;*/
+}
+
+.tdcontent{
+	padding-left:2px;
+	padding-right:2px;
+	padding-top:1px;
+	padding-bottom:1px;
+}
+
+.tbl{
+	border:0;
+	padding:1px;
+	padding-left:1px;
+	padding-right:1px;
+	padding-top:1px;
+	padding-bottom:1px;
+	bordercolordark:#999999;
+	background-color:#888888;
+	bordercolorlight:#999999;
+	/*background-color:#F0F0F0;*/
+}
+.td{
+	border:0;
+	padding:1px;
+	padding-left:2px;
+	padding-right:2px;
+	padding-top:1px;
+	padding-bottom:1px;
+	background-color:#FFFFFF;
+	border-color:#CCCCCC;
+	/*bordercolor:#CCCCCC;*/
+	
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+}
+.tdanalysis{
+	border:0;
+	padding:1px;
+	padding-left:2px;
+	padding-right:2px;
+	padding-top:1px;
+	padding-bottom:1px;
+	border-color:#CCCCCC;
+	
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+}
+.tblprint{
+	border:1px;
+	border-width:1px;
+	border-color:#F0F0F0;
+	border-left-color:#F0F0F0;
+	border-right-color:#F0F0F0;
+	border-top-color:#F0F0F0;
+	border-bottom-color:#F0F0F0;
+	background-color:#FFFFFF;
+}
+.tdprint{
+	border-width:1px;
+	padding:1px;
+	padding-left:2px;
+	padding-right:2px;
+	padding-top:1px;
+	padding-bottom:1px;
+	border-color:#F0F0F0;
+	border-left-color:#F0F0F0;
+	border-right-color:#F0F0F0;
+	border-top-color:#F0F0F0;
+	border-bottom-color:#F0F0F0;
+	
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+}
+.tdhprint{
+	border-width:1px;
+	padding:1px;
+	padding-left:2px;
+	padding-right:2px;
+	padding-top:1px;
+	padding-bottom:1px;
+	border-color:#F0F0F0;
+	border-left-color:#F0F0F0;
+	border-right-color:#F0F0F0;
+	border-top-color:#FFFFFF;
+	border-bottom-color:#F0F0F0;
+	background-color:#F4F4F7;
+	
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+}

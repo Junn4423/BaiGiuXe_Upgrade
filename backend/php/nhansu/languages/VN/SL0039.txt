@@ -1,0 +1,52 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+SALE SUCCESSFULL  
+Delete successfully!
+Could not deleted, error:
+RETAIL DETAIL 
+LIST RETAIL
+Order
+RetailID
+WarehouseID
+EmployeeID
+Title
+Source
+ReferenceID
+Locked
+Note
+DateRetail
+0.No confirm
+1.Confirm
+RetailDetailID
+ItemID
+Quantity
+UnitID
+OtherQuantity
+OtherUnitID
+Price
+Currency
+Tax
+Type
+Owe
+Own
+LotID
+Note
+AutoID 
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web

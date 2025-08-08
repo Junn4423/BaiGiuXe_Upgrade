@@ -1,0 +1,29 @@
+Thêm Mục Tạo Lịch Làm Việc
+Lọc Mục Tạo Lịch Làm Việc
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Tạo Lịch Làm Việc
+Mã tự động
+Mã nhân viên
+Mã dự án
+Ngày bắt đầu
+Ngày kết thúc
+Hoạt động
+Khóa
+Người tạo
+Ngày tạo
+Mã nhân viên không được rỗng
+Mã dự án không được rỗng
+Bạn phải nhập ngày
+Ngày bắt đầu phải nhỏ hơn ngày kết thúc
+Khoản ngày phải thuộc khoản ngày dự án cho phép

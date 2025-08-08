@@ -1,0 +1,20 @@
+Add New Method Fixed Asset
+Save
+Save
+Back
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Method Fixed Asset
+ID:
+Name:
+Note
+The ID is empty, please try again
+The Name is not empty

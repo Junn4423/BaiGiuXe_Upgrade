@@ -1,0 +1,152 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Mục Người Dự Tuyển
+STT
+Mã tự động
+Mã vị trí tuyển dụng
+Tên
+Tên lót
+Họ
+Biệt danh
+Mã CMND
+Ngày cấp CMND
+Nơi cấp
+Ngày sinh
+Nơi sinh
+Phái
+Quốc tịch
+Dân tộc
+Tôn giáo
+Tình trang gia đình
+Mã quốc gia
+Mã tỉnh
+Địa chỉ hộ khẩu hay thường trú
+Địa chỉ tạm trú
+Số điện thoại nhà
+Số điện thoại công ty
+Số điện thoại di động
+Email công ty
+Văn hóa
+Mức lương hiện tại
+Mức lương mong muốn
+Trình độ học vấn
+Ghi chú thêm học vấn
+Lịch sử công việc
+Kinh nghiệm đi du lịch
+Ngoại ngữ
+Kỹ năng vi tính
+Điểm mạnh
+Điểm yếu
+Tham chiếu
+Ghi chú
+Hình ảnh
+Người nhập
+Ngày nhập
+Trạng thái
+Ngày bắt đầu làm việc
+Người ghi nhận trạng thái
+Trạng thái tuyển dụng
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web
+Kết quả phỏng vấn
+Chiều cao
+Cân nặng
+Khuyết tật
+Số con
+Tính chất khó công việc
+Làm ngoài giờ, chủ nhật
+Công việc cần những kỹ năng gì
+Các kỷ năng chuyên môn anh (chị) thông thạo nhất
+Định hướng nghề nghiệp trong 02 - 03 năm tới của anh chị 
+Lý do chính anh/chị muốn vào làm việc
+Bạn có đánh giá được giá trị sức lao động của mình không
+Chúng tôi có nhận ra những câu trả lời không trung thực
+Người thân, bạn bè ở TDL
+Thường thay đổi số điện thoại di động
+Ngày có thể nhận việc
+Lương đề nghị
+Lương sau thử việc
+Đề nghị khác
+Đề nghị khác
+Phần mềm khác
+Vị trí khác
+Tên, địa chỉ trường, nơi đào tạo 
+Loại hình đào tạo 
+Chuyên nghành 
+Tốt nghiệp loại
+Thời gian học 
+Tên, địa chỉ trường, nơi đào tạo 
+Loại hình đào tạo 
+Chuyên nghành 
+Tốt nghiệp loại
+Thời gian học 
+Tên, địa chỉ trường, nơi đào tạo 
+Loại hình đào tạo 
+Chuyên nghành 
+Tốt nghiệp loại
+Thời gian học 
+Thời gian công tác từ
+Thời gian công tác đến
+Tên đơn vị 
+Ngành họat động 
+Địa chỉ 
+Quy mô 
+Nhiệm vụ khi mới vào 
+Chức vụ sau cùng 
+Quản lý bao nhiêu nhân viên 
+Toàn bộ phận có bao nhiêu người 
+Mức lương khi mới vào 
+mức lương cuối cùng 
+Lý do nghỉ việc 
+Người liên hệ tham khảo 
+sđt 
+Thời gian công tác từ
+Thời gian công tác đến
+Tên đơn vị 
+Ngành họat động 
+Địa chỉ 
+Quy mô 
+Nhiệm vụ khi mới vào 
+Chức vụ sau cùng 
+Quản lý bao nhiêu nhân viên 
+Toàn bộ phận có bao nhiêu người 
+Mức lương khi mới vào 
+mức lương cuối cùng 
+Lý do nghỉ việc 
+Người liên hệ tham khảo 
+sđt 
+Thời gian công tác từ
+Thời gian công tác đến
+Tên đơn vị 
+Ngành họat động 
+Địa chỉ 
+Quy mô 
+Nhiệm vụ khi mới vào 
+Chức vụ sau cùng 
+Quản lý bao nhiêu nhân viên 
+Toàn bộ phận có bao nhiêu người 
+Mức lương khi mới vào 
+mức lương cuối cùng 
+Lý do nghỉ việc 
+Người liên hệ tham khảo 
+sđt 

@@ -1,0 +1,54 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Mục Đối Thủ
+STT
+Mã Đối Thủ
+Tên công ty
+Tên người liên hệ
+Tên người ký hợp đồng
+Chức vụ
+Địa chỉ
+Tỉnh
+Quốc gia
+Quận/Huyện
+Điện thoại
+Điện thoại di động
+Fax
+Mã số thuế
+Website
+E-mail
+Số tài khoản
+Ghi chú
+Quốc gia giao hàng
+Địa chỉ giao hàng
+Điên thoại giao hàng
+Ghi chú 
+Nhóm Đối Thủ
+Hoạt động/Không hoạt động
+Ngày tạo
+Người tạo
+Tên liên hệ
+Chức vụ
+Số điện thoại
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web

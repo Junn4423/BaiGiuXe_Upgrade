@@ -1,0 +1,28 @@
+Add Project
+Filter Project
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Project
+ProjectID
+DepartmentID
+Project Name
+Description
+BeginDate
+ExpireDate
+WorkHour
+Active
+DateCreate
+0.No active
+1.Active
+ProjectID is not empty
+Title is not empty

@@ -1,0 +1,28 @@
+Thêm Mục nhận hàng
+Lọc Mục nhận hàng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục nhận hàng
+Mã phiếu
+Mã kho
+Mã nhân viên
+Chủ đề nhận hàng
+Đợt ĐNNH
+Mã PMH
+Khóa
+Ghi chú
+Ngày nhập hàng
+0.Chưa xác nhận
+1.Đã xác nhận
+Bạn phải nhập mã nhận hàng
+Chủ đề kiểm kho không rỗng

@@ -1,0 +1,21 @@
+ERP SOF
+Lọc nhân viên
+Lọc
+Hủy
+Hủy
+Nạp lại
+Nạp lại
+Giúp đỡ
+Giúp đỡ
+Mã khóa
+Ngày bắt đầu huấn luyện từ
+đến
+Ngày hoàn thành huấn luyện từ
+đến
+Tổng giờ từ
+đến
+Tổng tiền khóa học từ
+đến
+Tổng chi phí huấn luyện từ
+đến
+Có bằng

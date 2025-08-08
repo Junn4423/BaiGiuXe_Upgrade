@@ -1,0 +1,36 @@
+Thêm Mục Phát Hàng Séc
+Lọc Mục Phát Hàng Séc
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Phát Hàng Séc
+Mã Séc
+Loại phiếu
+Nguồn phiếu
+Mã tham chiếu
+Tên
+Địa chỉ
+Mô tả
+Mã nhân viên
+Ngày ghi
+Tài khoản ngân hàng
+Mã tiền tệ
+Tỷ giá quy đổi
+Mã liên kết
+Hạn thanh toán
+Chứng từ gốc
+Khóa
+Bạn phải nhập tài khoản quỹ
+Mã tiền tệ không được rỗng
+Tỷ giá quy đổi khác không
+Địa chỉ không rỗng;
+Tên không rỗng.

@@ -1,0 +1,36 @@
+Add Check Income/Outcome
+Filter Check Income/Outcome
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Check Income/Outcome
+Check Income/OutcomeID
+CategoryVoteID
+Source
+ReferenceID
+Name
+Address
+Description
+EmployeeID
+DateBillPO
+Account
+Currency
+Scale
+VoiceLinkID
+PaymentDate
+InvoiceSourceID
+Lock
+Account is not empty
+Currency is not empty
+Scale is not balance zero
+Address is not empty
+Nam is not  empty.

@@ -1,0 +1,36 @@
+Add Schedule of Items
+Filter Schedule of Items
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit Schedule of Items
+AutoID
+CONTRACT_ID
+CONTRACT_ITEM_ID
+QUANTITY
+ITEM_UNIT
+AMOUNT
+UNIT_PRICE
+VAT
+ITEM_CODE
+ITEM_DESC
+CONTRACT_REF
+ITEM_ORDER
+ContracNumber
+BudgetCode
+Order
+Creator
+Create Date
+TARIFF_ID
+Item Code is not empty
+Description is not empty
+

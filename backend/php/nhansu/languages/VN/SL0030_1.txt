@@ -1,0 +1,34 @@
+Thêm Mục Chi Tiết Hợp Đồng
+Lọc Mục Chi Tiết Hợp Đồng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết Hợp Đồng
+MÃ TỰ ĐỘNG 
+MÃ TÍNH LƯƠNG
+MÃ SẢN PHẨM 
+SỐ LƯỢNG 
+ĐVT
+GIÁ 
+ĐV GIÁ
+THUẾ 
+MÃ NHÂN VIÊN
+QUI ĐỔI
+CHIẾT KHẤU
+ĐIỂM 
+NGÀY GIAO
+NGÀY HOÀN THÀNH
+Thứ tự
+Mã BOM không rổng
+Bạn phải nhập số
+Mã hợp đồng không rổng
+Nhà phân phối

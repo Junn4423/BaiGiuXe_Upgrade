@@ -1,0 +1,65 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+XUẤT THÀNH CÔNG
+Xóa thành công.
+Xóa không được, lỗi: 
+Chi tiết Doanh Số Bán Hàng
+DANH MỤC Doanh Số Bán Hàng
+STT
+Mã CTDS
+Mã kho
+Mã người dùng
+Chủ đề
+Nguồn xuất kho
+Loại thiết lập
+Khóa
+Ghi chú
+Ngày Doanh Số Bán Hàng
+Từ ngày
+đến ngày
+Mã Chi tiết ĐNGH
+Tên nhân viên
+Được tính
+Khu vực
+Ngày xuất
+Phòng ban
+Doanh số
+ĐVG
+Thuế
+Chiết khấu
+Số tồn theo lô
+Số còn lại
+Lô
+Ghi chú
+Mã tự động
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web
+Cut#
+Màu
+Kích thước
+Loại kích thước
+Sản phẩm đóng gói
+Mã đóng gói
+Trọng lượng tổng
+Trọng lượng thực
+Ngày tạo
+Thành tiền
+Tổng tiền
+Tổng số lượng
+Doanh Số Bán Hàng NHANH

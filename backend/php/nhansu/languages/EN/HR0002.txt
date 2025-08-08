@@ -1,0 +1,23 @@
+...//Begin control icon part
+Save
+Save
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin show data part
+Resource Categories
+Name
+Descriptions
+...//Begin messages part
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error 
+Name is not empty
+Description is not empty
+Authority
+Has right
+Hasn't right

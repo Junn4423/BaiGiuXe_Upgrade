@@ -1,0 +1,68 @@
+Thêm Hợp Đồng Kinh Tế
+Lọc Hợp Đồng Kinh Tế
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Begin show data part
+Sửa Hợp Đồng Kinh Tế
+STT
+Mã tự động
+Khách hàng
+Tên dự án
+Ngày bán hàng
+Ngày hết hạn BH
+Hiệu lực hợp đồng
+Khu vực
+Loại hình dự án
+Điện thoại
+Người tạo
+Trạng thái
+Tên dự án khác
+Ref.
+HĐKT Số
+Type Ref.
+Kinh Doanh Dự Án
+Đối tượng khách hàng
+Admin
+Ngày nhận hợp đồng
+Người duyệt
+Vận chuyển
+Bảo hành
+Người sửa
+Ưu tiên
+Thời gian giao hàng
+Số báo giá
+Trạng thái hợp đồng
+Chức vụ người đại diện
+Ghi chú
+Người đại diện
+Khu vực
+Phòng ban
+Địa chỉ
+Email
+Ngày tạo
+Thanh toán
+Hình thức thanh toán
+Thuế tiêu thụ đặt biệt
+Chi phí vận chuyển
+%VAT
+Ngày ký hợp đồng
+PO Số
+Loại bán hàng
+Mã công việc
+PBH Số
+Mã cha
+
+Company name is not empty
+Date is not empty
+CustomerID is not empty
+Other language contens
+Load data template to content contract

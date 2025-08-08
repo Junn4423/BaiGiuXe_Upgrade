@@ -1,0 +1,32 @@
+Thêm Mục Chi Tiết
+Lọc Mục Chi Tiết
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết Hóa Đơn
+Mã tự động
+Mã liên kết
+Mã BOM
+Số lượng
+Mã đơn vị
+Giá
+Đơn vị giá
+Số tiền quy đổi
+Mã kho
+Nợ
+Có
+Lô
+Chú ý
+Ngày nhập
+Mã BOM không rổng
+Bạn phải nhập số
+Mã ngày nhập không rổng

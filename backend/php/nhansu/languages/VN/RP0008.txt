@@ -1,0 +1,14 @@
+BÁO CÁO TẠM ỨNG
+Tháng tính lương
+Phòng ban
+Trạng thái nhân viên
+Chọn cách hiển thị
+Chữ có dấu
+Chữ không dấu
+Chọn loại tạm ứng
+
+
+
+
+Báo cáo
+Nạp lại

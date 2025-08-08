@@ -1,0 +1,14 @@
+...
+Tìm người dùng
+Tìm người dùng
+STT
+Mã ND
+Tên ND
+Nhóm ND
+Quyền ND
+Mã
+Tìm
+Tìm
+Quay lại trang trước
+Quay lại
+Không tìm thấy người dùng nào thỏa điều kiện tìm kiếm, xin hãy thử lại

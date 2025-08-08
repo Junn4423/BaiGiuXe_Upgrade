@@ -1,0 +1,27 @@
+Add Educations
+Filter Educations
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit Educations
+AutoID
+EmployeeID
+Education
+Major/Specialization
+Number years
+GPA/Score
+Start Date
+End Date
+EmployeeID is not empty
+Major/Specialization is not empty
+You must input date
+Licenses

@@ -1,0 +1,22 @@
+Thêm Chi Tiết KPI
+Lọc Chi Tiết KPI
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Chi Tiết KPI
+Mã tự động
+KPI
+Tiêu chí KPI
+Hệ số tính
+Giá trị mặc định
+Ghi chú
+Mã không được rỗng!

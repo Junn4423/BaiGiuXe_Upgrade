@@ -1,0 +1,20 @@
+Thêm Mục Cảnh Báo Xe
+Lọc Mục Cảnh Báo Xe
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi:
+Sửa thành công.
+Sửa không được, lỗi:
+Sửa Cảnh Báo Xe
+Mã
+Mã xe
+Loại cảnh báo
+Ngày bắt đầu
+Ngày hết hạn
+Ghi chú

@@ -1,0 +1,36 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+Job Title List 
+Order
+Select All
+ID
+Title Name
+Descritpion
+Comments
+Paygrade ID
+Paygrade
+Job Title with employee status
+Status
+Employment status
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file

@@ -1,0 +1,35 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+Inventory
+List Inventorys
+Order
+InventoryID
+WarehouseID
+EmployeeID
+Title
+DateInventory
+Comment
+State
+0.No confirm
+1.Confirm
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file

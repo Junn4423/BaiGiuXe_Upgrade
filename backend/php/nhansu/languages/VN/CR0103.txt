@@ -1,0 +1,43 @@
+THÊM MỤC NHÓM ĐƠN ĐẶT HÀNG
+LỌC MỤC NHÓM ĐƠN ĐẶT HÀNG
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+SỬA MỤC NHÓM ĐƠN ĐẶT HÀNG
+Mã nhóm
+Nhà cung cấp
+Chủ đề
+Ngày bắt đầu nhóm
+Ngày hết hạn nhóm
+Tỷ lệ thuế(%)
+Người tạo
+Ngày tạo
+Bạn phải nhập tên sản phẩm
+Bạn phải nhập ngày
+Ghi chú
+Mã nhân viên
+Ngày giờ tạo
+Tiền tệ thứ 2
+Tỷ giá VNĐ
+Tỷ giá tiền tệ thứ 2
+Tiền tệ chính
+Trạng thái khoá
+Ghi nhận lỗi
+Tổng tiền VNĐ
+Tổng tiền chính
+Thanh toán chính
+Tổng tiền thứ 2
+Thanh toán thứ 2
+Qui đổi thanh toán thứ 2 → chính
+Qui đổi thanh toán
+Tổng tiền nợ còn lại
+

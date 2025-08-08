@@ -1,0 +1,63 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+List Fixed Asset
+Order
+FixedID
+Name
+CategoryID
+DepartmentUsed
+Quantity
+AssetLabels
+Power
+YearCreate
+ContryCreateID
+Insurance
+ConditionInsurance
+Description
+AttachAccessories
+SupplierID
+DateBuy
+DateSave
+DateUsed
+DateCal
+AccountCost
+AccountDepreciation
+AccountSpent
+StateDepreciation
+AccountCollectionCost
+CapitalBudget
+Loans
+Equity
+VentureCapital 
+OtherCapital
+Cost
+AccumulatedDepreciation
+ResidualValue 
+ValueDepreciation
+TimeUsed
+ScaleDepreciation
+ValuePerYear
+DepreciationMethod 
+Picture
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file

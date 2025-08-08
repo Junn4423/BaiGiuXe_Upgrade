@@ -1,0 +1,30 @@
+Thêm Mục Chi Phí Tạm Ứng
+Lọc Mục Chi Phí Tạm Ứng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Phí Tạm Ứng
+Mã tự động
+Mã nhân viên
+Lần tính
+Loại chi phí tạm ứng
+Tiền
+Mã tiền tệ
+Lý do
+Khóa
+Người tạo
+Mã nhân viên không được rỗng
+Tháng không hợp lệ
+Năm không hợp lệ
+Ngày tạo
+Thời hạn thanh toán
+Ngày ghi

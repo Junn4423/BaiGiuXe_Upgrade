@@ -1,0 +1,12 @@
+SOF CO., LTD
+Cancel
+Delete
+Refresh
+Help
+List logs
+Order
+ID
+LoginDate
+LoginTime
+State
+By date

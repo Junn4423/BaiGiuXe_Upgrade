@@ -1,0 +1,37 @@
+Add Contracts Supplier
+Filter Contracts Supplier
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Contracts Supplier
+AutoID
+SupplierID
+Title
+StartDate contract
+ExpireDate contract
+SalesTaxRate
+PaymentMethod
+ShippingMethod
+Contents
+EmployeeID
+State
+QuotationID
+0.No confirm
+1.Confirm
+Company name is not empty
+Date is not empty
+CustomerID is not empty
+Other language contens
+Load data template to content contract
+No Contract
+ParentID
+(0=Sale/1=Purchase)

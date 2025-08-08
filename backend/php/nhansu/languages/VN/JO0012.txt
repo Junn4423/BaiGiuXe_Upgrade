@@ -1,0 +1,27 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Cập nhật thành công.
+Cập nhật không được, lỗi: 
+Cấu hình
+STT
+Người tạo
+Ngày cập nhật
+Người duyệt
+Người duyệt khác
+Tự động cập nhật không duyệt hết hạn đơn
+IP/Tên server chấm công
+Tên đăng nhập
+Mật khẩu
+Tên dữ liệu chấm công
+IP/Tên server chấm cơm
+Tên đăng nhập
+Mật khẩu
+Tên dữ liệu chấm cơm
+Chuyển bảng lương cc thêm email

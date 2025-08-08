@@ -1,0 +1,25 @@
+Thêm Chủ Đề Công Việc
+Lưu
+Lưu
+Quay lại
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Chủ Đề Công Việc
+Mã:
+Tên chủ đề công việc:
+Môt tả công việc:
+Diễn giải:
+Mức lương:
+--Lựa chọn--
+Tình trạng tuyển dụng
+Mã chủ đề không có, xin hãy thử lại.
+Bạn phải nhập tên chủ đề.
+Xin hãy chọn mức lương.

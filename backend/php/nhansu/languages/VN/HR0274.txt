@@ -1,0 +1,12 @@
+...Bắt đầu từ phần biểu tượng điều khiển
+Quay lại 
+Quay lại 
+Nạp lại trang này 
+Nạp lại 
+Trợ giúp 
+Trợ giúp 
+...//Begin control icon part 
+Tạo nhân viên tham gia bảo hiểm 
+Ghi tăng bảo  hiểm 
+Ghi giảm bảo hiểm 
+Hủy nhân viên tham gia bảo hiểm 

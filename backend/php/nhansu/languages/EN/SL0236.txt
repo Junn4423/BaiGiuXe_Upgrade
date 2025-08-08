@@ -1,0 +1,32 @@
+Add Distributor Sale
+Filter Distributor Sale
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Distributor Sale
+ID
+ContactID
+ItemID
+Quantity
+UnitID
+Price
+UnitPrice
+SalesTaxRate
+TimeCaculateID
+Convert
+Discount
+QtyBuy
+OB Date
+DateClose
+QtyFirst
+CustomerID
+QtyLast

@@ -1,0 +1,24 @@
+Add History
+Filter History
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit History
+AutoID
+LinkID
+Description
+User
+Date History
+User Name
+Group Code is not empty
+
+

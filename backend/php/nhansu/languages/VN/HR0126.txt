@@ -1,0 +1,29 @@
+/*------------------------------------*/
+Thêm thông tin thông số hợp đồng
+Thêm thông tin thông số hợp đồng
+Lưu
+Lưu
+Quay lại trang trước
+Quay lại
+Thêm dữ liệu thành công
+Quá trình thêm bị lỗi, nguyên nhân:
+Sửa dữ liệu thành công
+Quá trình sửa bị lỗi, nguyên nhân:
+/*------------------------------------*/
+Người tuyển dụng
+Tiền tệ
+--Chọn tiền tệ--
+Ngày trả lương
+BHXH nhân viên trả
+BHYT nhân viên trả
+BHXH công ty trả
+BHYT công ty trả
+Tên đường 2:
+Mã vùng:
+Số đt di động:
+Thư điện cơ quan:
+Thư điện tử khác:
+/*------------------------------------*/
+Người tuyển dụng không rỗng, xin thử lại 
+Xin hãy nhập số
+Tiền tệ không rỗng, xin thử lại 

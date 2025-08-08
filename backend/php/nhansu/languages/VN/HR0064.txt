@@ -1,0 +1,25 @@
+Thêm Mục Đào Tạo
+Lọc Mục Đào Tạo
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Đào Tạo
+Mã
+Tên trường
+Địa chỉ
+Điện thoại
+Fax
+Chú ý
+Mã không có dữ liệu, xin hãy thử lại.
+Bạn phải nhập phần tên trường.
+Số điện thoại không hợp lệ
+Số fax không hợp lệ

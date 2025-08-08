@@ -1,0 +1,16 @@
+…
+Add new rightcategory
+New
+Edit this rightcategory
+Edit
+Delete rightcategory
+Delete
+Reload This Page
+Reload
+Help
+Help
+Order
+Category ID
+Description
+List of category right
+Back

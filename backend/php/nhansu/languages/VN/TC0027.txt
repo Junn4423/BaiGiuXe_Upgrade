@@ -1,0 +1,42 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Mục Làm Việc Hàng Năm
+STT
+Chọn hết
+Mã tự động
+Mã nhân viên
+AL tháng
+Số năm
+Năm làm việc
+Số giờ làm
+Mã ca
+Người tạo
+Ngày tạo
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin web
+Phép năm năm trước chuyển qua
+Số phép năm đã dùng
+Số phép năm còn lại
+Số phép năm thực đã dùng
+Số phép năm thực còn lại
+AL năm

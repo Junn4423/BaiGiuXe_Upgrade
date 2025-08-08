@@ -1,0 +1,49 @@
+/*------------------------------------*/
+Thêm thông tin cá nhân nhân viên
+Thêm thông tin cá nhân nhân viên
+Lưu
+Lưu
+Quay lại trang trước
+Quay lại
+Thêm dữ liệu thành công
+Quá trình thêm bị lỗi, nguyên nhân:
+Sửa dữ liệu thành công
+Quá trình sửa bị lỗi, nguyên nhân:
+/*------------------------------------*/
+Mã NV
+Số CMND:
+Mã số lính:
+Mã số khác:
+Báo cáo công việc:
+Giấy phép lái xe số:
+Phục vụ quân đội:
+Vùng / đất nước::
+--Chọn vùng--
+Ngày sinh:
+Tình trạng hôn nhân:
+--Chọn--
+Độc thân
+Đã có gia đình
+Đã ly dị
+Khác
+Giới tính:
+Nam
+Nữ
+Ngày hết hạn:
+Màu da:
+--Chọn màu da--
+/*------------------------------------*/
+Nhấp đúp chuột để xóa ngày
+Phải là số
+Xin hãy nhập ngày sinh
+Xin hãy nhập ngày hết hạn
+Thông tin cá nhân
+Có
+Không
+Ngày cấp CMND
+Nơi cấp CMND
+Nơi sinh
+Dân tộc:
+--Chọn dân tộc--
+Tôn giáo:
+--Chọn tôn giáo--

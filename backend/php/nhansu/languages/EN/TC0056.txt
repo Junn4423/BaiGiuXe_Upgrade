@@ -1,0 +1,15 @@
+CREATE INFORMATION YEAR AUTO
+Year update
+Option department to process
+Option shift
+Time to work
+TypeCalculate
+Start Process
+Create data successful
+Create data no successful
+Please! Choose data to load
+Do you want continue (Y/N)?
+Please! Choose date to process.
+Help
+Enter auto previous year
+Enter option department

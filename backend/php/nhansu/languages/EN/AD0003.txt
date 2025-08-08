@@ -1,0 +1,41 @@
+...
+Priview
+Edit
+Reload
+Help
+Employee Infomation
+Log In Information
+Employee ID
+Personal Information
+Full Name:
+SSNNo:
+Birthday:
+Gender:
+Male
+Female
+Marital Status:
+Unmaried
+Married
+Divorced
+Others
+Title:
+Contact Information
+Street 1:
+Street 2:
+City:
+State / Province:
+Country / Region:
+ZIP Code:
+Home phone:
+Work phone:
+Mobile phone:
+Work email:
+Other email:
+Job Information
+Job Title:
+Status:
+Job Category:
+Department:
+Join date:
+Orther Information
+Group:

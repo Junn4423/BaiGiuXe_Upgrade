@@ -1,0 +1,49 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Không có dữ liệu phiếu khấu hao tài sản cố định ở chi tiết phiếu. <br>Hoặc mã phiếu tài sản cố định không đúng với mã tham chiếu cần nhập.<br> Xin vui lòng làm mới dữ liệu lại.
+Thêm không được, lỗi: 
+Nhập Chi Tiết Khấu Hao
+Nhập Khấu Hao TSCĐ
+STT
+Phiếu khấu hao
+Loại phiếu
+Nguồn phiếu
+Mã tham chiếu
+Tên
+Địa chỉ
+Mô tả
+Mã nhân viên
+Ngày ghi HĐ
+Tài khoản quỹ
+Mã tiền tệ
+Tỷ giá quy đổi
+Mã phiếu liên kết
+Hạn thanh toán
+Chứng từ gốc
+Khóa
+Mã tài sản
+Số lượng
+Mã đơn vị
+Giá
+Đơn vị giá
+Số tiền quy đổi
+Nợ
+Có
+Lô
+Chú ý
+Ngày nhập
+Mã khấu hao không rổng
+Tên không rỗng.
+Mã phiếu không rổng

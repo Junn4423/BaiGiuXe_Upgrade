@@ -1,0 +1,55 @@
+SOF CO., LTD
+Save
+Cancel
+Refresh
+Help
+Edit information of employee
+Log In Information
+Employee ID 
+Personal Information
+Firt Name 
+Middle Name 
+Last Name 
+Title
+Birthday
+Contact Information
+Email
+Address
+City
+State Or Province 
+Postal Code 
+Country Or Region
+Home Phone 
+Work Phone 
+Department Information
+Department ID 
+Group
+DateHired
+Salary
+Orther Information
+Spounse Name
+Emrgcy Contact Name
+Emrgcy Contact Phone
+Photograph
+EmployeeID is not empty 
+Length of password  is less than <4 
+FirtName is not empty 
+LastName is not empty 
+Month of birthday is not empty 
+Day of birthday is not empty 
+Year of birthday is not empty 
+Email is not valid 
+Address is not empty 
+State or Province is not empty 
+Country is not empty 
+DepartmentID is not empty 
+Month of DateHired is not empty 
+Day of DateHired is not empty 
+Year of DateHired is not empty 
+Salary is not  empty 
+You must enter number 
+Indentification Number
+IndentificationNumber is not empty or  invalid 
+Update successful 
+Update error :
+IndentificationNumber is exist 

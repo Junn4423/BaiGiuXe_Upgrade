@@ -1,0 +1,20 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+List Groupuser
+Order
+GroupID
+GroupName
+Save
+Number rows display
+Display style

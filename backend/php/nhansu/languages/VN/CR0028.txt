@@ -1,0 +1,40 @@
+Thêm Bảng Mã Hoá Bảng Tính
+Lọc Bảng Mã Hoá Bảng Tính
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Bảng Mã Hoá Bảng Tính
+Mã tự động
+Mã loại sản phẩm
+Mã  nhóm đọc
+Thứ tự
+Cột 1
+Cột 2
+Cột 3
+Cột 4
+Cột 5
+Cột 6
+Cột 7
+Cột 8
+Cột 9
+Cột 10
+Cột 11
+Cột 12
+Cột 13
+Cột 14
+Cột 15
+Cột 16
+Mã tạo
+Ngày giờ tạo
+...//Begin messages part
+Mã không trống!
+Tên không trống!

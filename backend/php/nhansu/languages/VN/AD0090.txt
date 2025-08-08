@@ -1,0 +1,16 @@
+…
+Thêm loại quyền mới
+Thêm
+Sửa loại quyền này
+Sửa
+Xóa loại quyền
+Xóa
+Nạp lại trang này
+Nạp lại
+Trợ giúp về trang này
+Trợ giúp
+STT
+Mã loại
+Diễn giải
+Danh sách các loại quyền
+Quay lại

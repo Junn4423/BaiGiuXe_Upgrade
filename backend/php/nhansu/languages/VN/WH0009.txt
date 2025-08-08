@@ -1,0 +1,29 @@
+Thêm Mục Chi Tiết Kiểm Kho
+Lọc Mục Chi Tiết Kiểm Kho
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết Kiểm Kho
+Mã tự động
+Mã kiểm kho
+Mã BOM
+SL kiểm
+Đơn vị
+SL kiểm
+Đơn vị
+SL thực tế
+Đơn vị thực
+SL mua
+Đơn vị mua
+Ghi chú
+Mã BOM không rổng
+Bạn phải nhập số

@@ -1,0 +1,31 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+Job Categories List 
+Order
+Select All
+ID
+Name
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Day probation
+Order

@@ -1,0 +1,46 @@
+Config
+Add New
+New
+Edit
+Edit
+Report
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully!
+Could not deleted, error:
+...//Begin show data part
+List Contracts Supplier
+Order
+AutoID
+SupplierID
+Title
+StartDate contract
+ExpireDate contract
+SalesTaxRate
+PaymentMethod
+ShippingMethod
+Note
+EmployeeID
+State
+0.No confirm
+1.Confirm
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+QuotationID
+Other language contens
+QuotationID
+Title English
+No Contract
+ParentID
+(0=Sale/1=Purchase)

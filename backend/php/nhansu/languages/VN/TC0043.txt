@@ -1,0 +1,31 @@
+Thêm Mục Nhập Sản Phẩm Chấm Công
+Lọc Mục Nhập Sản Phẩm Chấm Công
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Nhập Sản Phẩm Chấm Công
+Mã tự động
+Mã nhân viên
+Mã lần tính
+Ngày làm việc
+Mã BOM
+Số lượng
+Loại thành phẩm
+Ghi chú
+Mã tạo
+Mã ca
+Khóa
+Mã nhân viên không được rỗng
+Mã lần tính lương không hợp lệ
+Năm không hợp lệ
+Loại tính
+Phòng ban

@@ -1,0 +1,23 @@
+Add Users
+Filter Users
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error
+...//Begin show data part
+Edit User
+UserID
+User Name
+Group User
+Right
+Password
+EmployeeID
+Themes
+UserID is not empty

@@ -1,0 +1,20 @@
+...//Begin control icon part
+Fillter
+Fillter
+Back
+Back
+Reload
+Reload
+Help
+Help
+...//Begin show data part
+Fillter by courses
+School:
+Course Group:
+CourseID:
+Course:
+Start date from:
+Start date to:
+End date from:
+End date to:
+...//Begin messages part

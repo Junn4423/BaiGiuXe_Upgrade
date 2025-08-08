@@ -1,0 +1,32 @@
+THÊM CHI TIẾT ĐƠN ĐẶT HÀNG
+Lọc Mục Chi Tiết ĐƠN ĐẶT HÀNG
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+SỬA MỤC CHI TIẾT ĐƠN ĐẶT HÀNG
+Mã tự động
+Mã phiếu 
+Tên sản phẩm
+Số lượng
+Đơn vị
+Giá 
+ĐV giá
+Thuế 
+Chiết khấu
+Tên màu
+Mô tả
+Ghi chú
+Mã BOM không rổng
+Bạn phải nhập số
+Mã đơn hàng không rổng
+NGÀY GIAO HÀNG
+Trạng thái(0:Tốt – 1:Trễ)

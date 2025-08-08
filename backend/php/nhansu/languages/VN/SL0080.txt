@@ -1,0 +1,21 @@
+Add Type History
+Filter Type History
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit Type History
+ID
+Name
+Picture
+...//Begin messages part
+The ID is empty, please try again
+Name is not empty

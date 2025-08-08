@@ -1,0 +1,25 @@
+Thêm Mục Email Gửi Tự Động
+Lọc Mục Email Gửi Tự Động
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Email Gửi Tự Động
+Mã tự động
+Mã người dùng
+Địa chỉ email
+Tên
+Ghi chú
+Không/Cho gửi
+Thứ tự
+Mã người dùng không được rỗng
+Tên không được rỗng
+Email không hợp lệ

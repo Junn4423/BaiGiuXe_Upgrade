@@ -1,0 +1,6 @@
+#!/bin/bash
+outfile1="/var/backups/mysql/sofv1_0_`date +%Y-%m-%d_%H_%M_%S`.sql"
+outfile2="/var/backups/mysql/huyvanv2_0_`date +%Y-%m-%d_%H_%M_%S`.sql"
+mysqldump -uroot -perpsofv.2 sofv1_0 >> $outfile1
+mysqldump -uroot -perpsofv.2 huyvanv2_0 >> $outfile2
+

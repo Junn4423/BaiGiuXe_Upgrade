@@ -1,0 +1,37 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+...//Begin messages part
+Delete successfully
+Could not deleted, error:
+...//Begin show data part
+List Expensives
+Order
+Select All
+AutoID
+EmployeeID
+CalculateTimesID
+CategoryExpensiveID
+Money
+CurrencyID
+Note
+Lock
+CreateID
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Load data XML

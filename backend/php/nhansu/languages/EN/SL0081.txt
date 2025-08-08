@@ -1,0 +1,42 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+ENTER SUCCESSFULL 
+Delete successfully!
+Could not deleted, error:
+CONFIG  TIME TO CALCULATE
+ENTER CONFIG TIME
+Order
+UserUpdate
+DateUpdate
+FirstTIme
+SecondTime
+NextTime
+OnceDay
+Lock
+UnitDay
+UnitHour
+OrderPayment 2
+AmountIntro 2
+NumBenefit
+MoneyBenefit
+IncomeService
+Month
+Year
+Save
+Number rows display
+Display style
+Export data
+Create excel file
+Create word file
+View Report Web

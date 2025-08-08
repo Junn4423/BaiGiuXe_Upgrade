@@ -1,0 +1,31 @@
+Add Balance Warehouse & Default Parameter
+Filter Balance Warehouse & Default Parameter
+Save
+Filter
+Back
+Reload
+Reload
+Help
+Help
+Add new successfully!
+Could not added, error: 
+Edit successfully!
+Could not editted, error!
+...//Begin show data part
+Edit Balance Warehouse & Default Parameter
+AutoID 
+ItemID
+WarehouseID
+Quantity
+UnitID
+OtherQuantity
+OtherUnitID
+Price
+Currency
+Tax(%)
+Type In/Out
+Owe
+Own
+WarehouseID is not empty
+You must enter number 
+ItemID is not empty

@@ -1,0 +1,18 @@
+SOF CO., LTD
+Save
+Save
+Cancel
+Cancel
+Refresh 
+Refresh 
+Help
+Help
+TrainingID
+CertificateDate
+Picture
+Insert/Update successful 
+Error:
+TrainingID is not empty 
+CertificateDate is not empty 
+Upload certificate training
+Upload

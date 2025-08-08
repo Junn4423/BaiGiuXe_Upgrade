@@ -1,0 +1,29 @@
+SOF CO., LTD
+Report
+Cancel
+Refresh
+Help
+Display previous parapayroll
+Order
+CalID
+Year
+Code
+From
+To
+Month
+NoneOvertime
+SunOvertime
+HolidayOvertime
+PerSocial
+PerHealth
+RestFN
+RestH
+RestNKP
+RestES
+RestMS
+RestM
+RestCV
+RestD
+Year From
+To
+Month From

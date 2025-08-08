@@ -1,0 +1,34 @@
+…
+Add Permission
+AddPer
+Remove Permission
+Remove
+Update Enable
+Enable
+Edit Permission
+EditPer
+Back to UserList
+Back
+Reload This Page
+Reload
+Help
+Help
+Permission Configuration
+For User:
+Back to UserList
+Back to All
+Order
+Right ID
+Description
+Link
+State
+Order
+Right ID
+Description
+Link
+State
+Enable
+Save
+Permission list
+Empty Right
+Are you sure?

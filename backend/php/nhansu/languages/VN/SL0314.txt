@@ -1,0 +1,24 @@
+Add Group Shares
+Filter Group Shares
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit Group Shares
+AutoID
+StaffID
+Group Code
+Creator
+Create Date
+Group Name
+Group Code is not empty
+
+

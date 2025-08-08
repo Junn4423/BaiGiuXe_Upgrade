@@ -1,0 +1,25 @@
+Add Units
+Filter Units
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Edit Units
+Mã đơn vị
+Tên tiếng việt
+Tỷ lệ
+Hoạt động / Không hoạt động
+Tên tiếng Anh
+Người tạo
+Ngày tạo
+...//Begin messages part
+The ID is empty, please try again
+The Description is not empty

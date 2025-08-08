@@ -1,0 +1,33 @@
+ERP SOF
+Lọc
+Lọc
+Hủy
+Hủy
+Load lại
+Load lại
+Giúp đỡ
+Giúp đỡ
+Lọc nhân viên theo điều kiện
+//Begin show data part
+Mã nhân viên
+Số CMND
+Tên
+Họ
+Chức vụ
+Tên tiếng anh
+Ngày sinh
+đến
+Phòng ban
+Looại công việc
+Quốc tịch
+Màu da
+//Begin show select
+--Chọn Trình độ văn hóa--
+--Chọn quốc tịch--
+--Chọn màu da--
+Báo cáo
+Chọn điều kiện cho hiển thị báo cáo
+Dân tộc
+Tôn giáo
+--Chọn dân tộc--
+--Chọn tôn giáo--

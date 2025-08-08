@@ -1,0 +1,21 @@
+/*------------------------------------*/
+Other information of employee to contract
+Other information of employee to contract
+Save
+Save
+Go back last page
+Back
+Add new successfully
+Could not added, error: 
+Edit successfully
+Could not editted, error:
+/*------------------------------------*/
+Social Insurance No
+RecordDate
+RecordPlace
+Spend Harmful
+Spend Orther
+Time work per one day
+Training Regulation
+EmployeeID is not empty, please try again
+Choose salary

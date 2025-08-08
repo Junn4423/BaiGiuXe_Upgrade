@@ -1,0 +1,52 @@
+Cấu hình
+Thêm mới
+Thêm
+Sửa
+Sửa
+Xóa
+Xóa
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+...///Bắt đầu từ phần thông báo
+Xóa thành công.
+Xóa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+List RFA AFE
+STT
+Chọn hết
+RFAStatusID
+RFA_ID
+DGD / HSE GM
+SSF GM
+GAD GM
+IT MGR
+WOD GM / PET MGR
+POD GM / PRD MGR
+FINMGR
+HRMGR
+ADM MGR
+DRG MGR
+SSF MGR
+PRDMGR
+PRDMGR1
+LOG MGR
+EXPMGR
+WI-PIC
+HSE MGR
+SNO MGR
+Closed
+Cancelled
+Creator
+DateCreate
+Lưu
+Số dòng hiển thị
+Cách hiển thị
+Kết xuất dữ liệu
+Tạo tập tin exel
+Tạo tập tin word
+Tạo tập tin Web
+

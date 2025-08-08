@@ -1,0 +1,40 @@
+Config
+Add New
+New
+Edit
+Edit
+Delete
+Delete
+Filter
+Back
+Reload
+Reload
+Help
+Help
+REPORT TIMECART
+REPORT EAT
+From date
+To date
+ENTER EAT
+ENTER TIMECARD
+Order
+DepartmentID
+EmployeeID
+Employee Name
+Lock/UnLock
+Bonus
+Rating
+Timecard to day(Focus column)
+Previous
+Next
+Sum Eat
+Sum TimeCard
+Display style
+Export data
+Create excel file
+Create word file
+Create pdf file
+Update information month and year
+Department
+EmployeeID
+Sign

@@ -1,0 +1,23 @@
+Thêm Mục Chi Tiết Hoa Hồng
+Lọc Mục Chi Tiết Hoa Hồng
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Danh Sách Chi Tiết Du Lịch
+Mã tự động
+Mã du lịch
+Mã nhân viên
+Nơi xuất phát
+Nơi đến
+Ghi chú
+Chi phí
+Mã không được rỗng

@@ -1,0 +1,23 @@
+...//Begin control icon part
+Back
+Back
+Reload
+Reload
+Help
+Help
+.../////////////////////////////////////
+Courses Report
+Course Information
+Course ID:
+Course Name:
+Course Group Name:
+School Name:
+Address:
+Phone:
+Section:
+Description:
+Instructor:
+Phone:
+Start date:
+End date:
+Have not sections data for course here

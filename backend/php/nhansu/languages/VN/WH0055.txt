@@ -1,0 +1,38 @@
+Thêm Mục Chi Tiết Đóng Gói
+Lọc Mục Chi Tiết Đóng Gói
+Lưu
+Lọc
+Quay lại
+Nạp lại trang này
+Nạp lại
+Trợ giúp
+Trợ giúp
+Thêm thành công.
+Thêm không được, lỗi: 
+Sửa thành công.
+Sửa không được, lỗi: 
+...//Bắt đầu từ phần hiển thị thông tin trong bảng
+Sửa Mục Chi Tiết Nhập Kho
+Mã tự động
+Mã đóng gói
+Mã BOM
+SL
+ĐVT
+Giá
+ĐVG
+Màu
+Cut
+Loại kích thức
+Kích thức
+Sản phẩm  đóng gói
+Tổng trọng lượng
+Trọng lượng thực
+Chú ý
+Ngày hoàn thành
+Đã đóng
+Mã đóng gói
+Mã BOM không rổng
+Bạn phải nhập số
+Mã nhập kho không rổng
+Chọn mẫu tập tin kho theo mẫu
+Tải tân tin mẫu đóng gói
