@@ -309,16 +309,16 @@ const EmployeePermissionDialog = ({ onClose }) => {
   };
 
   return (
-    <div className="employee-permission-overlay">
+    <div className="dialog-overlay">
       <div className="employee-permission-dialog">
-        <div className="employee-permission-header">
-          <h2>Quản Lý Phân Quyền Nhân Viên</h2>
-          <button className="close-btn" onClick={onClose}>
+        <div className="dialog-header">
+          <h3 className="dialog-title">Quản Lý Phân Quyền Nhân Viên</h3>
+          <button className="dialog-close" onClick={onClose}>
             ×
           </button>
         </div>
 
-        <div className="employee-permission-content">
+        <div className="dialog-content">
           {/* Left Panel - Employee List */}
           <div className="employee-list-panel">
             <div className="panel-header">
@@ -593,7 +593,7 @@ const EmployeePermissionDialog = ({ onClose }) => {
       </div>
 
       <style jsx>{`
-        .employee-permission-overlay {
+        .dialog-overlay {
           position: fixed;
           top: 0;
           left: 0;
@@ -617,7 +617,7 @@ const EmployeePermissionDialog = ({ onClose }) => {
           overflow: hidden;
         }
 
-        .employee-permission-header {
+        .dialog-header {
           background: #f5f5f5;
           padding: 20px;
           border-bottom: 1px solid #ddd;
@@ -626,12 +626,14 @@ const EmployeePermissionDialog = ({ onClose }) => {
           align-items: center;
         }
 
-        .employee-permission-header h2 {
+        .dialog-title {
           margin: 0;
           color: #333;
+          font-size: 18px;
+          font-weight: 600;
         }
 
-        .close-btn {
+        .dialog-close {
           background: none;
           border: none;
           font-size: 24px;
@@ -643,13 +645,16 @@ const EmployeePermissionDialog = ({ onClose }) => {
           display: flex;
           align-items: center;
           justify-content: center;
+          border-radius: 4px;
+          transition: all 0.2s ease;
         }
 
-        .close-btn:hover {
+        .dialog-close:hover {
           color: #333;
+          background: rgba(0, 0, 0, 0.1);
         }
 
-        .employee-permission-content {
+        .dialog-content {
           flex: 1;
           display: flex;
           overflow: hidden;
