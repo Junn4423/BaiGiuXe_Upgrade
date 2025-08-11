@@ -1,0 +1,459 @@
+/* RelayControl.css - Styling cho USB Relay Control component */
+
+.relay-control-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.relay-control-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.relay-control-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 16px 16px 0 0;
+}
+
+.relay-control-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.relay-control-content {
+  padding: 30px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.relay-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.relay-section:last-child {
+  border-bottom: none;
+}
+
+.relay-section h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Connection Controls */
+.connection-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.connection-status.connected {
+  background: #d4edda;
+  color: #155724;
+}
+
+.connection-status.disconnected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Relay Controls */
+.relay-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.relay-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  background: #f8f9fa;
+  transition: all 0.2s ease;
+}
+
+.relay-item:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.relay-item label {
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.relay-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.relay-btn.on {
+  background: #dc3545;
+  color: white;
+}
+
+.relay-btn.on:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.relay-btn.off {
+  background: #6c757d;
+  color: white;
+}
+
+.relay-btn.off:hover:not(:disabled) {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.relay-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.global-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* Bitmask Controls */
+.bitmask-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bitmask-input {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.bitmask-input label {
+  font-weight: 600;
+  color: #333;
+  min-width: 120px;
+}
+
+.bitmask-input input {
+  padding: 10px;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 16px;
+  width: 80px;
+  text-align: center;
+}
+
+.bitmask-input input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.bitmask-hex {
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.bitmask-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.bitmask-presets span {
+  font-weight: 600;
+  color: #333;
+  margin-right: 10px;
+}
+
+.preset-btn {
+  padding: 6px 12px;
+  border: 1px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* Test Controls */
+.test-controls {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.test-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.test-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Relay Visualization */
+.relay-visualization {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.relay-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  min-width: 60px;
+}
+
+.relay-visual.active {
+  background: #f8d7da;
+  border: 2px solid #dc3545;
+}
+
+.relay-visual.inactive {
+  background: #f8f9fa;
+  border: 2px solid #6c757d;
+}
+
+.relay-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: inherit;
+}
+
+.relay-indicator {
+  font-size: 24px;
+}
+
+.bitmask-display {
+  text-align: center;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-family: "Courier New", monospace;
+}
+
+.bitmask-value {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 18px;
+}
+
+.binary-display {
+  color: #666;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+/* Buttons */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #5a6fd8;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #e0a800;
+  transform: translateY(-1px);
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-info:hover:not(:disabled) {
+  background: #138496;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .relay-control-container {
+    width: 95%;
+    margin: 20px;
+  }
+
+  .relay-control-header {
+    padding: 15px 20px;
+  }
+
+  .relay-control-content {
+    padding: 20px;
+  }
+
+  .relay-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .bitmask-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bitmask-input label {
+    min-width: auto;
+  }
+
+  .test-controls {
+    flex-direction: column;
+  }
+
+  .relay-visualization {
+    gap: 15px;
+  }
+}
+
+/* Scrollbar styling */
+.relay-control-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.relay-control-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.relay-control-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.relay-control-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

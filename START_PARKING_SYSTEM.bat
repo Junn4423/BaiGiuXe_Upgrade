@@ -70,18 +70,6 @@ echo Testing ALPR service...
 powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5001/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ ALPR Service is ready' } else { Write-Host '❌ ALPR Service health check failed' } } catch { Write-Host '❌ ALPR Service is not responding' }"
 echo.
 
-REM Check for MinIO (optional)
-echo [%timestamp%] Checking MinIO service...
-cd /d "%~dp0MInio"
-if exist "chayserver.vbs" (
-    echo Starting MinIO server...
-    start "MinIO Server" wscript chayserver.vbs
-    echo ✅ MinIO server started
-) else (
-    echo ⚠️  MinIO not found, continuing without object storage
-)
-echo.
-
 REM Start Electron App
 echo [%timestamp%] Starting Electron Application...
 cd /d "%~dp0electron-app"
@@ -113,6 +101,7 @@ echo ✅ Frontend: Built and ready
 echo ✅ ALPR Service: Running on http://127.0.0.1:5001
 echo ✅ Electron App: Running
 echo ✅ Realtime License Plate Detection: Active
+echo ⚠️  MinIO: Disabled (using local storage)
 echo ================================================
 echo.
 echo Press any key to exit...
