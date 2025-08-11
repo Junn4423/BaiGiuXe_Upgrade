@@ -169,6 +169,12 @@ const SystemSettings = ({ onClose }) => {
     }
   }
 
+  const handleResetToDefault = () => {
+    const defaultPath = 'C:/ParkingLot_Images'
+    setImageStoragePath(defaultPath)
+    showToast('Đã đặt lại về thư mục mặc định', 'success')
+  }
+
   return (
     <div className="system-settings">
       <div className="settings-container">
