@@ -1,6 +1,3 @@
-// relayService.js - Electron IPC service cho relay control
-// Wrapper để gọi từ renderer process
-
 class RelayService {
   constructor() {
     this.isElectron = typeof window !== "undefined" && window.electronAPI;
@@ -22,10 +19,10 @@ class RelayService {
     try {
       this.checkElectronEnvironment();
       const result = await window.electronAPI.relayControl.connect();
-      console.log("🔌 Relay connected:", result);
+      console.log("Relay connected:", result);
       return result;
     } catch (error) {
-      console.error("❌ Relay connect error:", error);
+      console.error("Relay connect error:", error);
       throw error;
     }
   }
