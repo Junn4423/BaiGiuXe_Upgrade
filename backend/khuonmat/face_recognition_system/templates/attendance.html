@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Điểm danh bằng khuôn mặt{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Camera điểm danh</h3>
+                    <div id="status-indicator" class="d-flex align-items-center">
+                        <span class="spinner-border spinner-border-sm me-2 d-none"></span>
+                        <span class="badge rounded-pill bg-secondary" id="camera-status-text">Đã tắt</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="video-container" class="mb-3">
+                        <img id="video-feed" src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="Camera feed">
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button id="start-camera-btn" class="btn btn-success"><i class="bi bi-camera-video-fill me-2"></i>Bật Camera</button>
+                        <button id="stop-camera-btn" class="btn btn-danger" disabled><i class="bi bi-camera-video-off-fill me-2"></i>Tắt Camera</button>
+                        <button id="zoom-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#video-modal" disabled><i class="bi bi-arrows-fullscreen me-2"></i>Phóng to</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Video Modal -->
+<div class="modal fade" id="video-modal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="videoModalLabel">Xem trực tiếp</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <img id="video-modal-feed" src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="Live camera feed">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const startBtn = document.getElementById('start-camera-btn');
+    const stopBtn = document.getElementById('stop-camera-btn');
+    const zoomBtn = document.getElementById('zoom-btn');
+    const videoFeed = document.getElementById('video-feed');
+    const videoModalFeed = document.getElementById('video-modal-feed');
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusSpinner = statusIndicator.querySelector('.spinner-border');
+    const statusText = document.getElementById('camera-status-text');
+    const placeholderImg = "{{ url_for('static', filename='images/placeholder.jpg') }}";
+
+    function setCameraStatus(status, message) {
+        statusSpinner.classList.add('d-none');
+        statusText.textContent = message;
+        switch(status) {
+            case 'on':
+                statusText.className = 'badge rounded-pill bg-success';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                zoomBtn.disabled = false;
+                break;
+            case 'off':
+                statusText.className = 'badge rounded-pill bg-secondary';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                zoomBtn.disabled = true;
+                videoFeed.src = placeholderImg;
+                videoModalFeed.src = placeholderImg;
+                break;
+            case 'loading':
+                statusSpinner.classList.remove('d-none');
+                statusText.textContent = message;
+                statusText.className = 'badge rounded-pill bg-warning text-dark';
+                startBtn.disabled = true;
+                stopBtn.disabled = true;
+                zoomBtn.disabled = true;
+                break;
+             case 'error':
+                statusText.className = 'badge rounded-pill bg-danger';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                zoomBtn.disabled = true;
+                videoFeed.src = placeholderImg;
+                videoModalFeed.src = placeholderImg;
+                break;
+        }
+    }
+
+    startBtn.addEventListener('click', function () {
+        setCameraStatus('loading', 'Đang kết nối...');
+        fetch('/api/start_camera', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const videoSrc = `/video_feed?t=${new Date().getTime()}`;
+                    videoFeed.src = videoSrc;
+                    videoModalFeed.src = videoSrc;
+                    setCameraStatus('on', 'Đang hoạt động');
+                } else {
+                    Swal.fire('Lỗi', data.message, 'error');
+                    setCameraStatus('error', 'Lỗi kết nối');
+                }
+            })
+            .catch(err => {
+                Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ.', 'error');
+                setCameraStatus('error', 'Lỗi kết nối');
+            });
+    });
+
+    stopBtn.addEventListener('click', function () {
+        setCameraStatus('loading', 'Đang tắt...');
+        fetch('/api/stop_camera', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setCameraStatus('off', 'Đã tắt');
+                } else {
+                    Swal.fire('Lỗi', data.message, 'error');
+                    setCameraStatus('on', 'Đang hoạt động'); // Revert status
+                }
+            })
+            .catch(err => {
+                 Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ.', 'error');
+                 setCameraStatus('on', 'Đang hoạt động'); // Revert status
+            });
+    });
+    
+    // Initial state check
+    const initialStatus = {{ camera_status | tojson }};
+    if (initialStatus) {
+        const videoSrc = `/video_feed?t=` + new Date().getTime();
+        videoFeed.src = videoSrc;
+        videoModalFeed.src = videoSrc;
+        setCameraStatus('on', 'Đang hoạt động');
+    } else {
+        setCameraStatus('off', 'Đã tắt');
+    }
+});
+</script>
+{% endblock %} 
