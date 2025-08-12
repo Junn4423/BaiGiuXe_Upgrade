@@ -16,7 +16,7 @@ class USBRelayController {
    */
   async connect() {
     try {
-      console.log("🔌 Đang kết nối USB Relay...");
+      console.log("Đang kết nối USB Relay...");
 
       // Tìm thiết bị
       const devices = HID.devices();
@@ -32,7 +32,7 @@ class USBRelayController {
       this.device = new HID.HID(this.vendorId, this.productId);
       this.isConnected = true;
 
-      console.log("✅ Đã kết nối với USBRelay4");
+      console.log("Đã kết nối với USBRelay4");
       console.log(
         `   - Vendor ID: 0x${this.vendorId.toString(16).toUpperCase()}`
       );
@@ -42,7 +42,7 @@ class USBRelayController {
 
       return true;
     } catch (error) {
-      console.error("❌ Lỗi kết nối USB Relay:", error.message);
+      console.error("Lỗi kết nối USB Relay:", error.message);
       this.isConnected = false;
       throw error;
     }
@@ -60,9 +60,9 @@ class USBRelayController {
         this.device = null;
       }
       this.isConnected = false;
-      console.log("🔌 Đã ngắt kết nối USB Relay");
+      console.log("Đã ngắt kết nối USB Relay");
     } catch (error) {
-      console.error("❌ Lỗi ngắt kết nối:", error.message);
+      console.error("Lỗi ngắt kết nối:", error.message);
     }
   }
 
@@ -135,7 +135,7 @@ class USBRelayController {
         result,
       };
     } catch (error) {
-      console.error(`❌ Lỗi điều khiển relay ${relayNum}:`, error.message);
+      console.error(`Lỗi điều khiển relay ${relayNum}:`, error.message);
       throw error;
     }
   }
@@ -152,7 +152,7 @@ class USBRelayController {
       ];
       const result = this.device.sendFeatureReport(featureData);
 
-      console.log(`⚫ TẮT TẤT CẢ relay - Result: ${result} bytes`);
+      console.log(`TẮT TẤT CẢ relay - Result: ${result} bytes`);
 
       return {
         success: result > 0,
@@ -160,7 +160,7 @@ class USBRelayController {
         result,
       };
     } catch (error) {
-      console.error("❌ Lỗi tắt tất cả relay:", error.message);
+      console.error("Lỗi tắt tất cả relay:", error.message);
       throw error;
     }
   }
@@ -191,7 +191,7 @@ class USBRelayController {
       const result = this.device.sendFeatureReport(featureData);
 
       console.log(
-        `🎯 Set bitmask 0x${bitmask
+        `Set bitmask 0x${bitmask
           .toString(16)
           .toUpperCase()
           .padStart(2, "0")} - Result: ${result} bytes`
@@ -204,7 +204,7 @@ class USBRelayController {
         result,
       };
     } catch (error) {
-      console.error(`❌ Lỗi bitmask control:`, error.message);
+      console.error(`Lỗi bitmask control:`, error.message);
       throw error;
     }
   }
@@ -228,7 +228,7 @@ class USBRelayController {
    */
   async testSequence(cycles = 1, delayMs = 1000) {
     try {
-      console.log(`🧪 Bắt đầu test sequence (${cycles} cycles)...`);
+      console.log(`Bắt đầu test sequence (${cycles} cycles)...`);
 
       for (let cycle = 1; cycle <= cycles; cycle++) {
         console.log(`\n--- Cycle ${cycle}/${cycles} ---`);
@@ -253,9 +253,9 @@ class USBRelayController {
 
       // Tắt tất cả cuối test
       await this.turnOffAllRelays();
-      console.log("✅ Test sequence hoàn thành");
+      console.log("Test sequence hoàn thành");
     } catch (error) {
-      console.error("❌ Lỗi test sequence:", error.message);
+      console.error("Lỗi test sequence:", error.message);
       throw error;
     }
   }
@@ -278,7 +278,7 @@ class USBRelayController {
         { bitmask: 0x00, description: "Tắt tất cả" }, // 0000
       ];
 
-      console.log(`🎯 Bắt đầu test bitmask patterns (${cycles} cycles)...`);
+      console.log(`Bắt đầu test bitmask patterns (${cycles} cycles)...`);
 
       for (let cycle = 1; cycle <= cycles; cycle++) {
         console.log(`\n--- Pattern Cycle ${cycle}/${cycles} ---`);
@@ -302,9 +302,9 @@ class USBRelayController {
 
       // Tắt tất cả cuối test
       await this.turnOffAllRelays();
-      console.log("✅ Test bitmask patterns hoàn thành");
+      console.log("Test bitmask patterns hoàn thành");
     } catch (error) {
-      console.error("❌ Lỗi test bitmask patterns:", error.message);
+      console.error("Lỗi test bitmask patterns:", error.message);
       throw error;
     }
   }

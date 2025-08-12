@@ -34,10 +34,10 @@ class RelayService {
     try {
       this.checkElectronEnvironment();
       const result = await window.electronAPI.relayControl.disconnect();
-      console.log("🔌 Relay disconnected:", result);
+      console.log("Relay disconnected:", result);
       return result;
     } catch (error) {
-      console.error("❌ Relay disconnect error:", error);
+      console.error("Relay disconnect error:", error);
       throw error;
     }
   }
@@ -54,10 +54,10 @@ class RelayService {
         relayNum,
         state
       );
-      console.log(`🎛️ Relay ${relayNum} ${state ? "ON" : "OFF"}:`, result);
+      console.log(`Relay ${relayNum} ${state ? "ON" : "OFF"}:`, result);
       return result;
     } catch (error) {
-      console.error(`❌ Relay control error (${relayNum}, ${state}):`, error);
+      console.error(`Relay control error (${relayNum}, ${state}):`, error);
       throw error;
     }
   }
@@ -83,10 +83,10 @@ class RelayService {
     try {
       this.checkElectronEnvironment();
       const result = await window.electronAPI.relayControl.turnOffAll();
-      console.log("⚫ All relays OFF:", result);
+      console.log("All relays OFF:", result);
       return result;
     } catch (error) {
-      console.error("❌ Turn off all relays error:", error);
+      console.error("Turn off all relays error:", error);
       throw error;
     }
   }
@@ -102,13 +102,13 @@ class RelayService {
         bitmask
       );
       console.log(
-        `🎯 Bitmask control (0x${bitmask.toString(16).toUpperCase()}):`,
+        `Bitmask control (0x${bitmask.toString(16).toUpperCase()}):`,
         result
       );
       return result;
     } catch (error) {
       console.error(
-        `❌ Bitmask control error (0x${bitmask.toString(16)}):`,
+        `Bitmask control error (0x${bitmask.toString(16)}):`,
         error
       );
       throw error;
@@ -125,10 +125,10 @@ class RelayService {
         cycles,
         delayMs
       );
-      console.log("🧪 Test sequence completed:", result);
+      console.log("Test sequence completed:", result);
       return result;
     } catch (error) {
-      console.error("❌ Test sequence error:", error);
+      console.error("Test sequence error:", error);
       throw error;
     }
   }
@@ -143,10 +143,10 @@ class RelayService {
         cycles,
         delayMs
       );
-      console.log("🎯 Test bitmask patterns completed:", result);
+      console.log("Test bitmask patterns completed:", result);
       return result;
     } catch (error) {
-      console.error("❌ Test bitmask patterns error:", error);
+      console.error("Test bitmask patterns error:", error);
       throw error;
     }
   }
@@ -160,7 +160,7 @@ class RelayService {
       const result = await window.electronAPI.relayControl.getStatus();
       return result;
     } catch (error) {
-      console.error("❌ Get status error:", error);
+      console.error("Get status error:", error);
       throw error;
     }
   }
@@ -178,6 +178,5 @@ class RelayService {
   }
 }
 
-// Export singleton instance
 const relayService = new RelayService();
 export default relayService;

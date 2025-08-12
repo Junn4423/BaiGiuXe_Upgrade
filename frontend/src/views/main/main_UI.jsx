@@ -765,6 +765,16 @@ const MainUI = () => {
           );
         }
 
+        // Kiểm tra quyền admin để thêm thẻ mới
+        if (!isAdmin()) {
+          showToast(
+            `Thẻ ${cardId} chưa được đăng ký. Chỉ Admin mới có quyền thêm thẻ mới.`,
+            "error",
+            5000
+          );
+          return;
+        }
+
         setShowAddCard({ show: true, cardId: cardId });
         showToast(
           `Thẻ ${cardId} chưa được đăng ký. Vui lòng thêm thẻ mới.`,
@@ -858,41 +868,50 @@ const MainUI = () => {
           });
 
           // ✅ IMAGES ALREADY DISPLAYED BY QuanLyCamera - No need to display again
-          console.log("✅ Images captured and should be displayed by QuanLyCamera:", {
-            plateImageUrl: plateImage?.url,
-            faceImageUrl: faceImage?.url,
-            hasPlateBlob: !!plateImage?.blob,
-            hasFaceBlob: !!faceImage?.blob
-          });
+          console.log(
+            "✅ Images captured and should be displayed by QuanLyCamera:",
+            {
+              plateImageUrl: plateImage?.url,
+              faceImageUrl: faceImage?.url,
+              hasPlateBlob: !!plateImage?.blob,
+              hasFaceBlob: !!faceImage?.blob,
+            }
+          );
 
           // Xử lý chấm công khi có ảnh khuôn mặt - CHỈ ở chế độ xe vào
           if (actualMode === "vao" && faceImage?.blob) {
-            console.log('🎯 Bắt đầu xử lý chấm công với ảnh khuôn mặt (mode: vào)');
-            
+            console.log(
+              "🎯 Bắt đầu xử lý chấm công với ảnh khuôn mặt (mode: vào)"
+            );
+
             // Lấy biển số từ div plate-text trong camera panel (tối ưu)
             const getDisplayedLicensePlate = () => {
               try {
                 // Sử dụng querySelector với cache element nếu có thể
-                const plateTextDiv = document.querySelector('.plate-text');
+                const plateTextDiv = document.querySelector(".plate-text");
                 if (plateTextDiv && plateTextDiv.textContent) {
                   const plateText = plateTextDiv.textContent.trim();
-                  if (plateText && plateText !== '' && plateText !== 'N/A') {
-                    console.log('Biển số từ plate-text div:', plateText);
+                  if (plateText && plateText !== "" && plateText !== "N/A") {
+                    console.log("Biển số từ plate-text div:", plateText);
                     return plateText;
                   }
                 }
                 return null;
               } catch (error) {
-                console.warn('Không thể lấy biển số từ plate-text div:', error);
+                console.warn("Không thể lấy biển số từ plate-text div:", error);
                 return null;
               }
             };
 
             const displayedPlate = getDisplayedLicensePlate();
-            const finalLicensePlate = displayedPlate || licensePlate || recognizedLicensePlate || '';
-            
-            console.log('Biển số cuối cùng sử dụng cho chấm công:', finalLicensePlate);
-            
+            const finalLicensePlate =
+              displayedPlate || licensePlate || recognizedLicensePlate || "";
+
+            console.log(
+              "Biển số cuối cùng sử dụng cho chấm công:",
+              finalLicensePlate
+            );
+
             // Chạy chấm công bất đồng bộ để không chặn UI
             setTimeout(async () => {
               try {
@@ -903,7 +922,7 @@ const MainUI = () => {
                   actualMode
                 );
               } catch (error) {
-                console.error('❌ Lỗi chấm công:', error);
+                console.error("❌ Lỗi chấm công:", error);
               }
             }, 50); // Giảm delay để responsive hơn
           }
@@ -914,7 +933,7 @@ const MainUI = () => {
               "ẢNH ĐÃ HIỂN THỊ",
               "#10b981"
             );
-          }          // Auto recognize license plate after capture
+          } // Auto recognize license plate after capture
           let recognizedLicensePlate = null;
           if (plateImage?.blob || capturedImages.plateImageBlob) {
             if (vehicleInfoComponentRef.current) {
@@ -991,19 +1010,22 @@ const MainUI = () => {
 
               // FALLBACK: Try to get detected plate from realtime detection
               const mode = actualMode === "vao" ? "in" : "out";
-              const realtimeDetectedPlate = cameraComponentRef.current?.getLastDetectedPlate?.(mode);
-              
+              const realtimeDetectedPlate =
+                cameraComponentRef.current?.getLastDetectedPlate?.(mode);
+
               if (realtimeDetectedPlate) {
                 recognizedLicensePlate = realtimeDetectedPlate;
-                console.log(`✅ Using realtime detected plate as fallback: ${recognizedLicensePlate}`);
-                
+                console.log(
+                  `✅ Using realtime detected plate as fallback: ${recognizedLicensePlate}`
+                );
+
                 if (vehicleInfoComponentRef.current) {
                   vehicleInfoComponentRef.current.updateCardReaderStatus(
                     `BIỂN SỐ (REALTIME): ${recognizedLicensePlate}`,
                     "#10b981"
                   );
                 }
-                
+
                 showToast(
                   `Sử dụng biển số từ nhận dạng realtime: ${recognizedLicensePlate}`,
                   "success",
@@ -1521,20 +1543,45 @@ const MainUI = () => {
 
               if (result && result.success) {
                 // **MỚI: UPLOAD ẢNH VÀO Ổ ĐĨA CHỈ SAU KHI PHIÊN GỬI XE THÀNH CÔNG**
-                if (cameraManagerRef.current && cameraManagerRef.current.uploadCapturedImages) {
+                if (
+                  cameraManagerRef.current &&
+                  cameraManagerRef.current.uploadCapturedImages
+                ) {
                   try {
-                    console.log('🚀 Session created successfully, now uploading images to disk...')
-                    const uploadResults = await cameraManagerRef.current.uploadCapturedImages(plateImage, faceImage)
+                    console.log(
+                      "🚀 Session created successfully, now uploading images to disk..."
+                    );
+                    const uploadResults =
+                      await cameraManagerRef.current.uploadCapturedImages(
+                        plateImage,
+                        faceImage
+                      );
                     if (uploadResults.errors.length === 0) {
-                      console.log('✅ All images uploaded to disk after successful session')
-                      showToast('Ảnh đã được lưu vào ổ đĩa thành công', 'success', 2000)
+                      console.log(
+                        "✅ All images uploaded to disk after successful session"
+                      );
+                      showToast(
+                        "Ảnh đã được lưu vào ổ đĩa thành công",
+                        "success",
+                        2000
+                      );
                     } else {
-                      console.warn('⚠️ Some images failed to upload:', uploadResults.errors)
-                      showToast('Một số ảnh không lưu được vào ổ đĩa', 'warning', 3000)
+                      console.warn(
+                        "⚠️ Some images failed to upload:",
+                        uploadResults.errors
+                      );
+                      showToast(
+                        "Một số ảnh không lưu được vào ổ đĩa",
+                        "warning",
+                        3000
+                      );
                     }
                   } catch (uploadError) {
-                    console.error('❌ Error uploading images after session:', uploadError)
-                    showToast('Lỗi lưu ảnh vào ổ đĩa', 'error', 3000)
+                    console.error(
+                      "❌ Error uploading images after session:",
+                      uploadError
+                    );
+                    showToast("Lỗi lưu ảnh vào ổ đĩa", "error", 3000);
                   }
                 }
 
@@ -1605,15 +1652,17 @@ const MainUI = () => {
                   "#ef4444"
                 );
               }
-              
+
               // Thông báo rõ ràng rằng ảnh sẽ không được lưu do lỗi phiên gửi xe
               showToast(
                 `Lỗi lưu phiên gửi xe: ${sessionError.message}. Ảnh không được lưu vào ổ đĩa.`,
                 "error",
                 6000
               );
-              
-              console.log('⚠️ Session creation failed - images will NOT be saved to disk')
+
+              console.log(
+                "⚠️ Session creation failed - images will NOT be saved to disk"
+              );
             }
           } else {
             // For "ra" mode, process vehicle exit
@@ -1920,20 +1969,45 @@ const MainUI = () => {
 
       if (updateResult && updateResult.success) {
         // **MỚI: UPLOAD ẢNH XE RA VÀ KHUÔN MẶT RA VÀO Ổ ĐĨA CHỈ SAU KHI CẬP NHẬT PHIÊN THÀNH CÔNG**
-        if (cameraManagerRef.current && cameraManagerRef.current.uploadCapturedImages) {
+        if (
+          cameraManagerRef.current &&
+          cameraManagerRef.current.uploadCapturedImages
+        ) {
           try {
-            console.log('Exit session updated successfully, now uploading exit images to disk...')
-            const uploadResults = await cameraManagerRef.current.uploadCapturedImages(plateImage, faceImage)
+            console.log(
+              "Exit session updated successfully, now uploading exit images to disk..."
+            );
+            const uploadResults =
+              await cameraManagerRef.current.uploadCapturedImages(
+                plateImage,
+                faceImage
+              );
             if (uploadResults.errors.length === 0) {
-              console.log('All exit images uploaded to disk after successful session update')
-              showToast('Ảnh xe ra đã được lưu vào ổ đĩa thành công', 'success', 2000)
+              console.log(
+                "All exit images uploaded to disk after successful session update"
+              );
+              showToast(
+                "Ảnh xe ra đã được lưu vào ổ đĩa thành công",
+                "success",
+                2000
+              );
             } else {
-              console.warn('Some exit images failed to upload:', uploadResults.errors)
-              showToast('Một số ảnh xe ra không lưu được vào ổ đĩa', 'warning', 3000)
+              console.warn(
+                "Some exit images failed to upload:",
+                uploadResults.errors
+              );
+              showToast(
+                "Một số ảnh xe ra không lưu được vào ổ đĩa",
+                "warning",
+                3000
+              );
             }
           } catch (uploadError) {
-            console.error('Error uploading exit images after session update:', uploadError)
-            showToast('Lỗi lưu ảnh xe ra vào ổ đĩa', 'error', 3000)
+            console.error(
+              "Error uploading exit images after session update:",
+              uploadError
+            );
+            showToast("Lỗi lưu ảnh xe ra vào ổ đĩa", "error", 3000);
           }
         }
 
@@ -2131,145 +2205,87 @@ const MainUI = () => {
         </div>
 
         <div className="toolbar-right">
+          {hasPermission("canAccessConfig") && (
+            <button
+              className="toolbar-btn"
+              onClick={openWorkConfig}
+              title="Cấu hình làm việc"
+            >
+              CẤU HÌNH
+            </button>
+          )}
+          {hasPermission("canAccessCamera") && (
+            <button
+              className="toolbar-btn"
+              onClick={openCameraConfig}
+              title="Cấu hình camera"
+            >
+              CAMERA
+            </button>
+          )}
+          {hasPermission("canAccessPricing") && (
+            <button
+              className="toolbar-btn"
+              onClick={openPricingPolicy}
+              title="Chính sách giá cả"
+            >
+              GIÁ CẢ
+            </button>
+          )}
+          {hasPermission("canAccessZone") && (
+            <button
+              className="toolbar-btn"
+              onClick={openParkingZoneManagement}
+              title="Quản lý khu vực"
+            >
+              KHU VỰC
+            </button>
+          )}
+          {hasPermission("canAccessVehicle") && (
+            <button
+              className="toolbar-btn"
+              onClick={openVehicleManagement}
+              title="Quản lý phương tiện"
+            >
+              PHƯƠNG TIỆN
+            </button>
+          )}
+          {hasPermission("canAccessVehicleType") && (
+            <button
+              className="toolbar-btn"
+              onClick={openVehicleType}
+              title="Quản lý loại xe"
+            >
+              LOẠI XE
+            </button>
+          )}
+          {isAdmin() && (
+            <button
+              className="toolbar-btn"
+              onClick={openEmployeePermission}
+              title="Quản lý phân quyền nhân viên"
+            >
+              NHÂN VIÊN
+            </button>
+          )}
+          {hasPermission("canAccessRfid") && (
+            <button
+              className="toolbar-btn"
+              onClick={openRfidManager}
+              title="Quản lý thẻ RFID"
+            >
+              THẺ RFID
+            </button>
+          )}
           <button
-            className={`toolbar-btn ${
-              !hasPermission("canAccessConfig") ? "disabled" : ""
-            }`}
-            onClick={
-              hasPermission("canAccessConfig") ? openWorkConfig : undefined
-            }
-            disabled={!hasPermission("canAccessConfig")}
-            title={
-              !hasPermission("canAccessConfig")
-                ? "Không có quyền truy cập"
-                : "Cấu hình làm việc"
-            }
-          >
-            CẤU HÌNH
-          </button>
-          <button
-            className={`toolbar-btn ${
-              !hasPermission("canAccessCamera") ? "disabled" : ""
-            }`}
-            onClick={
-              hasPermission("canAccessCamera") ? openCameraConfig : undefined
-            }
-            disabled={!hasPermission("canAccessCamera")}
-            title={
-              !hasPermission("canAccessCamera")
-                ? "Không có quyền truy cập"
-                : "Cấu hình camera"
-            }
-          >
-            CAMERA
-          </button>
-          <button
-            className={`toolbar-btn ${
-              !hasPermission("canAccessPricing") ? "disabled" : ""
-            }`}
-            onClick={
-              hasPermission("canAccessPricing") ? openPricingPolicy : undefined
-            }
-            disabled={!hasPermission("canAccessPricing")}
-            title={
-              !hasPermission("canAccessPricing")
-                ? "Không có quyền truy cập"
-                : "Chính sách giá cả"
-            }
-          >
-            GIÁ CẢ
-          </button>
-          <button
-            className={`toolbar-btn ${
-              !hasPermission("canAccessZone") ? "disabled" : ""
-            }`}
-            onClick={
-              hasPermission("canAccessZone")
-                ? openParkingZoneManagement
-                : undefined
-            }
-            disabled={!hasPermission("canAccessZone")}
-            title={
-              !hasPermission("canAccessZone")
-                ? "Không có quyền truy cập"
-                : "Quản lý khu vực"
-            }
-          >
-            KHU VỰC
-          </button>
-          <button
-            className={`toolbar-btn ${
-              !hasPermission("canAccessVehicle") ? "disabled" : ""
-            }`}
-            onClick={
-              hasPermission("canAccessVehicle")
-                ? openVehicleManagement
-                : undefined
-            }
-            disabled={!hasPermission("canAccessVehicle")}
-            title={
-              !hasPermission("canAccessVehicle")
-                ? "Không có quyền truy cập"
-                : "Quản lý phương tiện"
-            }
-          >
-            PHƯƠNG TIỆN
-          </button>
-          <button
-            className={`toolbar-btn ${
-              !hasPermission("canAccessVehicleType") ? "disabled" : ""
-            }`}
-            onClick={
-              hasPermission("canAccessVehicleType")
-                ? openVehicleType
-                : undefined
-            }
-            disabled={!hasPermission("canAccessVehicleType")}
-            title={
-              !hasPermission("canAccessVehicleType")
-                ? "Không có quyền truy cập"
-                : "Quản lý loại xe"
-            }
-          >
-            LOẠI XE
-          </button>
-          <button
-            className={`toolbar-btn ${!isAdmin() ? "disabled" : ""}`}
-            onClick={isAdmin() ? openEmployeePermission : undefined}
-            disabled={!isAdmin()}
-            title={
-              !isAdmin()
-                ? "Chỉ Admin mới có quyền truy cập"
-                : "Quản lý phân quyền nhân viên"
-            }
-          >
-            NHÂN VIÊN
-          </button>
-          <button
-            className={`toolbar-btn ${
-              !hasPermission("canAccessRfid") ? "disabled" : ""
-            }`}
-            onClick={
-              hasPermission("canAccessRfid") ? openRfidManager : undefined
-            }
-            disabled={!hasPermission("canAccessRfid")}
-            title={
-              !hasPermission("canAccessRfid")
-                ? "Không có quyền truy cập"
-                : "Quản lý thẻ RFID"
-            }
-          >
-            THẺ RFID
-          </button>
-          <button 
-            className="toolbar-btn attendance-btn" 
+            className="toolbar-btn attendance-btn"
             onClick={() => setShowAttendance(true)}
             title="Xem chấm công hôm nay"
           >
             CHẤM CÔNG
           </button>
-          <button 
-            className="toolbar-btn settings-btn" 
+          <button
+            className="toolbar-btn settings-btn"
             onClick={openSystemSettings}
             title="Cài đặt hệ thống"
           >
@@ -2360,7 +2376,6 @@ const MainUI = () => {
           onSave={(config) => {
             console.log("Camera config saved:", config);
             setShowCameraConfig(false);
-            // Reload zone info to get updated cameras
             if (workConfig && workConfig.zone) {
               loadZoneInfo(workConfig.zone);
             }
