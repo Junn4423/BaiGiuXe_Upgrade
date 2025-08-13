@@ -2,6 +2,17 @@
 // ini_set('display_errors', 1); 
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
+
+// Debug: Log all incoming requests
+error_log("=== KEBAO.PHP REQUEST ===");
+error_log("Request Method: " . $_SERVER['REQUEST_METHOD']);
+error_log("POST data: " . json_encode($_POST));
+error_log("GET data: " . json_encode($_GET));
+error_log("Input JSON: " . file_get_contents('php://input'));
+error_log("vtable: " . ($vtable ?? 'NULL'));
+error_log("vfun: " . ($vfun ?? 'NULL'));
+error_log("input array: " . json_encode($input ?? []));
+
 switch ($vtable) {
     // --- Loại Phương Tiện ---
     case "pm_nc0001":
@@ -69,12 +80,25 @@ switch ($vtable) {
                 }
                 break;
             case "add":
+                error_log("PM_NC0002 Add - Input data: " . json_encode($input));
+                
                 $pm_nc0002->lv001 = $input['bienSo'] ?? $_POST['lv001'] ?? null;
                 $pm_nc0002->lv002 = $input['maLoaiPT'] ?? $_POST['lv002'] ?? null;
                 $pm_nc0002->lv003 = $input['tenChuXe'] ?? $_POST['lv003'] ?? null;
                 $pm_nc0002->lv004 = $input['duongDanKhuonMat'] ?? $_POST['lv004'] ?? null;
+                
+                error_log("PM_NC0002 Add - Mapped data: lv001=" . $pm_nc0002->lv001 . ", lv002=" . $pm_nc0002->lv002 . ", lv003=" . $pm_nc0002->lv003 . ", lv004=" . $pm_nc0002->lv004);
+                
                 $result = $pm_nc0002->KB_Insert();
-                $vOutput = $result ? ['success'=>true,'message'=>'Thêm mới thành công'] : ['success'=>false,'message'=>'Lỗi khi thêm mới'];
+                
+                if (!$result) {
+                    $mysqlError = sof_error();
+                    error_log("PM_NC0002 Insert failed - MySQL Error: " . $mysqlError);
+                    $vOutput = ['success'=>false,'message'=>'Lỗi khi thêm mới: ' . $mysqlError];
+                } else {
+                    error_log("PM_NC0002 Insert SUCCESS");
+                    $vOutput = ['success'=>true,'message'=>'Thêm mới thành công'];
+                }
                 break;
             case "delete":
                 $delArr = $input['bienSo'] ?? $_POST['lv001'] ?? null;

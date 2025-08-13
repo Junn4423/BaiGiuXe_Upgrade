@@ -37,6 +37,46 @@ $vyear = isset($input['year']) ? $input['year'] : (isset($_POST['year']) ? $_POS
 session_start();
 $vOutput = array();
 
+// Xác thực token
+function authenticateUser() {
+    $headers = getallheaders();
+    $userCode = $headers['X-USER-CODE'] ?? $headers['X-User-Code'] ?? null;
+    $userToken = $headers['X-USER-TOKEN'] ?? $headers['X-User-Token'] ?? null;
+    
+    error_log("Auth headers - Code: " . ($userCode ?? 'NULL') . ", Token: " . ($userToken ?? 'NULL'));
+    
+    if (!$userCode || !$userToken) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Missing authentication headers']);
+        exit();
+    }
+    
+    // Kiểm tra token trong database
+    $sql = "SELECT * FROM lv_lv0007 WHERE lv001 = '$userCode' AND lv097 = '$userToken' AND lv096 = 0";
+    $result = db_query($sql);
+    
+    if (!$result || db_num_rows($result) == 0) {
+        error_log("Authentication failed for user: $userCode with token: $userToken");
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid token or user']);
+        exit();
+    }
+    
+    $userData = db_fetch_array($result);
+    
+    // Thiết lập session
+    $_SESSION['ERPSOFV2RUserID'] = $userData['lv001'];
+    $_SESSION['ERPSOFV2RRight'] = $userData['lv197'] ?? '';
+    
+    error_log("Authentication successful for user: " . $_SESSION['ERPSOFV2RUserID']);
+    return true;
+}
+
+// Chỉ xác thực khi không phải request OPTIONS
+if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
+    authenticateUser();
+}
+
 function saveImageToDB($fileData, $cot, $lv001)
 {
 	try {

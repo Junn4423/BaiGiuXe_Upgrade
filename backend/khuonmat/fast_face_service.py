@@ -505,12 +505,7 @@ async def register_face(request: RegisterRequest):
         
         # Check if employee already exists
         existing_user = db_session.query(User).filter_by(employee_id=request.employee_id).first()
-        if existing_user:
-            db_session.close()
-            return RegisterResponse(
-                success=False, 
-                message="Mã nhân viên đã tồn tại"
-            )
+        is_update = existing_user is not None
         
         # Decode image
         image = decode_base64_image(request.image)
@@ -542,16 +537,27 @@ async def register_face(request: RegisterRequest):
         
         face_encoding = face_encodings[0]
         
-        # Save user to database
-        new_user = User(
-            name=request.name,
-            employee_id=request.employee_id,
-            department=request.department,
-            position=request.position,
-            face_encoding=str(face_encoding.tolist())  # Convert to JSON string
-        )
+        # Save or update user in database
+        if is_update:
+            # Update existing user
+            existing_user.name = request.name
+            existing_user.department = request.department  
+            existing_user.position = request.position
+            existing_user.face_encoding = str(face_encoding.tolist())
+            user_to_save = existing_user
+            logger.info(f"Updated face for {request.name} (ID: {request.employee_id})")
+        else:
+            # Create new user
+            user_to_save = User(
+                name=request.name,
+                employee_id=request.employee_id,
+                department=request.department,
+                position=request.position,
+                face_encoding=str(face_encoding.tolist())  # Convert to JSON string
+            )
+            db_session.add(user_to_save)
+            logger.info(f"Registered new face for {request.name} (ID: {request.employee_id})")
         
-        db_session.add(new_user)
         db_session.commit()
         
         # Save face image
@@ -565,7 +571,8 @@ async def register_face(request: RegisterRequest):
         # Reload known faces
         load_known_faces()
         
-        logger.info(f"Registered new face for {request.name} (ID: {request.employee_id})")
+        action = "Updated" if is_update else "Registered new"
+        logger.info(f"{action} face for {request.name} (ID: {request.employee_id})")
         
         return RegisterResponse(
             success=True,

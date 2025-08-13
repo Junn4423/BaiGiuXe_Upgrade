@@ -31,8 +31,22 @@ class pm_nc0002 extends lv_controler{
 
     // Thêm mới
     function KB_Insert() {
-        $sql = "INSERT INTO pm_nc0002 (lv001, lv002, lv003, lv004) VALUES ('$this->lv001', '$this->lv002', '$this->lv003', '$this->lv004')";
-        return db_query($sql);
+        // Debug: Log the values being inserted
+        error_log("PM_NC0002 Insert - lv001: " . $this->lv001 . ", lv002: " . $this->lv002 . ", lv003: " . $this->lv003 . ", lv004: " . $this->lv004);
+        
+        // Escape strings to prevent SQL injection
+        $lv001_escaped = addslashes($this->lv001);
+        $lv002_escaped = addslashes($this->lv002);
+        $lv003_escaped = addslashes($this->lv003);
+        $lv004_escaped = addslashes($this->lv004);
+        
+        $sql = "INSERT INTO pm_nc0002 (lv001, lv002, lv003, lv004) VALUES ('$lv001_escaped', '$lv002_escaped', '$lv003_escaped', '$lv004_escaped')";
+        error_log("PM_NC0002 Insert SQL: " . $sql);
+        
+        $result = db_query($sql);
+        error_log("PM_NC0002 Insert Result: " . ($result ? "SUCCESS" : "FAILED"));
+        
+        return $result;
     }
 
     // Sửa

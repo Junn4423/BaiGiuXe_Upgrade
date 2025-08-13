@@ -25,10 +25,25 @@ async function getAuthToken(username = "admin", password = "1") {
   });
 
   if (!res.ok) {
+    console.error("Login failed with status:", res.status);
     throw new Error("Không thể đăng nhập để lấy token");
   }
 
-  authCache = await res.json();
+  const result = await res.json();
+
+  // Kiểm tra nếu có lỗi trong response
+  if (result.error) {
+    console.error("Login error:", result.error);
+    throw new Error(result.error);
+  }
+
+  // Kiểm tra nếu không có token
+  if (!result.token || !result.code) {
+    console.error("Invalid login response:", result);
+    throw new Error("Đăng nhập thất bại: không nhận được token");
+  }
+
+  authCache = result;
   console.log("Got auth token:", authCache);
   return authCache;
 }
@@ -88,7 +103,7 @@ export async function themLoaiPhuongTien(loaiPhuongTien) {
     maLoaiPT: loaiPhuongTien.maLoaiPT,
     tenLoaiPT: loaiPhuongTien.tenLoaiPT,
     moTa: loaiPhuongTien.moTa,
-    loaiXe: loaiPhuongTien.loaiXe, 
+    loaiXe: loaiPhuongTien.loaiXe,
   };
   return callApiWithAuth(payload);
 }
@@ -100,7 +115,7 @@ export async function capNhatLoaiPhuongTien(loaiPhuongTien) {
     maLoaiPT: loaiPhuongTien.maLoaiPT,
     tenLoaiPT: loaiPhuongTien.tenLoaiPT,
     moTa: loaiPhuongTien.moTa,
-    loaiXe: loaiPhuongTien.loaiXe, 
+    loaiXe: loaiPhuongTien.loaiXe,
   };
   return callApiWithAuth(payload);
 }
@@ -512,9 +527,12 @@ async function nhanDangBienSoFormData(imageBlob) {
       body: formData,
       // Không set Content-Type để browser tự động thêm boundary cho multipart/form-data
     }),
-    new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("License plate API timeout (1 second)")), 1000)
-    )
+    new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error("License plate API timeout (1 second)")),
+        1000
+      )
+    ),
   ]);
 
   console.log("📡 Response status (FormData):", response.status);
@@ -562,35 +580,48 @@ export function blobToBase64(blob) {
  * @param {string} options.updateType - Type of update (plate_in, plate_out, face_in, face_out)
  * @returns {Promise<Object>} - Upload results from direct folder storage
  */
-export async function uploadImageToLocal(imageBlob, prefix = 'image', options = {}) {
+export async function uploadImageToLocal(
+  imageBlob,
+  prefix = "image",
+  options = {}
+) {
   try {
-    console.log('🔄 Starting image upload...', {
+    console.log("🔄 Starting image upload...", {
       blob: imageBlob,
       type: imageBlob.type,
       size: imageBlob.size,
       prefix: prefix,
-      options: options
+      options: options,
     });
 
     // Use provided filename if available, otherwise generate new one
     let filename;
     if (options.filename) {
       filename = options.filename;
-      console.log('🏷️ Using provided filename:', filename);
+      console.log("🏷️ Using provided filename:", filename);
     } else {
       // Generate timestamp-based filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', 'T').slice(0, -1) + 'Z';
+      const timestamp =
+        new Date()
+          .toISOString()
+          .replace(/[:.]/g, "-")
+          .replace("T", "T")
+          .slice(0, -1) + "Z";
       const extension = getFileExtension(imageBlob);
       filename = `${prefix}_${timestamp}.${extension}`;
-      console.log('🏷️ Generated new filename:', filename);
+      console.log("🏷️ Generated new filename:", filename);
     }
 
     // Try local storage first if enabled
     if (await isLocalStorageEnabled()) {
       try {
-        const localResult = await saveToUserDefinedFolder(imageBlob, filename, prefix);
+        const localResult = await saveToUserDefinedFolder(
+          imageBlob,
+          filename,
+          prefix
+        );
         if (localResult.success) {
-          console.log('✅ Local Storage Success:', localResult);
+          console.log("✅ Local Storage Success:", localResult);
           return {
             success: true,
             filename: filename,
@@ -599,19 +630,22 @@ export async function uploadImageToLocal(imageBlob, prefix = 'image', options = 
             primaryUrl: localResult.url || filename, // Return filename for database
             urls: [localResult.url || filename],
             isLocal: true,
-            message: 'Lưu ảnh local thành công'
+            message: "Lưu ảnh local thành công",
           };
         }
       } catch (localError) {
-        console.warn('Local storage failed, falling back to server:', localError);
+        console.warn(
+          "Local storage failed, falling back to server:",
+          localError
+        );
       }
     }
 
     // Fallback to server storage
     const serverResult = await uploadToLocalServer(imageBlob, filename);
-    
+
     if (serverResult.success) {
-      console.log('✅ Server Storage Success:', serverResult);
+      console.log("✅ Server Storage Success:", serverResult);
       return {
         success: true,
         filename: filename,
@@ -620,14 +654,13 @@ export async function uploadImageToLocal(imageBlob, prefix = 'image', options = 
         primaryUrl: filename, // Return filename for database
         urls: [filename],
         isLocal: false,
-        message: serverResult.message
+        message: serverResult.message,
       };
     } else {
-      throw new Error(serverResult.message || 'Upload failed');
+      throw new Error(serverResult.message || "Upload failed");
     }
-
   } catch (error) {
-    console.error('Image upload failed:', error);
+    console.error("Image upload failed:", error);
     throw new Error(`Image upload failed: ${error.message}`);
   }
 }
@@ -638,9 +671,9 @@ export const uploadImageToMinIO = uploadImageToLocal;
 // Helper functions for local storage
 async function isLocalStorageEnabled() {
   try {
-    const enabled = localStorage.getItem('local_storage_enabled') === 'true';
-    const path = localStorage.getItem('image_storage_path');
-    return enabled && path && path.trim() !== '';
+    const enabled = localStorage.getItem("local_storage_enabled") === "true";
+    const path = localStorage.getItem("image_storage_path");
+    return enabled && path && path.trim() !== "";
   } catch (error) {
     return false;
   }
@@ -648,23 +681,29 @@ async function isLocalStorageEnabled() {
 
 async function saveToUserDefinedFolder(imageBlob, filename, prefix) {
   try {
-    let basePath = localStorage.getItem('image_storage_path');
-    
+    let basePath = localStorage.getItem("image_storage_path");
+
     // Check if saved path is old Documents path and use default instead
-    if (!basePath || basePath.includes('Documents') || basePath.includes('ParkingLotApp')) {
-      console.warn('⚠️ Old or missing storage path detected, using default: C:/ParkingLot_Images/');
-      basePath = 'C:/ParkingLot_Images';
+    if (
+      !basePath ||
+      basePath.includes("Documents") ||
+      basePath.includes("ParkingLotApp")
+    ) {
+      console.warn(
+        "⚠️ Old or missing storage path detected, using default: C:/ParkingLot_Images/"
+      );
+      basePath = "C:/ParkingLot_Images";
       // Don't update localStorage here to avoid infinite loops
     }
 
     // Create date-based subdirectory structure (same as backend)
     const year = new Date().getFullYear();
-    const month = String(new Date().getMonth() + 1).padStart(2, '0');
-    const day = String(new Date().getDate()).padStart(2, '0');
-    
+    const month = String(new Date().getMonth() + 1).padStart(2, "0");
+    const day = String(new Date().getDate()).padStart(2, "0");
+
     const subFolder = `Nam_${year}/Thang_${month}/Ngay_${day}`;
     const fullFolderPath = `${basePath}/${subFolder}`;
-    
+
     console.log(`💾 Saving to storage folder: ${fullFolderPath}/${filename}`);
 
     // Check if running in Electron
@@ -678,28 +717,28 @@ async function saveToUserDefinedFolder(imageBlob, filename, prefix) {
 
       const arrayBuffer = await imageBlob.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
-      
+
       // Save using absolute path - ĐỒNG BỘ với backend path structure
       const electronSaveData = {
         data: Array.from(uint8Array),
         fileName: filename,
-        folder: fullFolderPath // Use absolute path matching backend
+        folder: fullFolderPath, // Use absolute path matching backend
       };
-      
+
       const filePath = await window.electronAPI.saveImage(electronSaveData);
       console.log(`✅ Local storage save successful: ${filePath}`);
-      
+
       return {
         success: true,
         filePath: filePath,
         fullPath: `${fullFolderPath}/${filename}`,
-        url: `${subFolder}/${filename}` // Return relative path for database storage (matches backend expectation)
+        url: `${subFolder}/${filename}`, // Return relative path for database storage (matches backend expectation)
       };
     } else {
-      throw new Error('Electron API không khả dụng');
+      throw new Error("Electron API không khả dụng");
     }
   } catch (error) {
-    console.error('Save to user-defined folder failed:', error);
+    console.error("Save to user-defined folder failed:", error);
     throw error;
   }
 }
@@ -707,70 +746,80 @@ async function saveToUserDefinedFolder(imageBlob, filename, prefix) {
 // Helper function for direct folder storage upload
 export async function uploadToLocalServer(imageBlob, filename) {
   try {
-    console.log('📁 Uploading to direct folder storage...', { filename, size: imageBlob.size });
+    console.log("📁 Uploading to direct folder storage...", {
+      filename,
+      size: imageBlob.size,
+    });
 
     // Create FormData
     const formData = new FormData();
-    
+
     // Ensure file has proper format
     const file = new File([imageBlob], filename, {
-      type: imageBlob.type || 'image/jpeg',
-      lastModified: Date.now()
+      type: imageBlob.type || "image/jpeg",
+      lastModified: Date.now(),
     });
 
-    formData.append('image', file);
-    formData.append('filename', filename);
-    
+    formData.append("image", file);
+    formData.append("filename", filename);
+
     // Add storage path if available from localStorage
-    const storagePath = localStorage.getItem('image_storage_path');
-    if (storagePath && storagePath.trim() !== '') {
+    const storagePath = localStorage.getItem("image_storage_path");
+    if (storagePath && storagePath.trim() !== "") {
       // Check if the custom path contains the old Documents path - if so, don't use it
-      if (storagePath.includes('Documents\\ParkingLotApp') || storagePath.includes('Documents/ParkingLotApp')) {
-        console.warn('⚠️ Old storage path detected, using default instead:', storagePath);
-        console.log('Using default storage path: C:/ParkingLot_Images/');
+      if (
+        storagePath.includes("Documents\\ParkingLotApp") ||
+        storagePath.includes("Documents/ParkingLotApp")
+      ) {
+        console.warn(
+          "⚠️ Old storage path detected, using default instead:",
+          storagePath
+        );
+        console.log("Using default storage path: C:/ParkingLot_Images/");
         // Don't add storage_path to formData - let backend use default
       } else {
-        formData.append('storage_path', storagePath);
-        console.log('Using custom storage path:', storagePath);
+        formData.append("storage_path", storagePath);
+        console.log("Using custom storage path:", storagePath);
       }
     } else {
-      console.log('No custom storage path set, using default: C:/ParkingLot_Images/');
+      console.log(
+        "No custom storage path set, using default: C:/ParkingLot_Images/"
+      );
     }
 
     // Log FormData for debugging
-    console.log('Direct Folder Upload FormData:', {
+    console.log("Direct Folder Upload FormData:", {
       filename: filename,
       fileSize: file.size,
-      fileType: file.type
+      fileType: file.type,
     });
 
     // Upload to local backend using upload1.php (direct folder storage)
-    const uploadUrl = url_api.replace('/index.php', '/upload1.php');
-    
+    const uploadUrl = url_api.replace("/index.php", "/upload1.php");
+
     const response = await fetch(uploadUrl, {
-      method: 'POST',
-      body: formData
+      method: "POST",
+      body: formData,
       // Don't set Content-Type to let browser set multipart/form-data boundary
     });
 
-    console.log('Direct Folder Upload Response Status:', response.status);
+    console.log("Direct Folder Upload Response Status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Direct Folder Upload Error:', errorText);
+      console.error("Direct Folder Upload Error:", errorText);
       throw new Error(`Upload failed: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
-    
+
     if (!result.success) {
-      throw new Error(result.message || 'Upload failed');
+      throw new Error(result.message || "Upload failed");
     }
 
     return result;
-
   } catch (error) {
-    console.error('Direct folder storage upload failed:', error);
+    console.error("Direct folder storage upload failed:", error);
     throw error;
   }
 }
@@ -937,9 +986,9 @@ async function saveToLocalStorage(imageBlob, filename, prefix) {
  * @returns {Promise<Object>} - Upload results
  */
 export async function uploadLicensePlateImage(imageBlob, options = {}) {
-  return uploadImageToLocal(imageBlob, 'license_plate_in', {
+  return uploadImageToLocal(imageBlob, "license_plate_in", {
     ...options,
-    updateType: 'plate_in'
+    updateType: "plate_in",
   });
 }
 
@@ -952,9 +1001,9 @@ export async function uploadLicensePlateImage(imageBlob, options = {}) {
  * @returns {Promise<Object>} - Upload results
  */
 export async function uploadLicensePlateOutImage(imageBlob, options = {}) {
-  return uploadImageToLocal(imageBlob, 'license_plate_out', {
+  return uploadImageToLocal(imageBlob, "license_plate_out", {
     ...options,
-    updateType: 'plate_out'
+    updateType: "plate_out",
   });
 }
 
@@ -969,11 +1018,11 @@ export async function uploadLicensePlateOutImage(imageBlob, options = {}) {
  */
 export async function uploadFaceImage(imageBlob, options = {}) {
   // Xác định prefix dựa trên updateType
-  const prefix = options.updateType === 'face_out' ? 'face_out' : 'face_in';
-  
+  const prefix = options.updateType === "face_out" ? "face_out" : "face_in";
+
   return uploadImageToLocal(imageBlob, prefix, {
     ...options,
-    updateType: options.updateType || 'face_in'
+    updateType: options.updateType || "face_in",
   });
 }
 
@@ -984,13 +1033,13 @@ export async function uploadFaceImage(imageBlob, options = {}) {
  * @param {string} desiredFilename - Tên file mong muốn (tuỳ chọn)
  * @returns {Promise<{success:boolean, filename:string, fullPath:string}>}
  */
-export async function uploadOwnerFaceImage(imageBlob, desiredFilename = '') {
+export async function uploadOwnerFaceImage(imageBlob, desiredFilename = "") {
   try {
-    const baseFolder = 'C:/ParkingLot_Images/NhanDien_khuonmat';
+    const baseFolder = "C:/ParkingLot_Images/NhanDien_khuonmat";
 
     // Ensure Electron API available
     if (!(window.electronAPI && window.electronAPI.saveImage)) {
-      throw new Error('Electron API không khả dụng để lưu ảnh chủ xe');
+      throw new Error("Electron API không khả dụng để lưu ảnh chủ xe");
     }
 
     // Create folder if needed
@@ -999,13 +1048,17 @@ export async function uploadOwnerFaceImage(imageBlob, desiredFilename = '') {
     }
 
     // Prepare filename
-    let filename = desiredFilename && desiredFilename.trim() !== ''
-      ? desiredFilename
-      : `owner_face_${new Date().toISOString().replace(/[:.]/g, '-').slice(0,19)}.jpg`;
+    let filename =
+      desiredFilename && desiredFilename.trim() !== ""
+        ? desiredFilename
+        : `owner_face_${new Date()
+            .toISOString()
+            .replace(/[:.]/g, "-")
+            .slice(0, 19)}.jpg`;
 
     // Ensure extension
     if (!/\.(jpg|jpeg|png)$/i.test(filename)) {
-      filename += '.jpg';
+      filename += ".jpg";
     }
 
     const arrayBuffer = await imageBlob.arrayBuffer();
@@ -1014,14 +1067,14 @@ export async function uploadOwnerFaceImage(imageBlob, desiredFilename = '') {
     const saveData = {
       data: Array.from(uint8Array),
       fileName: filename,
-      folder: baseFolder
+      folder: baseFolder,
     };
 
     const fullPath = await window.electronAPI.saveImage(saveData);
     return { success: true, filename, fullPath };
   } catch (error) {
-    console.error('uploadOwnerFaceImage failed:', error);
-    return { success: false, filename: '', fullPath: '', error: error.message };
+    console.error("uploadOwnerFaceImage failed:", error);
+    return { success: false, filename: "", fullPath: "", error: error.message };
   }
 }
 
@@ -1032,73 +1085,92 @@ export async function uploadOwnerFaceImage(imageBlob, desiredFilename = '') {
  */
 export async function getImageUrl(filename) {
   if (!filename) {
-    console.warn('🚫 getImageUrl: Empty filename provided');
-    return '';
+    console.warn("🚫 getImageUrl: Empty filename provided");
+    return "";
   }
-  
+
   // If it's already a full URL, return as is
-  if (filename.startsWith('http://') || filename.startsWith('https://') || filename.startsWith('data:')) {
+  if (
+    filename.startsWith("http://") ||
+    filename.startsWith("https://") ||
+    filename.startsWith("data:")
+  ) {
     console.log(`🔗 getImageUrl: Returning existing URL for ${filename}`);
     return filename;
   }
-  
+
   try {
     // Extract date from filename timestamp like "2025-08-05T11-40-10-594Z"
     let year, month, day;
     const timestampMatch = filename.match(/(\d{4})-(\d{2})-(\d{2})T/);
-    
+
     if (timestampMatch) {
       year = timestampMatch[1];
       month = timestampMatch[2];
       day = timestampMatch[3];
-      console.log(`📅 getImageUrl: Extracted date from ${filename} -> ${year}-${month}-${day}`);
+      console.log(
+        `📅 getImageUrl: Extracted date from ${filename} -> ${year}-${month}-${day}`
+      );
     } else {
       // Fallback to current date if can't extract from filename
       year = new Date().getFullYear();
-      month = String(new Date().getMonth() + 1).padStart(2, '0');
-      day = String(new Date().getDate()).padStart(2, '0');
-      console.warn(`⚠️ getImageUrl: Could not extract date from ${filename}, using current date: ${year}-${month}-${day}`);
+      month = String(new Date().getMonth() + 1).padStart(2, "0");
+      day = String(new Date().getDate()).padStart(2, "0");
+      console.warn(
+        `⚠️ getImageUrl: Could not extract date from ${filename}, using current date: ${year}-${month}-${day}`
+      );
     }
-    
-    console.log(`🔍 getImageUrl: Looking for image: ${filename} on date ${year}-${month}-${day}`);
-    
-    const baseUrl = url_api.replace('/index.php', '');
+
+    console.log(
+      `🔍 getImageUrl: Looking for image: ${filename} on date ${year}-${month}-${day}`
+    );
+
+    const baseUrl = url_api.replace("/index.php", "");
     const apiUrl = `${baseUrl}/getImage.php`;
-    
+
     console.log(`🌐 getImageUrl: Making request to ${apiUrl}`);
-    
+
     const response = await fetch(apiUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
         year: year,
         month: month,
         day: day,
-        file: filename
-      })
+        file: filename,
+      }),
     });
-    
-    console.log(`📡 getImageUrl: Response status ${response.status} for ${filename}`);
-    
+
+    console.log(
+      `📡 getImageUrl: Response status ${response.status} for ${filename}`
+    );
+
     if (response.ok) {
       const result = await response.json();
       if (result.base64) {
-        console.log(`✅ getImageUrl: Successfully loaded image: ${filename} (${result.base64.length} chars)`);
+        console.log(
+          `✅ getImageUrl: Successfully loaded image: ${filename} (${result.base64.length} chars)`
+        );
         return result.base64; // Return base64 data URL
       } else {
-        console.warn(`❌ getImageUrl: No base64 data in response for ${filename}:`, result);
+        console.warn(
+          `❌ getImageUrl: No base64 data in response for ${filename}:`,
+          result
+        );
       }
     } else {
       const errorText = await response.text();
-      console.warn(`❌ getImageUrl: Failed to load image: ${filename}, status: ${response.status}, error: ${errorText}`);
+      console.warn(
+        `❌ getImageUrl: Failed to load image: ${filename}, status: ${response.status}, error: ${errorText}`
+      );
     }
-    
-    return ''; // Return empty string on failure
+
+    return ""; // Return empty string on failure
   } catch (error) {
     console.error(`💥 getImageUrl: Error loading image ${filename}:`, error);
-    return '';
+    return "";
   }
 }
 
@@ -1110,10 +1182,12 @@ export async function getImageUrl(filename) {
  */
 export function getBackupImageUrls(filename) {
   if (!filename) return [];
-  
+
   // For local storage with single endpoint, return empty array
   // FallbackImage will use getImageUrl() as primary source
-  console.log(`getBackupImageUrls called for ${filename} - using primary getImageUrl only`);
+  console.log(
+    `getBackupImageUrls called for ${filename} - using primary getImageUrl only`
+  );
   return [];
 }
 
@@ -1179,13 +1253,13 @@ export function getBackupImageUrls(filename) {
  */
 export async function checkImageUrl(url) {
   if (!url) return false;
-  
+
   try {
     // For local server, try a simple fetch to check if file exists
-    const response = await fetch(url, { method: 'HEAD' });
+    const response = await fetch(url, { method: "HEAD" });
     return response.ok;
   } catch (error) {
-    console.warn('Error checking image URL:', error);
+    console.warn("Error checking image URL:", error);
     return false;
   }
 }
@@ -1197,16 +1271,16 @@ export async function checkImageUrl(url) {
  */
 export async function getWorkingImageUrl(filename) {
   const url = getImageUrl(filename);
-  
+
   console.log(`Checking local image URL: ${url}`);
   const isWorking = await checkImageUrl(url);
-  
+
   if (isWorking) {
     console.log(`Local image URL working: ${url}`);
     return url;
   } else {
     console.warn(`Local image URL not working: ${url}`);
-    return '';
+    return "";
   }
 }
 
@@ -1217,23 +1291,23 @@ export async function getWorkingImageUrl(filename) {
  */
 function getFileExtension(file) {
   if (file.name) {
-    const extension = file.name.split('.').pop();
+    const extension = file.name.split(".").pop();
     if (extension && extension !== file.name) {
       return extension.toLowerCase();
     }
   }
-  
+
   // Fallback based on MIME type
   if (file.type) {
-    if (file.type.includes('jpeg') || file.type.includes('jpg')) {
-      return 'jpg';
-    } else if (file.type.includes('png')) {
-      return 'png';
+    if (file.type.includes("jpeg") || file.type.includes("jpg")) {
+      return "jpg";
+    } else if (file.type.includes("png")) {
+      return "png";
     }
   }
-  
+
   // Default fallback
-  return 'jpg';
+  return "jpg";
 }
 
 /**
@@ -1242,8 +1316,16 @@ function getFileExtension(file) {
  * @param {string} extension - File extension
  * @returns {string} - Generated filename
  */
-export function generateParkingImageFilename(prefix = 'image', extension = 'jpg') {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', 'T').slice(0, -1) + 'Z';
+export function generateParkingImageFilename(
+  prefix = "image",
+  extension = "jpg"
+) {
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")
+      .replace("T", "T")
+      .slice(0, -1) + "Z";
   return `${prefix}_${timestamp}.${extension}`;
 }
 
@@ -2583,7 +2665,7 @@ export async function themNhatKyQuetTheVoiThoiGian(scanLogData) {
     clientTime: scanLogData.scanTime,
     imagePath: scanLogData.imagePath,
     plateMatch: scanLogData.plateMatch || 0,
-    direction: scanLogData.direction || 'entry'
+    direction: scanLogData.direction || "entry",
   };
   return callApiWithAuth(payload);
 }
@@ -2595,96 +2677,103 @@ export async function themNhatKyQuetTheVoiThoiGian(scanLogData) {
  * @returns {Promise<Object>} Kết quả tính phí
  */
 export const tinhPhiGuiXe = async (maPhien, uidThe = null) => {
-    try {
-        console.log(`💰 Bắt đầu tính phí cho phiên: ${maPhien}, thẻ: ${uidThe || 'N/A'}`);
+  try {
+    console.log(
+      `💰 Bắt đầu tính phí cho phiên: ${maPhien}, thẻ: ${uidThe || "N/A"}`
+    );
 
-        if (!maPhien) {
-            return {
-                success: false,
-                phi: 0,
-                tongPhut: 0,
-                message: "Thiếu mã phiên"
-            };
-        }
+    if (!maPhien) {
+      return {
+        success: false,
+        phi: 0,
+        tongPhut: 0,
+        message: "Thiếu mã phiên",
+      };
+    }
 
-        // B1: Nếu có uidThe, kiểm tra xem thẻ có được miễn phí không
-        if (uidThe) {
-            try {
-                const isFree = await kiemTraTheMienPhi(uidThe);
-                
-                // B2: Nếu được miễn phí, trả về phí là 0
-                if (isFree) {
-                    console.log(`✅ Thẻ ${uidThe} được miễn phí (không phải thẻ KHACH).`);
-                    return {
-                        success: true,
-                        phi: 0,
-                        tongPhut: 0,
-                        message: "Thẻ thuộc đối tượng miễn phí"
-                    };
-                }
-                console.log(`💰 Thẻ ${uidThe} là thẻ KHACH, tiến hành tính phí.`);
-            } catch (freeCheckError) {
-                console.warn(`⚠️ Lỗi kiểm tra miễn phí, tiếp tục tính phí:`, freeCheckError);
-            }
-        }
+    // B1: Nếu có uidThe, kiểm tra xem thẻ có được miễn phí không
+    if (uidThe) {
+      try {
+        const isFree = await kiemTraTheMienPhi(uidThe);
 
-        // B3: Gọi API backend để tính phí
-        const payload = { 
-            table: "pm_nc0008", 
-            func: "tinhPhiGuiXe", 
-            maPhien: maPhien 
-        };
-        
-        console.log(`💰 Gọi API tính phí với payload:`, payload);
-        const response = await callApiWithAuth(payload);
-        console.log(`💰 Response từ API:`, response);
-        
-        // Xử lý response từ backend
-        if (response) {
-            // Check if response has success property directly
-            if (response.success !== undefined) {
-                return {
-                    success: response.success,
-                    phi: response.phi || response.fee || 0,
-                    tongPhut: response.tongPhut || response.totalMinutes || 0,
-                    message: response.message || (response.success ? "Tính phí thành công" : "Lỗi tính phí")
-                };
-            }
-            // Check if response has data property
-            else if (response.data) {
-                return {
-                    success: true,
-                    phi: response.data.phi || response.data.fee || 0,
-                    tongPhut: response.data.tongPhut || response.data.totalMinutes || 0,
-                    message: response.data.message || "Tính phí thành công"
-                };
-            }
-            // Legacy format - assume success if response exists
-            else {
-                return {
-                    success: true,
-                    phi: response.phi || response.fee || 0,
-                    tongPhut: response.tongPhut || response.totalMinutes || 0,
-                    message: response.message || "Tính phí thành công"
-                };
-            }
-        } else {
-            return {
-                success: false,
-                phi: 0,
-                tongPhut: 0,
-                message: "Không nhận được response từ server"
-            };
-        }
-    } catch (error) {
-        console.error('❌ Lỗi khi tính phí gửi xe:', error);
-        return {
-            success: false,
+        // B2: Nếu được miễn phí, trả về phí là 0
+        if (isFree) {
+          console.log(`✅ Thẻ ${uidThe} được miễn phí (không phải thẻ KHACH).`);
+          return {
+            success: true,
             phi: 0,
             tongPhut: 0,
-            message: error.message || "Lỗi tính phí"
-        };
+            message: "Thẻ thuộc đối tượng miễn phí",
+          };
+        }
+        console.log(`💰 Thẻ ${uidThe} là thẻ KHACH, tiến hành tính phí.`);
+      } catch (freeCheckError) {
+        console.warn(
+          `⚠️ Lỗi kiểm tra miễn phí, tiếp tục tính phí:`,
+          freeCheckError
+        );
+      }
     }
+
+    // B3: Gọi API backend để tính phí
+    const payload = {
+      table: "pm_nc0008",
+      func: "tinhPhiGuiXe",
+      maPhien: maPhien,
+    };
+
+    console.log(`💰 Gọi API tính phí với payload:`, payload);
+    const response = await callApiWithAuth(payload);
+    console.log(`💰 Response từ API:`, response);
+
+    // Xử lý response từ backend
+    if (response) {
+      // Check if response has success property directly
+      if (response.success !== undefined) {
+        return {
+          success: response.success,
+          phi: response.phi || response.fee || 0,
+          tongPhut: response.tongPhut || response.totalMinutes || 0,
+          message:
+            response.message ||
+            (response.success ? "Tính phí thành công" : "Lỗi tính phí"),
+        };
+      }
+      // Check if response has data property
+      else if (response.data) {
+        return {
+          success: true,
+          phi: response.data.phi || response.data.fee || 0,
+          tongPhut: response.data.tongPhut || response.data.totalMinutes || 0,
+          message: response.data.message || "Tính phí thành công",
+        };
+      }
+      // Legacy format - assume success if response exists
+      else {
+        return {
+          success: true,
+          phi: response.phi || response.fee || 0,
+          tongPhut: response.tongPhut || response.totalMinutes || 0,
+          message: response.message || "Tính phí thành công",
+        };
+      }
+    } else {
+      return {
+        success: false,
+        phi: 0,
+        tongPhut: 0,
+        message: "Không nhận được response từ server",
+      };
+    }
+  } catch (error) {
+    console.error("❌ Lỗi khi tính phí gửi xe:", error);
+    return {
+      success: false,
+      phi: 0,
+      tongPhut: 0,
+      message: error.message || "Lỗi tính phí",
+    };
+  }
 };
 
 /**
@@ -2694,18 +2783,18 @@ export const tinhPhiGuiXe = async (maPhien, uidThe = null) => {
  */
 export async function kiemTraTheMienPhi(uidThe) {
   try {
-    const danhSachThe = await layDanhSachThe()
-    const the = danhSachThe.find(t => t.uidThe === uidThe)
-    
+    const danhSachThe = await layDanhSachThe();
+    const the = danhSachThe.find((t) => t.uidThe === uidThe);
+
     if (the) {
       // Chỉ thẻ KHACH mới phải trả phí
-      return the.loaiThe !== "KHACH"
+      return the.loaiThe !== "KHACH";
     }
-    
-    return false
+
+    return false;
   } catch (error) {
-    console.error("Lỗi kiểm tra thẻ miễn phí:", error)
-    return false
+    console.error("Lỗi kiểm tra thẻ miễn phí:", error);
+    return false;
   }
 }
 
@@ -2718,12 +2807,12 @@ export async function layThongTinTheChiTiet(uidThe) {
   const payload = {
     table: "pm_nc0003",
     func: "timTheTuUID",
-    uidThe: uidThe
-  }
-  const result = await callApiWithAuth(payload)
-  
+    uidThe: uidThe,
+  };
+  const result = await callApiWithAuth(payload);
+
   if (result && result.length > 0) {
-    const the = result[0]
+    const the = result[0];
     return {
       success: true,
       data: {
@@ -2734,15 +2823,15 @@ export async function layThongTinTheChiTiet(uidThe) {
         bienSoXe: the.bienSoXe,
         maChinhSach: the.maChinhSach,
         ngayKetThucCS: the.ngayKetThucCS,
-        laMienPhi: the.loaiThe !== "KHACH" // Chỉ thẻ KHACH phải trả phí
-      }
-    }
+        laMienPhi: the.loaiThe !== "KHACH", // Chỉ thẻ KHACH phải trả phí
+      },
+    };
   }
-  
+
   return {
     success: false,
-    message: "Không tìm thấy thẻ"
-  }
+    message: "Không tìm thấy thẻ",
+  };
 }
 
 /**
@@ -2753,45 +2842,45 @@ export async function layThongTinTheChiTiet(uidThe) {
 export async function themPhienGuiXeVoiViTri(session) {
   try {
     // Lấy thông tin loại xe từ biển số
-    let loaiXe = "0" // Mặc định xe nhỏ
-    let viTriGui = null
-    
+    let loaiXe = "0"; // Mặc định xe nhỏ
+    let viTriGui = null;
+
     if (session.bienSo) {
-      const thongTinLoaiXe = await layThongTinLoaiXeTuBienSo(session.bienSo)
-      loaiXe = thongTinLoaiXe.loaiXe || "0"
-      
+      const thongTinLoaiXe = await layThongTinLoaiXeTuBienSo(session.bienSo);
+      loaiXe = thongTinLoaiXe.loaiXe || "0";
+
       // Nếu là xe lớn (loaiXe = "1"), tìm slot trống
       if (loaiXe === "1") {
-        const slotResult = await laySlotTrongChoXeLon(session.maKhuVuc)
+        const slotResult = await laySlotTrongChoXeLon(session.maKhuVuc);
         if (slotResult.success) {
-          viTriGui = slotResult.maChoDo
-          
+          viTriGui = slotResult.maChoDo;
+
           // Cập nhật trạng thái slot thành đã dùng
-          await capNhatTrangThaiChoDo(viTriGui, "1")
+          await capNhatTrangThaiChoDo(viTriGui, "1");
         } else {
           return {
             success: false,
-            message: "Không còn chỗ đỗ cho xe lớn"
-          }
+            message: "Không còn chỗ đỗ cho xe lớn",
+          };
         }
       }
       // Xe nhỏ không cần vị trí đỗ cụ thể
     }
-    
+
     // Tạo phiên gửi xe
     const sessionData = {
       ...session,
       viTriGui: viTriGui, // null cho xe nhỏ, có giá trị cho xe lớn
-      loaiXe: loaiXe
-    }
-    
-    return await themPhienGuiXe(sessionData)
+      loaiXe: loaiXe,
+    };
+
+    return await themPhienGuiXe(sessionData);
   } catch (error) {
-    console.error("Lỗi thêm phiên gửi xe:", error)
+    console.error("Lỗi thêm phiên gửi xe:", error);
     return {
       success: false,
-      message: error.message
-    }
+      message: error.message,
+    };
   }
 }
 
@@ -2799,23 +2888,26 @@ export async function themPhienGuiXeVoiViTri(session) {
 export async function layThongTinQuyenHanNguoiDung(userCode) {
   try {
     console.log(`Đang lấy thông tin quyền hạn cho người dùng: ${userCode}`);
-    
+
     const payload = {
       table: "pm_nc0011",
       func: "select",
-      code: userCode
+      code: userCode,
     };
 
     const result = await callApiWithAuth(payload);
-    
+
     if (result && result.success && result.data) {
       console.log(`Lấy thông tin quyền hạn thành công:`, result.data);
       return {
         success: true,
-        ...result.data
+        ...result.data,
       };
     } else {
-      console.error(`Lỗi lấy thông tin quyền hạn:`, result?.message || "Unknown error");
+      console.error(
+        `Lỗi lấy thông tin quyền hạn:`,
+        result?.message || "Unknown error"
+      );
       return {
         success: false,
         message: result?.message || "Không thể lấy thông tin quyền hạn",
@@ -2827,8 +2919,8 @@ export async function layThongTinQuyenHanNguoiDung(userCode) {
           canAccessZone: false,
           canAccessVehicle: false,
           canAccessVehicleType: false,
-          canAccessRfid: false
-        }
+          canAccessRfid: false,
+        },
       };
     }
   } catch (error) {
@@ -2844,8 +2936,8 @@ export async function layThongTinQuyenHanNguoiDung(userCode) {
         canAccessZone: false,
         canAccessVehicle: false,
         canAccessVehicleType: false,
-        canAccessRfid: false
-      }
+        canAccessRfid: false,
+      },
     };
   }
 }
@@ -2863,49 +2955,49 @@ export async function kiemTraQuyenHanNguoiDung(userCode) {
 // Tách filename từ URL ảnh để lưu vào database
 export function extractFilenameFromImageUrl(imageUrl) {
   try {
-    if (!imageUrl || typeof imageUrl !== 'string') {
-      return '';
+    if (!imageUrl || typeof imageUrl !== "string") {
+      return "";
     }
-    
+
     // Extract filename from URL pattern: http://192.168.1.19:9000/parking-lot-images/license_plate_2025-07-10T03-04-54-531Z.jpg
-    const urlParts = imageUrl.split('/');
+    const urlParts = imageUrl.split("/");
     const filename = urlParts[urlParts.length - 1];
-    
+
     console.log(`🖼️ Tách filename từ URL: ${imageUrl} -> ${filename}`);
     return filename;
   } catch (error) {
     console.error(`❌ Lỗi tách filename từ URL: ${error.message}`);
-    return '';
+    return "";
   }
 }
 
 // Tạo URL đầy đủ từ filename để hiển thị ảnh
 export function constructImageUrlFromFilename(filename, serverIndex = 0) {
   try {
-    if (!filename || typeof filename !== 'string') {
-      return '';
+    if (!filename || typeof filename !== "string") {
+      return "";
     }
-    
+
     // Nếu đã là URL đầy đủ thì return luôn
-    if (filename.startsWith('http://') || filename.startsWith('https://')) {
+    if (filename.startsWith("http://") || filename.startsWith("https://")) {
       return filename;
     }
-    
+
     // Tạo URL từ filename với các MinIO servers
     const minioServers = [
-      'http://192.168.1.19:9000',
-      'http://192.168.1.90:9000', 
-      'http://192.168.1.94:9000'
+      "http://192.168.1.19:9000",
+      "http://192.168.1.90:9000",
+      "http://192.168.1.94:9000",
     ];
-    
+
     const baseUrl = minioServers[serverIndex] || minioServers[0];
     const fullUrl = `${baseUrl}/parking-lot-images/${filename}`;
-    
+
     console.log(`🖼️ Tạo URL từ filename: ${filename} -> ${fullUrl}`);
     return fullUrl;
   } catch (error) {
     console.error(`❌ Lỗi tạo URL từ filename: ${error.message}`);
-    return '';
+    return "";
   }
 }
 
@@ -2964,7 +3056,7 @@ export async function laySlotTrongChoXeLon(maKhuVuc = null) {
     let spots = await layDanhSachChoDo();
 
     if (!Array.isArray(spots)) {
-      return { success: false, message: 'Không lấy được danh sách chỗ đỗ' };
+      return { success: false, message: "Không lấy được danh sách chỗ đỗ" };
     }
 
     // Lọc theo khu vực (nếu có)
@@ -2973,14 +3065,18 @@ export async function laySlotTrongChoXeLon(maKhuVuc = null) {
     }
 
     // Lọc slot trống (trangThai = 0)
-    const freeSpots = spots.filter((s) => s.trangThai === '0' || s.trangThai === 0);
+    const freeSpots = spots.filter(
+      (s) => s.trangThai === "0" || s.trangThai === 0
+    );
 
     if (freeSpots.length === 0) {
-      return { success: false, message: 'Không còn chỗ đỗ trống' };
+      return { success: false, message: "Không còn chỗ đỗ trống" };
     }
 
     // Sắp xếp theo mã chỗ đỗ (tăng dần) => P0001, P0002 ...
-    freeSpots.sort((a, b) => a.maChoDo.localeCompare(b.maChoDo, undefined, { numeric: true }));
+    freeSpots.sort((a, b) =>
+      a.maChoDo.localeCompare(b.maChoDo, undefined, { numeric: true })
+    );
 
     const bestSpot = freeSpots[0];
 
@@ -2988,10 +3084,10 @@ export async function laySlotTrongChoXeLon(maKhuVuc = null) {
       success: true,
       maChoDo: bestSpot.maChoDo,
       maKhuVuc: bestSpot.maKhuVuc,
-      tenKhuVuc: bestSpot.tenKhuVuc || '',
+      tenKhuVuc: bestSpot.tenKhuVuc || "",
     };
   } catch (error) {
-    console.error('❌ [API Error] Lỗi lấy slot trống:', error);
+    console.error("❌ [API Error] Lỗi lấy slot trống:", error);
     return { success: false, message: `Lỗi kết nối: ${error.message}` };
   }
 }
@@ -3000,14 +3096,14 @@ export async function laySlotTrongChoXeLon(maKhuVuc = null) {
 export async function capNhatTrangThaiChoDo(maChoDo, trangThai) {
   try {
     const payload = {
-      table: 'pm_nc0005',
-      func: 'chinhSuaTrangThai',
+      table: "pm_nc0005",
+      func: "chinhSuaTrangThai",
       maChoDo,
-      trangThai
+      trangThai,
     };
     return await callApiWithAuth(payload);
   } catch (error) {
-    console.error('❌ [API Error] Lỗi cập nhật slot:', error);
+    console.error("❌ [API Error] Lỗi cập nhật slot:", error);
     return { success: false, message: `Lỗi kết nối: ${error.message}` };
   }
 }
@@ -3020,37 +3116,39 @@ export async function capNhatTrangThaiChoDo(maChoDo, trangThai) {
 export async function layThongTinLoaiXeTuBienSo(bienSo) {
   try {
     console.log(`🚗 [API] Tìm loại xe từ biển số: ${bienSo}`);
-    
+
     // Gọi API lấy thông tin phương tiện
     const response = await fetch(`${getBaseUrl()}/kebao.php`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        table: 'pm_nc0002',
-        func: 'data'
-      })
+        table: "pm_nc0002",
+        func: "data",
+      }),
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    
+
     const vehicles = await response.json();
     console.log(`🚗 [API Response] Danh sách phương tiện:`, vehicles);
-    
+
     if (Array.isArray(vehicles)) {
-      const foundVehicle = vehicles.find(v => 
-        v.bienSo === bienSo || v.lv001 === bienSo
+      const foundVehicle = vehicles.find(
+        (v) => v.bienSo === bienSo || v.lv001 === bienSo
       );
-      
+
       if (foundVehicle) {
         // Lấy thông tin loại xe từ pm_nc0001
         const vehicleTypes = await layALLLoaiPhuongTien();
         if (Array.isArray(vehicleTypes)) {
-          const vehicleType = vehicleTypes.find(vt => 
-            vt.maLoaiPT === foundVehicle.maLoaiPT || vt.lv001 === foundVehicle.maLoaiPT
+          const vehicleType = vehicleTypes.find(
+            (vt) =>
+              vt.maLoaiPT === foundVehicle.maLoaiPT ||
+              vt.lv001 === foundVehicle.maLoaiPT
           );
-          
+
           if (vehicleType) {
             console.log(`✅ [API] Tìm thấy loại xe từ biển số:`, vehicleType);
             return {
@@ -3058,26 +3156,26 @@ export async function layThongTinLoaiXeTuBienSo(bienSo) {
               data: {
                 maLoaiPT: vehicleType.maLoaiPT,
                 tenLoaiPT: vehicleType.tenLoaiPT,
-                loaiXe: vehicleType.loaiXe // 0 = xe nhỏ, 1 = xe lớn
-              }
+                loaiXe: vehicleType.loaiXe, // 0 = xe nhỏ, 1 = xe lớn
+              },
             };
           }
         }
       }
-      
+
       console.log(`⚠️ [API] Không tìm thấy thông tin loại xe từ biển số`);
       return {
         success: false,
-        message: 'Không tìm thấy thông tin loại xe từ biển số'
+        message: "Không tìm thấy thông tin loại xe từ biển số",
       };
     } else {
-      throw new Error('Dữ liệu phương tiện không hợp lệ');
+      throw new Error("Dữ liệu phương tiện không hợp lệ");
     }
   } catch (error) {
     console.error(`❌ [API Error] Lỗi tìm loại xe:`, error);
     return {
       success: false,
-      message: `Lỗi kết nối: ${error.message}`
+      message: `Lỗi kết nối: ${error.message}`,
     };
   }
 }
@@ -3089,57 +3187,58 @@ export async function layThongTinLoaiXeTuBienSo(bienSo) {
 // Tính ngày kết thúc chính sách từ tên chính sách và ngày bắt đầu
 export function tinhNgayKetThucChinhSach(tenChinhSach, ngayBatDau) {
   try {
-    console.log(`📅 [API] Tính ngày kết thúc cho chính sách: ${tenChinhSach}, từ ngày: ${ngayBatDau}`);
-    
+    console.log(
+      `📅 [API] Tính ngày kết thúc cho chính sách: ${tenChinhSach}, từ ngày: ${ngayBatDau}`
+    );
+
     if (!tenChinhSach || !ngayBatDau) {
-      throw new Error('Thiếu tên chính sách hoặc ngày bắt đầu');
+      throw new Error("Thiếu tên chính sách hoặc ngày bắt đầu");
     }
-    
+
     const startDate = new Date(ngayBatDau);
     if (isNaN(startDate.getTime())) {
-      throw new Error('Ngày bắt đầu không hợp lệ');
+      throw new Error("Ngày bắt đầu không hợp lệ");
     }
-    
+
     // Parse pattern: CS_[VEHICLE_TYPE]_[DURATION][UNIT]
     // Improved regex to handle various formats
     const match = tenChinhSach.match(/(\d+)(T|TH|THANG|N|NAM|H)$/i);
-    
+
     if (!match) {
       console.warn(`⚠️ [API] Không thể parse chính sách: ${tenChinhSach}`);
       return null;
     }
-    
+
     const duration = parseInt(match[1]);
     const unit = match[2].toUpperCase();
-    
+
     console.log(`📅 [API] Parsed: ${duration} ${unit}`);
-    
+
     const endDate = new Date(startDate);
-    
+
     switch (unit) {
-      case 'T':
+      case "T":
         endDate.setDate(endDate.getWeek() + duration);
-      case 'TH':
-        endDate.setMonth(endDate.getMonth() + duration); 
-      case 'THANG':
+      case "TH":
+        endDate.setMonth(endDate.getMonth() + duration);
+      case "THANG":
         endDate.setMonth(endDate.getMonth() + duration);
         break;
-      case 'N':
+      case "N":
         endDate.setDate(endDate.getDate() + duration);
         break;
-      case 'NAM':
+      case "NAM":
         endDate.setFullYear(endDate.getFullYear() + duration);
         break;
-      case 'H':
+      case "H":
         endDate.setHours(endDate.getHours() + duration);
         break;
       default:
         throw new Error(`Đơn vị thời gian không hỗ trợ: ${unit}`);
     }
-    
+
     console.log(`✅ [API] Ngày kết thúc tính được: ${endDate.toISOString()}`);
-    return endDate.toISOString().split('T')[0]; // Return YYYY-MM-DD format
-    
+    return endDate.toISOString().split("T")[0]; // Return YYYY-MM-DD format
   } catch (error) {
     console.error(`❌ [API Error] Lỗi tính ngày kết thúc:`, error);
     return null;
@@ -3163,23 +3262,23 @@ export function getBaseUrl() {
 export async function layThongTinQuyenHanNhanVien(token, userCode) {
   try {
     if (!token || !userCode) {
-      throw new Error('Thiếu token hoặc userCode');
+      throw new Error("Thiếu token hoặc userCode");
     }
 
     const payload = {
-      table: 'lv_lv0007',
-      func: 'layThongTinTaiKhoanTheoToken',
-      token: token
+      table: "lv_lv0007",
+      func: "layThongTinTaiKhoanTheoToken",
+      token: token,
     };
 
     const res = await fetch(url_api, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'X-USER-CODE': userCode,
-        'X-USER-TOKEN': token
+        "Content-Type": "application/json",
+        "X-USER-CODE": userCode,
+        "X-USER-TOKEN": token,
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -3190,7 +3289,7 @@ export async function layThongTinQuyenHanNhanVien(token, userCode) {
 
     if (Array.isArray(data) && data.length > 0) {
       const userInfo = data[0];
-      const isAdmin = userInfo.quyenHan === '0';
+      const isAdmin = userInfo.quyenHan === "0";
       return {
         success: true,
         data: {
@@ -3206,14 +3305,14 @@ export async function layThongTinQuyenHanNhanVien(token, userCode) {
             canAccessZone: isAdmin,
             canAccessVehicle: isAdmin,
             canAccessVehicleType: isAdmin,
-            canAccessRfid: isAdmin
-          }
-        }
+            canAccessRfid: isAdmin,
+          },
+        },
       };
     }
-    return { success: false, message: 'Không tìm thấy thông tin người dùng' };
+    return { success: false, message: "Không tìm thấy thông tin người dùng" };
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thông tin quyền hạn:', error);
+    console.error("[API Error] Lỗi lấy thông tin quyền hạn:", error);
     return { success: false, message: `Lỗi kết nối: ${error.message}` };
   }
 }
@@ -3227,7 +3326,7 @@ export async function layThongTinQuyenHanNhanVien(token, userCode) {
 export async function layDanhSachNhanVien() {
   const payload = {
     table: "lv_lv0007",
-    func: "data"
+    func: "data",
   };
   return callApiWithAuth(payload);
 }
@@ -3241,7 +3340,7 @@ export async function layThongTinTaiKhoanTheoToken(token) {
   const payload = {
     table: "lv_lv0007",
     func: "layThongTinTaiKhoanTheoToken",
-    token: token
+    token: token,
   };
   return callApiWithAuth(payload);
 }
@@ -3261,12 +3360,12 @@ export async function themNhanVien(nhanVien) {
   const payload = {
     table: "lv_lv0007",
     func: "add",
-    taiKhoanDN: nhanVien.taiKhoanDN,  // -> lv001
-    nguoiThem: nhanVien.nguoiThem,    // -> lv003
-    roleQuyen: nhanVien.roleQuyen,    // -> lv004
-    matKhau: nhanVien.matKhau,        // -> lv005
-    ten: nhanVien.ten,                // -> lv006
-    quyenHan: nhanVien.quyenHan       // -> lv900
+    taiKhoanDN: nhanVien.taiKhoanDN, // -> lv001
+    nguoiThem: nhanVien.nguoiThem, // -> lv003
+    roleQuyen: nhanVien.roleQuyen, // -> lv004
+    matKhau: nhanVien.matKhau, // -> lv005
+    ten: nhanVien.ten, // -> lv006
+    quyenHan: nhanVien.quyenHan, // -> lv900
   };
   return callApiWithAuth(payload);
 }
@@ -3286,16 +3385,15 @@ export async function capNhatNhanVien(nhanVien) {
   const payload = {
     table: "lv_lv0007",
     func: "edit",
-    taiKhoanDN: nhanVien.taiKhoanDN,  // -> lv001
-    nguoiThem: nhanVien.nguoiThem,    // -> lv003
-    roleQuyen: nhanVien.roleQuyen,    // -> lv004
-    matKhau: nhanVien.matKhau,        // -> lv005
-    ten: nhanVien.ten,                // -> lv006
-    quyenHan: nhanVien.quyenHan       // -> lv900
+    taiKhoanDN: nhanVien.taiKhoanDN, // -> lv001
+    nguoiThem: nhanVien.nguoiThem, // -> lv003
+    roleQuyen: nhanVien.roleQuyen, // -> lv004
+    matKhau: nhanVien.matKhau, // -> lv005
+    ten: nhanVien.ten, // -> lv006
+    quyenHan: nhanVien.quyenHan, // -> lv900
   };
   return callApiWithAuth(payload);
 }
-
 
 // ==================== QUẢN LÝ KHU VỰC LÀM VIỆC NHÂN VIÊN (pm_nc0011) ====================
 
@@ -3306,7 +3404,7 @@ export async function capNhatNhanVien(nhanVien) {
 export async function layDanhSachKhuVucLamViec() {
   const payload = {
     table: "pm_nc0011",
-    func: "data"
+    func: "data",
   };
   return callApiWithAuth(payload);
 }
@@ -3325,7 +3423,7 @@ export async function themKhuVucLamViec(khuVucLamViec) {
     func: "add",
     maKhuVuc: khuVucLamViec.maKhuVuc,
     taiKhoanDN: khuVucLamViec.taiKhoanDN,
-    moTa: khuVucLamViec.moTa
+    moTa: khuVucLamViec.moTa,
   };
   return callApiWithAuth(payload);
 }
@@ -3341,7 +3439,7 @@ export async function xoaKhuVucLamViec(maKhuVuc, taiKhoanDN) {
     table: "pm_nc0011",
     func: "delete",
     maKhuVuc: maKhuVuc,
-    taiKhoanDN: taiKhoanDN
+    taiKhoanDN: taiKhoanDN,
   };
   return callApiWithAuth(payload);
 }
@@ -3355,7 +3453,7 @@ export async function layKhuVucLamViecCuaNhanVien(taiKhoanDN) {
   const payload = {
     table: "pm_nc0011",
     func: "layKhuVucLamViecCuaNhanVien",
-    taiKhoanDN: taiKhoanDN
+    taiKhoanDN: taiKhoanDN,
   };
   return callApiWithAuth(payload);
 }
@@ -3376,7 +3474,7 @@ export async function xoaNhanVien(taiKhoanDN) {
   const payload = {
     table: "lv_lv0007",
     func: "delete",
-    taiKhoanDN: taiKhoanDN
+    taiKhoanDN: taiKhoanDN,
   };
   return callApiWithAuth(payload);
 }
@@ -3428,11 +3526,11 @@ export async function layThongKeTongQuan() {
   try {
     const payload = {
       table: "statistics",
-      func: "systemOverview"
+      func: "systemOverview",
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thống kê tổng quan:', error);
+    console.error("[API Error] Lỗi lấy thống kê tổng quan:", error);
     return {
       totalCards: 0,
       totalEmployees: 0,
@@ -3440,7 +3538,7 @@ export async function layThongKeTongQuan() {
       totalCameras: 0,
       totalGates: 0,
       totalSessions: 0,
-      activeSessionsToday: 0
+      activeSessionsToday: 0,
     };
   }
 }
@@ -3453,14 +3551,14 @@ export async function layThongKeTongQuan() {
 export async function layThongKeXeTrongBai({ fromDate, toDate }) {
   try {
     const payload = {
-      table: "statistics", 
+      table: "statistics",
       func: "vehiclesInParking",
       fromDate,
-      toDate
+      toDate,
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thống kê xe trong bãi:', error);
+    console.error("[API Error] Lỗi lấy thống kê xe trong bãi:", error);
     return { hourlyData: [], totalIn: 0, totalOut: 0 };
   }
 }
@@ -3474,13 +3572,16 @@ export async function layThongKeDoanhThuTheoLoaiThe({ fromDate, toDate }) {
   try {
     const payload = {
       table: "statistics",
-      func: "revenueByCardType", 
+      func: "revenueByCardType",
       fromDate,
-      toDate
+      toDate,
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thống kê doanh thu theo loại thẻ:', error);
+    console.error(
+      "[API Error] Lỗi lấy thống kê doanh thu theo loại thẻ:",
+      error
+    );
     return { cardTypes: [], totalRevenue: 0 };
   }
 }
@@ -3495,12 +3596,12 @@ export async function layThongKeHieuSuatCamera({ fromDate, toDate }) {
     const payload = {
       table: "statistics",
       func: "cameraPerformance",
-      fromDate, 
-      toDate
+      fromDate,
+      toDate,
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thống kê camera:', error);
+    console.error("[API Error] Lỗi lấy thống kê camera:", error);
     return { cameras: [], totalScans: 0, successRate: 0 };
   }
 }
@@ -3516,36 +3617,36 @@ export async function layThongKeTheoKhuVuc({ fromDate, toDate }) {
       table: "statistics",
       func: "zoneStatistics",
       fromDate,
-      toDate
+      toDate,
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thống kê theo khu vực:', error);
+    console.error("[API Error] Lỗi lấy thống kê theo khu vực:", error);
     return { zones: [], busiest: null };
   }
 }
 
 /**
  * Lấy thống kê nhân viên hoạt động
- * @param {Object} params - Tham số thống kê  
+ * @param {Object} params - Tham số thống kê
  * @returns {Promise<Object>} Thống kê nhân viên
  */
 export async function layThongKeNhanVien({ fromDate, toDate }) {
   try {
     const payload = {
-      table: "statistics", 
+      table: "statistics",
       func: "employeeActivity",
       fromDate,
-      toDate
+      toDate,
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thống kê nhân viên:', error);
-    return { 
+    console.error("[API Error] Lỗi lấy thống kê nhân viên:", error);
+    return {
       totalEmployees: 0,
       activeEmployees: 0,
       byRole: [],
-      byStatus: []
+      byStatus: [],
     };
   }
 }
@@ -3559,13 +3660,13 @@ export async function layThongKeThoiGianTrungBinh({ fromDate, toDate }) {
   try {
     const payload = {
       table: "statistics",
-      func: "averageParkingTime", 
+      func: "averageParkingTime",
       fromDate,
-      toDate
+      toDate,
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thống kê thời gian:', error);
+    console.error("[API Error] Lỗi lấy thống kê thời gian:", error);
     return { averageTime: 0, byVehicleType: [], distribution: [] };
   }
 }
@@ -3582,11 +3683,11 @@ export async function layTopTheSuDung({ fromDate, toDate, limit = 10 }) {
       func: "topCards",
       fromDate,
       toDate,
-      limit
+      limit,
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy top thẻ:', error);
+    console.error("[API Error] Lỗi lấy top thẻ:", error);
     return { topCards: [] };
   }
 }
@@ -3602,16 +3703,64 @@ export async function layThongKeLoiSuCo({ fromDate, toDate }) {
       table: "statistics",
       func: "errorAnalysis",
       fromDate,
-      toDate
+      toDate,
     };
     return callApiWithAuth(payload);
   } catch (error) {
-    console.error('[API Error] Lỗi lấy thống kê lỗi:', error);
-    return { 
+    console.error("[API Error] Lỗi lấy thống kê lỗi:", error);
+    return {
       plateErrors: 0,
-      cameraErrors: 0, 
+      cameraErrors: 0,
       cardErrors: 0,
-      systemErrors: 0
+      systemErrors: 0,
     };
+  }
+}
+
+/**
+ * Register face with face recognition service
+ * @param {string} imageBase64 - Base64 encoded image
+ * @param {string} employeeId - Employee/vehicle ID
+ * @param {string} employeeName - Employee/owner name
+ * @param {string} department - Department (default: 'Vehicle Owner')
+ * @param {string} position - Position (default: 'Vehicle Owner')
+ * @returns {Promise<{success: boolean, message: string, employee_id?: string}>}
+ */
+export async function registerFaceRecognition(
+  imageBase64,
+  employeeId,
+  employeeName,
+  department = "Vehicle Owner",
+  position = "Vehicle Owner"
+) {
+  try {
+    const response = await fetch("http://localhost:5055/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: employeeName || "Unknown",
+        employee_id: employeeId,
+        department: department,
+        position: position,
+        image: imageBase64,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.message || "Failed to register face");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Face registration error:", error);
+    throw error;
   }
 }
