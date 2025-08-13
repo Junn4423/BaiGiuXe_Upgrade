@@ -19,7 +19,30 @@ sys.path.append('Silent-Face-Anti-Spoofing/src')
 # Thêm CORS
 from flask_cors import CORS
 import numpy as np
-import face_recognition
+try:
+    import face_recognition
+    FACE_RECOGNITION_AVAILABLE = True
+except ImportError:
+    print("WARNING: face_recognition module not available. Face recognition features will be disabled.")
+    FACE_RECOGNITION_AVAILABLE = False
+    # Mock face_recognition module
+    class MockFaceRecognition:
+        @staticmethod
+        def face_encodings(*args, **kwargs):
+            return []
+        @staticmethod
+        def face_locations(*args, **kwargs):
+            return []
+        @staticmethod
+        def compare_faces(*args, **kwargs):
+            return []
+        @staticmethod
+        def face_distance(*args, **kwargs):
+            return []
+        @staticmethod
+        def load_image_file(*args, **kwargs):
+            return None
+    face_recognition = MockFaceRecognition()
 from PIL import Image as PILImage
 import io
 
