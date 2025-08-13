@@ -978,6 +978,54 @@ export async function uploadFaceImage(imageBlob, options = {}) {
 }
 
 /**
+ * Upload ảnh khuôn mặt chủ phương tiện vào thư mục cố định
+ * C:\\ParkingLot_Images\\NhanDien_khuonmat
+ * @param {Blob|File} imageBlob
+ * @param {string} desiredFilename - Tên file mong muốn (tuỳ chọn)
+ * @returns {Promise<{success:boolean, filename:string, fullPath:string}>}
+ */
+export async function uploadOwnerFaceImage(imageBlob, desiredFilename = '') {
+  try {
+    const baseFolder = 'C:/ParkingLot_Images/NhanDien_khuonmat';
+
+    // Ensure Electron API available
+    if (!(window.electronAPI && window.electronAPI.saveImage)) {
+      throw new Error('Electron API không khả dụng để lưu ảnh chủ xe');
+    }
+
+    // Create folder if needed
+    if (window.electronAPI.createDirectory) {
+      await window.electronAPI.createDirectory(baseFolder);
+    }
+
+    // Prepare filename
+    let filename = desiredFilename && desiredFilename.trim() !== ''
+      ? desiredFilename
+      : `owner_face_${new Date().toISOString().replace(/[:.]/g, '-').slice(0,19)}.jpg`;
+
+    // Ensure extension
+    if (!/\.(jpg|jpeg|png)$/i.test(filename)) {
+      filename += '.jpg';
+    }
+
+    const arrayBuffer = await imageBlob.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    const saveData = {
+      data: Array.from(uint8Array),
+      fileName: filename,
+      folder: baseFolder
+    };
+
+    const fullPath = await window.electronAPI.saveImage(saveData);
+    return { success: true, filename, fullPath };
+  } catch (error) {
+    console.error('uploadOwnerFaceImage failed:', error);
+    return { success: false, filename: '', fullPath: '', error: error.message };
+  }
+}
+
+/**
  * Get local image URL from filename using POST method
  * @param {string} filename - Image filename stored in database
  * @returns {Promise<string>} - Base64 data URL of the image
@@ -1448,6 +1496,8 @@ export async function themPhuongTien(phuongTien) {
     func: "add",
     bienSo: phuongTien.bienSo,
     maLoaiPT: phuongTien.maLoaiPT,
+    tenChuXe: phuongTien.tenChuXe,
+    duongDanKhuonMat: phuongTien.duongDanKhuonMat,
   };
   return callApiWithAuth(payload);
 }
@@ -1463,6 +1513,8 @@ export async function capNhatPhuongTien(phuongTien) {
     func: "edit",
     bienSo: phuongTien.bienSo,
     maLoaiPT: phuongTien.maLoaiPT,
+    tenChuXe: phuongTien.tenChuXe,
+    duongDanKhuonMat: phuongTien.duongDanKhuonMat,
   };
   return callApiWithAuth(payload);
 }

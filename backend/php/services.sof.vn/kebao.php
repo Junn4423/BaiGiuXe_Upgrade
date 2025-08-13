@@ -62,13 +62,17 @@ switch ($vtable) {
                 while ($vrow = db_fetch_array($objEmp)) {
                     $vOutput[] = [
                         'bienSo' => $vrow['lv001'],
-                        'maLoaiPT' => $vrow['lv002']
+                        'maLoaiPT' => $vrow['lv002'],
+                        'tenChuXe' => $vrow['lv003'],
+                        'duongDanKhuonMat' => $vrow['lv004']
                     ];
                 }
                 break;
             case "add":
                 $pm_nc0002->lv001 = $input['bienSo'] ?? $_POST['lv001'] ?? null;
                 $pm_nc0002->lv002 = $input['maLoaiPT'] ?? $_POST['lv002'] ?? null;
+                $pm_nc0002->lv003 = $input['tenChuXe'] ?? $_POST['lv003'] ?? null;
+                $pm_nc0002->lv004 = $input['duongDanKhuonMat'] ?? $_POST['lv004'] ?? null;
                 $result = $pm_nc0002->KB_Insert();
                 $vOutput = $result ? ['success'=>true,'message'=>'Thêm mới thành công'] : ['success'=>false,'message'=>'Lỗi khi thêm mới'];
                 break;
@@ -86,6 +90,8 @@ switch ($vtable) {
             case "edit":
                 $pm_nc0002->lv001 = $input['bienSo'] ?? $_POST['lv001'] ?? null;
                 $pm_nc0002->lv002 = $input['maLoaiPT'] ?? $_POST['lv002'] ?? null;
+                $pm_nc0002->lv003 = $input['tenChuXe'] ?? $_POST['lv003'] ?? null;
+                $pm_nc0002->lv004 = $input['duongDanKhuonMat'] ?? $_POST['lv004'] ?? null;
                 $result = $pm_nc0002->KB_Update();
                 $vOutput = $result ? ['success'=>true,'message'=>'Cập nhật thành công'] : ['success'=>false,'message'=>'Lỗi khi cập nhật'];
                 break;

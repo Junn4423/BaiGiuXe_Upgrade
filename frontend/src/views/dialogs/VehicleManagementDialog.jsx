@@ -17,11 +17,15 @@ const VehicleManagementDialog = ({ onClose }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [ownerImageBlob, setOwnerImageBlob] = useState(null)
+  const [ownerPreviewUrl, setOwnerPreviewUrl] = useState("")
 
   // Form data state
   const [formData, setFormData] = useState({
     bienSo: '',
     maLoaiPT: '',
+    tenChuXe: '',
+    duongDanKhuonMat: '',
   })
 
   // Error state
@@ -64,9 +68,14 @@ const VehicleManagementDialog = ({ onClose }) => {
     setFormData({
       bienSo: vehicle.bienSo || "",
       maLoaiPT: vehicle.maLoaiPT || "",
+      tenChuXe: vehicle.tenChuXe || '',
+      duongDanKhuonMat: vehicle.duongDanKhuonMat || vehicle.lv004 || '',
     })
     setIsEditing(false)
     setErrors({})
+    setOwnerImageBlob(null)
+    if (ownerPreviewUrl) URL.revokeObjectURL(ownerPreviewUrl)
+    setOwnerPreviewUrl("")
   }
 
   const handleNewVehicle = () => {
@@ -76,8 +85,13 @@ const VehicleManagementDialog = ({ onClose }) => {
     setFormData({
       bienSo: "",
       maLoaiPT: "",
+      tenChuXe: '',
+      duongDanKhuonMat: '',
     })
     setErrors({})
+    setOwnerImageBlob(null)
+    if (ownerPreviewUrl) URL.revokeObjectURL(ownerPreviewUrl)
+    setOwnerPreviewUrl("")
   }
 
   const handleEdit = () => {
@@ -114,6 +128,26 @@ const VehicleManagementDialog = ({ onClose }) => {
       const vehicleData = {
         bienSo: formData.bienSo.trim().toUpperCase(),
         maLoaiPT: formData.maLoaiPT,
+        tenChuXe: formData.tenChuXe,
+        duongDanKhuonMat: formData.duongDanKhuonMat,
+      }
+
+      // Nếu có chọn file ảnh mới, upload vào C:\\ParkingLot_Images\\NhanDien_khuonmat trước khi lưu DB
+      if (ownerImageBlob) {
+        try {
+          const desiredName = `${vehicleData.bienSo || "owner_face"}.jpg`
+          const { success, filename, fullPath, error } = await (await import("../../api/api")).uploadOwnerFaceImage(ownerImageBlob, desiredName)
+          if (!success) {
+            throw new Error(error || "Upload ảnh chủ xe thất bại")
+          }
+          // Lưu chỉ tên file vào DB (lv004). Service verify sẽ tự ghép đường dẫn mặc định nếu cần
+          vehicleData.duongDanKhuonMat = filename
+        } catch (e) {
+          console.error("Upload owner image error:", e)
+          alert(e.message || "Không thể tải ảnh chủ xe lên thư mục mặc định")
+          setIsSubmitting(false)
+          return
+        }
       }
 
       console.log("Vehicle data to save:", vehicleData)
@@ -137,6 +171,9 @@ const VehicleManagementDialog = ({ onClose }) => {
         setIsEditing(false)
         setSelectedVehicle(vehicleData)
         setFormData(vehicleData)
+        setOwnerImageBlob(null)
+        if (ownerPreviewUrl) URL.revokeObjectURL(ownerPreviewUrl)
+        setOwnerPreviewUrl("")
       } else {
         alert(result?.message || "Không thể lưu phương tiện")
       }
@@ -186,6 +223,9 @@ const VehicleManagementDialog = ({ onClose }) => {
     setSelectedVehicle(null)
     setIsEditing(false)
     setErrors({})
+    setOwnerImageBlob(null)
+    if (ownerPreviewUrl) URL.revokeObjectURL(ownerPreviewUrl)
+    setOwnerPreviewUrl("")
   }
 
   const handleCancel = () => {
@@ -200,6 +240,9 @@ const VehicleManagementDialog = ({ onClose }) => {
     }
     setIsEditing(false)
     setErrors({})
+    setOwnerImageBlob(null)
+    if (ownerPreviewUrl) URL.revokeObjectURL(ownerPreviewUrl)
+    setOwnerPreviewUrl("")
   }
 
   const updateField = (field, value) => {
@@ -244,7 +287,7 @@ const VehicleManagementDialog = ({ onClose }) => {
             {/* Vehicle List Panel */}
             <div className="vehicle-list-panel">
               <div className="panel-header">
-                <h4>Danh sách phương tiện ({vehicles.length})</h4>
+                <h4>Danh sách chủ phương tiện ({vehicles.length})</h4>
                 <div className="action-buttons">
                   <button 
                     className="btn btn-success" 
@@ -280,6 +323,8 @@ const VehicleManagementDialog = ({ onClose }) => {
                         <th>Biển số</th>
                         <th>Loại phương tiện</th>
                         <th>Mã loại</th>
+                        <th>Chủ phương tiện</th>
+                        <th>Ảnh (lv004)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -292,6 +337,8 @@ const VehicleManagementDialog = ({ onClose }) => {
                           <td>{vehicle.bienSo}</td>
                           <td>{getVehicleTypeLabel(vehicle.maLoaiPT)}</td>
                           <td>{vehicle.maLoaiPT}</td>
+                          <td>{vehicle.tenChuXe || ''}</td>
+                          <td style={{fontFamily:'monospace', fontSize:'0.85rem'}}>{vehicle.duongDanKhuonMat || vehicle.lv004 || ''}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -305,8 +352,8 @@ const VehicleManagementDialog = ({ onClose }) => {
               <div className="panel-header">
                 <h4>
                   {isEditing 
-                    ? (selectedVehicle ? "Sửa phương tiện" : "Thêm phương tiện mới")
-                    : (selectedVehicle ? "Thông tin phương tiện" : "Chưa chọn phương tiện")
+                    ? (selectedVehicle ? "Sửa chủ phương tiện" : "Thêm chủ phương tiện")
+                    : (selectedVehicle ? "Thông tin chủ phương tiện" : "Chưa chọn chủ phương tiện")
                   }
                 </h4>
                 {!isEditing && selectedVehicle && (
@@ -380,6 +427,58 @@ const VehicleManagementDialog = ({ onClose }) => {
                       </div>
                     </div>
 
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="tenChuXe">Chủ phương tiện</label>
+                        <input
+                          type="text"
+                          id="tenChuXe"
+                          value={formData.tenChuXe}
+                          onChange={(e) => updateField('tenChuXe', e.target.value)}
+                          disabled={!isEditing || isSubmitting}
+                          placeholder="Nhập tên chủ xe"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="duongDanKhuonMat">Ảnh khuôn mặt (lv004)</label>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <input
+                            type="text"
+                            id="duongDanKhuonMat"
+                            value={formData.duongDanKhuonMat}
+                            onChange={(e) => updateField('duongDanKhuonMat', e.target.value)}
+                            disabled={!isEditing || isSubmitting}
+                            placeholder={"Tên file hoặc đường dẫn trong C:\\ParkingLot_Images\\NhanDien_khuonmat"}
+                            style={{ flex: 1 }}
+                          />
+                          <button
+                            className="btn btn-secondary"
+                            type="button"
+                            onClick={async () => {
+                              if (window.electronAPI && window.electronAPI.openFileDialog) {
+                                try {
+                                  const filePath = await window.electronAPI.openFileDialog({
+                                    filters: [{ name: 'Images', extensions: ['jpg','jpeg','png'] }]
+                                  })
+                                  if (filePath) {
+                                    updateField('duongDanKhuonMat', filePath)
+                                  }
+                                } catch (err) {
+                                  console.error('Open file dialog error:', err)
+                                }
+                              } else {
+                                alert('Không hỗ trợ chọn file tự động. Vui lòng nhập đường dẫn đầy đủ.\nMặc định: C\\\ParkingLot_Images\\\NhanDien_khuonmat')
+                              }
+                            }}
+                          >Chọn ảnh</button>
+                        </div>
+                        <div style={{ color: '#6b7280', fontSize: 12, marginTop: 4 }}>
+                          Ảnh chủ xe sẽ lưu trong: C:\\ParkingLot_Images\\NhanDien_khuonmat (lv004)
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Display info when not editing */}
                     {!isEditing && selectedVehicle && (
                       <div className="info-section">
@@ -390,6 +489,14 @@ const VehicleManagementDialog = ({ onClose }) => {
                         <div className="info-row">
                           <span className="info-label">Loại phương tiện:</span>
                           <span className="info-value">{getSelectedVehicleTypeLabel()}</span>
+                        </div>
+                        <div className="info-row">
+                          <span className="info-label">Chủ phương tiện:</span>
+                          <span className="info-value">{selectedVehicle.tenChuXe || ''}</span>
+                        </div>
+                        <div className="info-row">
+                          <span className="info-label">Ảnh (lv004):</span>
+                          <span className="info-value" style={{fontFamily:'monospace'}}>{selectedVehicle.duongDanKhuonMat || selectedVehicle.lv004 || ''}</span>
                         </div>
                       </div>
                     )}

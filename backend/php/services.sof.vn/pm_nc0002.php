@@ -3,6 +3,8 @@
 class pm_nc0002 extends lv_controler{
     public $lv001; // biển số (PK)
     public $lv002; // mã loại (FK)
+    public $lv003; // tên chủ xe
+    public $lv004; // đường dẫn khuôn mặt chủ xe
 //Mo comment la mo quyen ben frontend phai truyen token sau khi dang nhap vao
 	// function __construct($vCheckAdmin,$vUserID,$vright)
 	// {
@@ -29,13 +31,13 @@ class pm_nc0002 extends lv_controler{
 
     // Thêm mới
     function KB_Insert() {
-        $sql = "INSERT INTO pm_nc0002 (lv001, lv002) VALUES ('$this->lv001', '$this->lv002')";
+        $sql = "INSERT INTO pm_nc0002 (lv001, lv002, lv003, lv004) VALUES ('$this->lv001', '$this->lv002', '$this->lv003', '$this->lv004')";
         return db_query($sql);
     }
 
     // Sửa
     function KB_Update() {
-        $sql = "UPDATE pm_nc0002 SET lv002 = '$this->lv002' WHERE lv001 = '$this->lv001'";
+        $sql = "UPDATE pm_nc0002 SET lv002 = '$this->lv002', lv003 = '$this->lv003', lv004 = '$this->lv004' WHERE lv001 = '$this->lv001'";
         return db_query($sql);
     }
 

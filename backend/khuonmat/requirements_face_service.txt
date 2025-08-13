@@ -1,0 +1,22 @@
+# Requirements for Fast Face Recognition Service
+# Install with: pip install -r requirements_face_service.txt
+
+# FastAPI framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Face recognition
+face-recognition
+opencv-python
+dlib
+
+# Database
+sqlalchemy
+
+# Image processing
+numpy
+Pillow
+
+# Utils
+python-dateutil

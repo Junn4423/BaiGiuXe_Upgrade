@@ -67,7 +67,26 @@ echo.
 
 REM Test ALPR service health
 echo Testing ALPR service...
-powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5001/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ ALPR Service is ready' } else { Write-Host '❌ ALPR Service health check failed' } } catch { Write-Host '❌ ALPR Service is not responding' }"
+powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5005/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ ALPR Service is ready' } else { Write-Host '❌ ALPR Service health check failed' } } catch { Write-Host '❌ ALPR Service is not responding' }"
+echo.
+
+REM Start Face Recognition Service
+echo [%timestamp%] Starting Face Recognition Service...
+cd /d "%~dp0backend\khuonmat"
+if exist "face_recognition_system\venv\Scripts\activate.bat" (
+    start "Face Recognition Service" /MIN cmd /k "call run_fast_face_service_silent.bat"
+    echo ✅ Face Recognition Service started on http://127.0.0.1:5055
+    
+    REM Wait for Face service to start
+    echo Waiting for Face Recognition service to initialize...
+    timeout /t 5 /nobreak >nul
+    
+    REM Test Face service health
+    echo Testing Face Recognition service...
+    powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5055/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ Face Recognition Service is ready' } else { Write-Host '❌ Face Recognition Service health check failed' } } catch { Write-Host '❌ Face Recognition Service is not responding' }"
+) else (
+    echo ⚠️  Face Recognition environment not found, skipping...
+)
 echo.
 
 REM Start Electron App
@@ -98,9 +117,11 @@ echo ================================================
 echo  SYSTEM COMPONENTS STATUS:
 echo ================================================
 echo ✅ Frontend: Built and ready
-echo ✅ ALPR Service: Running on http://127.0.0.1:5001
+echo ✅ ALPR Service: Running on http://127.0.0.1:5005
+echo ✅ Face Recognition Service: Running on http://127.0.0.1:5055
 echo ✅ Electron App: Running
 echo ✅ Realtime License Plate Detection: Active
+echo ✅ Realtime Face Recognition: Active
 echo ⚠️  MinIO: Disabled (using local storage)
 echo ================================================
 echo.

@@ -43,6 +43,8 @@ import { layALLLoaiPhuongTien } from "../../api/api";
 import StatisticsPage from "../../components/StatisticsPage";
 import SystemSettings from "../SystemSettings";
 import { processAttendanceImage } from "../../api/apiChamCong";
+import { layDanhSachPhuongTien } from "../../api/api";
+import faceAPI from "../../api/apiFaceRecognition";
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
 
@@ -915,14 +917,33 @@ const MainUI = () => {
             // Chạy chấm công bất đồng bộ để không chặn UI
             setTimeout(async () => {
               try {
-                await processAttendanceImage(
-                  faceImage.blob,
-                  finalLicensePlate,
-                  showToast,
-                  actualMode
-                );
+                // 1) Kiểm tra biển số có trong pm_nc0002
+                let ownerImagePath = null;
+                try {
+                  const ds = await layDanhSachPhuongTien();
+                  const match = Array.isArray(ds)
+                    ? ds.find(
+                        (v) => (v.bienSo || "").toUpperCase() === (finalLicensePlate || "").toUpperCase()
+                      )
+                    : null;
+                  ownerImagePath = match ? match.duongDanKhuonMat || match.lv004 || null : null;
+                } catch (e) {
+                  console.warn("Không tải được danh sách pm_nc0002:", e);
+                }
+
+                if (ownerImagePath) {
+                  // 2) Gửi ảnh panel khuôn mặt để xác thực với ảnh chủ xe (lv004)
+                  const verify = await faceAPI.verifyFace(faceImage.blob, ownerImagePath, 0.45);
+                  if (!verify.success || !verify.match) {
+                    showToast && showToast("Không nhận diện được", "error", 2000);
+                  } else {
+                    console.log("Xác thực khuôn mặt OK, confidence:", verify.confidence);
+                  }
+                } else {
+                  showToast && showToast("Không tìm thấy ảnh chủ xe để đối chiếu", "warning", 2000);
+                }
               } catch (error) {
-                console.error("❌ Lỗi chấm công:", error);
+                console.error("❌ Lỗi xác thực khuôn mặt:", error);
               }
             }, 50); // Giảm delay để responsive hơn
           }
@@ -2247,7 +2268,7 @@ const MainUI = () => {
               onClick={openVehicleManagement}
               title="Quản lý phương tiện"
             >
-              PHƯƠNG TIỆN
+              CHỦ PHƯƠNG TIỆN
             </button>
           )}
           {hasPermission("canAccessVehicleType") && (

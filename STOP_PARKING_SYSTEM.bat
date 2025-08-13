@@ -7,13 +7,13 @@ echo.
 
 echo Stopping all Parking Lot Management System services...
 
-REM Stop ALPR Service (Python)
-echo Stopping ALPR Service...
+REM Stop ALPR and Face Recognition Services (Python)
+echo Stopping ALPR and Face Recognition Services...
 taskkill /f /im python.exe >nul 2>&1
 if %errorlevel% equ 0 (
-    echo ✅ ALPR Service stopped
+    echo ✅ Python services stopped (ALPR + Face Recognition)
 ) else (
-    echo ⚠️  ALPR Service was not running
+    echo ⚠️  Python services were not running
 )
 
 REM Stop MinIO Server
@@ -51,6 +51,7 @@ echo ================================================
 echo  ALL SERVICES STOPPED
 echo ================================================
 echo ✅ ALPR Service (Python)
+echo ✅ Face Recognition Service (Python)
 echo ✅ MinIO Server  
 echo ✅ Frontend Development Server
 echo ✅ Electron Application
