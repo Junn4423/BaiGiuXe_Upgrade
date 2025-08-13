@@ -37,12 +37,23 @@ generate_patches = importlib.import_module('generate_patches')
 utility = importlib.import_module('utility')
 
 class AntiSpoofingWrapper:
-    def __init__(self, model_dir='Silent-Face-Anti-Spoofing/resources/anti_spoof_models', device_id=0):
+    def __init__(self, model_dir=None, device_id=0):
+        import os
+        
+        if model_dir is None:
+            # Tự động tìm đường dẫn model từ thư mục hiện tại
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            model_dir = os.path.join(current_dir, '..', 'Silent-Face-Anti-Spoofing', 'resources', 'anti_spoof_models')
+            model_dir = os.path.abspath(model_dir)
+        
         self.model_dir = model_dir
         self.device_id = device_id
         self.anti_spoof = anti_spoof_predict.AntiSpoofPredict(device_id)
         self.cropper = generate_patches.CropImage()
-        import os
+        
+        if not os.path.exists(model_dir):
+            raise FileNotFoundError(f"Model directory not found: {model_dir}")
+        
         self.model_paths = [os.path.join(model_dir, m) for m in os.listdir(model_dir) if m.endswith('.pth')]
 
     def is_real_face(self, frame, bbox=None):

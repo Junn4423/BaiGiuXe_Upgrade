@@ -36,14 +36,18 @@ if %ERRORLEVEL% NEQ 0 (
     )
 )
 
-REM Chạy service
+REM Chạy service với log chi tiết
 echo.
 echo Starting Face Recognition Service on port 5055...
+echo ================================================================
+echo Service will display live logs. Press Ctrl+C to stop.
 echo ================================================================
 echo.
 
 python fast_face_service.py --host 127.0.0.1 --port 5055
 
 echo.
-echo Service stopped.
+echo ================================================================
+echo Face Recognition Service stopped.
+echo ================================================================
 pause

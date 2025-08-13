@@ -118,12 +118,16 @@ class Attendance(Base):
 # Configuration
 ################################################################################
 
-DATABASE_URI = 'sqlite:///instance/attendance.db'
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'face_recognition_system/static/faces')
+# Use absolute path for database to avoid path issues
+BASE_DIR = os.path.dirname(__file__)
+DATABASE_PATH = os.path.join(BASE_DIR, 'instance', 'attendance.db')
+DATABASE_URI = f'sqlite:///{DATABASE_PATH}'
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'face_recognition_system/static/faces')
 
-# Create upload folder if not exists
+# Create required directories if not exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(os.path.join(os.path.dirname(__file__), 'face_recognition_system/instance'), exist_ok=True)
+os.makedirs(os.path.join(BASE_DIR, 'instance'), exist_ok=True)
+os.makedirs(os.path.join(BASE_DIR, 'face_recognition_system/instance'), exist_ok=True)
 
 # Initialize database engine
 engine = create_engine(DATABASE_URI)

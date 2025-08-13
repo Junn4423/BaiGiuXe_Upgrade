@@ -8,15 +8,13 @@ echo           TESTING FACE RECOGNITION SERVICE
 echo ================================================================
 echo.
 
-REM Kiểm tra service có đang chạy không
+REM Kiểm tra service có đang chạy không bằng PowerShell
 echo [1] Checking if service is running...
-curl -s -o nul -w "Status: %%{http_code}" http://127.0.0.1:5055/healthz
-echo.
+powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5055/healthz' -UseBasicParsing; Write-Host 'Status:' $response.StatusCode; exit 0 } catch { Write-Host 'Status: Service not running'; exit 1 }"
+set SERVICE_STATUS=%ERRORLEVEL%
 echo.
 
-REM Nếu service chạy, thực hiện test
-curl -s http://127.0.0.1:5055/healthz >nul 2>&1
-if %ERRORLEVEL% EQU 0 (
+if %SERVICE_STATUS% EQU 0 (
     echo [2] Service is running! Testing health endpoint...
     curl -X GET http://127.0.0.1:5055/healthz
     echo.
@@ -28,7 +26,7 @@ if %ERRORLEVEL% EQU 0 (
     
     echo [4] API Endpoints available:
     echo    - GET  /healthz          : Health check
-    echo    - POST /recognize        : Recognize faces (multipart/form-data or base64)
+    echo    - POST /recognize        : Recognize faces (multipart/form-data or base64^)
     echo    - POST /register         : Register new face
     echo.
     

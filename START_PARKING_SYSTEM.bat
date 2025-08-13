@@ -13,11 +13,44 @@ set "timestamp=%current_date%_%current_time%"
 echo [%timestamp%] Starting Parking Lot Management System...
 echo.
 
-REM Kiểm tra Python environment
-echo [%timestamp%] Checking Python environment for ALPR service...
+REM ================================================
+REM BƯỚC 1: DỪNG CÁC SERVICES CŨ (NẾU CÓ)
+REM ================================================
+echo [%timestamp%] Step 1: Stopping existing services...
+
+echo Stopping ALPR Service...
+cd /d "%~dp0backend\bienso"
+if exist "stop_alpr_service.bat" (
+    call stop_alpr_service.bat >nul 2>&1
+    echo ✅ ALPR Service stopped
+) else (
+    echo ⚠️  ALPR stop script not found, killing Python processes...
+    taskkill /F /IM python.exe >nul 2>&1
+)
+
+echo Stopping Face Recognition Service...
+cd /d "%~dp0backend\khuonmat"
+if exist "stop_face_service.bat" (
+    call stop_face_service.bat >nul 2>&1
+    echo ✅ Face Recognition Service stopped
+) else (
+    echo ⚠️  Face Recognition stop script not found, killing Python processes...
+    taskkill /F /IM python.exe >nul 2>&1
+)
+
+echo Waiting for services to fully stop...
+timeout /t 3 /nobreak >nul
+echo.
+
+REM ================================================
+REM BƯỚC 2: KIỂM TRA PYTHON ENVIRONMENT
+REM ================================================
+echo [%timestamp%] Step 2: Checking Python environments...
+
+echo Checking ALPR Python environment...
 cd /d "%~dp0backend\bienso"
 if not exist "venv\Scripts\activate.bat" (
-    echo ❌ Python virtual environment not found!
+    echo ❌ ALPR Python virtual environment not found!
     echo Please create Python venv first:
     echo    cd backend\bienso
     echo    python -m venv venv
@@ -26,12 +59,23 @@ if not exist "venv\Scripts\activate.bat" (
     pause
     exit /b 1
 )
+echo ✅ ALPR Python environment found
 
-echo ✅ Python environment found
+echo Checking Face Recognition Python environment...
+cd /d "%~dp0backend\khuonmat"
+if not exist "face_recognition_system\venv\Scripts\activate.bat" (
+    echo ❌ Face Recognition Python virtual environment not found!
+    echo Please run setup_face_recognition.bat first
+    pause
+    exit /b 1
+)
+echo ✅ Face Recognition Python environment found
 echo.
 
-REM Build Frontend
-echo [%timestamp%] Building Frontend...
+REM ================================================
+REM BƯỚC 3: BUILD FRONTEND
+REM ================================================
+echo [%timestamp%] Step 3: Building Frontend...
 cd /d "%~dp0frontend"
 if not exist "node_modules" (
     echo Installing frontend dependencies...
@@ -53,44 +97,44 @@ if %errorlevel% neq 0 (
 echo ✅ Frontend built successfully
 echo.
 
-REM Start ALPR Backend Service
-echo [%timestamp%] Starting ALPR Backend Service...
+REM ================================================
+REM BƯỚC 4: KHỞI ĐỘNG ALPR BACKEND SERVICE
+REM ================================================
+echo [%timestamp%] Step 4: Starting ALPR Backend Service...
 cd /d "%~dp0backend\bienso"
 start "ALPR Service" cmd /k "venv\Scripts\activate && python fast_alpr_service.py --host 127.0.0.1 --port 5001"
-echo ✅ ALPR Service started on http://127.0.0.1:5001
-echo.
+echo ✅ ALPR Service starting on http://127.0.0.1:5001
 
 REM Wait for ALPR service to start
 echo Waiting for ALPR service to initialize...
-timeout /t 5 /nobreak >nul
+timeout /t 8 /nobreak >nul
+
+REM Test ALPR service health (FIX: Đổi port từ 5005 thành 5001)
+echo Testing ALPR service health...
+powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5001/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ ALPR Service is ready' } else { Write-Host '❌ ALPR Service health check failed (Status: ' $response.StatusCode ')' } } catch { Write-Host '❌ ALPR Service is not responding:' $_.Exception.Message }"
 echo.
 
-REM Test ALPR service health
-echo Testing ALPR service...
-powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5005/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ ALPR Service is ready' } else { Write-Host '❌ ALPR Service health check failed' } } catch { Write-Host '❌ ALPR Service is not responding' }"
-echo.
-
-REM Start Face Recognition Service
-echo [%timestamp%] Starting Face Recognition Service...
+REM ================================================
+REM BƯỚC 5: KHỞI ĐỘNG FACE RECOGNITION SERVICE
+REM ================================================
+echo [%timestamp%] Step 5: Starting Face Recognition Service...
 cd /d "%~dp0backend\khuonmat"
-if exist "face_recognition_system\venv\Scripts\activate.bat" (
-    start "Face Recognition Service" /MIN cmd /k "call run_fast_face_service_silent.bat"
-    echo ✅ Face Recognition Service started on http://127.0.0.1:5055
-    
-    REM Wait for Face service to start
-    echo Waiting for Face Recognition service to initialize...
-    timeout /t 5 /nobreak >nul
-    
-    REM Test Face service health
-    echo Testing Face Recognition service...
-    powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5055/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ Face Recognition Service is ready' } else { Write-Host '❌ Face Recognition Service health check failed' } } catch { Write-Host '❌ Face Recognition Service is not responding' }"
-) else (
-    echo ⚠️  Face Recognition environment not found, skipping...
-)
+start "Face Recognition Service" cmd /k "face_recognition_system\venv\Scripts\activate && python fast_face_service.py --host 127.0.0.1 --port 5055"
+echo ✅ Face Recognition Service starting on http://127.0.0.1:5055
+
+REM Wait for Face service to start
+echo Waiting for Face Recognition service to initialize...
+timeout /t 8 /nobreak >nul
+
+REM Test Face service health
+echo Testing Face Recognition service health...
+powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5055/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ Face Recognition Service is ready' } else { Write-Host '❌ Face Recognition Service health check failed (Status: ' $response.StatusCode ')' } } catch { Write-Host '❌ Face Recognition Service is not responding:' $_.Exception.Message }"
 echo.
 
-REM Start Electron App
-echo [%timestamp%] Starting Electron Application...
+REM ================================================
+REM BƯỚC 6: KHỞI ĐỘNG ELECTRON APP
+REM ================================================
+echo [%timestamp%] Step 6: Starting Electron Application...
 cd /d "%~dp0electron-app"
 if not exist "node_modules" (
     echo Installing electron dependencies...
@@ -117,7 +161,7 @@ echo ================================================
 echo  SYSTEM COMPONENTS STATUS:
 echo ================================================
 echo ✅ Frontend: Built and ready
-echo ✅ ALPR Service: Running on http://127.0.0.1:5005
+echo ✅ ALPR Service: Running on http://127.0.0.1:5001
 echo ✅ Face Recognition Service: Running on http://127.0.0.1:5055
 echo ✅ Electron App: Running
 echo ✅ Realtime License Plate Detection: Active
@@ -125,5 +169,6 @@ echo ✅ Realtime Face Recognition: Active
 echo ⚠️  MinIO: Disabled (using local storage)
 echo ================================================
 echo.
-echo Press any key to exit...
+echo To stop all services, run STOP_PARKING_SYSTEM.bat
+echo Press any key to exit this launcher...
 pause >nul

@@ -1,20 +1,56 @@
 @echo off
 chcp 65001 >nul
 echo ================================================
-echo     STOP PARKING LOT MANAGEMENT SYSTEM
+echo     PARKING LOT MANAGEMENT SYSTEM STOPPER
 echo ================================================
 echo.
 
-echo Stopping all Parking Lot Management System services...
+REM Tạo timestamp cho log
+for /f "tokens=1-4 delims=/ " %%a in ('date /t') do set "current_date=%%a-%%b-%%c"
+for /f "tokens=1-2 delims=: " %%a in ('time /t') do set "current_time=%%a-%%b"
+set "timestamp=%current_date%_%current_time%"
 
-REM Stop ALPR and Face Recognition Services (Python)
-echo Stopping ALPR and Face Recognition Services...
-taskkill /f /im python.exe >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✅ Python services stopped (ALPR + Face Recognition)
+echo [%timestamp%] Stopping Parking Lot Management System...
+echo.
+
+REM ================================================
+REM BƯỚC 1: DỪNG ELECTRON APP
+REM ================================================
+echo [%timestamp%] Step 1: Stopping Electron Application...
+taskkill /F /IM electron.exe >nul 2>&1
+taskkill /F /IM "Parking System.exe" >nul 2>&1
+echo ✅ Electron App stopped
+echo.
+
+REM ================================================
+REM BƯỚC 2: DỪNG ALPR SERVICE
+REM ================================================
+echo [%timestamp%] Step 2: Stopping ALPR Service...
+cd /d "%~dp0backend\bienso"
+if exist "stop_alpr_service.bat" (
+    call stop_alpr_service.bat >nul 2>&1
+    echo ✅ ALPR Service stopped using script
 ) else (
-    echo ⚠️  Python services were not running
+    echo ⚠️  ALPR stop script not found, killing processes manually...
+    for /f "tokens=2" %%i in ('wmic process where "commandline like '%%fast_alpr_service.py%%' and name='python.exe'" get processid /value 2^>nUL ^| find "="') do taskkill /PID %%i /F >nul 2>&1
+    echo ✅ ALPR Service processes killed
 )
+echo.
+
+REM ================================================
+REM BƯỚC 3: DỪNG FACE RECOGNITION SERVICE
+REM ================================================
+echo [%timestamp%] Step 3: Stopping Face Recognition Service...
+cd /d "%~dp0backend\khuonmat"
+if exist "stop_face_service.bat" (
+    call stop_face_service.bat >nul 2>&1
+    echo ✅ Face Recognition Service stopped using script
+) else (
+    echo ⚠️  Face Recognition stop script not found, killing processes manually...
+    for /f "tokens=2" %%i in ('wmic process where "commandline like '%%fast_face_service.py%%' and name='python.exe'" get processid /value 2^>nUL ^| find "="') do taskkill /PID %%i /F >nul 2>&1
+    echo ✅ Face Recognition Service processes killed
+)
+echo.
 
 REM Stop MinIO Server
 echo Stopping MinIO Server...
