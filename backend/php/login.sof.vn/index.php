@@ -2,7 +2,7 @@
 ini_set('display_errors', 0); 
 ini_set('display_startup_errors', 0);
 error_reporting(0);
-//header("Content-Type: application/json; charset=UTF-8");
+header("Content-Type: application/json; charset=UTF-8");
 $lvIpClient=$_SERVER['REMOTE_ADDR'];
 
 ob_start(); // Turn on output buffering
@@ -104,7 +104,7 @@ function ASCCodeAuto()
 				}
 		} else if($vUserName==""){
 			$vMessage = "Please enter your Login Name!";
-		} else if($$vPassword==""){
+		} else if($vPassword==""){
 			$vMessage = "Please enter your Password!";
 			$vFlagFocus = 1;
 		}
