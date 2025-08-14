@@ -1,294 +1,401 @@
-const { spawn } = require("child_process")
-const WebSocket = require("ws")
-const path = require("path")
-const fs = require("fs")
+const { spawn } = require("child_process");
+const WebSocket = require("ws");
+const path = require("path");
+const fs = require("fs");
 
 // Handle ffmpeg path for both development and production
-let ffmpegPath
+let ffmpegPath;
 try {
-  console.log('🔍 [DEBUG] Initializing FFmpeg path resolution...')
-  console.log('🔍 [DEBUG] NODE_ENV:', process.env.NODE_ENV)
-  console.log('🔍 [DEBUG] __dirname:', __dirname)
-  console.log('🔍 [DEBUG] process.resourcesPath:', process.resourcesPath)
-  
+  console.log("🔍 [DEBUG] Initializing FFmpeg path resolution...");
+  console.log("🔍 [DEBUG] NODE_ENV:", process.env.NODE_ENV);
+  console.log("🔍 [DEBUG] __dirname:", __dirname);
+  console.log("🔍 [DEBUG] process.resourcesPath:", process.resourcesPath);
+
   // In development, use ffmpeg-static
-  if (process.env.NODE_ENV === 'development') {
-    ffmpegPath = require("ffmpeg-static")
-    console.log('🔍 [DEBUG] Using development FFmpeg:', ffmpegPath)
+  if (process.env.NODE_ENV === "development") {
+    ffmpegPath = require("ffmpeg-static");
+    console.log("🔍 [DEBUG] Using development FFmpeg:", ffmpegPath);
   } else {
-    console.log('🔍 [DEBUG] Production mode - checking for packaged FFmpeg...')
-    
+    console.log("🔍 [DEBUG] Production mode - checking for packaged FFmpeg...");
+
     // Try multiple possible paths for packaged app - PRIORITIZE app.asar.unpacked paths
     const possiblePaths = [
       // FIRST: ASAR unpacked paths (these can be executed)
-      ...(process.resourcesPath ? [
-        path.join(process.resourcesPath, 'app.asar.unpacked', 'ffmpeg-binary', 'ffmpeg.exe'),
-        path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
-        path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'ffmpeg-static', 'bin', 'win32', 'x64', 'ffmpeg.exe'),
-        path.join(process.resourcesPath, 'ffmpeg.exe')
-      ] : []),
-      
+      ...(process.resourcesPath
+        ? [
+            path.join(
+              process.resourcesPath,
+              "app.asar.unpacked",
+              "ffmpeg-binary",
+              "ffmpeg.exe"
+            ),
+            path.join(
+              process.resourcesPath,
+              "app.asar.unpacked",
+              "node_modules",
+              "ffmpeg-static",
+              "ffmpeg.exe"
+            ),
+            path.join(
+              process.resourcesPath,
+              "app.asar.unpacked",
+              "node_modules",
+              "ffmpeg-static",
+              "bin",
+              "win32",
+              "x64",
+              "ffmpeg.exe"
+            ),
+            path.join(process.resourcesPath, "ffmpeg.exe"),
+          ]
+        : []),
+
       // SECOND: Development-style paths (for when running from source)
-      path.join(__dirname, 'ffmpeg-binary', 'ffmpeg.exe'),
-      path.join(__dirname, 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
-      path.join(__dirname, 'node_modules', 'ffmpeg-static', 'bin', 'win32', 'x64', 'ffmpeg.exe'),
-      
+      path.join(__dirname, "ffmpeg-binary", "ffmpeg.exe"),
+      path.join(__dirname, "node_modules", "ffmpeg-static", "ffmpeg.exe"),
+      path.join(
+        __dirname,
+        "node_modules",
+        "ffmpeg-static",
+        "bin",
+        "win32",
+        "x64",
+        "ffmpeg.exe"
+      ),
+
       // LAST: System ffmpeg as fallback
-      'ffmpeg'
-    ]
-    
-    console.log('🔍 [DEBUG] Checking possible FFmpeg paths:')
+      "ffmpeg",
+    ];
+
+    console.log("🔍 [DEBUG] Checking possible FFmpeg paths:");
     possiblePaths.forEach((p, index) => {
       try {
-        const exists = p === 'ffmpeg' || fs.existsSync(p)
-        console.log(`🔍 [DEBUG] ${index + 1}. ${p} - ${exists ? '✅ EXISTS' : '❌ NOT FOUND'}`)
-        if (exists && p !== 'ffmpeg') {
-          const stats = fs.statSync(p)
-          console.log(`🔍 [DEBUG]    Size: ${stats.size} bytes`)
+        const exists = p === "ffmpeg" || fs.existsSync(p);
+        console.log(
+          `🔍 [DEBUG] ${index + 1}. ${p} - ${
+            exists ? "✅ EXISTS" : "❌ NOT FOUND"
+          }`
+        );
+        if (exists && p !== "ffmpeg") {
+          const stats = fs.statSync(p);
+          console.log(`🔍 [DEBUG]    Size: ${stats.size} bytes`);
         }
       } catch (e) {
-        console.log(`� [DEBUG] ${index + 1}. ${p} - ❌ ERROR: ${e.message}`)
+        console.log(`� [DEBUG] ${index + 1}. ${p} - ❌ ERROR: ${e.message}`);
       }
-    })
-    
-    ffmpegPath = possiblePaths.find(p => {
-      try {
-        const exists = p === 'ffmpeg' || fs.existsSync(p)
-        if (exists && p !== 'ffmpeg') {
-          console.log(`🔍 [DEBUG] ✅ Selected FFmpeg path: ${p}`)
+    });
+
+    ffmpegPath =
+      possiblePaths.find((p) => {
+        try {
+          const exists = p === "ffmpeg" || fs.existsSync(p);
+          if (exists && p !== "ffmpeg") {
+            console.log(`🔍 [DEBUG] ✅ Selected FFmpeg path: ${p}`);
+          }
+          return exists;
+        } catch (e) {
+          console.log(`🔍 [DEBUG] ❌ Error checking ${p}: ${e.message}`);
+          return false;
         }
-        return exists
-      } catch (e) {
-        console.log(`🔍 [DEBUG] ❌ Error checking ${p}: ${e.message}`)
-        return false
-      }
-    }) || 'ffmpeg'
-    
-    console.log(`🔍 [DEBUG] Final FFmpeg path: ${ffmpegPath}`)
-    
+      }) || "ffmpeg";
+
+    console.log(`🔍 [DEBUG] Final FFmpeg path: ${ffmpegPath}`);
+
     // If no FFmpeg found, try to setup
-    if (ffmpegPath === 'ffmpeg') {
-      console.log('🔍 [DEBUG] ⚠️ No bundled FFmpeg found, attempting to setup...')
+    if (ffmpegPath === "ffmpeg") {
+      console.log(
+        "🔍 [DEBUG] ⚠️ No bundled FFmpeg found, attempting to setup..."
+      );
       try {
-        const { downloadFFmpeg } = require('./ffmpeg-downloader')
-        downloadFFmpeg().then(path => {
-          ffmpegPath = path
-          console.log(`🔍 [DEBUG] ✅ FFmpeg setup complete: ${path}`)
-        }).catch(e => {
-          console.error('🔍 [DEBUG] ❌ Failed to setup FFmpeg:', e)
-        })
+        const { downloadFFmpeg } = require("./ffmpeg-downloader");
+        downloadFFmpeg()
+          .then((path) => {
+            ffmpegPath = path;
+            console.log(`🔍 [DEBUG] ✅ FFmpeg setup complete: ${path}`);
+          })
+          .catch((e) => {
+            console.error("🔍 [DEBUG] ❌ Failed to setup FFmpeg:", e);
+          });
       } catch (e) {
-        console.error('🔍 [DEBUG] ❌ FFmpeg downloader error:', e)
+        console.error("🔍 [DEBUG] ❌ FFmpeg downloader error:", e);
       }
     }
   }
 } catch (error) {
-  console.error('🔍 [DEBUG] ❌ Error loading ffmpeg-static, falling back to system ffmpeg:', error)
-  ffmpegPath = 'ffmpeg'
+  console.error(
+    "🔍 [DEBUG] ❌ Error loading ffmpeg-static, falling back to system ffmpeg:",
+    error
+  );
+  ffmpegPath = "ffmpeg";
 }
 
-const url = require("url")
+const url = require("url");
 
 class RTSPStreamingServer {
   constructor(port = 9999) {
-    this.port = port
-    this.activeStreams = new Map() // Map<rtspUrl, {ffmpeg, clients}>
-    this.wss = null
+    this.port = port;
+    this.activeStreams = new Map(); // Map<rtspUrl, {ffmpeg, clients}>
+    this.wss = null;
   }
 
   start() {
-    // Create WebSocket server
+    // Create WebSocket server với cấu hình ultra-low latency
     this.wss = new WebSocket.Server({
       port: this.port,
-      perMessageDeflate: false,
-      maxPayload: 1024 * 1024 * 10, // 10MB max payload
-    })
+      perMessageDeflate: false, // Tắt compression để giảm latency
+      maxPayload: 1024 * 1024 * 5, // Giảm max payload xuống 5MB
+      backlog: 10, // Giới hạn connection queue
+      clientTracking: true, // Enable client tracking
+      verifyClient: false, // Skip verification để nhanh hơn
+      handleProtocols: false, // Skip protocol handling
+    });
 
-    console.log(`🚀 RTSP WebSocket server started on port ${this.port}`)
+    console.log(`🚀 RTSP WebSocket server started on port ${this.port}`);
 
     this.wss.on("connection", (ws, req) => {
-      const query = url.parse(req.url, true).query
-      const rtspUrl = query.rtsp
-      const cameraId = query.cameraId || "unknown"
+      const query = url.parse(req.url, true).query;
+      const rtspUrl = query.rtsp;
+      const cameraId = query.cameraId || "unknown";
 
-      console.log(`📹 New client connected for camera ${cameraId}`)
-      console.log(`🔗 RTSP URL: ${rtspUrl}`)
-      console.log(`🔍 [DEBUG] Client count: ${this.wss.clients.size}`)
-      console.log(`🔍 [DEBUG] Query params:`, query)
+      console.log(`📹 New client connected for camera ${cameraId}`);
+      console.log(`🔗 RTSP URL: ${rtspUrl}`);
+      console.log(`🔍 [DEBUG] Client count: ${this.wss.clients.size}`);
+      console.log(`🔍 [DEBUG] Query params:`, query);
+
+      // Tối ưu WebSocket connection cho low latency
+      ws.binaryType = "arraybuffer";
+      ws._socket.setNoDelay(true); // Disable Nagle algorithm
+      ws._socket.setKeepAlive(true, 30000); // Keep connection alive
 
       if (!rtspUrl) {
-        console.error("❌ No RTSP URL provided")
-        console.error("🔍 [DEBUG] Request URL:", req.url)
-        console.error("🔍 [DEBUG] Query object:", query)
-        ws.close(1008, "RTSP URL required")
-        return
+        console.error("❌ No RTSP URL provided");
+        console.error("🔍 [DEBUG] Request URL:", req.url);
+        console.error("🔍 [DEBUG] Query object:", query);
+        ws.close(1008, "RTSP URL required");
+        return;
       }
 
       // Store client info
-      ws.rtspUrl = rtspUrl
-      ws.cameraId = cameraId
-      ws.isAlive = true
+      ws.rtspUrl = rtspUrl;
+      ws.cameraId = cameraId;
+      ws.isAlive = true;
 
       // Setup ping/pong for connection health
       ws.on("pong", () => {
-        ws.isAlive = true
-      })
+        ws.isAlive = true;
+      });
 
       // Get or create stream
-      this.getOrCreateStream(rtspUrl, cameraId, ws)
+      this.getOrCreateStream(rtspUrl, cameraId, ws);
 
       // Handle WebSocket close
       ws.on("close", (code, reason) => {
-        console.log(`📱 Client disconnected for camera ${cameraId}: ${code} ${reason}`)
-        this.handleClientDisconnect(ws)
-      })
+        console.log(
+          `📱 Client disconnected for camera ${cameraId}: ${code} ${reason}`
+        );
+        this.handleClientDisconnect(ws);
+      });
 
       ws.on("error", (err) => {
-        console.error(`❌ WebSocket error for camera ${cameraId}:`, err)
-        this.handleClientDisconnect(ws)
-      })
-    })
+        console.error(`❌ WebSocket error for camera ${cameraId}:`, err);
+        this.handleClientDisconnect(ws);
+      });
+    });
 
-    // Setup heartbeat to detect broken connections
+    // Setup heartbeat optimized for low latency - check more frequently but lighter
     const heartbeat = setInterval(() => {
       this.wss.clients.forEach((ws) => {
         if (!ws.isAlive) {
-          console.log(`💔 Terminating dead connection for camera ${ws.cameraId}`)
-          return ws.terminate()
+          console.log(
+            `💔 Terminating dead connection for camera ${ws.cameraId}`
+          );
+          return ws.terminate();
         }
-        ws.isAlive = false
-        ws.ping()
-      })
-    }, 30000) // Check every 30 seconds
+        ws.isAlive = false;
+        // Use faster ping without payload
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.ping();
+        }
+      });
+    }, 15000); // Check every 15 seconds (more frequent for faster detection)
 
-    // Setup stream health check
+    // Setup stream health check - optimized for performance
     const streamHealthCheck = setInterval(() => {
       for (const [rtspUrl, streamInfo] of this.activeStreams) {
-        const timeSinceStart = Date.now() - streamInfo.startTime
-        const timeSinceLastData = Date.now() - streamInfo.lastDataTime
-        const hasClients = streamInfo.clients.size > 0
-        const isStuck = hasClients && timeSinceLastData > 30000 // No data for 30s
-        
+        const timeSinceLastData = Date.now() - streamInfo.lastDataTime;
+        const hasClients = streamInfo.clients.size > 0;
+        const isStuck = hasClients && timeSinceLastData > 20000; // Reduce stuck detection to 20s
+
         if (isStuck && !streamInfo.isRestarting) {
-          console.log(`🔧 Stream appears stuck for ${rtspUrl} (${Math.round(timeSinceLastData/1000)}s since last data), restarting...`)
-          streamInfo.ffmpeg.kill("SIGTERM")
+          console.log(
+            `🔧 Stream stuck for ${rtspUrl} (${Math.round(
+              timeSinceLastData / 1000
+            )}s), restarting...`
+          );
+          streamInfo.isRestarting = true;
+          streamInfo.ffmpeg.kill("SIGTERM");
         }
-        
-        // Log stream stats periodically
-        if (hasClients && timeSinceStart % 120000 < 45000) { // Every 2 minutes (within health check window)
-          console.log(`📊 Stream stats for ${rtspUrl}: ${streamInfo.dataCount} chunks, ${streamInfo.clients.size} clients, ${Math.round(timeSinceStart/1000)}s uptime`)
+
+        // Less frequent stats logging for better performance
+        if (
+          hasClients &&
+          streamInfo.dataCount % 200 === 0 &&
+          streamInfo.dataCount > 0
+        ) {
+          console.log(
+            `📊 Stream ${rtspUrl}: ${streamInfo.dataCount} chunks, ${streamInfo.clients.size} clients`
+          );
         }
       }
-    }, 45000) // Check every 45 seconds
+    }, 30000); // Check every 30 seconds (reduced frequency)
 
     this.wss.on("close", () => {
-      clearInterval(heartbeat)
-      clearInterval(streamHealthCheck)
-    })
+      clearInterval(heartbeat);
+      clearInterval(streamHealthCheck);
+    });
 
     // Cleanup on process exit
-    process.on("SIGINT", this.cleanup.bind(this))
-    process.on("SIGTERM", this.cleanup.bind(this))
+    process.on("SIGINT", this.cleanup.bind(this));
+    process.on("SIGTERM", this.cleanup.bind(this));
   }
 
   getOrCreateStream(rtspUrl, cameraId, ws) {
-    let streamInfo = this.activeStreams.get(rtspUrl)
+    let streamInfo = this.activeStreams.get(rtspUrl);
 
     // Check if we need to create a new stream
-    const needNewStream = !streamInfo || 
-                         streamInfo.ffmpeg.killed || 
-                         streamInfo.ffmpeg.exitCode !== null ||
-                         streamInfo.ffmpeg.signalCode !== null
+    const needNewStream =
+      !streamInfo ||
+      streamInfo.ffmpeg.killed ||
+      streamInfo.ffmpeg.exitCode !== null ||
+      streamInfo.ffmpeg.signalCode !== null;
 
     if (needNewStream) {
       // Preserve existing clients if stream exists
-      let existingClients = new Set()
+      let existingClients = new Set();
       if (streamInfo && streamInfo.clients) {
-        existingClients = new Set(streamInfo.clients)
-        console.log(`🔄 Preserving ${existingClients.size} existing clients for camera ${cameraId}`)
+        existingClients = new Set(streamInfo.clients);
+        console.log(
+          `🔄 Preserving ${existingClients.size} existing clients for camera ${cameraId}`
+        );
       }
 
       // Clean up old stream if exists
       if (streamInfo) {
-        console.log(`🗑️ Cleaning up old stream for camera ${cameraId}`)
+        console.log(`🗑️ Cleaning up old stream for camera ${cameraId}`);
         if (!streamInfo.ffmpeg.killed) {
-          streamInfo.ffmpeg.kill("SIGKILL")
+          streamInfo.ffmpeg.kill("SIGKILL");
         }
-        this.activeStreams.delete(rtspUrl)
+        this.activeStreams.delete(rtspUrl);
       }
 
       // Create new FFmpeg process
-      console.log(`🎬 Starting new FFmpeg process for camera ${cameraId}`)
-      console.log(`🔍 [DEBUG] Using FFmpeg binary: ${ffmpegPath}`)
-      console.log(`🔍 [DEBUG] FFmpeg exists check: ${fs.existsSync(ffmpegPath)}`)
-      
+      console.log(`🎬 Starting new FFmpeg process for camera ${cameraId}`);
+      console.log(`🔍 [DEBUG] Using FFmpeg binary: ${ffmpegPath}`);
+      console.log(
+        `🔍 [DEBUG] FFmpeg exists check: ${fs.existsSync(ffmpegPath)}`
+      );
+
       // Test FFmpeg binary before spawning
-      if (ffmpegPath !== 'ffmpeg') {
+      if (ffmpegPath !== "ffmpeg") {
         try {
-          const stats = fs.statSync(ffmpegPath)
-          console.log(`🔍 [DEBUG] FFmpeg file size: ${stats.size} bytes`)
-          console.log(`🔍 [DEBUG] FFmpeg permissions: ${stats.mode.toString(8)}`)
+          const stats = fs.statSync(ffmpegPath);
+          console.log(`🔍 [DEBUG] FFmpeg file size: ${stats.size} bytes`);
+          console.log(
+            `🔍 [DEBUG] FFmpeg permissions: ${stats.mode.toString(8)}`
+          );
         } catch (e) {
-          console.error(`🔍 [DEBUG] ❌ Error reading FFmpeg stats: ${e.message}`)
+          console.error(
+            `🔍 [DEBUG] ❌ Error reading FFmpeg stats: ${e.message}`
+          );
         }
       }
 
-      // Simple FFmpeg args based on source-stream-camera-success
+      // Ultra-low latency FFmpeg args optimized for license plate reading
       const ffmpegArgs = [
-        // Input options - basic and compatible
+        // Input options - minimize input buffering and probing
         "-rtsp_transport",
         "tcp",
+        "-rtsp_flags",
+        "prefer_tcp",
+        "-fflags",
+        "nobuffer+flush_packets",
+        "-flags",
+        "low_delay",
+        "-probesize",
+        "32768", // Reduce probe size for faster startup
+        "-analyzeduration",
+        "100000", // Reduce analyze duration (100ms)
+        "-max_delay",
+        "100000", // Max delay 100ms
         "-i",
         rtspUrl,
 
-        // Video processing - simple and stable
+        // Video processing - ultra-low latency optimized for license plates
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast",
+        "ultrafast", // Fastest encoding
         "-tune",
-        "zerolatency",
+        "zerolatency", // Zero latency tuning
+        "-crf",
+        "23", // Constant Rate Factor for good quality
         "-pix_fmt",
         "yuv420p",
         "-profile:v",
-        "baseline",
+        "baseline", // Baseline profile for compatibility
         "-level",
         "3.1",
         "-s",
-        "640x480",
+        "1280x720", // Higher resolution for better license plate reading
         "-r",
-        "15",
-        "-b:v",
-        "500k",
-        "-maxrate",
-        "600k",
-        "-bufsize",
-        "1200k",
+        "25", // Higher framerate for smoother motion
         "-g",
-        "30",
+        "10", // Smaller GOP for lower latency (keyframe every 10 frames)
         "-keyint_min",
-        "15",
+        "5", // Minimum keyframe interval
+        "-x264-params",
+        "sliced-threads=1:sync-lookahead=0:rc-lookahead=0:intra-refresh=1:bframes=0:ref=1:me=dia:subme=1:trellis=0",
         "-an", // No audio
 
-        // Output options - MP4 fragmented for streaming
+        // Output options - optimized MP4 fragmented streaming
         "-f",
         "mp4",
         "-movflags",
-        "empty_moov+default_base_moof+frag_keyframe",
+        "empty_moov+default_base_moof+frag_keyframe+dash+delay_moov",
+        "-frag_duration",
+        "200000", // Fragment duration 200ms
+        "-min_frag_duration",
+        "100000", // Min fragment duration 100ms
+        "-reset_timestamps",
+        "1",
+        "-flush_packets",
+        "1",
         "pipe:1",
-      ]
+      ];
 
-      console.log(`🔧 FFmpeg command: ${ffmpegPath} ${ffmpegArgs.join(" ")}`)
-      console.log(`🔍 [DEBUG] Spawning FFmpeg with:`)
-      console.log(`🔍 [DEBUG] - Binary: ${ffmpegPath}`)
-      console.log(`🔍 [DEBUG] - Args: [${ffmpegArgs.slice(0, 10).join(', ')}...]`)
-      console.log(`🔍 [DEBUG] - Working dir: ${process.cwd()}`)
+      console.log(
+        `🔧 FFmpeg ultra-low latency command: ${ffmpegPath} ${ffmpegArgs.join(
+          " "
+        )}`
+      );
+      console.log(`🔍 [DEBUG] Optimized for <500ms latency`);
+      console.log(
+        `🔍 [DEBUG] Resolution: 1280x720 @ 25fps for license plate reading`
+      );
+      console.log(`🔍 [DEBUG] - Binary: ${ffmpegPath}`);
+      console.log(`🔍 [DEBUG] - Args count: ${ffmpegArgs.length}`);
 
       const ffmpeg = spawn(ffmpegPath, ffmpegArgs, {
         stdio: ["ignore", "pipe", "pipe"],
-      })
-      
-      console.log(`🔍 [DEBUG] FFmpeg process spawned with PID: ${ffmpeg.pid}`)
+        windowsHide: true, // Hide console window on Windows
+        detached: false, // Keep attached to parent process
+        env: {
+          ...process.env,
+          FFREPORT: "level=16", // Minimal FFmpeg logging for better performance
+        },
+      });
+
+      console.log(`🔍 [DEBUG] FFmpeg process spawned with PID: ${ffmpeg.pid}`);
 
       streamInfo = {
         ffmpeg: ffmpeg,
@@ -299,44 +406,55 @@ class RTSPStreamingServer {
         isRestarting: false,
         dataCount: 0,
         lastDataTime: Date.now(),
-      }
+      };
 
-      this.activeStreams.set(rtspUrl, streamInfo)
+      this.activeStreams.set(rtspUrl, streamInfo);
 
-      // Handle FFmpeg stdout (video data)
+      // Handle FFmpeg stdout (video data) - optimized for ultra-low latency
       ffmpeg.stdout.on("data", (chunk) => {
-        streamInfo.lastData = chunk
-        streamInfo.dataCount++
-        streamInfo.lastDataTime = Date.now()
-        
+        streamInfo.lastData = chunk;
+        streamInfo.dataCount++;
+        streamInfo.lastDataTime = Date.now();
+
         // Log data flow periodically and first few chunks
         if (streamInfo.dataCount <= 5) {
-          console.log(`🔍 [DEBUG] Camera ${cameraId}: Received chunk ${streamInfo.dataCount}, size: ${chunk.length} bytes`)
-        } else if (streamInfo.dataCount % 100 === 0) {
-          console.log(`📊 Camera ${cameraId}: ${streamInfo.dataCount} chunks sent to ${streamInfo.clients.size} clients`)
+          console.log(
+            `🔍 [DEBUG] Camera ${cameraId}: Received chunk ${streamInfo.dataCount}, size: ${chunk.length} bytes`
+          );
+        } else if (streamInfo.dataCount % 150 === 0) {
+          // Less frequent logging for better performance
+          console.log(
+            `📊 Camera ${cameraId}: ${streamInfo.dataCount} chunks sent to ${streamInfo.clients.size} clients`
+          );
         }
-        
-        // Broadcast to all clients for this stream
+
+        // Broadcast to all clients for this stream - immediate delivery
+        const deadClients = new Set();
         streamInfo.clients.forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             try {
-              client.send(chunk)
+              // Immediate send với buffering tối thiểu
+              client.send(chunk, { binary: true, compress: false, fin: true });
             } catch (err) {
-              console.error("❌ Error sending data to client:", err)
-              console.error(`🔍 [DEBUG] Client state: ${client.readyState}`)
-              streamInfo.clients.delete(client)
+              console.error("❌ Error sending data to client:", err);
+              deadClients.add(client);
             }
           } else {
-            // Remove dead clients
-            console.log(`🔍 [DEBUG] Removing dead client (state: ${client.readyState})`)
-            streamInfo.clients.delete(client)
+            // Mark dead clients for removal
+            deadClients.add(client);
           }
-        })
-      })
+        });
+
+        // Remove dead clients in batch
+        if (deadClients.size > 0) {
+          console.log(`🔍 [DEBUG] Removing ${deadClients.size} dead clients`);
+          deadClients.forEach((client) => streamInfo.clients.delete(client));
+        }
+      });
 
       // Handle FFmpeg stderr (logs)
       ffmpeg.stderr.on("data", (chunk) => {
-        const error = chunk.toString()
+        const error = chunk.toString();
 
         // Skip frame progress logs and version info
         if (
@@ -355,10 +473,10 @@ class RTSPStreamingServer {
           error.includes("libpostproc") ||
           error.includes("-vsync is deprecated")
         ) {
-          return
+          return;
         }
 
-        console.log(`📺 FFmpeg [${cameraId}]:`, error.trim())
+        console.log(`📺 FFmpeg [${cameraId}]:`, error.trim());
 
         // Check for critical errors that require restart
         if (
@@ -374,39 +492,45 @@ class RTSPStreamingServer {
           error.includes("End of file") ||
           (error.includes("Option") && error.includes("not found"))
         ) {
-          console.error(`💥 Critical error for camera ${cameraId}: ${error.trim()}`)
+          console.error(
+            `💥 Critical error for camera ${cameraId}: ${error.trim()}`
+          );
 
           // Kill process to trigger restart
           setTimeout(() => {
             if (!ffmpeg.killed && streamInfo.clients.size > 0) {
-              console.log(`🔄 Killing process to restart for camera ${cameraId}`)
-              ffmpeg.kill("SIGTERM")
+              console.log(
+                `🔄 Killing process to restart for camera ${cameraId}`
+              );
+              ffmpeg.kill("SIGTERM");
             }
-          }, 2000)
+          }, 2000);
         }
-      })
+      });
 
       ffmpeg.on("exit", (code, signal) => {
-        console.log(`🔚 FFmpeg process for camera ${cameraId} exited with code ${code}, signal ${signal}`)
+        console.log(
+          `🔚 FFmpeg process for camera ${cameraId} exited with code ${code}, signal ${signal}`
+        );
 
         // Manual kill - don't restart
         if (signal === "SIGKILL") {
-          console.log(`🛑 Manual kill for camera ${cameraId}, not restarting`)
-          this.activeStreams.delete(rtspUrl)
-          return
+          console.log(`🛑 Manual kill for camera ${cameraId}, not restarting`);
+          this.activeStreams.delete(rtspUrl);
+          return;
         }
 
         // Prevent multiple restart attempts
         if (streamInfo.isRestarting) {
-          console.log(`⚠️ Already restarting camera ${cameraId}, skipping...`)
-          return
+          console.log(`⚠️ Already restarting camera ${cameraId}, skipping...`);
+          return;
         }
 
         // Auto-restart if there are still clients and restart count is reasonable
         if (streamInfo.clients.size > 0 && streamInfo.restartCount < 5) {
-          streamInfo.isRestarting = true
-          streamInfo.restartCount++
-          
+          streamInfo.isRestarting = true;
+          streamInfo.restartCount++;
+
           // Different delays based on exit code
           let delay = 2000; // Default 2s delay
           if (code === 0) {
@@ -416,108 +540,114 @@ class RTSPStreamingServer {
           }
 
           console.log(
-            `🔄 Auto-restarting FFmpeg for camera ${cameraId} in ${delay}ms (attempt ${streamInfo.restartCount}/5, exit code: ${code})...`,
-          )
+            `🔄 Auto-restarting FFmpeg for camera ${cameraId} in ${delay}ms (attempt ${streamInfo.restartCount}/5, exit code: ${code})...`
+          );
 
           setTimeout(() => {
             if (streamInfo.clients.size > 0 && streamInfo.isRestarting) {
               // Create new stream info to avoid reference issues
-              this.activeStreams.delete(rtspUrl)
+              this.activeStreams.delete(rtspUrl);
 
               // Get first client to restart stream
-              const firstClient = Array.from(streamInfo.clients)[0]
+              const firstClient = Array.from(streamInfo.clients)[0];
               if (firstClient && firstClient.readyState === WebSocket.OPEN) {
-                this.getOrCreateStream(rtspUrl, cameraId, firstClient)
+                this.getOrCreateStream(rtspUrl, cameraId, firstClient);
               }
             }
-          }, delay)
+          }, delay);
         } else {
           console.log(
-            `❌ Not restarting FFmpeg for camera ${cameraId} (clients: ${streamInfo.clients.size}, restarts: ${streamInfo.restartCount})`,
-          )
-          this.activeStreams.delete(rtspUrl)
+            `❌ Not restarting FFmpeg for camera ${cameraId} (clients: ${streamInfo.clients.size}, restarts: ${streamInfo.restartCount})`
+          );
+          this.activeStreams.delete(rtspUrl);
         }
-      })
+      });
 
       ffmpeg.on("error", (err) => {
-        console.error(`💥 FFmpeg process error for camera ${cameraId}:`, err)
-        console.error(`🔍 [DEBUG] Error details:`)
-        console.error(`🔍 [DEBUG] - Code: ${err.code}`)
-        console.error(`🔍 [DEBUG] - Errno: ${err.errno}`)
-        console.error(`🔍 [DEBUG] - Syscall: ${err.syscall}`)
-        console.error(`🔍 [DEBUG] - Path: ${err.path}`)
-        console.error(`🔍 [DEBUG] - FFmpeg path used: ${ffmpegPath}`)
-        console.error(`🔍 [DEBUG] - FFmpeg exists: ${fs.existsSync(ffmpegPath)}`)
-        this.activeStreams.delete(rtspUrl)
-      })
+        console.error(`💥 FFmpeg process error for camera ${cameraId}:`, err);
+        console.error(`🔍 [DEBUG] Error details:`);
+        console.error(`🔍 [DEBUG] - Code: ${err.code}`);
+        console.error(`🔍 [DEBUG] - Errno: ${err.errno}`);
+        console.error(`🔍 [DEBUG] - Syscall: ${err.syscall}`);
+        console.error(`🔍 [DEBUG] - Path: ${err.path}`);
+        console.error(`🔍 [DEBUG] - FFmpeg path used: ${ffmpegPath}`);
+        console.error(
+          `🔍 [DEBUG] - FFmpeg exists: ${fs.existsSync(ffmpegPath)}`
+        );
+        this.activeStreams.delete(rtspUrl);
+      });
     }
 
     // Add client to stream
-    streamInfo.clients.add(ws)
-    console.log(`👥 Added client to stream. Total clients: ${streamInfo.clients.size}`)
+    streamInfo.clients.add(ws);
+    console.log(
+      `👥 Added client to stream. Total clients: ${streamInfo.clients.size}`
+    );
 
     // Send last data if available (for faster initial display)
     if (streamInfo.lastData && ws.readyState === WebSocket.OPEN) {
       try {
-        ws.send(streamInfo.lastData)
+        ws.send(streamInfo.lastData);
       } catch (err) {
-        console.error("❌ Error sending initial data:", err)
+        console.error("❌ Error sending initial data:", err);
       }
     }
   }
 
   handleClientDisconnect(ws) {
-    const rtspUrl = ws.rtspUrl
-    if (!rtspUrl) return
+    const rtspUrl = ws.rtspUrl;
+    if (!rtspUrl) return;
 
-    const streamInfo = this.activeStreams.get(rtspUrl)
+    const streamInfo = this.activeStreams.get(rtspUrl);
     if (streamInfo) {
-      streamInfo.clients.delete(ws)
-      console.log(`👋 Removed client from stream. Remaining clients: ${streamInfo.clients.size}`)
+      streamInfo.clients.delete(ws);
+      console.log(
+        `👋 Removed client from stream. Remaining clients: ${streamInfo.clients.size}`
+      );
 
       // Kill stream if no more clients after a delay
       if (streamInfo.clients.size === 0) {
         setTimeout(() => {
-          const currentStreamInfo = this.activeStreams.get(rtspUrl)
+          const currentStreamInfo = this.activeStreams.get(rtspUrl);
           if (currentStreamInfo && currentStreamInfo.clients.size === 0) {
-            console.log(`🗑️ No more clients for ${rtspUrl}, killing stream`)
-            this.killStream(rtspUrl)
+            console.log(`🗑️ No more clients for ${rtspUrl}, killing stream`);
+            this.killStream(rtspUrl);
           }
-        }, 15000) // Wait 15 seconds before killing
+        }, 15000); // Wait 15 seconds before killing
       }
     }
   }
 
   killStream(rtspUrl) {
-    const streamInfo = this.activeStreams.get(rtspUrl)
+    const streamInfo = this.activeStreams.get(rtspUrl);
     if (streamInfo && !streamInfo.ffmpeg.killed) {
-      console.log(`🔪 Killing FFmpeg process for ${rtspUrl}`)
-      streamInfo.ffmpeg.kill("SIGKILL")
+      console.log(`🔪 Killing FFmpeg process for ${rtspUrl}`);
+      streamInfo.ffmpeg.kill("SIGKILL");
     }
-    this.activeStreams.delete(rtspUrl)
+    this.activeStreams.delete(rtspUrl);
   }
 
   cleanup() {
-    console.log("🧹 Shutting down RTSP streaming server...")
+    console.log("🧹 Shutting down RTSP streaming server...");
 
     // Kill all FFmpeg processes
     for (const [rtspUrl, streamInfo] of this.activeStreams) {
-      console.log(`🔪 Killing FFmpeg process for ${rtspUrl}`)
+      console.log(`🔪 Killing FFmpeg process for ${rtspUrl}`);
       if (!streamInfo.ffmpeg.killed) {
-        streamInfo.ffmpeg.kill("SIGKILL")
+        streamInfo.ffmpeg.kill("SIGKILL");
       }
     }
 
-    this.activeStreams.clear()
+    this.activeStreams.clear();
 
     if (this.wss) {
-      this.wss.close()
+      this.wss.close();
     }
   }
 
   stop() {
-    this.cleanup()
+    this.cleanup();
   }
 }
 
-module.exports = RTSPStreamingServer
+module.exports = RTSPStreamingServer;

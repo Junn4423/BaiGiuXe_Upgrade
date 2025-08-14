@@ -1,6 +1,8 @@
 class RelayService {
   constructor() {
     this.isElectron = typeof window !== "undefined" && window.electronAPI;
+    this.connectionState = false;
+    this.autoConnectAttempted = false;
   }
 
   /**
@@ -13,6 +15,30 @@ class RelayService {
   }
 
   /**
+   * Tự động kết nối khi khởi động app
+   */
+  async autoConnect() {
+    if (this.autoConnectAttempted) {
+      console.log("🔄 Auto-connect already attempted");
+      return this.connectionState;
+    }
+
+    this.autoConnectAttempted = true;
+
+    try {
+      console.log("🔌 Attempting auto-connect to USB Relay...");
+      await this.connect();
+      this.connectionState = true;
+      console.log("✅ USB Relay auto-connected successfully");
+      return true;
+    } catch (error) {
+      console.warn("⚠️ USB Relay auto-connect failed:", error.message);
+      this.connectionState = false;
+      return false;
+    }
+  }
+
+  /**
    * Kết nối với USB Relay
    */
   async connect() {
@@ -20,9 +46,11 @@ class RelayService {
       this.checkElectronEnvironment();
       const result = await window.electronAPI.relayControl.connect();
       console.log("Relay connected:", result);
+      this.connectionState = true;
       return result;
     } catch (error) {
       console.error("Relay connect error:", error);
+      this.connectionState = false;
       throw error;
     }
   }
@@ -35,9 +63,34 @@ class RelayService {
       this.checkElectronEnvironment();
       const result = await window.electronAPI.relayControl.disconnect();
       console.log("Relay disconnected:", result);
+      this.connectionState = false;
       return result;
     } catch (error) {
       console.error("Relay disconnect error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Đảm bảo relay đã kết nối trước khi thực hiện thao tác
+   */
+  async ensureConnection() {
+    try {
+      if (!this.isElectron) {
+        throw new Error("Relay control chỉ hoạt động trong Electron app");
+      }
+
+      // Kiểm tra trạng thái hiện tại
+      const isCurrentlyConnected = await this.isConnected();
+
+      if (!isCurrentlyConnected) {
+        console.log("🔌 Relay not connected, attempting to connect...");
+        await this.connect();
+      }
+
+      return true;
+    } catch (error) {
+      console.error("❌ Failed to ensure relay connection:", error);
       throw error;
     }
   }
@@ -49,7 +102,7 @@ class RelayService {
    */
   async controlRelay(relayNum, state) {
     try {
-      this.checkElectronEnvironment();
+      await this.ensureConnection();
       const result = await window.electronAPI.relayControl.controlRelay(
         relayNum,
         state
@@ -81,7 +134,7 @@ class RelayService {
    */
   async turnOffAll() {
     try {
-      this.checkElectronEnvironment();
+      await this.ensureConnection();
       const result = await window.electronAPI.relayControl.turnOffAll();
       console.log("All relays OFF:", result);
       return result;
@@ -97,7 +150,7 @@ class RelayService {
    */
   async controlBitmask(bitmask) {
     try {
-      this.checkElectronEnvironment();
+      await this.ensureConnection();
       const result = await window.electronAPI.relayControl.controlBitmask(
         bitmask
       );
@@ -116,37 +169,39 @@ class RelayService {
   }
 
   /**
-   * Test sequence
+   * Test sequence với auto-connect
    */
   async testSequence(cycles = 1, delayMs = 1000) {
     try {
-      this.checkElectronEnvironment();
+      // Đảm bảo kết nối trước khi thực hiện
+      await this.ensureConnection();
+
       const result = await window.electronAPI.relayControl.testSequence(
         cycles,
         delayMs
       );
-      console.log("Test sequence completed:", result);
+      console.log("✅ Test sequence completed:", result);
       return result;
     } catch (error) {
-      console.error("Test sequence error:", error);
+      console.error("❌ Test sequence error:", error);
       throw error;
     }
   }
 
   /**
-   * Test bitmask patterns
+   * Test bitmask patterns với auto-connect
    */
   async testBitmaskPatterns(cycles = 1, delayMs = 1500) {
     try {
-      this.checkElectronEnvironment();
+      await this.ensureConnection();
       const result = await window.electronAPI.relayControl.testBitmaskPatterns(
         cycles,
         delayMs
       );
-      console.log("Test bitmask patterns completed:", result);
+      console.log("✅ Test bitmask patterns completed:", result);
       return result;
     } catch (error) {
-      console.error("Test bitmask patterns error:", error);
+      console.error("❌ Test bitmask patterns error:", error);
       throw error;
     }
   }

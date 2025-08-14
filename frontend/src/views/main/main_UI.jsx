@@ -45,6 +45,7 @@ import SystemSettings from "../SystemSettings";
 import { processAttendanceImage } from "../../api/apiChamCong";
 import { layDanhSachPhuongTien } from "../../api/api";
 import faceAPI from "../../api/apiFaceRecognition";
+import relayService from "../../services/relayService";
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
 
@@ -118,6 +119,15 @@ const MainUI = () => {
     plateImageBlob: null,
     faceImageBlob: null,
   });
+
+  // Auto face recognition monitoring
+  const [autoFaceRecognitionEnabled, setAutoFaceRecognitionEnabled] =
+    useState(true);
+  const [lastProcessedPlate, setLastProcessedPlate] = useState("");
+  const [vehicleDatabase, setVehicleDatabase] = useState([]); // Cache pm_nc0002 data
+  const [isProcessingFace, setIsProcessingFace] = useState(false); // For UI indicator
+  const plateMonitoringRef = useRef(null);
+  const processingFaceRef = useRef(false);
   const [scannedCardId, setScannedCardId] = useState("");
   const [imagesSavedToDisc, setImagesSavedToDisc] = useState(false); // **NEW: Track if images are saved to disc**
   const [environmentInfo, setEnvironmentInfo] = useState(null);
@@ -286,6 +296,231 @@ const MainUI = () => {
       console.error("Error loading zone info:", error);
     }
   };
+
+  // Load vehicle database for auto face recognition
+  const loadVehicleDatabase = async () => {
+    try {
+      const vehicleList = await layDanhSachPhuongTien();
+      if (Array.isArray(vehicleList)) {
+        setVehicleDatabase(vehicleList);
+        console.log(`📋 Loaded ${vehicleList.length} vehicles from pm_nc0002`);
+      }
+    } catch (error) {
+      console.error("❌ Error loading vehicle database:", error);
+    }
+  };
+
+  // Check if license plate exists in vehicle database
+  const checkLicensePlateInDatabase = (licensePlate) => {
+    if (!licensePlate || !Array.isArray(vehicleDatabase)) return null;
+
+    const normalizedPlate = licensePlate.trim().toUpperCase();
+    return vehicleDatabase.find(
+      (v) => (v.bienSo || v.lv001 || "").toUpperCase() === normalizedPlate
+    );
+  };
+
+  // Capture face image from camera stream (temporary, no save)
+  const captureTempFaceImage = async () => {
+    try {
+      if (!cameraManagerRef.current) {
+        console.log("❌ Camera manager not available");
+        return null;
+      }
+
+      const tempCardId = `temp_${Date.now()}`;
+      const mode = currentMode === "vao" ? "vao" : "ra";
+
+      console.log("📸 Capturing temp face image...");
+
+      // Use the same capture method as normal flow
+      const captureResult = await cameraManagerRef.current.captureImage(
+        tempCardId,
+        mode
+      );
+
+      // Extract face image from result
+      const faceImage = captureResult[2]; // faceImage is at index 2
+
+      if (faceImage?.blob) {
+        console.log("✅ Temp face image captured successfully");
+        return faceImage;
+      } else {
+        console.log("❌ No face image blob in capture result");
+        return null;
+      }
+    } catch (error) {
+      console.error("❌ Error capturing temp face image:", error);
+      return null;
+    }
+  };
+
+  // Process face recognition for detected license plate
+  const processFaceRecognition = async (licensePlate, vehicleInfo) => {
+    if (processingFaceRef.current) {
+      console.log("🔄 Face recognition already in progress, skipping...");
+      return;
+    }
+
+    processingFaceRef.current = true;
+    setIsProcessingFace(true);
+    console.log(`🎯 Processing face recognition for: ${licensePlate}`);
+
+    let tempImageUrl = null;
+    try {
+      // Capture temp face image
+      const faceImage = await captureTempFaceImage();
+      if (!faceImage?.blob) {
+        console.log("❌ No face image captured");
+        return;
+      }
+
+      tempImageUrl = faceImage.url; // Store for cleanup
+
+      // Send to face recognition service
+      const recognizeResult = await faceAPI.recognizeFace(faceImage.blob);
+
+      if (
+        recognizeResult.success &&
+        recognizeResult.faces &&
+        recognizeResult.faces.length > 0
+      ) {
+        const recognizedFace = recognizeResult.faces[0];
+
+        if (
+          recognizedFace.name &&
+          recognizedFace.employee_id &&
+          recognizedFace.confidence
+        ) {
+          console.log("✅ Face recognized:", recognizedFace);
+
+          // Show welcome toast
+          const welcomeMessage = `Xin chào ${recognizedFace.name}, biển số: ${recognizedFace.employee_id}, đang mở cổng`;
+          showToast && showToast(welcomeMessage, "success", 5000);
+
+          // Trigger relay sequence
+          try {
+            if (
+              typeof window !== "undefined" &&
+              window.electronAPI &&
+              window.electronAPI.relayControl
+            ) {
+              await relayService.testSequence(1, 1000);
+              console.log("✅ Relay sequence activated");
+              showToast &&
+                showToast("🎛️ Đã kích hoạt cổng tự động", "info", 3000);
+            } else {
+              console.warn("⚠️ Relay control not available");
+            }
+          } catch (relayError) {
+            console.error("❌ Relay error:", relayError);
+          }
+        }
+      } else {
+        console.log("❌ No face recognized or invalid response");
+      }
+    } catch (error) {
+      console.error("❌ Face recognition error:", error);
+    } finally {
+      // Clean up temp image blob and URL to save memory
+      if (tempImageUrl) {
+        try {
+          URL.revokeObjectURL(tempImageUrl);
+          console.log("🧹 Cleaned up temp image URL");
+        } catch (e) {
+          console.warn("⚠️ Warning cleaning up temp image:", e);
+        }
+      }
+
+      processingFaceRef.current = false;
+      setIsProcessingFace(false);
+    }
+  };
+
+  // Monitor plate-text changes
+  const startPlateMonitoring = () => {
+    if (plateMonitoringRef.current) {
+      clearInterval(plateMonitoringRef.current);
+    }
+
+    console.log(
+      "🔍 Starting plate monitoring with vehicle database:",
+      vehicleDatabase.length,
+      "vehicles"
+    );
+
+    plateMonitoringRef.current = setInterval(() => {
+      if (!autoFaceRecognitionEnabled || processingFaceRef.current) return;
+
+      try {
+        const plateTextDiv = document.querySelector(".plate-text");
+        if (!plateTextDiv || !plateTextDiv.textContent) return;
+
+        const currentPlate = plateTextDiv.textContent.trim();
+        if (!currentPlate || currentPlate === "" || currentPlate === "N/A")
+          return;
+
+        // Skip if same as last processed plate (avoid duplicate processing)
+        if (currentPlate === lastProcessedPlate) return;
+
+        // Check if plate exists in database
+        const vehicleInfo = checkLicensePlateInDatabase(currentPlate);
+        if (vehicleInfo) {
+          console.log(`🎯 License plate ${currentPlate} found in database:`, {
+            owner: vehicleInfo.tenChuXe || vehicleInfo.lv003,
+            type: vehicleInfo.maLoaiPT || vehicleInfo.lv002,
+          });
+          setLastProcessedPlate(currentPlate);
+          processFaceRecognition(currentPlate, vehicleInfo);
+        } else {
+          // Only log once per plate to avoid spam
+          if (currentPlate !== lastProcessedPlate) {
+            console.log(
+              `ℹ️ License plate ${currentPlate} not found in database`
+            );
+            setLastProcessedPlate(currentPlate);
+          }
+        }
+      } catch (error) {
+        console.error("❌ Plate monitoring error:", error);
+      }
+    }, 1500); // Check every 1.5 seconds for better responsiveness
+  };
+
+  // Load vehicle database on component mount
+  useEffect(() => {
+    loadVehicleDatabase();
+  }, []);
+
+  // Start/stop plate monitoring based on auto face recognition setting
+  useEffect(() => {
+    if (autoFaceRecognitionEnabled && vehicleDatabase.length > 0) {
+      console.log("🔍 Starting auto license plate monitoring...");
+      startPlateMonitoring();
+    } else {
+      if (plateMonitoringRef.current) {
+        clearInterval(plateMonitoringRef.current);
+        plateMonitoringRef.current = null;
+        console.log("⏹️ Stopped license plate monitoring");
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (plateMonitoringRef.current) {
+        clearInterval(plateMonitoringRef.current);
+      }
+    };
+  }, [autoFaceRecognitionEnabled, vehicleDatabase]);
+
+  // Reload vehicle database periodically (every 5 minutes)
+  useEffect(() => {
+    const reloadInterval = setInterval(() => {
+      loadVehicleDatabase();
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(reloadInterval);
+  }, []);
 
   // Setup connections between components
   const setupConnections = () => {
@@ -918,32 +1153,160 @@ const MainUI = () => {
             setTimeout(async () => {
               try {
                 // 1) Kiểm tra biển số có trong pm_nc0002
-                let ownerImagePath = null;
+                let vehicleOwnerInfo = null;
                 try {
-                  const ds = await layDanhSachPhuongTien();
-                  const match = Array.isArray(ds)
-                    ? ds.find(
-                        (v) => (v.bienSo || "").toUpperCase() === (finalLicensePlate || "").toUpperCase()
+                  const vehicleList = await layDanhSachPhuongTien();
+                  const matchedVehicle = Array.isArray(vehicleList)
+                    ? vehicleList.find(
+                        (v) =>
+                          (v.bienSo || "").toUpperCase() ===
+                          (finalLicensePlate || "").toUpperCase()
                       )
                     : null;
-                  ownerImagePath = match ? match.duongDanKhuonMat || match.lv004 || null : null;
+
+                  if (matchedVehicle) {
+                    vehicleOwnerInfo = {
+                      licensePlate:
+                        matchedVehicle.bienSo || matchedVehicle.lv001,
+                      ownerName:
+                        matchedVehicle.tenChuXe || matchedVehicle.lv003,
+                      ownerImagePath:
+                        matchedVehicle.duongDanKhuonMat || matchedVehicle.lv004,
+                      vehicleType:
+                        matchedVehicle.maLoaiPT || matchedVehicle.lv002,
+                    };
+                    console.log(
+                      "🎯 Tìm thấy xe trong pm_nc0002:",
+                      vehicleOwnerInfo
+                    );
+                  }
                 } catch (e) {
                   console.warn("Không tải được danh sách pm_nc0002:", e);
                 }
 
-                if (ownerImagePath) {
-                  // 2) Gửi ảnh panel khuôn mặt để xác thực với ảnh chủ xe (lv004)
-                  const verify = await faceAPI.verifyFace(faceImage.blob, ownerImagePath, 0.45);
-                  if (!verify.success || !verify.match) {
-                    showToast && showToast("Không nhận diện được", "error", 2000);
-                  } else {
-                    console.log("Xác thực khuôn mặt OK, confidence:", verify.confidence);
+                if (vehicleOwnerInfo && faceImage?.blob) {
+                  console.log(
+                    "🔍 Bắt đầu nhận diện khuôn mặt cho biển số:",
+                    finalLicensePlate
+                  );
+
+                  try {
+                    // 2) Gửi ảnh khuôn mặt tới face recognition service
+                    const recognizeResult = await faceAPI.recognizeFace(
+                      faceImage.blob
+                    );
+
+                    if (
+                      recognizeResult.success &&
+                      recognizeResult.faces &&
+                      recognizeResult.faces.length > 0
+                    ) {
+                      const recognizedFace = recognizeResult.faces[0];
+
+                      // Kiểm tra format response đúng như yêu cầu
+                      if (
+                        recognizedFace.name &&
+                        recognizedFace.employee_id &&
+                        recognizedFace.confidence
+                      ) {
+                        console.log(
+                          "✅ Nhận diện khuôn mặt thành công:",
+                          recognizedFace
+                        );
+
+                        // 3) Hiển thị toast thông báo xin chào
+                        const welcomeMessage = `Xin chào ${recognizedFace.name}, biển số: ${recognizedFace.employee_id}, đang mở cổng`;
+                        showToast && showToast(welcomeMessage, "success", 5000);
+
+                        // 4) Kích hoạt relay sequence (module 1)
+                        try {
+                          console.log("🎛️ Kích hoạt relay sequence module 1");
+
+                          // Kiểm tra môi trường Electron trước khi thực hiện
+                          if (
+                            typeof window !== "undefined" &&
+                            window.electronAPI &&
+                            window.electronAPI.relayControl
+                          ) {
+                            // Chạy test sequence trên relay module 1 lần
+                            await relayService.testSequence(1, 1000);
+                            console.log(
+                              "✅ Đã kích hoạt relay sequence thành công"
+                            );
+
+                            // Toast thông báo relay đã kích hoạt
+                            showToast &&
+                              showToast(
+                                "🎛️ Đã kích hoạt cổng tự động",
+                                "info",
+                                3000
+                              );
+                          } else {
+                            console.warn(
+                              "⚠️ Relay control không khả dụng (không phải Electron environment)"
+                            );
+                            // Trong môi trường web browser, chỉ log thông báo
+                            showToast &&
+                              showToast(
+                                "⚠️ Relay control không khả dụng trong môi trường web",
+                                "warning",
+                                3000
+                              );
+                          }
+                        } catch (relayError) {
+                          console.error("❌ Lỗi kích hoạt relay:", relayError);
+                          showToast &&
+                            showToast(
+                              "❌ Lỗi kích hoạt cổng tự động",
+                              "error",
+                              3000
+                            );
+                        }
+                      } else {
+                        console.log(
+                          "❌ Không nhận diện được khuôn mặt hoặc format response không đúng"
+                        );
+                        showToast &&
+                          showToast(
+                            "Không nhận diện được khuôn mặt",
+                            "warning",
+                            2000
+                          );
+                      }
+                    } else {
+                      console.log(
+                        "❌ Face recognition service trả về lỗi hoặc không tìm thấy khuôn mặt"
+                      );
+                      showToast &&
+                        showToast(
+                          "Không nhận diện được khuôn mặt trong ảnh",
+                          "warning",
+                          2000
+                        );
+                    }
+                  } catch (faceRecognitionError) {
+                    console.error(
+                      "❌ Lỗi nhận diện khuôn mặt:",
+                      faceRecognitionError
+                    );
+                    showToast &&
+                      showToast(
+                        "Lỗi kết nối tới dịch vụ nhận diện khuôn mặt",
+                        "error",
+                        3000
+                      );
                   }
+                } else if (!vehicleOwnerInfo) {
+                  console.log(
+                    "ℹ️ Biển số không có trong database pm_nc0002:",
+                    finalLicensePlate
+                  );
+                  // Không hiển thị thông báo cho trường hợp này để tránh spam
                 } else {
-                  showToast && showToast("Không tìm thấy ảnh chủ xe để đối chiếu", "warning", 2000);
+                  console.log("⚠️ Không có ảnh khuôn mặt để xử lý");
                 }
               } catch (error) {
-                console.error("❌ Lỗi xác thực khuôn mặt:", error);
+                console.error("❌ Lỗi xử lý chấm công tự động:", error);
               }
             }, 50); // Giảm delay để responsive hơn
           }
@@ -2306,6 +2669,33 @@ const MainUI = () => {
             CHẤM CÔNG
           </button>
           <button
+            className={`toolbar-btn ${
+              autoFaceRecognitionEnabled ? "active" : ""
+            }`}
+            onClick={() => {
+              setAutoFaceRecognitionEnabled(!autoFaceRecognitionEnabled);
+              showToast &&
+                showToast(
+                  `Auto Face Recognition ${
+                    !autoFaceRecognitionEnabled ? "Bật" : "Tắt"
+                  }`,
+                  "info",
+                  2000
+                );
+            }}
+            title={`${
+              autoFaceRecognitionEnabled ? "Tắt" : "Bật"
+            } tự động nhận diện khuôn mặt`}
+            style={{
+              backgroundColor: autoFaceRecognitionEnabled
+                ? "#10b981"
+                : "#6b7280",
+              color: "white",
+            }}
+          >
+            {autoFaceRecognitionEnabled ? "🎯 AUTO ON" : "🎯 AUTO OFF"}
+          </button>
+          <button
             className="toolbar-btn settings-btn"
             onClick={openSystemSettings}
             title="Cài đặt hệ thống"
@@ -2334,6 +2724,28 @@ const MainUI = () => {
         >
           DANH SÁCH XE TRONG BÃI
         </button>
+
+        {/* Auto Face Recognition Status Indicator */}
+        {autoFaceRecognitionEnabled && (
+          <div
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+              color: "#10b981",
+              fontSize: "12px",
+              fontWeight: "bold",
+            }}
+          >
+            <span style={{ marginRight: "5px" }}>🎯</span>
+            <span>
+              AUTO MONITORING ({vehicleDatabase.length} vehicles)
+              {isProcessingFace && (
+                <span style={{ color: "#f59e0b" }}> • PROCESSING...</span>
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}

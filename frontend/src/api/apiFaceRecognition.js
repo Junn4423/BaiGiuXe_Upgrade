@@ -312,11 +312,35 @@ export async function resizeImage(base64Str, maxWidth = 800, maxHeight = 600) {
   });
 }
 
+/**
+ * Nhận diện khuôn mặt từ Blob
+ * @param {Blob} imageBlob - Image blob data
+ * @returns {Promise<Object>} Kết quả nhận diện
+ */
+export async function recognizeFace(imageBlob) {
+  try {
+    // Convert blob to File object
+    const imageFile = new File([imageBlob], "face_image.jpg", {
+      type: "image/jpeg",
+    });
+
+    return await recognizeFaceFromFile(imageFile);
+  } catch (error) {
+    console.error("Error recognizing face from blob:", error);
+    return {
+      success: false,
+      error: error.message,
+      faces: [],
+    };
+  }
+}
+
 // Export default object với tất cả functions
 export default {
   checkFaceServiceHealth,
   recognizeFaceFromBase64,
   recognizeFaceFromFile,
+  recognizeFace,
   registerFace,
   recognizeFaceFromCanvas,
   verifyFace,
