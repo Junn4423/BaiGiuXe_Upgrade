@@ -189,6 +189,14 @@ class RegisterResponse(BaseModel):
     message: str
     employee_id: Optional[str] = None
 
+class DeleteUserRequest(BaseModel):
+    employee_id: str
+
+class DeleteUserResponse(BaseModel):
+    success: bool
+    message: str
+    deleted_images: Optional[List[str]] = None
+
 ################################################################################
 # Helper functions
 ################################################################################
@@ -586,6 +594,111 @@ async def register_face(request: RegisterRequest):
             success=False,
             message=f"Lỗi: {str(e)}"
         )
+
+@app.delete("/user/{employee_id}", response_model=DeleteUserResponse)
+async def delete_user(employee_id: str):
+    """Delete a user and all related data"""
+    try:
+        db_session = SessionLocal()
+        
+        # Find user by employee_id
+        user = db_session.query(User).filter_by(employee_id=employee_id).first()
+        if not user:
+            db_session.close()
+            return DeleteUserResponse(
+                success=False,
+                message=f"Không tìm thấy nhân viên với mã: {employee_id}"
+            )
+        
+        user_name = user.name
+        deleted_images = []
+        
+        # Delete related attendance records first (to avoid foreign key constraint)
+        attendance_count = db_session.query(Attendance).filter_by(user_id=user.id).count()
+        if attendance_count > 0:
+            db_session.query(Attendance).filter_by(user_id=user.id).delete()
+            logger.info(f"Deleted {attendance_count} attendance records for user {employee_id}")
+        
+        # Delete face images from filesystem
+        try:
+            import glob
+            # Find all image files for this employee
+            image_pattern = os.path.join(UPLOAD_FOLDER, f"{employee_id}_*.jpg")
+            image_files = glob.glob(image_pattern)
+            
+            for image_path in image_files:
+                try:
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
+                        deleted_images.append(os.path.basename(image_path))
+                        logger.info(f"Deleted image file: {image_path}")
+                except Exception as e:
+                    logger.warning(f"Could not delete image file {image_path}: {str(e)}")
+        except Exception as e:
+            logger.warning(f"Error deleting face images for {employee_id}: {str(e)}")
+        
+        # Delete user from database
+        db_session.delete(user)
+        db_session.commit()
+        db_session.close()
+        
+        # Reload known faces to remove from memory
+        load_known_faces()
+        
+        logger.info(f"Successfully deleted user {user_name} (ID: {employee_id})")
+        
+        return DeleteUserResponse(
+            success=True,
+            message=f"Đã xóa thành công nhân viên {user_name} (ID: {employee_id})",
+            deleted_images=deleted_images
+        )
+        
+    except Exception as e:
+        logger.error(f"Error deleting user {employee_id}: {str(e)}", exc_info=True)
+        return DeleteUserResponse(
+            success=False,
+            message=f"Lỗi khi xóa nhân viên: {str(e)}"
+        )
+
+@app.post("/delete_user", response_model=DeleteUserResponse)
+async def delete_user_post(request: DeleteUserRequest):
+    """Delete a user and all related data (POST version for easier integration)"""
+    return await delete_user(request.employee_id)
+
+@app.get("/users", response_model=dict)
+async def list_users():
+    """List all users in the system"""
+    try:
+        db_session = SessionLocal()
+        users = db_session.query(User).all()
+        
+        user_list = []
+        for user in users:
+            user_list.append({
+                "id": user.id,
+                "name": user.name,
+                "employee_id": user.employee_id,
+                "department": user.department,
+                "position": user.position,
+                "created_at": user.created_at.isoformat() if user.created_at else None
+            })
+        
+        db_session.close()
+        
+        return {
+            "success": True,
+            "users": user_list,
+            "total": len(user_list)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error listing users: {str(e)}", exc_info=True)
+        return {
+            "success": False,
+            "error": str(e),
+            "users": [],
+            "total": 0
+        }
 
 ################################################################################
 # Main entry point

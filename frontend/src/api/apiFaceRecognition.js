@@ -46,7 +46,7 @@ export async function recognizeFaceFromBase64(imageBase64) {
     return {
       success: false,
       error: error.message,
-      faces: []
+      faces: [],
     };
   }
 }
@@ -77,7 +77,7 @@ export async function recognizeFaceFromFile(imageFile) {
     return {
       success: false,
       error: error.message,
-      faces: []
+      faces: [],
     };
   }
 }
@@ -132,7 +132,7 @@ export async function recognizeFaceFromCanvas(canvas) {
     return {
       success: false,
       error: error.message,
-      faces: []
+      faces: [],
     };
   }
 }
@@ -149,7 +149,12 @@ export async function verifyFace(captured, referencePath, tolerance = 0.45) {
     const formData = new FormData();
 
     if (captured instanceof Blob || captured instanceof File) {
-      const file = captured instanceof File ? captured : new File([captured], "captured.jpg", { type: captured.type || "image/jpeg" });
+      const file =
+        captured instanceof File
+          ? captured
+          : new File([captured], "captured.jpg", {
+              type: captured.type || "image/jpeg",
+            });
       formData.append("file", file);
     } else if (typeof captured === "string") {
       formData.append("image_base64", captured);
@@ -175,7 +180,12 @@ export async function verifyFace(captured, referencePath, tolerance = 0.45) {
     return await response.json();
   } catch (error) {
     console.error("Error verifying face:", error);
-    return { success: false, match: false, confidence: null, error: error.message };
+    return {
+      success: false,
+      match: false,
+      confidence: null,
+      error: error.message,
+    };
   }
 }
 
@@ -194,14 +204,71 @@ export async function getEmployeeInfo(employeeId) {
         employee_id: employeeId,
         name: "Unknown",
         department: "Unknown",
-        position: "Unknown"
-      }
+        position: "Unknown",
+      },
     };
   } catch (error) {
     console.error("Error getting employee info:", error);
     return {
       success: false,
-      error: error.message
+      error: error.message,
+    };
+  }
+}
+
+/**
+ * Xóa user khỏi hệ thống face recognition
+ * @param {string} employeeId - Mã nhân viên
+ * @returns {Promise<Object>} Kết quả xóa
+ */
+export async function deleteUser(employeeId) {
+  try {
+    const response = await fetch(`${FACE_SERVICE_URL}/delete_user`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        employee_id: employeeId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
+/**
+ * Lấy danh sách tất cả users trong hệ thống face recognition
+ * @returns {Promise<Object>} Danh sách users
+ */
+export async function listUsers() {
+  try {
+    const response = await fetch(`${FACE_SERVICE_URL}/users`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error listing users:", error);
+    return {
+      success: false,
+      error: error.message,
+      users: [],
+      total: 0,
     };
   }
 }
@@ -254,5 +321,7 @@ export default {
   recognizeFaceFromCanvas,
   verifyFace,
   getEmployeeInfo,
+  deleteUser,
+  listUsers,
   resizeImage,
 };

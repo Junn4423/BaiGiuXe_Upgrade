@@ -33,6 +33,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return await ipcRenderer.invoke("path-exists", pathToCheck);
   },
 
+  // Read image file as base64
+  readImageFile: async (filePath) => {
+    return await ipcRenderer.invoke("read-image-file", filePath);
+  },
+
   // USB Relay Control APIs
   relayControl: {
     // Connect to USB Relay

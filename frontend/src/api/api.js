@@ -679,6 +679,19 @@ async function isLocalStorageEnabled() {
   }
 }
 
+// Get configurable face image folder path
+function getFaceImageBasePath() {
+  let basePath = localStorage.getItem("image_storage_path");
+  if (
+    !basePath ||
+    basePath.includes("Documents") ||
+    basePath.includes("ParkingLotApp")
+  ) {
+    basePath = "C:/ParkingLot_Images";
+  }
+  return `${basePath}/NhanDien_khuonmat`;
+}
+
 async function saveToUserDefinedFolder(imageBlob, filename, prefix) {
   try {
     let basePath = localStorage.getItem("image_storage_path");
@@ -1027,15 +1040,15 @@ export async function uploadFaceImage(imageBlob, options = {}) {
 }
 
 /**
- * Upload ảnh khuôn mặt chủ phương tiện vào thư mục cố định
- * C:\\ParkingLot_Images\\NhanDien_khuonmat
+ * Upload ảnh khuôn mặt chủ phương tiện vào thư mục cấu hình
  * @param {Blob|File} imageBlob
  * @param {string} desiredFilename - Tên file mong muốn (tuỳ chọn)
  * @returns {Promise<{success:boolean, filename:string, fullPath:string}>}
  */
 export async function uploadOwnerFaceImage(imageBlob, desiredFilename = "") {
   try {
-    const baseFolder = "C:/ParkingLot_Images/NhanDien_khuonmat";
+    // Get configurable face image folder path
+    const baseFolder = getFaceImageBasePath();
 
     // Ensure Electron API available
     if (!(window.electronAPI && window.electronAPI.saveImage)) {
@@ -1170,6 +1183,106 @@ export async function getImageUrl(filename) {
     return ""; // Return empty string on failure
   } catch (error) {
     console.error(`💥 getImageUrl: Error loading image ${filename}:`, error);
+    return "";
+  }
+}
+
+/**
+ * Get face image URL from filename using Electron API first, fallback to server (for NhanDien_khuonmat folder)
+ * @param {string} filename - Face image filename stored in database
+ * @returns {Promise<string>} - Base64 data URL of the face image
+ */
+export async function getFaceImageUrl(filename) {
+  if (!filename) {
+    console.warn(`getFaceImageUrl: Empty filename provided`);
+    return "";
+  }
+
+  try {
+    // Extract filename if it's a full path
+    let actualFilename = filename;
+    if (filename.includes("/") || filename.includes("\\")) {
+      actualFilename = filename.split(/[/\\]/).pop();
+    }
+
+    console.log(`getFaceImageUrl: Looking for face image: ${actualFilename}`);
+
+    // Try Electron API first if available
+    if (window.electronAPI && window.electronAPI.readImageFile) {
+      try {
+        // Get configurable face image folder path
+        const faceImageFolder = getFaceImageBasePath();
+        const imagePath = `${faceImageFolder}/${actualFilename}`.replace(
+          /\//g,
+          "\\"
+        );
+
+        console.log(
+          `getFaceImageUrl: Attempting Electron read from: ${imagePath}`
+        );
+
+        // Check if file exists first
+        const fileExists = await window.electronAPI.pathExists(imagePath);
+        if (fileExists) {
+          const base64Data = await window.electronAPI.readImageFile(imagePath);
+          console.log(
+            `getFaceImageUrl: Successfully loaded via Electron: ${actualFilename}`
+          );
+          return `data:image/jpeg;base64,${base64Data}`;
+        } else {
+          console.log(
+            `getFaceImageUrl: File not found via Electron: ${imagePath}`
+          );
+        }
+      } catch (electronError) {
+        console.warn("getFaceImageUrl: Electron API failed:", electronError);
+      }
+    }
+
+    // Fallback to server API
+    console.log(
+      `getFaceImageUrl: Falling back to server API for: ${actualFilename}`
+    );
+
+    const baseUrl = url_api.replace("/index.php", "");
+    // Use get_image.php with face image path
+    const faceImagePath = `NhanDien_khuonmat/${actualFilename}`;
+    const apiUrl = `${baseUrl}/get_image.php?file=${encodeURIComponent(
+      faceImagePath
+    )}`;
+
+    console.log(`getFaceImageUrl: Making request to ${apiUrl}`);
+
+    const response = await fetch(apiUrl, {
+      method: "GET",
+    });
+
+    console.log(
+      `getFaceImageUrl: Response status ${response.status} for ${actualFilename}`
+    );
+
+    if (!response.ok) {
+      console.warn(
+        `getFaceImageUrl: HTTP ${response.status} for ${actualFilename}`
+      );
+      return "";
+    }
+
+    // Convert response to base64
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const mimeType = response.headers.get("content-type") || "image/jpeg";
+
+    console.log(
+      `getFaceImageUrl: Successfully loaded face image via server: ${actualFilename}`
+    );
+
+    return `data:${mimeType};base64,${base64}`;
+  } catch (error) {
+    console.error(
+      `getFaceImageUrl: Error loading face image ${filename}:`,
+      error
+    );
     return "";
   }
 }

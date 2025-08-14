@@ -9,9 +9,11 @@ import {
   xoaPhuongTien,
   layALLLoaiPhuongTien,
   getImageUrl,
+  getFaceImageUrl,
   registerFaceRecognition as registerFaceAPI,
   uploadOwnerFaceImage,
 } from "../../api/api";
+import faceAPI from "../../api/apiFaceRecognition";
 
 // Image Viewer Modal Component
 const ImageViewerModal = ({ imagePath, ownerName, onClose }) => {
@@ -31,28 +33,28 @@ const ImageViewerModal = ({ imagePath, ownerName, onClose }) => {
         setIsLoading(true);
         setError("");
 
-        // Try to get image URL using the API
-        const url = await getImageUrl(imagePath);
+        // Extract filename from path if it's a full path
+        let filename = imagePath;
+        if (imagePath.includes("/") || imagePath.includes("\\")) {
+          filename = imagePath.split(/[/\\]/).pop();
+        }
+
+        console.log(
+          `🔍 ImageViewerModal: Loading face image with filename: ${filename}`
+        );
+
+        // Use dedicated face image API for NhanDien_khuonmat folder
+        const url = await getFaceImageUrl(filename);
         if (url) {
           setImageUrl(url);
+          console.log(
+            `✅ ImageViewerModal: Successfully loaded face image from API`
+          );
         } else {
-          // Fallback to direct path construction for face recognition images
-          const basePath = "C:/ParkingLot_Images/NhanDien_khuonmat";
-          const fullPath = imagePath.includes(":/")
-            ? imagePath
-            : `${basePath}/${imagePath}`;
-
-          // Try to load the file using Electron API if available
-          if (window.electronAPI && window.electronAPI.readImageFile) {
-            try {
-              const base64 = await window.electronAPI.readImageFile(fullPath);
-              setImageUrl(`data:image/jpeg;base64,${base64}`);
-            } catch (electronError) {
-              setError(`Không thể tải ảnh: ${electronError.message}`);
-            }
-          } else {
-            setError("Không thể truy cập ảnh. API không khả dụng.");
-          }
+          setError("Không thể tải ảnh khuôn mặt từ server");
+          console.warn(
+            `❌ ImageViewerModal: Failed to load face image: ${filename}`
+          );
         }
       } catch (loadError) {
         console.error("Error loading image:", loadError);
@@ -394,10 +396,46 @@ const VehicleManagementDialog = ({ onClose }) => {
       try {
         setIsSubmitting(true);
         console.log("Deleting vehicle:", selectedVehicle.bienSo);
+
+        // 1. Xóa phương tiện từ database chính
         const result = await xoaPhuongTien(selectedVehicle.bienSo);
         console.log("Delete result:", result);
 
         if (result && result.success !== false) {
+          // 2. Xóa dữ liệu khuôn mặt từ face recognition service (nếu có)
+          try {
+            // Sử dụng biển số làm employee_id để xóa trong face service
+            const faceDeleteResult = await faceAPI.deleteUser(
+              selectedVehicle.bienSo
+            );
+            console.log("Face recognition delete result:", faceDeleteResult);
+
+            if (faceDeleteResult.success) {
+              console.log(
+                "Successfully deleted face data for:",
+                selectedVehicle.bienSo
+              );
+              if (
+                faceDeleteResult.deleted_images &&
+                faceDeleteResult.deleted_images.length > 0
+              ) {
+                console.log(
+                  "Deleted face images:",
+                  faceDeleteResult.deleted_images
+                );
+              }
+            } else {
+              console.warn(
+                "Could not delete face data:",
+                faceDeleteResult.message
+              );
+              // Không báo lỗi cho user vì dữ liệu chính đã xóa thành công
+            }
+          } catch (faceError) {
+            console.error("Error deleting face recognition data:", faceError);
+            // Không báo lỗi cho user vì dữ liệu chính đã xóa thành công
+          }
+
           alert("Xóa phương tiện thành công!");
           await loadData();
           clearForm();

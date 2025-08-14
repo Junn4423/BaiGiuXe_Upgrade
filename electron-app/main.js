@@ -818,6 +818,28 @@ ipcMain.handle("path-exists", async (event, pathToCheck) => {
   }
 });
 
+// IPC Handler for reading image file as base64
+ipcMain.handle("read-image-file", async (event, filePath) => {
+  try {
+    console.log(`📖 Reading image file: ${filePath}`);
+
+    // Check if file exists
+    await fs.access(filePath);
+
+    // Read file and convert to base64
+    const fileBuffer = await fs.readFile(filePath);
+    const base64Data = fileBuffer.toString("base64");
+
+    console.log(
+      `✅ Successfully read image file: ${filePath} (${fileBuffer.length} bytes)`
+    );
+    return base64Data;
+  } catch (error) {
+    console.error(`❌ Error reading image file ${filePath}:`, error);
+    throw new Error(`Cannot read image file: ${error.message}`);
+  }
+});
+
 // IPC Handler for choosing custom save directory
 ipcMain.handle("choose-save-directory", async () => {
   try {
