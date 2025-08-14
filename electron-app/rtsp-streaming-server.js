@@ -139,15 +139,17 @@ class RTSPStreamingServer {
   }
 
   start() {
-    // Create WebSocket server với cấu hình ultra-low latency
+    // Create WebSocket server
     this.wss = new WebSocket.Server({
       port: this.port,
-      perMessageDeflate: false, // Tắt compression để giảm latency
-      maxPayload: 1024 * 1024 * 5, // Giảm max payload xuống 5MB
-      backlog: 10, // Giới hạn connection queue
-      clientTracking: true, // Enable client tracking
-      verifyClient: false, // Skip verification để nhanh hơn
-      handleProtocols: false, // Skip protocol handling
+      perMessageDeflate: false, // Disable compression for lower latency
+      maxPayload: 1024 * 1024 * 5, // Reduced to 5MB for faster processing
+      clientTracking: true,
+      // Ultra low-latency WebSocket settings
+      handshakeTimeout: 5000, // 5 second handshake timeout
+      heartbeatInterval: 30000, // 30 second heartbeat
+      dropConnectionOnKeepaliveTimeout: true,
+      keepaliveGracePeriod: 5000,
     });
 
     console.log(`🚀 RTSP WebSocket server started on port ${this.port}`);
@@ -161,11 +163,6 @@ class RTSPStreamingServer {
       console.log(`🔗 RTSP URL: ${rtspUrl}`);
       console.log(`🔍 [DEBUG] Client count: ${this.wss.clients.size}`);
       console.log(`🔍 [DEBUG] Query params:`, query);
-
-      // Tối ưu WebSocket connection cho low latency
-      ws.binaryType = "arraybuffer";
-      ws._socket.setNoDelay(true); // Disable Nagle algorithm
-      ws._socket.setKeepAlive(true, 30000); // Keep connection alive
 
       if (!rtspUrl) {
         console.error("❌ No RTSP URL provided");
@@ -202,7 +199,7 @@ class RTSPStreamingServer {
       });
     });
 
-    // Setup heartbeat optimized for low latency - check more frequently but lighter
+    // Setup heartbeat to detect broken connections
     const heartbeat = setInterval(() => {
       this.wss.clients.forEach((ws) => {
         if (!ws.isAlive) {
@@ -212,42 +209,38 @@ class RTSPStreamingServer {
           return ws.terminate();
         }
         ws.isAlive = false;
-        // Use faster ping without payload
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.ping();
-        }
+        ws.ping();
       });
-    }, 15000); // Check every 15 seconds (more frequent for faster detection)
+    }, 30000); // Check every 30 seconds
 
-    // Setup stream health check - optimized for performance
+    // Setup stream health check with low latency monitoring
     const streamHealthCheck = setInterval(() => {
       for (const [rtspUrl, streamInfo] of this.activeStreams) {
+        const timeSinceStart = Date.now() - streamInfo.startTime;
         const timeSinceLastData = Date.now() - streamInfo.lastDataTime;
         const hasClients = streamInfo.clients.size > 0;
-        const isStuck = hasClients && timeSinceLastData > 20000; // Reduce stuck detection to 20s
+        const isStuck = hasClients && timeSinceLastData > 15000; // Reduced to 15s for faster recovery
 
         if (isStuck && !streamInfo.isRestarting) {
           console.log(
-            `🔧 Stream stuck for ${rtspUrl} (${Math.round(
+            `🔧 Stream appears stuck for ${rtspUrl} (${Math.round(
               timeSinceLastData / 1000
-            )}s), restarting...`
+            )}s since last data), restarting...`
           );
-          streamInfo.isRestarting = true;
           streamInfo.ffmpeg.kill("SIGTERM");
         }
 
-        // Less frequent stats logging for better performance
-        if (
-          hasClients &&
-          streamInfo.dataCount % 200 === 0 &&
-          streamInfo.dataCount > 0
-        ) {
+        // Log stream stats periodically (less frequent for performance)
+        if (hasClients && timeSinceStart % 180000 < 30000) {
+          // Every 3 minutes (within health check window)
           console.log(
-            `📊 Stream ${rtspUrl}: ${streamInfo.dataCount} chunks, ${streamInfo.clients.size} clients`
+            `📊 Stream stats for ${rtspUrl}: ${streamInfo.dataCount} chunks, ${
+              streamInfo.clients.size
+            } clients, ${Math.round(timeSinceStart / 1000)}s uptime`
           );
         }
       }
-    }, 30000); // Check every 30 seconds (reduced frequency)
+    }, 30000); // More frequent checks (30s) for better responsiveness
 
     this.wss.on("close", () => {
       clearInterval(heartbeat);
@@ -310,89 +303,89 @@ class RTSPStreamingServer {
         }
       }
 
-      // Ultra-low latency FFmpeg args optimized for license plate reading
+      // Ultra low-latency FFmpeg args optimized for real-time streaming
       const ffmpegArgs = [
-        // Input options - minimize input buffering and probing
+        // Input options - optimize for minimal buffering
+        "-fflags",
+        "nobuffer",
+        "-flags",
+        "low_delay",
         "-rtsp_transport",
         "tcp",
         "-rtsp_flags",
         "prefer_tcp",
-        "-fflags",
-        "nobuffer+flush_packets",
-        "-flags",
-        "low_delay",
         "-probesize",
-        "32768", // Reduce probe size for faster startup
+        "32",
         "-analyzeduration",
-        "100000", // Reduce analyze duration (100ms)
+        "0",
         "-max_delay",
-        "100000", // Max delay 100ms
+        "0",
         "-i",
         rtspUrl,
 
-        // Video processing - ultra-low latency optimized for license plates
+        // Video processing - ultra low latency settings
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast", // Fastest encoding
+        "ultrafast",
         "-tune",
-        "zerolatency", // Zero latency tuning
-        "-crf",
-        "23", // Constant Rate Factor for good quality
+        "zerolatency",
         "-pix_fmt",
         "yuv420p",
         "-profile:v",
-        "baseline", // Baseline profile for compatibility
+        "baseline",
         "-level",
         "3.1",
-        "-s",
-        "1280x720", // Higher resolution for better license plate reading
-        "-r",
-        "25", // Higher framerate for smoother motion
-        "-g",
-        "10", // Smaller GOP for lower latency (keyframe every 10 frames)
-        "-keyint_min",
-        "5", // Minimum keyframe interval
-        "-x264-params",
-        "sliced-threads=1:sync-lookahead=0:rc-lookahead=0:intra-refresh=1:bframes=0:ref=1:me=dia:subme=1:trellis=0",
-        "-an", // No audio
 
-        // Output options - optimized MP4 fragmented streaming
+        // Resolution and framerate - maintain quality for license plate reading
+        "-s",
+        "640x480",
+        "-r",
+        "20", // Increased framerate for smoother detection
+
+        // Bitrate settings - optimized for license plate clarity
+        "-b:v",
+        "800k", // Increased bitrate for better quality
+        "-maxrate",
+        "1000k",
+        "-bufsize",
+        "500k", // Reduced buffer size for lower latency
+
+        // GOP settings for minimal latency
+        "-g",
+        "20", // Reduced GOP size for faster keyframes
+        "-keyint_min",
+        "10",
+        "-x264-params",
+        "sliced-threads=0:sync-lookahead=0:rc-lookahead=0:bframes=0:ref=1:subme=1:me=dia:no-deblock=1:no-mbtree=1:aq-mode=0:weightp=0",
+
+        // No audio for faster processing
+        "-an",
+
+        // Output options - optimized for low latency streaming
         "-f",
         "mp4",
         "-movflags",
         "empty_moov+default_base_moof+frag_keyframe+dash+delay_moov",
         "-frag_duration",
-        "200000", // Fragment duration 200ms
+        "100000", // 100ms fragments
         "-min_frag_duration",
-        "100000", // Min fragment duration 100ms
-        "-reset_timestamps",
-        "1",
+        "100000",
         "-flush_packets",
         "1",
         "pipe:1",
       ];
 
-      console.log(
-        `🔧 FFmpeg ultra-low latency command: ${ffmpegPath} ${ffmpegArgs.join(
-          " "
-        )}`
-      );
-      console.log(`🔍 [DEBUG] Optimized for <500ms latency`);
-      console.log(
-        `🔍 [DEBUG] Resolution: 1280x720 @ 25fps for license plate reading`
-      );
+      console.log(`🔧 FFmpeg command: ${ffmpegPath} ${ffmpegArgs.join(" ")}`);
+      console.log(`🔍 [DEBUG] Spawning FFmpeg with:`);
       console.log(`🔍 [DEBUG] - Binary: ${ffmpegPath}`);
-      console.log(`🔍 [DEBUG] - Args count: ${ffmpegArgs.length}`);
+      console.log(
+        `🔍 [DEBUG] - Args: [${ffmpegArgs.slice(0, 10).join(", ")}...]`
+      );
+      console.log(`🔍 [DEBUG] - Working dir: ${process.cwd()}`);
 
       const ffmpeg = spawn(ffmpegPath, ffmpegArgs, {
         stdio: ["ignore", "pipe", "pipe"],
-        windowsHide: true, // Hide console window on Windows
-        detached: false, // Keep attached to parent process
-        env: {
-          ...process.env,
-          FFREPORT: "level=16", // Minimal FFmpeg logging for better performance
-        },
       });
 
       console.log(`🔍 [DEBUG] FFmpeg process spawned with PID: ${ffmpeg.pid}`);
@@ -410,45 +403,46 @@ class RTSPStreamingServer {
 
       this.activeStreams.set(rtspUrl, streamInfo);
 
-      // Handle FFmpeg stdout (video data) - optimized for ultra-low latency
+      // Handle FFmpeg stdout (video data) - optimized for minimal latency
       ffmpeg.stdout.on("data", (chunk) => {
         streamInfo.lastData = chunk;
         streamInfo.dataCount++;
         streamInfo.lastDataTime = Date.now();
+
+        // Immediate broadcast without buffering for ultra-low latency
+        const deadClients = [];
+
+        // Fast iteration over clients
+        for (const client of streamInfo.clients) {
+          if (client.readyState === WebSocket.OPEN) {
+            try {
+              // Send immediately without queuing
+              client.send(chunk, { binary: true, compress: false });
+            } catch (err) {
+              console.error("❌ Error sending data to client:", err);
+              deadClients.push(client);
+            }
+          } else {
+            deadClients.push(client);
+          }
+        }
+
+        // Remove dead clients in batch
+        if (deadClients.length > 0) {
+          deadClients.forEach((client) => streamInfo.clients.delete(client));
+          console.log(`🔍 [DEBUG] Removed ${deadClients.length} dead clients`);
+        }
 
         // Log data flow periodically and first few chunks
         if (streamInfo.dataCount <= 5) {
           console.log(
             `🔍 [DEBUG] Camera ${cameraId}: Received chunk ${streamInfo.dataCount}, size: ${chunk.length} bytes`
           );
-        } else if (streamInfo.dataCount % 150 === 0) {
-          // Less frequent logging for better performance
+        } else if (streamInfo.dataCount % 200 === 0) {
+          // Less frequent logging
           console.log(
             `📊 Camera ${cameraId}: ${streamInfo.dataCount} chunks sent to ${streamInfo.clients.size} clients`
           );
-        }
-
-        // Broadcast to all clients for this stream - immediate delivery
-        const deadClients = new Set();
-        streamInfo.clients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
-            try {
-              // Immediate send với buffering tối thiểu
-              client.send(chunk, { binary: true, compress: false, fin: true });
-            } catch (err) {
-              console.error("❌ Error sending data to client:", err);
-              deadClients.add(client);
-            }
-          } else {
-            // Mark dead clients for removal
-            deadClients.add(client);
-          }
-        });
-
-        // Remove dead clients in batch
-        if (deadClients.size > 0) {
-          console.log(`🔍 [DEBUG] Removing ${deadClients.size} dead clients`);
-          deadClients.forEach((client) => streamInfo.clients.delete(client));
         }
       });
 
