@@ -142,14 +142,18 @@ class RTSPStreamingServer {
     // Create WebSocket server
     this.wss = new WebSocket.Server({
       port: this.port,
-      perMessageDeflate: false, // Disable compression for lower latency
-      maxPayload: 1024 * 1024 * 5, // Reduced to 5MB for faster processing
+      perMessageDeflate: false, // Disable compression for lowest latency
+      maxPayload: 1024 * 1024 * 3, // Reduced to 3MB for faster processing
       clientTracking: true,
-      // Ultra low-latency WebSocket settings
-      handshakeTimeout: 5000, // 5 second handshake timeout
-      heartbeatInterval: 30000, // 30 second heartbeat
+      // Ultimate low-latency WebSocket settings
+      handshakeTimeout: 3000, // Reduced to 3 seconds
+      heartbeatInterval: 25000, // More frequent heartbeat
       dropConnectionOnKeepaliveTimeout: true,
-      keepaliveGracePeriod: 5000,
+      keepaliveGracePeriod: 3000, // Shorter grace period
+      // Additional performance optimizations
+      backlog: 100, // Larger connection backlog
+      verifyClient: false, // Skip verification for speed
+      noDelay: true, // TCP_NODELAY for immediate transmission
     });
 
     console.log(`🚀 RTSP WebSocket server started on port ${this.port}`);
@@ -303,76 +307,92 @@ class RTSPStreamingServer {
         }
       }
 
-      // Ultra low-latency FFmpeg args optimized for real-time streaming
+      // Fixed: Ultra low-latency + high quality for license plate reading
       const ffmpegArgs = [
-        // Input options - optimize for minimal buffering
+        // Input options - corrected minimum values
         "-fflags",
-        "nobuffer",
+        "nobuffer+fastseek+flush_packets",
         "-flags",
-        "low_delay",
+        "low_delay+global_header",
         "-rtsp_transport",
         "tcp",
         "-rtsp_flags",
         "prefer_tcp",
         "-probesize",
-        "32",
+        "32", // Fixed: minimum value is 32, not 16
         "-analyzeduration",
         "0",
         "-max_delay",
         "0",
+        "-thread_queue_size",
+        "512",
         "-i",
         rtspUrl,
 
-        // Video processing - ultra low latency settings
+        // Video processing - optimized for both speed and quality
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast",
+        "veryfast", // Good balance of speed and quality
         "-tune",
         "zerolatency",
         "-pix_fmt",
         "yuv420p",
         "-profile:v",
-        "baseline",
+        "main",
         "-level",
-        "3.1",
+        "4.0",
 
-        // Resolution and framerate - maintain quality for license plate reading
+        // Enhanced resolution and framerate for license plate clarity
         "-s",
-        "640x480",
+        "704x480",
         "-r",
-        "20", // Increased framerate for smoother detection
+        "25",
 
-        // Bitrate settings - optimized for license plate clarity
+        // Advanced bitrate settings - higher quality for OCR
         "-b:v",
-        "800k", // Increased bitrate for better quality
+        "1200k",
         "-maxrate",
-        "1000k",
+        "1500k",
         "-bufsize",
-        "500k", // Reduced buffer size for lower latency
+        "300k",
+        "-crf",
+        "18",
 
-        // GOP settings for minimal latency
+        // Advanced GOP and keyframe settings
         "-g",
-        "20", // Reduced GOP size for faster keyframes
+        "15",
         "-keyint_min",
-        "10",
-        "-x264-params",
-        "sliced-threads=0:sync-lookahead=0:rc-lookahead=0:bframes=0:ref=1:subme=1:me=dia:no-deblock=1:no-mbtree=1:aq-mode=0:weightp=0",
+        "5",
+        "-sc_threshold",
+        "0",
 
-        // No audio for faster processing
+        // Simplified x264 optimization (removed problematic params)
+        "-x264-params",
+        "sliced-threads=0:sync-lookahead=0:rc-lookahead=0:bframes=0:ref=1:subme=2:me=hex:no-mbtree=1:weightp=1:fast-pskip=1",
+
+        // Threading for parallel processing
+        "-threads",
+        "4",
+        "-thread_type",
+        "slice",
+
+        // No audio for maximum speed
         "-an",
 
-        // Output options - optimized for low latency streaming
+        // Enhanced output options for minimal latency streaming
         "-f",
         "mp4",
         "-movflags",
         "empty_moov+default_base_moof+frag_keyframe+dash+delay_moov",
         "-frag_duration",
-        "100000", // 100ms fragments
+        "66666",
         "-min_frag_duration",
-        "100000",
+        "66666",
         "-flush_packets",
         "1",
+        "-avoid_negative_ts",
+        "make_zero",
         "pipe:1",
       ];
 
@@ -403,21 +423,27 @@ class RTSPStreamingServer {
 
       this.activeStreams.set(rtspUrl, streamInfo);
 
-      // Handle FFmpeg stdout (video data) - optimized for minimal latency
+      // Enhanced FFmpeg stdout handling - zero-latency broadcasting with quality
       ffmpeg.stdout.on("data", (chunk) => {
         streamInfo.lastData = chunk;
         streamInfo.dataCount++;
         streamInfo.lastDataTime = Date.now();
 
-        // Immediate broadcast without buffering for ultra-low latency
+        // Priority-based immediate broadcast for ultra-low latency
         const deadClients = [];
+        const chunkBuffer = Buffer.from(chunk); // Create buffer once
 
-        // Fast iteration over clients
+        // Ultra-fast iteration with priority sending
         for (const client of streamInfo.clients) {
           if (client.readyState === WebSocket.OPEN) {
             try {
-              // Send immediately without queuing
-              client.send(chunk, { binary: true, compress: false });
+              // Immediate send with optimized options
+              client.send(chunkBuffer, {
+                binary: true,
+                compress: false,
+                fin: true, // Force immediate transmission
+                mask: false, // Server-side optimization
+              });
             } catch (err) {
               console.error("❌ Error sending data to client:", err);
               deadClients.push(client);
@@ -427,19 +453,19 @@ class RTSPStreamingServer {
           }
         }
 
-        // Remove dead clients in batch
+        // Batch cleanup for performance
         if (deadClients.length > 0) {
           deadClients.forEach((client) => streamInfo.clients.delete(client));
           console.log(`🔍 [DEBUG] Removed ${deadClients.length} dead clients`);
         }
 
-        // Log data flow periodically and first few chunks
-        if (streamInfo.dataCount <= 5) {
+        // Reduced logging frequency for performance
+        if (streamInfo.dataCount <= 3) {
           console.log(
             `🔍 [DEBUG] Camera ${cameraId}: Received chunk ${streamInfo.dataCount}, size: ${chunk.length} bytes`
           );
-        } else if (streamInfo.dataCount % 200 === 0) {
-          // Less frequent logging
+        } else if (streamInfo.dataCount % 300 === 0) {
+          // Even less frequent logging
           console.log(
             `📊 Camera ${cameraId}: ${streamInfo.dataCount} chunks sent to ${streamInfo.clients.size} clients`
           );
