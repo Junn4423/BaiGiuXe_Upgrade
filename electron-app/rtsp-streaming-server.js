@@ -217,15 +217,22 @@ class RTSPStreamingServer {
       });
     }, 30000); // Check every 30 seconds
 
-    // Setup stream health check with low latency monitoring
+    // Enhanced stream health monitoring with DTS/PTS error detection
     const streamHealthCheck = setInterval(() => {
       for (const [rtspUrl, streamInfo] of this.activeStreams) {
         const timeSinceStart = Date.now() - streamInfo.startTime;
         const timeSinceLastData = Date.now() - streamInfo.lastDataTime;
         const hasClients = streamInfo.clients.size > 0;
-        const isStuck = hasClients && timeSinceLastData > 15000; // Reduced to 15s for faster recovery
+        const isStuck = hasClients && timeSinceLastData > 10000; // 10s timeout
 
-        if (isStuck && !streamInfo.isRestarting) {
+        // Check for DTS/PTS errors
+        if (streamInfo.dtsErrors && streamInfo.dtsErrors > 10) {
+          console.log(
+            `💥 DTS/PTS errors detected for ${rtspUrl}, restarting stream...`
+          );
+          streamInfo.ffmpeg.kill("SIGTERM");
+          streamInfo.dtsErrors = 0; // Reset counter
+        } else if (isStuck && !streamInfo.isRestarting) {
           console.log(
             `🔧 Stream appears stuck for ${rtspUrl} (${Math.round(
               timeSinceLastData / 1000
@@ -234,17 +241,24 @@ class RTSPStreamingServer {
           streamInfo.ffmpeg.kill("SIGTERM");
         }
 
-        // Log stream stats periodically (less frequent for performance)
-        if (hasClients && timeSinceStart % 180000 < 30000) {
-          // Every 3 minutes (within health check window)
+        // Enhanced logging with health status
+        if (hasClients && timeSinceStart % 300000 < 30000) {
+          // Every 5 minutes
+          const health = isStuck
+            ? "STUCK"
+            : timeSinceLastData < 5000
+            ? "HEALTHY"
+            : "SLOW";
           console.log(
-            `📊 Stream stats for ${rtspUrl}: ${streamInfo.dataCount} chunks, ${
-              streamInfo.clients.size
-            } clients, ${Math.round(timeSinceStart / 1000)}s uptime`
+            `📊 Stream [${health}] for ${rtspUrl}: ${
+              streamInfo.dataCount
+            } chunks, ${streamInfo.clients.size} clients, ${Math.round(
+              timeSinceStart / 1000
+            )}s uptime`
           );
         }
       }
-    }, 30000); // More frequent checks (30s) for better responsiveness
+    }, 30000); // Check every 30 seconds
 
     this.wss.on("close", () => {
       clearInterval(heartbeat);
@@ -307,92 +321,94 @@ class RTSPStreamingServer {
         }
       }
 
-      // Fixed: Ultra low-latency + high quality for license plate reading
+      // Stable: Anti-corruption FFmpeg args for production streaming
       const ffmpegArgs = [
-        // Input options - corrected minimum values
+        // Input options - robust and stable
         "-fflags",
-        "nobuffer+fastseek+flush_packets",
+        "nobuffer+genpts+igndts", // Generate PTS and ignore bad DTS
         "-flags",
-        "low_delay+global_header",
+        "low_delay",
         "-rtsp_transport",
         "tcp",
         "-rtsp_flags",
         "prefer_tcp",
         "-probesize",
-        "32", // Fixed: minimum value is 32, not 16
+        "32",
         "-analyzeduration",
         "0",
         "-max_delay",
         "0",
         "-thread_queue_size",
         "512",
+        "-use_wallclock_as_timestamps",
+        "1", // Fix timestamp issues
         "-i",
         rtspUrl,
 
-        // Video processing - optimized for both speed and quality
+        // Video processing - stable and robust
         "-c:v",
         "libx264",
         "-preset",
-        "veryfast", // Good balance of speed and quality
+        "faster", // More stable than veryfast
         "-tune",
         "zerolatency",
         "-pix_fmt",
         "yuv420p",
         "-profile:v",
-        "main",
+        "baseline", // More compatible than main
         "-level",
-        "4.0",
+        "3.1",
 
-        // Enhanced resolution and framerate for license plate clarity
+        // Resolution and framerate - stable settings
         "-s",
-        "704x480",
+        "640x480", // Back to stable resolution
         "-r",
-        "25",
+        "20", // Reduced for stability
 
-        // Advanced bitrate settings - higher quality for OCR
+        // Conservative bitrate for stability
         "-b:v",
-        "1200k",
+        "800k",
         "-maxrate",
-        "1500k",
+        "1000k",
         "-bufsize",
-        "300k",
-        "-crf",
-        "18",
+        "400k", // Larger buffer for stability
 
-        // Advanced GOP and keyframe settings
+        // Conservative GOP settings
         "-g",
-        "15",
+        "20",
         "-keyint_min",
-        "5",
+        "10",
         "-sc_threshold",
-        "0",
+        "40", // Enable scene change detection for better timestamps
 
-        // Simplified x264 optimization (removed problematic params)
+        // Minimal x264 params to avoid conflicts
         "-x264-params",
-        "sliced-threads=0:sync-lookahead=0:rc-lookahead=0:bframes=0:ref=1:subme=2:me=hex:no-mbtree=1:weightp=1:fast-pskip=1",
+        "sliced-threads=0:sync-lookahead=0:bframes=0:ref=1",
 
-        // Threading for parallel processing
+        // Threading
         "-threads",
-        "4",
+        "2", // Reduced threads for stability
         "-thread_type",
         "slice",
 
         // No audio for maximum speed
         "-an",
 
-        // Enhanced output options for minimal latency streaming
+        // Stable output format
         "-f",
         "mp4",
         "-movflags",
-        "empty_moov+default_base_moof+frag_keyframe+dash+delay_moov",
+        "empty_moov+default_base_moof+frag_keyframe",
         "-frag_duration",
-        "66666",
+        "100000", // Back to 100ms for stability
         "-min_frag_duration",
-        "66666",
+        "100000",
         "-flush_packets",
         "1",
         "-avoid_negative_ts",
         "make_zero",
+        "-copyts", // Preserve timestamps
+        "-start_at_zero",
         "pipe:1",
       ];
 
@@ -419,6 +435,8 @@ class RTSPStreamingServer {
         isRestarting: false,
         dataCount: 0,
         lastDataTime: Date.now(),
+        dtsErrors: 0, // Track DTS/PTS errors
+        lastHealthCheck: Date.now(),
       };
 
       this.activeStreams.set(rtspUrl, streamInfo);
@@ -498,6 +516,18 @@ class RTSPStreamingServer {
 
         console.log(`📺 FFmpeg [${cameraId}]:`, error.trim());
 
+        // Enhanced DTS/PTS error detection and counting
+        if (error.includes("DTS") && error.includes("invalid dropping")) {
+          if (!streamInfo.dtsErrors) streamInfo.dtsErrors = 0;
+          streamInfo.dtsErrors++;
+          console.warn(
+            `⚠️ DTS/PTS error #${streamInfo.dtsErrors} for camera ${cameraId}`
+          );
+
+          // If too many DTS errors, the stream will be restarted by health check
+          return; // Don't spam logs with DTS errors
+        }
+
         // Check for critical errors that require restart
         if (
           error.includes("Connection refused") ||
@@ -510,6 +540,7 @@ class RTSPStreamingServer {
           error.includes("RTSP connection failed") ||
           error.includes("Protocol not found") ||
           error.includes("End of file") ||
+          error.includes("Conversion failed") ||
           (error.includes("Option") && error.includes("not found"))
         ) {
           console.error(

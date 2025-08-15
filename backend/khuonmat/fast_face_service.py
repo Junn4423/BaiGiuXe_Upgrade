@@ -61,15 +61,29 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
 # Add path for anti-spoofing
-sys.path.append(os.path.join(os.path.dirname(__file__), 'face_recognition_system'))
-sys.path.append(os.path.join(os.path.dirname(__file__), 'face_recognition_system/Silent-Face-Anti-Spoofing/src'))
+anti_spoofing_base = os.path.join(os.path.dirname(__file__), 'face_recognition_system')
+anti_spoofing_src = os.path.join(anti_spoofing_base, 'Silent-Face-Anti-Spoofing', 'src')
+
+sys.path.append(anti_spoofing_base)
+sys.path.append(anti_spoofing_src)
+sys.path.append(os.path.join(anti_spoofing_src, 'model_lib'))
+sys.path.append(os.path.join(anti_spoofing_src, 'data_io'))
 
 # Import các module cần thiết
 try:
     from face_recognition_system.models.face_recognition_module import FaceRecognition
     from face_recognition_system.models.erp_integration import erp_attendance
-except ImportError:
-    logger.warning("Could not import face_recognition_module or erp_integration")
+    
+    # Import Silent-Face-Anti-Spoofing modules
+    from anti_spoof_predict import AntiSpoofPredict
+    from generate_patches import CropImage
+    from utility import parse_model_name
+    ANTI_SPOOFING_AVAILABLE = True
+    logger.info("Silent-Face-Anti-Spoofing modules loaded successfully")
+except ImportError as e:
+    logger.warning(f"Could not import face_recognition_module, erp_integration, or anti-spoofing: {e}")
+    ANTI_SPOOFING_AVAILABLE = False
+    
     # Create mock objects for development
     class FaceRecognition:
         def __init__(self):
@@ -136,6 +150,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Initialize face recognition
 face_recognizer = FaceRecognition()
 
+# Initialize Anti-Spoofing system
+anti_spoof_predictor = None
+crop_image = None
+
 ################################################################################
 # FastAPI application
 ################################################################################
@@ -168,6 +186,8 @@ class FaceDetection(BaseModel):
     bbox: Optional[FaceLocation] = None
     department: Optional[str] = None
     position: Optional[str] = None
+    anti_spoofing_passed: Optional[bool] = None
+    anti_spoofing_confidence: Optional[float] = None
 
 class RecognizeRequest(BaseModel):
     image: str  # Base64 encoded image
@@ -253,6 +273,105 @@ def decode_base64_image(image_base64: str) -> np.ndarray:
     
     return image
 
+def perform_anti_spoofing_check(image: np.ndarray, face_location: tuple) -> tuple:
+    """
+    Perform anti-spoofing check on detected face
+    
+    Args:
+        image: Input image as numpy array
+        face_location: Tuple (top, right, bottom, left) of face location
+        
+    Returns:
+        Tuple (is_real: bool, confidence: float, error: str)
+    """
+    global anti_spoof_predictor, crop_image
+    
+    if not ANTI_SPOOFING_AVAILABLE or anti_spoof_predictor is None:
+        logger.warning("Anti-spoofing not available, allowing face")
+        return True, 1.0, None  # Default to real if anti-spoofing unavailable
+    
+    try:
+        top, right, bottom, left = face_location
+        
+        # Convert face_recognition format to standard bbox format
+        # face_recognition: (top, right, bottom, left)
+        # anti-spoofing expects: (x, y, w, h)
+        x, y, w, h = left, top, right - left, bottom - top
+        bbox = [x, y, w, h]
+        
+        # Crop face for anti-spoofing analysis
+        # CropImage.crop(org_img, bbox, scale, out_w, out_h, crop=True)
+        scale = 2.7  # Default scale from anti-spoofing examples
+        out_w, out_h = 80, 80  # Default output size for model
+        cropped_face = crop_image.crop(image, bbox, scale, out_w, out_h)
+        
+        if cropped_face is None:
+            return False, 0.0, "Failed to crop face for anti-spoofing"
+        
+        # Predict if face is real or fake
+        prediction = anti_spoof_predictor.predict(cropped_face)
+        
+        # prediction returns: (label, confidence)
+        # label: 1 for real, 0 for fake
+        # confidence: probability score
+        label = prediction[0] 
+        confidence = prediction[1]
+        
+        is_real = label == 1
+        
+        logger.info(f"Anti-spoofing result: {'REAL' if is_real else 'FAKE'} (confidence: {confidence:.4f})")
+        
+        return is_real, confidence, None
+        
+    except Exception as e:
+        logger.error(f"Error in anti-spoofing check: {str(e)}")
+        return False, 0.0, str(e)
+
+def init_anti_spoofing():
+    """Initialize anti-spoofing predictor and crop image utility"""
+    global anti_spoof_predictor, crop_image
+    
+    if not ANTI_SPOOFING_AVAILABLE:
+        logger.warning("Anti-spoofing modules not available")
+        return False
+    
+    try:
+        # Initialize crop image utility
+        crop_image = CropImage()
+        
+        # Initialize anti-spoofing predictor
+        device_id = 0  # Use GPU if available, otherwise CPU
+        anti_spoof_predictor = AntiSpoofPredict(device_id)
+        
+        # Load pre-trained model
+        model_dir = os.path.join(os.path.dirname(__file__), 'face_recognition_system', 'Silent-Face-Anti-Spoofing', 'resources', 'anti_spoof_models')
+        
+        # Try to find available model files
+        model_files = []
+        if os.path.exists(model_dir):
+            for file in os.listdir(model_dir):
+                if file.endswith('.pth'):
+                    model_files.append(os.path.join(model_dir, file))
+        
+        if not model_files:
+            logger.warning("No anti-spoofing model files found, using default detection")
+            return False
+        
+        # Use the first available model
+        model_path = model_files[0]
+        logger.info(f"Loading anti-spoofing model: {model_path}")
+        
+        anti_spoof_predictor._load_model(model_path)
+        
+        logger.info("Anti-spoofing initialized successfully")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to initialize anti-spoofing: {str(e)}")
+        anti_spoof_predictor = None
+        crop_image = None
+        return False
+
 def perform_auto_attendance(user_id: int, employee_id: str, db_session):
     """Automatically perform attendance check for a user"""
     try:
@@ -328,8 +447,29 @@ def health_check():
         "status": "ok", 
         "service": "fast_face_recognition",
         "timestamp": datetime.now().isoformat(),
-        "known_faces": len(face_recognizer.known_face_encodings)
+        "known_faces": len(face_recognizer.known_face_encodings),
+        "anti_spoofing_available": ANTI_SPOOFING_AVAILABLE,
+        "anti_spoofing_initialized": anti_spoof_predictor is not None
     }
+
+@app.post("/init-anti-spoofing")
+def initialize_anti_spoofing_endpoint():
+    """Initialize anti-spoofing system"""
+    try:
+        success = init_anti_spoofing()
+        return {
+            "success": success,
+            "message": "Anti-spoofing initialized successfully" if success else "Failed to initialize anti-spoofing",
+            "available": ANTI_SPOOFING_AVAILABLE,
+            "initialized": anti_spoof_predictor is not None
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Error initializing anti-spoofing: {str(e)}",
+            "available": ANTI_SPOOFING_AVAILABLE,
+            "initialized": False
+        }
 
 @app.post("/recognize", response_model=RecognizeResponse)
 async def recognize_face(file: Optional[UploadFile] = File(None), image_base64: Optional[str] = Form(None)):
@@ -364,6 +504,31 @@ async def recognize_face(file: Optional[UploadFile] = File(None), image_base64: 
         db_session = SessionLocal()
         
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            # Perform anti-spoofing check first
+            face_location = (top, right, bottom, left)
+            is_real, spoof_confidence, spoof_error = perform_anti_spoofing_check(image, face_location)
+            
+            if not is_real:
+                # Add fake face to results with special marking
+                faces.append({
+                    "name": "FAKE_FACE",
+                    "confidence": 0.0,
+                    "location": {"top": top, "right": right, "bottom": bottom, "left": left},
+                    "user_id": None,
+                    "employee_id": None,
+                    "department": None,
+                    "position": None,
+                    "anti_spoofing": {
+                        "is_real": False,
+                        "confidence": spoof_confidence,
+                        "error": spoof_error
+                    }
+                })
+                logger.warning(f"Anti-spoofing detected FAKE face at location {face_location}")
+                continue  # Skip face recognition for fake faces
+            
+            logger.info(f"Anti-spoofing passed: REAL face (confidence: {spoof_confidence:.4f})")
+            
             # Compare with known faces
             if len(face_recognizer.known_face_encodings) == 0:
                 name = "Unknown"
@@ -405,7 +570,9 @@ async def recognize_face(file: Optional[UploadFile] = File(None), image_base64: 
                                     h=bottom-top
                                 ),
                                 department=user.department,
-                                position=user.position
+                                position=user.position,
+                                anti_spoofing_passed=True,
+                                anti_spoofing_confidence=spoof_confidence
                             ))
                         else:
                             name = "Unknown"
@@ -429,7 +596,9 @@ async def recognize_face(file: Optional[UploadFile] = File(None), image_base64: 
                         y=top,
                         w=right-left,
                         h=bottom-top
-                    )
+                    ),
+                    anti_spoofing_passed=True,
+                    anti_spoofing_confidence=spoof_confidence
                 ))
         
         db_session.close()
@@ -442,7 +611,7 @@ async def recognize_face(file: Optional[UploadFile] = File(None), image_base64: 
 class VerifyResponse(BaseModel):
     success: bool
     match: bool
-    confidence: float | None = None
+    confidence: Optional[float] = None
     error: Optional[str] = None
 
 @app.post("/verify", response_model=VerifyResponse)

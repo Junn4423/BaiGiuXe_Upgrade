@@ -27,6 +27,11 @@ const RTSPPlayer = ({
   const maxReconnectAttempts = 3;
   const mountedRef = useRef(true);
 
+  // Anti-browser-suspension protection
+  const lastActivityRef = useRef(Date.now());
+  const visibilityStateRef = useRef(true);
+  const suspensionRecoveryRef = useRef(null);
+
   // ====== Realtime ALPR detection overlay ======
   const overlayCanvasRef = useRef(null);
   const lastDetectionsRef = useRef([]);
@@ -44,6 +49,59 @@ const RTSPPlayer = ({
     stableRtspUrl.current = rtspUrl;
     stableCameraId.current = cameraId;
   }, [rtspUrl, cameraId]);
+
+  // Browser tab suspension protection
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      const wasVisible = visibilityStateRef.current;
+      visibilityStateRef.current = isVisible;
+
+      if (!wasVisible && isVisible) {
+        // Tab became visible again - check for stream recovery
+        console.log(
+          `📱 Tab visible again for camera ${cameraId}, checking stream health...`
+        );
+        const timeSinceActivity = Date.now() - lastActivityRef.current;
+
+        if (timeSinceActivity > 10000) {
+          // 10s without activity
+          console.log(
+            `🔄 Stream may be stale, triggering recovery for camera ${cameraId}`
+          );
+          // Gentle recovery without full reconnect
+          if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+            // Send a ping to test connection
+            try {
+              wsRef.current.ping?.();
+            } catch (e) {
+              // If ping fails, trigger reconnect
+              wsRef.current.close();
+            }
+          }
+        }
+      }
+    };
+
+    const handleFocus = () => {
+      visibilityStateRef.current = true;
+      lastActivityRef.current = Date.now();
+    };
+
+    const handleBlur = () => {
+      visibilityStateRef.current = false;
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, [cameraId]);
 
   // Memoize callbacks để tránh re-render
   const handleConnected = useCallback(() => {
@@ -167,6 +225,9 @@ const RTSPPlayer = ({
         ws.onmessage = (ev) => {
           if (!mountedRef.current || !initializingRef.current) return;
 
+          // Update activity tracking
+          lastActivityRef.current = Date.now();
+
           try {
             const chunk = new Uint8Array(ev.data);
             const sourceBuffer = sourceBufferRef.current;
@@ -178,32 +239,49 @@ const RTSPPlayer = ({
               return;
             }
 
-            // Phase 2: Zero-latency processing with quality preservation
+            // Robust processing with error recovery
             if (queueRef.current.length > 1) {
-              // Drop only the oldest chunk to maintain quality while reducing latency
+              // Drop oldest chunk to maintain low latency
               queueRef.current = queueRef.current.slice(-1);
             }
 
             // Queue the chunk
             queueRef.current.push(chunk);
 
-            // Immediate processing for zero-latency
+            // Process immediately if possible
             if (!sourceBuffer.updating && queueRef.current.length > 0) {
               try {
                 const nextChunk = queueRef.current.shift();
                 sourceBuffer.appendBuffer(nextChunk);
               } catch (err) {
-                // Clear queue on error but preserve latest chunk
-                if (queueRef.current.length > 1) {
-                  const latest = queueRef.current[queueRef.current.length - 1];
-                  queueRef.current = [latest];
-                } else {
-                  queueRef.current = [];
+                console.warn(
+                  `SourceBuffer append error for camera ${cameraId}:`,
+                  err
+                );
+                // Clear queue and try recovery
+                queueRef.current = [];
+
+                // If MediaSource is corrupted, trigger reconnect
+                if (
+                  err.name === "QuotaExceededError" ||
+                  err.name === "InvalidStateError"
+                ) {
+                  console.log(
+                    `🔄 SourceBuffer error, triggering recovery for camera ${cameraId}`
+                  );
+                  setTimeout(() => {
+                    if (mountedRef.current) {
+                      wsRef.current?.close();
+                    }
+                  }, 1000);
                 }
               }
             }
           } catch (err) {
-            // Silent error handling for performance
+            console.error(
+              `Message processing error for camera ${cameraId}:`,
+              err
+            );
           }
         };
       } catch (err) {
@@ -279,7 +357,7 @@ const RTSPPlayer = ({
 
             isInitializedRef.current = true; // Use ref instead of state
 
-            // Enhanced buffer updates - optimized for ultra-low latency + quality
+            // Robust buffer management with proactive cleanup
             const handleUpdateEnd = () => {
               if (!mountedRef.current || !initializingRef.current) return;
 
@@ -288,26 +366,29 @@ const RTSPPlayer = ({
                 setHasVideoData(true);
               }
 
-              // Enhanced queue processing for zero-latency
+              // Process queue with error handling
               let processed = 0;
               while (
                 queueRef.current.length > 0 &&
                 !sourceBuffer.updating &&
-                processed < 3
+                processed < 2 // Reduced for stability
               ) {
                 try {
                   const nextChunk = queueRef.current.shift();
                   sourceBuffer.appendBuffer(nextChunk);
                   processed++;
-                  break; // Process one at a time to prevent blocking
+                  break; // Process one at a time
                 } catch (err) {
-                  // Clear queue on error to prevent blocking
+                  console.warn(
+                    `Buffer append error for camera ${cameraId}:`,
+                    err
+                  );
                   queueRef.current = [];
                   break;
                 }
               }
 
-              // Advanced buffer management for minimal latency
+              // Proactive buffer management for stability
               try {
                 if (sourceBuffer.buffered.length > 0) {
                   const bufferedEnd = sourceBuffer.buffered.end(
@@ -316,29 +397,35 @@ const RTSPPlayer = ({
                   const video = videoRef.current;
                   if (video && video.currentTime > 0) {
                     const bufferSize = bufferedEnd - video.currentTime;
+                    const totalBuffered =
+                      bufferedEnd - sourceBuffer.buffered.start(0);
 
-                    // More aggressive buffer cleanup for <0.5s latency
-                    if (
-                      bufferSize > 1.0 &&
-                      sourceBuffer.buffered.start(0) < video.currentTime - 0.5
+                    // Aggressive cleanup for memory management
+                    if (totalBuffered > 30.0) {
+                      // If total buffer > 30s
+                      console.log(
+                        `🧹 Large buffer cleanup for camera ${cameraId}`
+                      );
+                      sourceBuffer.remove(
+                        sourceBuffer.buffered.start(0),
+                        video.currentTime - 2.0
+                      );
+                    } else if (
+                      bufferSize > 3.0 && // If ahead buffer > 3s
+                      sourceBuffer.buffered.start(0) < video.currentTime - 5.0
                     ) {
                       sourceBuffer.remove(
                         sourceBuffer.buffered.start(0),
-                        video.currentTime - 0.2
-                      );
-                    }
-
-                    // Quality preservation: ensure minimum buffer for smooth playback
-                    if (bufferSize < 0.1 && queueRef.current.length === 0) {
-                      // Brief pause to allow buffer buildup if needed
-                      console.log(
-                        "📊 Buffer low, allowing brief buildup for quality"
+                        video.currentTime - 1.0
                       );
                     }
                   }
                 }
               } catch (err) {
-                // Ignore buffer management errors
+                console.warn(
+                  `Buffer cleanup error for camera ${cameraId}:`,
+                  err
+                );
               }
             };
 
