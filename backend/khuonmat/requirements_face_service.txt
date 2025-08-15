@@ -1,6 +1,3 @@
-# Requirements for Fast Face Recognition Service
-# Install with: pip install -r requirements_face_service.txt
-
 # FastAPI framework
 fastapi
 uvicorn[standard]
