@@ -696,18 +696,22 @@ const RTSPPlayer = ({
         } catch (captureError) {
           console.error("🚫 Frame capture error:", captureError.message);
         }
-      }
-
-      // Draw overlay bounding boxes
+      } // Draw overlay bounding boxes - ONLY for license plate cameras
       ctx.clearRect(0, 0, overlay.width, overlay.height);
-      ctx.strokeStyle = "lime";
-      ctx.lineWidth = 2;
-      lastDetectionsRef.current.forEach((det) => {
-        if (det && det.bbox) {
-          const { x, y, w, h } = det.bbox;
-          ctx.strokeRect(x, y, w, h);
-        }
-      });
+
+      // Check if this is a license plate camera (only show bbox for plate cameras)
+      const isLicensePlateCamera = cameraType && cameraType.includes("plate");
+
+      if (isLicensePlateCamera) {
+        ctx.strokeStyle = "lime";
+        ctx.lineWidth = 2;
+        lastDetectionsRef.current.forEach((det) => {
+          if (det && det.bbox) {
+            const { x, y, w, h } = det.bbox;
+            ctx.strokeRect(x, y, w, h);
+          }
+        });
+      }
     };
 
     requestAnimationFrame(step);
