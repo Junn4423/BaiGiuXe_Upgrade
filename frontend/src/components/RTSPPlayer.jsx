@@ -649,7 +649,6 @@ const RTSPPlayer = ({
                     `HTTP ${response.status}: ${response.statusText}`
                   );
                 }
-
                 const data = await response.json();
                 console.log("🎯 ALPR Detection result:", data); // Debug log
 
@@ -663,7 +662,18 @@ const RTSPPlayer = ({
                       "confidence:",
                       bestPlate.confidence
                     ); // Debug log
-                    onPlateDetected(bestPlate.plate || "");
+
+                    // Only display plate text if confidence >= 90%
+                    if (bestPlate.confidence >= 0.9) {
+                      onPlateDetected(bestPlate.plate || "");
+                    } else {
+                      console.log(
+                        `⚠️ Plate confidence too low: ${(
+                          bestPlate.confidence * 100
+                        ).toFixed(1)}% < 90%`
+                      );
+                      onPlateDetected(""); // Clear displayed plate text
+                    }
                   } else {
                     console.log("⚠️ No plates detected in frame"); // Debug log
                   }

@@ -386,7 +386,6 @@ const MainUI = () => {
         recognizeResult.faces.length > 0
       ) {
         const recognizedFace = recognizeResult.faces[0];
-
         if (
           recognizedFace.name &&
           recognizedFace.employee_id &&
@@ -394,26 +393,54 @@ const MainUI = () => {
         ) {
           console.log("✅ Face recognized:", recognizedFace);
 
-          // Show welcome toast
-          const welcomeMessage = `Xin chào ${recognizedFace.name}, biển số: ${recognizedFace.employee_id}, đang mở cổng`;
-          showToast && showToast(welcomeMessage, "success", 5000);
+          // ✅ KIỂM TRA CHÍNH XÁC: Biển số detected phải khớp với employee_id
+          const faceEmployeeId = (recognizedFace.employee_id || "")
+            .toUpperCase()
+            .trim();
+          const detectedPlate = (licensePlate || "").toUpperCase().trim();
 
-          // Trigger relay sequence
-          try {
-            if (
-              typeof window !== "undefined" &&
-              window.electronAPI &&
-              window.electronAPI.relayControl
-            ) {
-              await relayService.testSequence(1, 1000);
-              console.log("✅ Relay sequence activated");
-              showToast &&
-                showToast("🎛️ Đã kích hoạt cổng tự động", "info", 3000);
-            } else {
-              console.warn("⚠️ Relay control not available");
+          if (faceEmployeeId === detectedPlate) {
+            console.log(
+              "✅ PERFECT MATCH: Face employee_id matches detected plate:",
+              {
+                detectedPlate: detectedPlate,
+                faceEmployeeId: faceEmployeeId,
+                ownerName: recognizedFace.name,
+                confidence: recognizedFace.confidence,
+              }
+            );
+
+            // Show welcome toast
+            const welcomeMessage = `Xin chào ${recognizedFace.name}, biển số: ${recognizedFace.employee_id}, đang mở cổng`;
+            showToast && showToast(welcomeMessage, "success", 5000);
+
+            // Trigger relay sequence
+            try {
+              if (
+                typeof window !== "undefined" &&
+                window.electronAPI &&
+                window.electronAPI.relayControl
+              ) {
+                await relayService.testSequence(1, 1000);
+                console.log("✅ Relay sequence activated");
+                showToast &&
+                  showToast("🎛️ Đã kích hoạt cổng tự động", "info", 3000);
+              } else {
+                console.warn("⚠️ Relay control not available");
+              }
+            } catch (relayError) {
+              console.error("❌ Relay error:", relayError);
             }
-          } catch (relayError) {
-            console.error("❌ Relay error:", relayError);
+          } else {
+            console.log(
+              `❌ PLATE MISMATCH: Detected plate "${detectedPlate}" != Face employee_id "${faceEmployeeId}" - SKIPPING gate activation`
+            );
+            showToast &&
+              showToast(
+                `Biển số không khớp với khuôn mặt: ${detectedPlate} != ${faceEmployeeId}`,
+                "warning",
+                4000
+              );
           }
         }
       } else {
@@ -448,7 +475,6 @@ const MainUI = () => {
       vehicleDatabase.length,
       "vehicles"
     );
-
     plateMonitoringRef.current = setInterval(() => {
       if (!autoFaceRecognitionEnabled || processingFaceRef.current) return;
 
@@ -463,20 +489,39 @@ const MainUI = () => {
         // Skip if same as last processed plate (avoid duplicate processing)
         if (currentPlate === lastProcessedPlate) return;
 
-        // Check if plate exists in database
+        // ✅ STRICT CHECK: Only process if plate exists EXACTLY in database
         const vehicleInfo = checkLicensePlateInDatabase(currentPlate);
         if (vehicleInfo) {
-          console.log(`🎯 License plate ${currentPlate} found in database:`, {
-            owner: vehicleInfo.tenChuXe || vehicleInfo.lv003,
-            type: vehicleInfo.maLoaiPT || vehicleInfo.lv002,
-          });
-          setLastProcessedPlate(currentPlate);
-          processFaceRecognition(currentPlate, vehicleInfo);
+          // ✅ EXACT MATCH: Verify the plate matches exactly
+          const registeredPlate = (
+            vehicleInfo.bienSo ||
+            vehicleInfo.lv001 ||
+            ""
+          ).toUpperCase();
+          const detectedPlate = currentPlate.toUpperCase();
+
+          if (registeredPlate === detectedPlate) {
+            console.log(
+              `🎯 EXACT MATCH: License plate ${currentPlate} found in database:`,
+              {
+                owner: vehicleInfo.tenChuXe || vehicleInfo.lv003,
+                type: vehicleInfo.maLoaiPT || vehicleInfo.lv002,
+                registeredPlate: registeredPlate,
+              }
+            );
+            setLastProcessedPlate(currentPlate);
+            processFaceRecognition(currentPlate, vehicleInfo);
+          } else {
+            console.log(
+              `⚠️ PLATE MISMATCH: Detected "${detectedPlate}" but registered "${registeredPlate}" - SKIPPING`
+            );
+            setLastProcessedPlate(currentPlate);
+          }
         } else {
           // Only log once per plate to avoid spam
           if (currentPlate !== lastProcessedPlate) {
             console.log(
-              `ℹ️ License plate ${currentPlate} not found in database`
+              `ℹ️ License plate ${currentPlate} not found in database - SKIPPING face recognition`
             );
             setLastProcessedPlate(currentPlate);
           }
@@ -1152,16 +1197,25 @@ const MainUI = () => {
             // Chạy chấm công bất đồng bộ để không chặn UI
             setTimeout(async () => {
               try {
-                // 1) Kiểm tra biển số có trong pm_nc0002
+                // 1) Kiểm tra biển số có trong pm_nc0002 - CHÍNH XÁC
                 let vehicleOwnerInfo = null;
                 try {
                   const vehicleList = await layDanhSachPhuongTien();
+
+                  // ✅ STRICT MATCH: Tìm xe với biển số chính xác 100%
                   const matchedVehicle = Array.isArray(vehicleList)
-                    ? vehicleList.find(
-                        (v) =>
-                          (v.bienSo || "").toUpperCase() ===
-                          (finalLicensePlate || "").toUpperCase()
-                      )
+                    ? vehicleList.find((v) => {
+                        const registeredPlate = (v.bienSo || v.lv001 || "")
+                          .toUpperCase()
+                          .trim();
+                        const detectedPlate = (finalLicensePlate || "")
+                          .toUpperCase()
+                          .trim();
+                        return (
+                          registeredPlate === detectedPlate &&
+                          registeredPlate !== ""
+                        );
+                      })
                     : null;
 
                   if (matchedVehicle) {
@@ -1176,17 +1230,26 @@ const MainUI = () => {
                         matchedVehicle.maLoaiPT || matchedVehicle.lv002,
                     };
                     console.log(
-                      "🎯 Tìm thấy xe trong pm_nc0002:",
-                      vehicleOwnerInfo
+                      "🎯 EXACT MATCH: Tìm thấy xe trong pm_nc0002 với biển số chính xác:",
+                      {
+                        detected: finalLicensePlate,
+                        registered: vehicleOwnerInfo.licensePlate,
+                        owner: vehicleOwnerInfo.ownerName,
+                      }
+                    );
+                  } else {
+                    console.log(
+                      `❌ KHÔNG TÌM THẤY: Biển số "${finalLicensePlate}" không có trong database pm_nc0002 - BỎ QUA nhận diện khuôn mặt`
                     );
                   }
                 } catch (e) {
                   console.warn("Không tải được danh sách pm_nc0002:", e);
                 }
 
+                // ✅ CHỈ XỬ LÝ KHI CÓ ĐÚNG BIỂN SỐ VÀ ẢNH KHUÔN MẶT
                 if (vehicleOwnerInfo && faceImage?.blob) {
                   console.log(
-                    "🔍 Bắt đầu nhận diện khuôn mặt cho biển số:",
+                    "🔍 Bắt đầu nhận diện khuôn mặt cho biển số đã xác thực:",
                     finalLicensePlate
                   );
 
@@ -1203,63 +1266,94 @@ const MainUI = () => {
                     ) {
                       const recognizedFace = recognizeResult.faces[0];
 
-                      // Kiểm tra format response đúng như yêu cầu
+                      // ✅ KIỂM TRA CHÍNH XÁC: Biển số nhận dạng phải khớp với employee_id
                       if (
                         recognizedFace.name &&
                         recognizedFace.employee_id &&
                         recognizedFace.confidence
                       ) {
-                        console.log(
-                          "✅ Nhận diện khuôn mặt thành công:",
-                          recognizedFace
-                        );
+                        const faceEmployeeId = (
+                          recognizedFace.employee_id || ""
+                        )
+                          .toUpperCase()
+                          .trim();
+                        const detectedPlate = (finalLicensePlate || "")
+                          .toUpperCase()
+                          .trim();
 
-                        // 3) Hiển thị toast thông báo xin chào
-                        const welcomeMessage = `Xin chào ${recognizedFace.name}, biển số: ${recognizedFace.employee_id}, đang mở cổng`;
-                        showToast && showToast(welcomeMessage, "success", 5000);
+                        // ✅ RÀNG BUỘC CHẶT CHẼ: employee_id phải khớp với biển số detected
+                        if (faceEmployeeId === detectedPlate) {
+                          console.log(
+                            "✅ MATCH HOÀN HẢO: Nhận diện khuôn mặt và biển số khớp:",
+                            {
+                              detectedPlate: detectedPlate,
+                              faceEmployeeId: faceEmployeeId,
+                              ownerName: recognizedFace.name,
+                              confidence: recognizedFace.confidence,
+                            }
+                          );
 
-                        // 4) Kích hoạt relay sequence (module 1)
-                        try {
-                          console.log("🎛️ Kích hoạt relay sequence module 1");
+                          // 3) Hiển thị toast thông báo xin chào
+                          const welcomeMessage = `Xin chào ${recognizedFace.name}, biển số: ${recognizedFace.employee_id}, đang mở cổng`;
+                          showToast &&
+                            showToast(welcomeMessage, "success", 5000);
 
-                          // Kiểm tra môi trường Electron trước khi thực hiện
-                          if (
-                            typeof window !== "undefined" &&
-                            window.electronAPI &&
-                            window.electronAPI.relayControl
-                          ) {
-                            // Chạy test sequence trên relay module 1 lần
-                            await relayService.testSequence(1, 1000);
-                            console.log(
-                              "✅ Đã kích hoạt relay sequence thành công"
-                            );
+                          // 4) Kích hoạt relay sequence (module 1)
+                          try {
+                            console.log("🎛️ Kích hoạt relay sequence module 1");
 
-                            // Toast thông báo relay đã kích hoạt
-                            showToast &&
-                              showToast(
-                                "🎛️ Đã kích hoạt cổng tự động",
-                                "info",
-                                3000
+                            // Kiểm tra môi trường Electron trước khi thực hiện
+                            if (
+                              typeof window !== "undefined" &&
+                              window.electronAPI &&
+                              window.electronAPI.relayControl
+                            ) {
+                              // Chạy test sequence trên relay module 1 lần
+                              await relayService.testSequence(1, 1000);
+                              console.log(
+                                "✅ Đã kích hoạt relay sequence thành công"
                               );
-                          } else {
-                            console.warn(
-                              "⚠️ Relay control không khả dụng (không phải Electron environment)"
+
+                              // Toast thông báo relay đã kích hoạt
+                              showToast &&
+                                showToast(
+                                  "🎛️ Đã kích hoạt cổng tự động",
+                                  "info",
+                                  3000
+                                );
+                            } else {
+                              console.warn(
+                                "⚠️ Relay control không khả dụng (không phải Electron environment)"
+                              );
+                              // Trong môi trường web browser, chỉ log thông báo
+                              showToast &&
+                                showToast(
+                                  "⚠️ Relay control không khả dụng trong môi trường web",
+                                  "warning",
+                                  3000
+                                );
+                            }
+                          } catch (relayError) {
+                            console.error(
+                              "❌ Lỗi kích hoạt relay:",
+                              relayError
                             );
-                            // Trong môi trường web browser, chỉ log thông báo
                             showToast &&
                               showToast(
-                                "⚠️ Relay control không khả dụng trong môi trường web",
-                                "warning",
+                                "❌ Lỗi kích hoạt cổng tự động",
+                                "error",
                                 3000
                               );
                           }
-                        } catch (relayError) {
-                          console.error("❌ Lỗi kích hoạt relay:", relayError);
+                        } else {
+                          console.log(
+                            `❌ BIỂN SỐ KHÔNG KHỚP: Detected plate "${detectedPlate}" != Face employee_id "${faceEmployeeId}" - BỎ QUA mở cổng`
+                          );
                           showToast &&
                             showToast(
-                              "❌ Lỗi kích hoạt cổng tự động",
-                              "error",
-                              3000
+                              `Biển số không khớp với khuôn mặt đã đăng ký: ${detectedPlate} != ${faceEmployeeId}`,
+                              "warning",
+                              4000
                             );
                         }
                       } else {
@@ -1299,7 +1393,8 @@ const MainUI = () => {
                 } else if (!vehicleOwnerInfo) {
                   console.log(
                     "ℹ️ Biển số không có trong database pm_nc0002:",
-                    finalLicensePlate
+                    finalLicensePlate,
+                    "- BỎ QUA nhận diện khuôn mặt"
                   );
                   // Không hiển thị thông báo cho trường hợp này để tránh spam
                 } else {
@@ -1355,7 +1450,12 @@ const MainUI = () => {
                   }
                 }
 
-                if (recognizedLicensePlate && cameraComponentRef.current) {
+                // Only display plate text if confidence >= 90%
+                if (
+                  recognizedLicensePlate &&
+                  confidence >= 0.9 &&
+                  cameraComponentRef.current
+                ) {
                   const direction = actualMode === "vao" ? "in" : "out";
                   cameraComponentRef.current.updateLicensePlateDisplay(
                     recognizedLicensePlate,
@@ -1376,6 +1476,24 @@ const MainUI = () => {
                     "success",
                     3000
                   );
+                } else if (recognizedLicensePlate && confidence < 0.9) {
+                  // License plate detected but confidence too low
+                  if (vehicleInfoComponentRef.current) {
+                    const confidencePercent = (confidence * 100).toFixed(1);
+                    vehicleInfoComponentRef.current.updateCardReaderStatus(
+                      `ĐỘ TIN CẬY THẤP: ${recognizedLicensePlate} (${confidencePercent}%)`,
+                      "#f59e0b"
+                    );
+                  }
+                  showToast(
+                    `Độ tin cậy biển số thấp: ${recognizedLicensePlate} (${(
+                      confidence * 100
+                    ).toFixed(1)}% < 90%)`,
+                    "warning",
+                    4000
+                  );
+                  // Clear the displayed plate text since confidence is too low
+                  recognizedLicensePlate = null;
                 } else {
                   if (vehicleInfoComponentRef.current) {
                     vehicleInfoComponentRef.current.updateCardReaderStatus(
