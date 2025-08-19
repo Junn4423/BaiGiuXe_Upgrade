@@ -1,6 +1,0 @@
-PROCESS CREATE WORK CALENDAR
-Delete old calandar and create new calandar
-Timesheetcode
-Create Calandar
-Create calendar successfull!
-ContractLaborID

@@ -1,9 +1,0 @@
-BÁO CÁO CÔNG VIỆC
-Loại báo cáo
-Ngày bắt đầu
-Ngày kết thúc
-Báo cáo
-Quay lại
-1.Báo cáo tổng hợp
-2.Báo cáo chi tiết
-3.Báo cáo quản trị

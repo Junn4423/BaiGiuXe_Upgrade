@@ -585,6 +585,54 @@ switch ($vtable) {
                 break;
 
             /* --------------------------------------------------
+             * Revenue Statistics - Thống kê doanh thu cơ bản
+             * --------------------------------------------------*/
+            case "revenueByDate":
+                $vOutput = $pm_statistics->GET_REVENUE_BY_DATE();
+                break;
+            case "revenueByWeek":
+                $vOutput = $pm_statistics->GET_REVENUE_BY_WEEK();
+                break;
+            case "revenueByMonth":
+                $vOutput = $pm_statistics->GET_REVENUE_BY_MONTH();
+                break;
+            case "revenueByYear":
+                $vOutput = $pm_statistics->GET_REVENUE_BY_YEAR();
+                break;
+            case "revenueLastDays":
+                $vOutput = $pm_statistics->GET_REVENUE_LAST_DAYS();
+                break;
+            case "revenueLastMonths":
+                $vOutput = $pm_statistics->GET_REVENUE_LAST_MONTHS();
+                break;
+
+            /* --------------------------------------------------
+             * Vehicle Count Statistics - Thống kê lượng xe
+             * --------------------------------------------------*/
+            case "vehicleCountByDate":
+                $vOutput = $pm_statistics->GET_VEHICLE_COUNT_BY_DATE();
+                break;
+            case "vehicleCountByHour":
+                $vOutput = $pm_statistics->GET_VEHICLE_COUNT_BY_HOUR();
+                break;
+            case "vehicleCountByMonth":
+                $vOutput = $pm_statistics->GET_VEHICLE_COUNT_BY_MONTH();
+                break;
+
+            /* --------------------------------------------------
+             * Parking Analytics - Phân tích bãi đỗ
+             * --------------------------------------------------*/
+            case "averageParkingTime":
+                $vOutput = $pm_statistics->GET_AVERAGE_PARKING_TIME();
+                break;
+            case "currentOccupancyRate":
+                $vOutput = $pm_statistics->GET_CURRENT_OCCUPANCY_RATE();
+                break;
+            case "historicalOccupancyRate":
+                $vOutput = $pm_statistics->GET_HISTORICAL_OCCUPANCY_RATE();
+                break;
+
+            /* --------------------------------------------------
              * 4. Thống kê tổng quan hệ thống (systemOverview)
              * --------------------------------------------------*/
             case "systemOverview":
@@ -669,6 +717,125 @@ switch ($vtable) {
              * --------------------------------------------------*/
             case "errorAnalysis":
                 $vOutput = $pm_statistics->GET_ERROR_ANALYSIS();
+                break;
+
+            /* --------------------------------------------------
+             * 13. Báo cáo ca làm việc (shiftReport)
+             * --------------------------------------------------*/
+            case "shiftReport":
+                $vOutput = $pm_statistics->GET_SHIFT_REPORT();
+                break;
+
+            /* --------------------------------------------------
+             * 14. Chi tiết giao dịch (transactionDetails)
+             * --------------------------------------------------*/
+            case "transactionDetails":
+                $vOutput = $pm_statistics->GET_TRANSACTION_DETAILS();
+                break;
+
+            /* --------------------------------------------------
+             * 15. Báo cáo sự cố & khiếu nại (incidentReports)
+             * --------------------------------------------------*/
+            case "incidentReports":
+                $vOutput = $pm_statistics->GET_INCIDENT_REPORTS();
+                break;
+
+            /* --------------------------------------------------
+             * 16. Log thiết bị (deviceLogs)
+             * --------------------------------------------------*/
+            case "deviceLogs":
+                $vOutput = $pm_statistics->GET_DEVICE_LOGS();
+                break;
+
+            /* --------------------------------------------------
+             * 17. Doanh thu theo loại xe (revenueByVehicleType)
+             * --------------------------------------------------*/
+            case "revenueByVehicleType":
+                $vOutput = $pm_statistics->GET_REVENUE_BY_VEHICLE_TYPE();
+                break;
+
+            /* --------------------------------------------------
+             * 18. Doanh thu theo chính sách giá (revenueByPricingPolicy)
+             * --------------------------------------------------*/
+            case "revenueByPricingPolicy":
+                $vOutput = $pm_statistics->GET_REVENUE_BY_PRICING_POLICY();
+                break;
+
+            /* --------------------------------------------------
+             * 19. Xe quá hạn (overdueVehicles)
+             * --------------------------------------------------*/
+            case "overdueVehicles":
+                $vOutput = $pm_statistics->GET_OVERDUE_VEHICLES();
+                break;
+
+            /* --------------------------------------------------
+             * 20. Top biển số thường xuyên (topFrequentPlates)
+             * --------------------------------------------------*/
+            case "topFrequentPlates":
+                $vOutput = $pm_statistics->GET_TOP_FREQUENT_PLATES();
+                break;
+
+            /* --------------------------------------------------
+             * 21. Chi tiết thẻ RFID (rfidCardDetails)
+             * --------------------------------------------------*/
+            case "rfidCardDetails":
+                $vOutput = $pm_statistics->GET_RFID_CARD_DETAILS();
+                break;
+
+            /* --------------------------------------------------
+             * 22. Thống kê barrier/cổng (barrierStatistics)
+             * --------------------------------------------------*/
+            case "barrierStatistics":
+                $vOutput = $pm_statistics->GET_BARRIER_STATISTICS();
+                break;
+
+            /* --------------------------------------------------
+             * 23. Chi tiết chỗ đỗ (parkingSpotDetails)
+             * --------------------------------------------------*/
+            case "parkingSpotDetails":
+                $vOutput = $pm_statistics->GET_PARKING_SPOT_DETAILS();
+                break;
+
+            /* --------------------------------------------------
+             * 24. Phân tích thời gian gửi xe (parkingTimeAnalysis)
+             * --------------------------------------------------*/
+            case "parkingTimeAnalysis":
+                $vOutput = $pm_statistics->GET_PARKING_TIME_ANALYSIS();
+                break;
+
+            /* --------------------------------------------------
+             * 25. Phân tích giờ cao điểm (peakHoursAnalysis)
+             * --------------------------------------------------*/
+            case "peakHoursAnalysis":
+                $vOutput = $pm_statistics->GET_PEAK_HOURS_ANALYSIS();
+                break;
+
+            /* --------------------------------------------------
+             * 26. Log hệ thống (systemLogs)
+             * --------------------------------------------------*/
+            case "systemLogs":
+                $vOutput = $pm_statistics->GET_SYSTEM_LOGS();
+                break;
+
+            /* --------------------------------------------------
+             * 27. So sánh doanh thu giữa các kỳ (revenueComparison)
+             * --------------------------------------------------*/
+            case "revenueComparison":
+                $vOutput = $pm_statistics->GET_REVENUE_COMPARISON();
+                break;
+
+            /* --------------------------------------------------
+             * 28. So sánh lượng xe giữa khu vực (zoneComparison)
+             * --------------------------------------------------*/
+            case "zoneComparison":
+                $vOutput = $pm_statistics->GET_ZONE_COMPARISON();
+                break;
+
+            /* --------------------------------------------------
+             * 29. Phân tích xu hướng theo thời gian (trendAnalysis)
+             * --------------------------------------------------*/
+            case "trendAnalysis":
+                $vOutput = $pm_statistics->GET_TREND_ANALYSIS();
                 break;
 
             default:

@@ -530,3 +530,363 @@
 .statistics-body::-webkit-scrollbar-thumb:hover {
   background: #2a4a7c;
 }
+
+/* Comprehensive Statistics Styles */
+.comprehensive-statistics {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c315c;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1c315c;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.stats-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.stats-table-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats-table-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1c315c;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stats-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.stats-table td:first-child {
+  color: #64748b;
+  font-weight: 500;
+  width: 60%;
+}
+
+.stats-table td:last-child {
+  color: #1c315c;
+  font-weight: 600;
+  text-align: right;
+}
+
+.stats-table tr:last-child td {
+  border-bottom: none;
+}
+
+.stats-table tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Text color utilities */
+.text-success {
+  color: #10b981 !important;
+}
+
+.text-danger {
+  color: #ef4444 !important;
+}
+
+.text-warning {
+  color: #f59e0b !important;
+}
+
+/* Detailed Tables */
+.detailed-tables {
+  margin-top: 32px;
+}
+
+.detailed-tables h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c315c;
+  margin-bottom: 20px;
+}
+
+.detail-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.detail-table-card h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1c315c;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.detail-table thead {
+  background-color: #f8fafc;
+}
+
+.detail-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #1c315c;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.detail-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+}
+
+.detail-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.detail-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Responsive adjustments for tables */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .stats-table-card {
+    padding: 12px;
+  }
+  
+  .detail-table-card {
+    padding: 16px;
+  }
+  
+  .detail-table {
+    font-size: 12px;
+  }
+  
+  .detail-table th,
+  .detail-table td {
+    padding: 8px 12px;
+  }
+  
+  .stats-table td {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .comprehensive-statistics {
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+  
+  .section-title {
+    font-size: 16px;
+  }
+  
+  .stats-table-card h4 {
+    font-size: 14px;
+  }
+  
+  .detail-table-card h5 {
+    font-size: 14px;
+  }
+  
+  .detail-table {
+    font-size: 11px;
+  }
+  
+  .detail-table th,
+  .detail-table td {
+    padding: 6px 8px;
+  }
+}
+
+/* Additional styles for tab-specific content */
+.table-container {
+  margin: 20px 0;
+}
+
+.table-container h3 {
+  margin-bottom: 15px;
+  color: #1c315c;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.statistics-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #000000; /* Force black text */
+}
+
+.statistics-table th {
+  background: linear-gradient(135deg, #1c315c 0%, #2a4a7c 100%);
+  color: white;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.statistics-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13px;
+  color: #000000; /* Force black text */
+  background-color: white; /* Force white background */
+}
+
+.statistics-table tr:hover {
+  background-color: #f8fafc !important;
+}
+
+.statistics-table tr:hover td {
+  color: #000000 !important; /* Force black text on hover */
+}
+
+.statistics-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status indicators */
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-ok {
+  background-color: #d1fae5;
+  color: #065f46 !important;
+}
+
+.status-warning {
+  background-color: #fef3c7;
+  color: #92400e !important;
+}
+
+.status-error {
+  background-color: #fee2e2;
+  color: #991b1b !important;
+}
+
+/* Trend indicators */
+.trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.trend-up {
+  color: #059669 !important;
+}
+
+.trend-down {
+  color: #dc2626 !important;
+}
+
+.trend-stable {
+  color: #6b7280 !important;
+}
+
+/* No data state */
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280 !important;
+  background-color: white;
+}
+
+.no-data p {
+  font-style: italic;
+  margin: 0;
+  color: #6b7280 !important;
+}
+
+/* Force black text throughout the page */
+.statistics-container {
+  color: #000000;
+}
+
+.statistics-container * {
+  color: #000000 !important;
+}
+
+/* Override any white text that might be showing */
+.statistics-container .stat-value,
+.statistics-container .stat-label,
+.statistics-container .info-content,
+.statistics-container .info-row,
+.statistics-container p,
+.statistics-container span,
+.statistics-container div {
+  color: #000000 !important;
+}
+
+/* Ensure stat cards have proper colors */
+.stat-card .stat-value {
+  color: #1c315c !important;
+  font-weight: bold;
+}
+
+.stat-card .stat-label {
+  color: #6b7280 !important;
+}
+
+.stat-change {
+  color: #6b7280 !important;
+}
+
+/* Ensure table headers remain white on dark background */
+.statistics-table th,
+.statistics-header,
+.statistics-title,
+.statistics-close-btn {
+  color: white !important;
+}

@@ -3877,3 +3877,645 @@ export async function registerFaceRecognition(
     throw error;
   }
 }
+
+// ==================== STATISTICS API FUNCTIONS ====================
+// Tất cả các API functions cho hệ thống thống kê bãi xe
+
+// -------------------- Revenue Statistics (Thống kê doanh thu) --------------------
+
+/**
+ * Lấy doanh thu theo ngày
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getRevenueByDate(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "revenueByDate",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy doanh thu theo tuần
+ * @param {string} fromDate - Ngày bắt đầu tuần (YYYY-MM-DD)
+ */
+export async function getRevenueByWeek(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "revenueByWeek",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy doanh thu theo tháng
+ * @param {string} fromDate - Ngày bắt đầu tháng (YYYY-MM-DD)
+ */
+export async function getRevenueByMonth(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "revenueByMonth",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy doanh thu theo năm
+ * @param {string} fromDate - Ngày bắt đầu năm (YYYY-MM-DD)
+ */
+export async function getRevenueByYear(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "revenueByYear",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy doanh thu N ngày gần nhất
+ * @param {number} limit - Số ngày gần nhất (mặc định 7)
+ */
+export async function getRevenueLastDays(limit = 7) {
+  const payload = {
+    table: "statistics",
+    func: "revenueLastDays",
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy doanh thu N tháng gần nhất
+ * @param {number} limit - Số tháng gần nhất (mặc định 6)
+ */
+export async function getRevenueLastMonths(limit = 6) {
+  const payload = {
+    table: "statistics",
+    func: "revenueLastMonths",
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy doanh thu theo loại thẻ RFID
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getRevenueByCardType(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "revenueByCardType",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy doanh thu theo loại xe
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getRevenueByVehicleType(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "revenueByVehicleType",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy doanh thu theo chính sách giá
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getRevenueByPricingPolicy(
+  fromDate = null,
+  toDate = null
+) {
+  const payload = {
+    table: "statistics",
+    func: "revenueByPricingPolicy",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * So sánh doanh thu giữa các kỳ
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getRevenueComparison(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "revenueComparison",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+// -------------------- Vehicle Count Statistics (Thống kê lượng xe) --------------------
+
+/**
+ * Lấy số lượng xe theo ngày
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getVehicleCountByDate(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "vehicleCountByDate",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy số lượng xe theo giờ
+ * @param {string} fromDate - Ngày cần thống kê (YYYY-MM-DD)
+ */
+export async function getVehicleCountByHour(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "vehicleCountByHour",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy số lượng xe theo tháng
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getVehicleCountByMonth(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "vehicleCountByMonth",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy danh sách xe quá hạn thanh toán
+ * @param {number} limit - Số lượng tối đa trả về (mặc định 50)
+ */
+export async function getOverdueVehicles(limit = 50) {
+  const payload = {
+    table: "statistics",
+    func: "overdueVehicles",
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy top biển số sử dụng thường xuyên
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ * @param {number} limit - Số lượng top (mặc định 20)
+ */
+export async function getTopFrequentPlates(
+  fromDate = null,
+  toDate = null,
+  limit = 20
+) {
+  const payload = {
+    table: "statistics",
+    func: "topFrequentPlates",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+// -------------------- Parking Analytics (Phân tích bãi đỗ) --------------------
+
+/**
+ * Lấy thời gian đỗ xe trung bình
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getAverageParkingTime(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "averageParkingTime",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy tỷ lệ lấp đầy hiện tại
+ */
+export async function getCurrentOccupancyRate() {
+  const payload = {
+    table: "statistics",
+    func: "currentOccupancyRate",
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy tỷ lệ lấp đầy theo lịch sử
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getHistoricalOccupancyRate(
+  fromDate = null,
+  toDate = null
+) {
+  const payload = {
+    table: "statistics",
+    func: "historicalOccupancyRate",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy danh sách xe đang trong bãi
+ */
+export async function getVehiclesInParking() {
+  const payload = {
+    table: "statistics",
+    func: "vehiclesInParking",
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy chi tiết các chỗ đỗ xe
+ * @param {string} fromDate - Ngày cần thống kê (YYYY-MM-DD)
+ */
+export async function getParkingSpotDetails(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "parkingSpotDetails",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Phân tích thời gian đỗ xe chi tiết
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getParkingTimeAnalysis(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "parkingTimeAnalysis",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Phân tích giờ cao điểm
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getPeakHoursAnalysis(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "peakHoursAnalysis",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+// -------------------- System Overview (Tổng quan hệ thống) --------------------
+
+/**
+ * Lấy tổng quan hệ thống
+ */
+export async function getSystemOverview() {
+  const payload = {
+    table: "statistics",
+    func: "systemOverview",
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy thống kê hiệu suất camera
+ * @param {string} fromDate - Ngày cần thống kê (YYYY-MM-DD)
+ */
+export async function getCameraPerformance(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "cameraPerformance",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy thống kê hoạt động barrier/cổng
+ * @param {string} fromDate - Ngày cần thống kê (YYYY-MM-DD)
+ */
+export async function getBarrierStatistics(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "barrierStatistics",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Phân tích lỗi hệ thống
+ * @param {string} fromDate - Ngày cần thống kê (YYYY-MM-DD)
+ */
+export async function getErrorAnalysis(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "errorAnalysis",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+// -------------------- Zone Statistics (Thống kê khu vực) --------------------
+
+/**
+ * Lấy thống kê theo khu vực
+ * @param {string} fromDate - Ngày cần thống kê (YYYY-MM-DD)
+ */
+export async function getZoneStatistics(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "zoneStatistics",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * So sánh lượng xe giữa các khu vực
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getZoneComparison(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "zoneComparison",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy thống kê hoạt động nhân viên
+ * @param {string} fromDate - Ngày cần thống kê (YYYY-MM-DD)
+ */
+export async function getEmployeeActivity(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "employeeActivity",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+// -------------------- RFID Card Statistics (Thống kê thẻ RFID) --------------------
+
+/**
+ * Lấy top thẻ RFID sử dụng nhiều nhất
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ * @param {number} limit - Số lượng top (mặc định 10)
+ */
+export async function getTopCards(fromDate = null, toDate = null, limit = 10) {
+  const payload = {
+    table: "statistics",
+    func: "topCards",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy chi tiết thẻ RFID
+ * @param {string} fromDate - Ngày cần thống kê (YYYY-MM-DD)
+ */
+export async function getRfidCardDetails(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "rfidCardDetails",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+// -------------------- Reports (Báo cáo) --------------------
+
+/**
+ * Lấy báo cáo ca làm việc
+ * @param {string} fromDate - Ngày cần báo cáo (YYYY-MM-DD)
+ */
+export async function getShiftReport(fromDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "shiftReport",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy chi tiết giao dịch
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ * @param {number} limit - Số lượng tối đa (mặc định 50)
+ */
+export async function getTransactionDetails(
+  fromDate = null,
+  toDate = null,
+  limit = 50
+) {
+  const payload = {
+    table: "statistics",
+    func: "transactionDetails",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy báo cáo sự cố và khiếu nại
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getIncidentReports(fromDate = null, toDate = null) {
+  const payload = {
+    table: "statistics",
+    func: "incidentReports",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    toDate: toDate || new Date().toISOString().split("T")[0],
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy log hoạt động thiết bị
+ * @param {string} fromDate - Ngày cần lấy log (YYYY-MM-DD)
+ * @param {number} limit - Số lượng tối đa (mặc định 100)
+ */
+export async function getDeviceLogs(fromDate = null, limit = 100) {
+  const payload = {
+    table: "statistics",
+    func: "deviceLogs",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy log hệ thống
+ * @param {string} fromDate - Ngày cần lấy log (YYYY-MM-DD)
+ * @param {number} limit - Số lượng tối đa (mặc định 100)
+ */
+export async function getSystemLogs(fromDate = null, limit = 100) {
+  const payload = {
+    table: "statistics",
+    func: "systemLogs",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+// -------------------- Trend Analysis (Phân tích xu hướng) --------------------
+
+/**
+ * Phân tích xu hướng theo thời gian
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {number} limit - Số ngày phân tích (mặc định 30)
+ */
+export async function getTrendAnalysis(fromDate = null, limit = 30) {
+  const payload = {
+    table: "statistics",
+    func: "trendAnalysis",
+    fromDate: fromDate || new Date().toISOString().split("T")[0],
+    limit: limit,
+  };
+  return callApiWithAuth(payload);
+}
+
+// -------------------- Utility Functions (Hàm tiện ích) --------------------
+
+/**
+ * Gọi API thống kê tùy chỉnh
+ * @param {string} functionName - Tên function trong pm_statistics.php
+ * @param {Object} params - Các tham số bổ sung
+ */
+export async function callCustomStatistics(functionName, params = {}) {
+  const payload = {
+    table: "statistics",
+    func: functionName,
+    ...params,
+  };
+  return callApiWithAuth(payload);
+}
+
+/**
+ * Lấy tất cả thống kê cơ bản trong một lần gọi
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ */
+export async function getAllBasicStatistics(fromDate = null, toDate = null) {
+  const defaultFromDate = fromDate || new Date().toISOString().split("T")[0];
+  const defaultToDate = toDate || new Date().toISOString().split("T")[0];
+
+  try {
+    const [
+      systemOverview,
+      revenueByDate,
+      vehicleCount,
+      occupancyRate,
+      topCards,
+    ] = await Promise.all([
+      getSystemOverview(),
+      getRevenueByDate(defaultFromDate, defaultToDate),
+      getVehicleCountByDate(defaultFromDate, defaultToDate),
+      getCurrentOccupancyRate(),
+      getTopCards(defaultFromDate, defaultToDate, 5),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        systemOverview,
+        revenueByDate,
+        vehicleCount,
+        occupancyRate,
+        topCards,
+      },
+    };
+  } catch (error) {
+    console.error("Error getting all basic statistics:", error);
+    throw error;
+  }
+}
+
+/**
+ * Lấy báo cáo tổng hợp theo ngày
+ * @param {string} date - Ngày cần báo cáo (YYYY-MM-DD)
+ */
+export async function getDailyReport(date = null) {
+  const reportDate = date || new Date().toISOString().split("T")[0];
+
+  try {
+    const [revenue, vehicleCount, shiftReport, incidents, errorAnalysis] =
+      await Promise.all([
+        getRevenueByDate(reportDate, reportDate),
+        getVehicleCountByDate(reportDate, reportDate),
+        getShiftReport(reportDate),
+        getIncidentReports(reportDate, reportDate),
+        getErrorAnalysis(reportDate),
+      ]);
+
+    return {
+      success: true,
+      date: reportDate,
+      data: {
+        revenue,
+        vehicleCount,
+        shiftReport,
+        incidents,
+        errorAnalysis,
+      },
+    };
+  } catch (error) {
+    console.error("Error getting daily report:", error);
+    throw error;
+  }
+}

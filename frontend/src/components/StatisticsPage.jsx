@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import { 
-  layThongKeDoanhThu, 
-  layThongKeLoaiXe, 
+import { useEffect, useRef, useState } from "react";
+import {
+  // Existing APIs
+  layThongKeDoanhThu,
+  layThongKeLoaiXe,
   layTiLeLapDay,
   layThongKeTongQuan,
   layThongKeXeTrongBai,
@@ -18,53 +19,79 @@ import {
   layDanhSachNhanVien,
   layDanhSachCamera,
   layDanhSachKhu,
-  layALLPhienGuiXe
-} from "../api/api"
-import Chart from "chart.js/auto"
-import "../assets/styles/StatisticsPage.css"
+  layALLPhienGuiXe,
+  // New Statistics APIs
+  getSystemOverview,
+  getRevenueByDate,
+  getRevenueByWeek,
+  getRevenueByMonth,
+  getRevenueLastDays,
+  getVehicleCountByDate,
+  getVehicleCountByHour,
+  getCurrentOccupancyRate,
+  getHistoricalOccupancyRate,
+  getAverageParkingTime,
+  getTopCards,
+  getIncidentReports,
+  getDeviceLogs,
+  getSystemLogs,
+  getShiftReport,
+  getTransactionDetails,
+  getBarrierStatistics,
+  getParkingSpotDetails,
+  getZoneComparison,
+  getTrendAnalysis,
+  getOverdueVehicles,
+  getTopFrequentPlates,
+  getAllBasicStatistics,
+  getDailyReport,
+} from "../api/api";
+import Chart from "chart.js/auto";
+import "../assets/styles/StatisticsPage.css";
 
 // Helper to calculate from / to dates based on preset
 const getDateRange = (preset) => {
-  const today = new Date()
-  const toDate = today.toISOString().substring(0, 10) // yyyy-mm-dd
-  let fromDate = toDate
+  const today = new Date();
+  const toDate = today.toISOString().substring(0, 10); // yyyy-mm-dd
+  let fromDate = toDate;
 
   switch (preset) {
     case "today":
-      fromDate = toDate
-      break
+      fromDate = toDate;
+      break;
     case "7d":
-      const d7 = new Date()
-      d7.setDate(d7.getDate() - 6)
-      fromDate = d7.toISOString().substring(0, 10)
-      break
+      const d7 = new Date();
+      d7.setDate(d7.getDate() - 6);
+      fromDate = d7.toISOString().substring(0, 10);
+      break;
     case "30d":
-      const d30 = new Date()
-      d30.setDate(d30.getDate() - 29)
-      fromDate = d30.toISOString().substring(0, 10)
-      break
+      const d30 = new Date();
+      d30.setDate(d30.getDate() - 29);
+      fromDate = d30.toISOString().substring(0, 10);
+      break;
     case "3m":
-      const m3 = new Date()
-      m3.setMonth(m3.getMonth() - 2)
-      fromDate = m3.toISOString().substring(0, 10)
-      break
+      const m3 = new Date();
+      m3.setMonth(m3.getMonth() - 2);
+      fromDate = m3.toISOString().substring(0, 10);
+      break;
     case "6m":
-      const m6 = new Date()
-      m6.setMonth(m6.getMonth() - 5)
-      fromDate = m6.toISOString().substring(0, 10)
-      break
+      const m6 = new Date();
+      m6.setMonth(m6.getMonth() - 5);
+      fromDate = m6.toISOString().substring(0, 10);
+      break;
     default:
-      fromDate = toDate
+      fromDate = toDate;
   }
-  return { fromDate, toDate }
-}
+  return { fromDate, toDate };
+};
 
 const StatisticsPage = ({ onClose }) => {
-  const [preset, setPreset] = useState("30d")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [activeTab, setActiveTab] = useState("overview")
+  const [preset, setPreset] = useState("30d");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
   const [statsData, setStatsData] = useState({
+    // Legacy data
     revenue: null,
     vehicles: null,
     occupancy: null,
@@ -82,25 +109,70 @@ const StatisticsPage = ({ onClose }) => {
       totalEmployees: 0,
       totalCameras: 0,
       totalZones: 0,
-      totalSessions: 0
+      totalSessions: 0,
+    },
+    // New statistics data
+    newSystemOverview: null,
+    revenueAnalysis: null,
+    vehicleAnalysis: null,
+    parkingAnalysis: null,
+    reports: null,
+    deviceStatus: null,
+    trends: null,
+    incidents: null,
+    transactions: null,
+    dailyReport: null,
+  });
+
+  // Helper function to safely extract data from API responses
+  const safeExtractData = (response, fallback = null) => {
+    if (!response) return fallback;
+
+    console.log("safeExtractData processing:", response);
+
+    // If response has success property, it's an API response wrapper
+    if (response.success !== undefined) {
+      // If response has data property, extract it
+      if (response.data !== undefined) {
+        console.log("Extracting .data:", response.data);
+        return response.data;
+      }
+      // Otherwise, extract the entire response object minus success flag
+      else {
+        const { success, ...dataOnly } = response;
+        console.log("Extracting data minus success flag:", dataOnly);
+        return dataOnly;
+      }
     }
-  })
 
-  const revenueChartRef = useRef(null)
-  const vehicleChartRef = useRef(null) 
-  const occupancyChartRef = useRef(null)
-  const vehiclesInParkingChartRef = useRef(null)
-  const revenueByCardTypeChartRef = useRef(null)
-  const parkingTimeChartRef = useRef(null)
-  const zoneStatsChartRef = useRef(null)
+    // If response is already the data object (no success wrapper)
+    if (typeof response === "object") {
+      console.log("Using response as-is:", response);
+      return response;
+    }
 
-  const revenueChartInstance = useRef(null)
-  const vehicleChartInstance = useRef(null)
-  const occupancyChartInstance = useRef(null)
-  const vehiclesInParkingChartInstance = useRef(null)
-  const revenueByCardTypeChartInstance = useRef(null)
-  const parkingTimeChartInstance = useRef(null)
-  const zoneStatsChartInstance = useRef(null)
+    // For primitive values or unexpected structures
+    console.log("Using fallback for:", response);
+    return fallback;
+  };
+
+  // Chart refs
+  const revenueChartRef = useRef(null);
+  const vehicleChartRef = useRef(null);
+  const occupancyChartRef = useRef(null);
+  const vehiclesInParkingChartRef = useRef(null);
+  const revenueByCardTypeChartRef = useRef(null);
+  const parkingTimeChartRef = useRef(null);
+  const zoneStatsChartRef = useRef(null);
+
+  // Chart instances
+  const revenueChartInstance = useRef(null);
+  const vehicleChartInstance = useRef(null);
+  const occupancyChartInstance = useRef(null);
+  const vehiclesInParkingChartInstance = useRef(null);
+  const revenueByCardTypeChartInstance = useRef(null);
+  const parkingTimeChartInstance = useRef(null);
+  const zoneStatsChartInstance = useRef(null);
 
   const timeRangeOptions = [
     { value: "today", label: "Hôm nay" },
@@ -108,137 +180,712 @@ const StatisticsPage = ({ onClose }) => {
     { value: "30d", label: "30 ngày" },
     { value: "3m", label: "3 tháng" },
     { value: "6m", label: "6 tháng" },
-  ]
+  ];
 
   const tabOptions = [
-    { value: "overview", label: "Tổng quan", icon: "" },
-    { value: "revenue", label: "Doanh thu", icon: "" },
-    { value: "vehicles", label: "Xe cộ", icon: "" },
-    { value: "system", label: "Hệ thống", icon: "" },
-    { value: "performance", label: "Hiệu suất", icon: "" },
-    { value: "analysis", label: "Phân tích", icon: "" }
-  ]
+    { value: "overview", label: "Tổng quan", icon: "📊" },
+    { value: "revenue", label: "Doanh thu", icon: "💰" },
+    { value: "vehicles", label: "Xe cộ", icon: "🚗" },
+    { value: "parking", label: "Bãi đỗ", icon: "🅿️" },
+    { value: "system", label: "Hệ thống", icon: "⚙️" },
+    { value: "reports", label: "Báo cáo", icon: "📋" },
+    { value: "analysis", label: "Phân tích", icon: "📈" },
+  ];
 
   const fetchData = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const { fromDate, toDate } = getDateRange(preset)
+      const { fromDate, toDate } = getDateRange(preset);
 
-      // Fetch basic statistics (always needed)
+      // Fetch basic statistics (for main charts)
       const [revenueRes, vehicleRes, occRes] = await Promise.all([
         layThongKeDoanhThu({ fromDate, toDate }),
         layThongKeLoaiXe({ fromDate, toDate }),
         layTiLeLapDay(),
-      ])
+      ]);
 
       // Fetch system counts for overview
-      const [cardsRes, employeesRes, camerasRes, zonesRes, sessionsRes] = await Promise.all([
-        layDanhSachThe().catch(() => []),
-        layDanhSachNhanVien().catch(() => []),
-        layDanhSachCamera().catch(() => []),
-        layDanhSachKhu().catch(() => []),
-        layALLPhienGuiXe().catch(() => [])
-      ])
+      const [cardsRes, employeesRes, camerasRes, zonesRes, sessionsRes] =
+        await Promise.all([
+          layDanhSachThe().catch(() => []),
+          layDanhSachNhanVien().catch(() => []),
+          layDanhSachCamera().catch(() => []),
+          layDanhSachKhu().catch(() => []),
+          layALLPhienGuiXe().catch(() => []),
+        ]);
 
       const systemCounts = {
         totalCards: Array.isArray(cardsRes) ? cardsRes.length : 0,
         totalEmployees: Array.isArray(employeesRes) ? employeesRes.length : 0,
         totalCameras: Array.isArray(camerasRes) ? camerasRes.length : 0,
         totalZones: Array.isArray(zonesRes) ? zonesRes.length : 0,
-        totalSessions: Array.isArray(sessionsRes) ? sessionsRes.length : 0
+        totalSessions: Array.isArray(sessionsRes) ? sessionsRes.length : 0,
+      };
+
+      // Fetch new comprehensive statistics including pm_nc0012-15 data
+      let newData = {};
+
+      // Always fetch data from pm_nc0012-15 tables
+      console.log("Fetching data from pm_nc0012-15 tables...");
+      try {
+        const [incidentsRes, deviceLogsRes, systemLogsRes] = await Promise.all([
+          getIncidentReports(fromDate, toDate).catch((err) => {
+            console.warn("getIncidentReports failed:", err);
+            return { success: false, data: [] };
+          }),
+          getDeviceLogs(fromDate, 50).catch((err) => {
+            console.warn("getDeviceLogs failed:", err);
+            return { success: false, data: [] };
+          }),
+          getSystemLogs(fromDate, 50).catch((err) => {
+            console.warn("getSystemLogs failed:", err);
+            return { success: false, data: [] };
+          }),
+        ]);
+
+        newData.incidents = safeExtractData(incidentsRes);
+        newData.deviceLogs = safeExtractData(deviceLogsRes);
+        newData.systemLogs = safeExtractData(systemLogsRes);
+
+        console.log("PM_NC0012-15 data:", {
+          incidents: newData.incidents,
+          deviceLogs: newData.deviceLogs,
+          systemLogs: newData.systemLogs,
+        });
+      } catch (tablesError) {
+        console.warn("Error fetching pm_nc0012-15 data:", tablesError);
+        newData.incidents = [];
+        newData.deviceLogs = [];
+        newData.systemLogs = [];
       }
 
-      // Fetch advanced statistics based on active tab
-      let advancedData = {}
-      
-      if (activeTab === "overview" || activeTab === "system") {
-        const [overviewRes, vehiclesInParkingRes] = await Promise.all([
-          layThongKeTongQuan().catch(() => ({})),
-          layThongKeXeTrongBai({ fromDate, toDate }).catch(() => ({}))
-        ])
-        advancedData.overview = overviewRes
-        advancedData.vehiclesInParking = vehiclesInParkingRes
+      // Temporarily disable new APIs due to server errors
+      const useNewApis = false; // Set to true when server APIs are fixed
+
+      if (useNewApis) {
+        try {
+          // Get all basic statistics in one call
+          console.log("Fetching basic stats for:", fromDate, "to", toDate);
+
+          let basicStatsData = {};
+          try {
+            const basicStats = await getAllBasicStatistics(fromDate, toDate);
+            console.log("Basic stats response:", basicStats);
+
+            // Handle different response formats
+            if (basicStats?.success && basicStats?.data) {
+              basicStatsData = basicStats.data;
+            } else if (
+              basicStats &&
+              typeof basicStats === "object" &&
+              !basicStats.success
+            ) {
+              basicStatsData = basicStats;
+            }
+          } catch (basicStatsError) {
+            console.warn("getAllBasicStatistics failed:", basicStatsError);
+            // Skip this API call if it fails - we'll use fallback data
+            basicStatsData = {};
+          }
+
+          newData.newSystemOverview = basicStatsData;
+
+          // Get detailed revenue analysis
+          console.log("Fetching revenue analysis...");
+          const [revenueWeek, revenueMonth, revenueLast7] = await Promise.all([
+            getRevenueByWeek(fromDate).catch((err) => {
+              console.warn("getRevenueByWeek failed:", err);
+              return null;
+            }),
+            getRevenueByMonth(fromDate).catch((err) => {
+              console.warn("getRevenueByMonth failed:", err);
+              return null;
+            }),
+            getRevenueLastDays(7).catch((err) => {
+              console.warn("getRevenueLastDays failed:", err);
+              return null;
+            }),
+          ]);
+          newData.revenueAnalysis = {
+            week: safeExtractData(revenueWeek),
+            month: safeExtractData(revenueMonth),
+            lastDays: safeExtractData(revenueLast7),
+          };
+
+          // Get vehicle analysis
+          console.log("Fetching vehicle analysis...");
+          const [
+            vehicleByHour,
+            currentOccupancy,
+            historicalOccupancy,
+            overdueVehicles,
+          ] = await Promise.all([
+            getVehicleCountByHour(fromDate).catch((err) => {
+              console.warn("getVehicleCountByHour failed:", err);
+              return null;
+            }),
+            getCurrentOccupancyRate().catch((err) => {
+              console.warn("getCurrentOccupancyRate failed:", err);
+              return null;
+            }),
+            getHistoricalOccupancyRate(fromDate, toDate).catch((err) => {
+              console.warn("getHistoricalOccupancyRate failed:", err);
+              return null;
+            }),
+            getOverdueVehicles(20).catch((err) => {
+              console.warn("getOverdueVehicles failed:", err);
+              return null;
+            }),
+          ]);
+          newData.vehicleAnalysis = {
+            hourly: safeExtractData(vehicleByHour),
+            current: safeExtractData(currentOccupancy),
+            historical: safeExtractData(historicalOccupancy),
+            overdue: safeExtractData(overdueVehicles),
+          };
+
+          // Get parking analysis
+          console.log("Fetching parking analysis...");
+          const [avgParkingTime, parkingSpots, topPlates, zoneComparison] =
+            await Promise.all([
+              getAverageParkingTime(fromDate, toDate).catch((err) => {
+                console.warn("getAverageParkingTime failed:", err);
+                return null;
+              }),
+              getParkingSpotDetails(fromDate).catch((err) => {
+                console.warn("getParkingSpotDetails failed:", err);
+                return null;
+              }),
+              getTopFrequentPlates(fromDate, toDate, 10).catch((err) => {
+                console.warn("getTopFrequentPlates failed:", err);
+                return null;
+              }),
+              getZoneComparison(fromDate, toDate).catch((err) => {
+                console.warn("getZoneComparison failed:", err);
+                return null;
+              }),
+            ]);
+          newData.parkingAnalysis = {
+            avgTime: safeExtractData(avgParkingTime),
+            spots: safeExtractData(parkingSpots),
+            topPlates: safeExtractData(topPlates),
+            zones: safeExtractData(zoneComparison),
+          };
+
+          // Get reports and logs
+          console.log("Fetching reports and logs...");
+          const [shiftReport, incidents, deviceLogs, systemLogs, transactions] =
+            await Promise.all([
+              getShiftReport(fromDate).catch((err) => {
+                console.warn("getShiftReport failed:", err);
+                return null;
+              }),
+              getIncidentReports(fromDate, toDate).catch((err) => {
+                console.warn("getIncidentReports failed:", err);
+                return null;
+              }),
+              getDeviceLogs(fromDate, 50).catch((err) => {
+                console.warn("getDeviceLogs failed:", err);
+                return null;
+              }),
+              getSystemLogs(fromDate, 50).catch((err) => {
+                console.warn("getSystemLogs failed:", err);
+                return null;
+              }),
+              getTransactionDetails(fromDate, toDate, 50).catch((err) => {
+                console.warn("getTransactionDetails failed:", err);
+                return null;
+              }),
+            ]);
+          newData.reports = {
+            shift: safeExtractData(shiftReport),
+            incidents: safeExtractData(incidents),
+            deviceLogs: safeExtractData(deviceLogs),
+            systemLogs: safeExtractData(systemLogs),
+            transactions: safeExtractData(transactions),
+          };
+
+          // Get device status and trends
+          console.log("Fetching device status and trends...");
+          const [barrierStats, trends, dailyReport] = await Promise.all([
+            getBarrierStatistics(fromDate).catch((err) => {
+              console.warn("getBarrierStatistics failed:", err);
+              return null;
+            }),
+            getTrendAnalysis(fromDate, 30).catch((err) => {
+              console.warn("getTrendAnalysis failed:", err);
+              return null;
+            }),
+            getDailyReport(fromDate).catch((err) => {
+              console.warn("getDailyReport failed:", err);
+              return null;
+            }),
+          ]);
+          newData.deviceStatus = { barriers: safeExtractData(barrierStats) };
+          newData.trends = safeExtractData(trends);
+          newData.dailyReport = safeExtractData(dailyReport);
+        } catch (newApiError) {
+          console.warn("New API error (fallback to legacy):", newApiError);
+          // If new APIs fail, we'll use legacy fallback below
+          newData = {};
+        }
+      } else {
+        console.log("New APIs disabled, using legacy APIs only");
+        // Use legacy APIs only
+        newData = {};
       }
 
-      if (activeTab === "revenue" || activeTab === "overview") {
-        const revenueByCardTypeRes = await layThongKeDoanhThuTheoLoaiThe({ fromDate, toDate }).catch(() => ({}))
-        advancedData.revenueByCardType = revenueByCardTypeRes
+      // Legacy advanced data fetch (keep for compatibility)
+      let advancedData = {};
+
+      // Load different data based on active tab
+      if (activeTab === "overview") {
+        console.log("Loading overview data with charts...");
+        const [overviewRes, vehiclesInParkingRes, revenueByCardTypeRes] =
+          await Promise.all([
+            layThongKeTongQuan().catch(() => ({})),
+            layThongKeXeTrongBai({ fromDate, toDate }).catch(() => ({})),
+            layThongKeDoanhThuTheoLoaiThe({ fromDate, toDate }).catch(
+              () => ({})
+            ),
+          ]);
+
+        const safeOverviewRes = safeExtractData(overviewRes);
+        const safeVehiclesInParkingRes = safeExtractData(vehiclesInParkingRes);
+        const safeRevenueByCardTypeRes = safeExtractData(revenueByCardTypeRes);
+
+        advancedData.overview = safeOverviewRes;
+        advancedData.vehiclesInParking = safeVehiclesInParkingRes;
+        advancedData.revenueByCardType = safeRevenueByCardTypeRes;
+
+        // Populate new data structure for overview
+        newData.newSystemOverview = safeOverviewRes;
+        newData.vehicleAnalysis = { current: safeVehiclesInParkingRes };
+        newData.revenueAnalysis = { byCardType: safeRevenueByCardTypeRes };
       }
 
-      if (activeTab === "performance" || activeTab === "system") {
+      // Load revenue-specific data for revenue tab
+      else if (activeTab === "revenue") {
+        console.log("Loading revenue-specific data...");
+        const revenueByCardTypeRes = await layThongKeDoanhThuTheoLoaiThe({
+          fromDate,
+          toDate,
+        }).catch(() => ({}));
+
+        const safeRevenueData = safeExtractData(revenueByCardTypeRes);
+        advancedData.revenueByCardType = safeRevenueData;
+
+        // Create structured revenue data for table display
+        const revenueTableData = [];
+        if (safeRevenueData && Array.isArray(safeRevenueData)) {
+          safeRevenueData.forEach((item, index) => {
+            revenueTableData.push({
+              cardType:
+                item.loai_the || item.cardType || `Loại thẻ ${index + 1}`,
+              amount: item.doanh_thu || item.amount || 0,
+              count: item.so_luong || item.count || 0,
+              percentage: item.ti_le || item.percentage || 0,
+            });
+          });
+        }
+
+        newData.revenueAnalysis = {
+          byCardType: safeRevenueData,
+          tableData: revenueTableData,
+        };
+      }
+
+      // Load vehicle-specific data for vehicles tab
+      else if (activeTab === "vehicles") {
+        console.log("Loading vehicle-specific data...");
+        const vehiclesInParkingRes = await layThongKeXeTrongBai({
+          fromDate,
+          toDate,
+        }).catch(() => ({}));
+
+        const safeVehicleData = safeExtractData(vehiclesInParkingRes);
+        advancedData.vehiclesInParking = safeVehicleData;
+
+        // Create structured vehicle data for table display
+        const vehicleTableData = [];
+        if (safeVehicleData && Array.isArray(safeVehicleData)) {
+          safeVehicleData.forEach((item, index) => {
+            const entryTime = item.gio_vao || item.entryTime || "";
+            const duration = item.thoi_gian_gui || item.duration || 0;
+
+            vehicleTableData.push({
+              plateNumber:
+                item.bien_so || item.plateNumber || `Xe ${index + 1}`,
+              cardId: item.ma_the || item.cardId || "N/A",
+              entryTime: entryTime,
+              duration: duration,
+              zone: item.khu_vuc || item.zone || "N/A",
+              status: item.trang_thai || item.status || "Đang gửi",
+            });
+          });
+        }
+
+        newData.vehicleAnalysis = {
+          current: safeVehicleData,
+          tableData: vehicleTableData,
+        };
+      }
+
+      // Load tab-specific data based on active tab
+      else if (activeTab === "system") {
+        console.log("Loading system-specific data...");
         const [cameraRes, zoneRes] = await Promise.all([
           layThongKeHieuSuatCamera({ fromDate, toDate }).catch(() => ({})),
-          layThongKeTheoKhuVuc({ fromDate, toDate }).catch(() => ({}))
-        ])
-        advancedData.cameraPerformance = cameraRes
-        advancedData.zoneStatistics = zoneRes
+          layThongKeTheoKhuVuc({ fromDate, toDate }).catch(() => ({})),
+        ]);
+
+        const safeCameraData = safeExtractData(cameraRes);
+        const safeZoneData = safeExtractData(zoneRes);
+
+        advancedData.cameraPerformance = safeCameraData;
+        advancedData.zoneStatistics = safeZoneData;
+
+        // Create system status table data using device logs from pm_nc0014
+        const systemTableData = [];
+
+        // Add device status from pm_nc0014 (device logs)
+        if (newData.deviceLogs && Array.isArray(newData.deviceLogs)) {
+          const deviceStatusMap = {};
+
+          // Aggregate device status from recent logs
+          newData.deviceLogs.forEach((log) => {
+            const deviceKey =
+              log.ten_thiet_bi || log.deviceName || `Device ${log.thiet_bi_id}`;
+            if (!deviceStatusMap[deviceKey]) {
+              deviceStatusMap[deviceKey] = {
+                parameter: deviceKey,
+                value: log.su_kien || log.event || "Unknown",
+                status:
+                  log.su_kien === "UP"
+                    ? "OK"
+                    : log.su_kien === "ERROR"
+                    ? "Lỗi"
+                    : "Cảnh báo",
+                type: "device",
+                lastUpdate: log.thoi_gian || log.timestamp || "",
+              };
+            }
+          });
+
+          // Convert to array
+          Object.values(deviceStatusMap).forEach((device) => {
+            systemTableData.push(device);
+          });
+        }
+
+        // Add camera performance data
+        if (safeCameraData && Array.isArray(safeCameraData)) {
+          safeCameraData.forEach((camera, index) => {
+            systemTableData.push({
+              parameter: `Camera ${
+                camera.ten_camera || camera.name || index + 1
+              }`,
+              value: `${camera.ti_le_thanh_cong || camera.successRate || 0}%`,
+              status:
+                (camera.ti_le_thanh_cong || camera.successRate || 0) > 90
+                  ? "OK"
+                  : "Cảnh báo",
+              type: "camera",
+              lastUpdate: "",
+            });
+          });
+        }
+
+        // Add zone data
+        if (safeZoneData && Array.isArray(safeZoneData)) {
+          safeZoneData.forEach((zone, index) => {
+            systemTableData.push({
+              parameter: `Khu vực ${zone.ten_khu || zone.name || index + 1}`,
+              value: `${zone.so_xe || zone.vehicleCount || 0} xe`,
+              status:
+                (zone.ti_le_lap_day || zone.occupancyRate || 0) > 90
+                  ? "Đầy"
+                  : "OK",
+              type: "zone",
+              lastUpdate: "",
+            });
+          });
+        }
+
+        newData.systemStatus = systemTableData;
+      } else if (activeTab === "analysis") {
+        console.log("Loading analysis-specific data...");
+        const [employeeRes, timeRes, topCardsRes, errorsRes] =
+          await Promise.all([
+            layThongKeNhanVien({ fromDate, toDate }).catch(() => ({})),
+            layThongKeThoiGianTrungBinh({ fromDate, toDate }).catch(() => ({})),
+            layTopTheSuDung({ fromDate, toDate }).catch(() => ({})),
+            layThongKeLoiSuCo({ fromDate, toDate }).catch(() => ({})),
+          ]);
+
+        const safeEmployeeData = safeExtractData(employeeRes);
+        const safeTimeData = safeExtractData(timeRes);
+        const safeTopCardsData = safeExtractData(topCardsRes);
+        const safeErrorsData = safeExtractData(errorsRes);
+
+        advancedData.employeeActivity = safeEmployeeData;
+        advancedData.averageParkingTime = safeTimeData;
+        advancedData.topCards = safeTopCardsData;
+        advancedData.errorAnalysis = safeErrorsData;
+
+        // Create analysis table data
+        const analysisTableData = [];
+
+        // Add parking time analysis
+        if (safeTimeData && typeof safeTimeData === "object") {
+          analysisTableData.push({
+            type: "Thời gian gửi xe trung bình",
+            value: `${
+              safeTimeData.thoi_gian_tb || safeTimeData.averageTime || 0
+            } phút`,
+            trend: "stable",
+            trendValue: "Ổn định",
+            note: "Thời gian gửi xe trong khoảng bình thường",
+          });
+        }
+
+        // Add error analysis
+        if (safeErrorsData && typeof safeErrorsData === "object") {
+          const errorCount =
+            safeErrorsData.tong_loi || safeErrorsData.totalErrors || 0;
+          analysisTableData.push({
+            type: "Tổng số lỗi hệ thống",
+            value: errorCount,
+            trend: errorCount > 10 ? "up" : "stable",
+            trendValue: errorCount > 10 ? "Tăng" : "Ổn định",
+            note:
+              errorCount > 10
+                ? "Cần kiểm tra hệ thống"
+                : "Hoạt động bình thường",
+          });
+        }
+
+        newData.analysisData = analysisTableData;
       }
 
-      if (activeTab === "analysis") {
-        const [employeeRes, timeRes, topCardsRes, errorsRes] = await Promise.all([
-          layThongKeNhanVien({ fromDate, toDate }).catch(() => ({})),
-          layThongKeThoiGianTrungBinh({ fromDate, toDate }).catch(() => ({})),
-          layTopTheSuDung({ fromDate, toDate }).catch(() => ({})),
-          layThongKeLoiSuCo({ fromDate, toDate }).catch(() => ({}))
-        ])
-        advancedData.employeeActivity = employeeRes
-        advancedData.averageParkingTime = timeRes
-        advancedData.topCards = topCardsRes
-        advancedData.errorAnalysis = errorsRes
+      // For parking tab - load parking specific data
+      else if (activeTab === "parking") {
+        console.log("Loading parking-specific data...");
+        const [occupancyRes, zoneRes] = await Promise.all([
+          layTiLeLapDay().catch(() => ({})),
+          layThongKeTheoKhuVuc({ fromDate, toDate }).catch(() => ({})),
+        ]);
+
+        const safeOccupancyData = safeExtractData(occupancyRes);
+        const safeZoneData = safeExtractData(zoneRes);
+
+        // Create parking table data
+        const parkingTableData = [];
+
+        if (safeZoneData && Array.isArray(safeZoneData)) {
+          safeZoneData.forEach((zone, index) => {
+            parkingTableData.push({
+              zoneName: zone.ten_khu || zone.name || `Khu ${index + 1}`,
+              totalSpots: zone.tong_cho || zone.totalSpots || 0,
+              occupiedSpots: zone.so_xe || zone.occupiedSpots || 0,
+              occupancyRate: `${
+                zone.ti_le_lap_day || zone.occupancyRate || 0
+              }%`,
+              status:
+                (zone.ti_le_lap_day || zone.occupancyRate || 0) > 90
+                  ? "Đầy"
+                  : "Còn chỗ",
+            });
+          });
+        }
+
+        newData.parkingData = parkingTableData;
+        advancedData.occupancy = safeOccupancyData;
+        advancedData.zoneStatistics = safeZoneData;
       }
 
-      console.log("Revenue data:", revenueRes)
-      console.log("Vehicle data:", vehicleRes)
-      console.log("Occupancy data:", occRes)
-      console.log("System counts:", systemCounts)
-      console.log("Advanced data:", advancedData)
+      // For reports tab - load report data
+      else if (activeTab === "reports") {
+        console.log("Loading reports-specific data...");
+        const [sessionsRes, errorsRes] = await Promise.all([
+          layALLPhienGuiXe().catch(() => []),
+          layThongKeLoiSuCo({ fromDate, toDate }).catch(() => ({})),
+        ]);
 
-      setStatsData({
-        revenue: revenueRes,
-        vehicles: vehicleRes,
-        occupancy: occRes,
+        const safeSessionsData = Array.isArray(sessionsRes) ? sessionsRes : [];
+        const safeErrorsData = safeExtractData(errorsRes);
+
+        // Create reports table data using incidents from pm_nc0012
+        const reportsTableData = [];
+
+        // Add incidents from pm_nc0012
+        if (newData.incidents && Array.isArray(newData.incidents)) {
+          newData.incidents.slice(0, 15).forEach((incident, index) => {
+            reportsTableData.push({
+              type: "Sự cố",
+              detail: `${
+                incident.loai_su_co ||
+                incident.incidentType ||
+                `Sự cố ${index + 1}`
+              } - ${incident.bien_so || incident.plateNumber || "N/A"}`,
+              time: incident.ngay_gio || incident.timestamp || "",
+              status: incident.trang_thai || incident.status || "N/A",
+              amount: incident.boi_thuong || incident.compensation || 0,
+              description: incident.mo_ta || incident.description || "",
+            });
+          });
+        }
+
+        // Add system logs from pm_nc0015
+        if (newData.systemLogs && Array.isArray(newData.systemLogs)) {
+          newData.systemLogs.slice(0, 10).forEach((log, index) => {
+            reportsTableData.push({
+              type: "Log hệ thống",
+              detail: `${log.hanh_dong || log.action || `Action ${index + 1}`}`,
+              time: log.thoi_gian || log.timestamp || "",
+              status: log.ket_qua || log.result || "N/A",
+              amount: 0,
+              description: log.mo_ta || log.description || "",
+            });
+          });
+        }
+
+        // Add recent sessions
+        safeSessionsData.slice(0, 10).forEach((session, index) => {
+          reportsTableData.push({
+            type: "Phiên gửi xe",
+            detail: `${
+              session.bien_so || session.plateNumber || `Xe ${index + 1}`
+            }`,
+            time: session.gio_vao || session.entryTime || "",
+            status: session.trang_thai || session.status || "N/A",
+            amount: session.phi_gui || session.amount || 0,
+            description: `Phiên gửi xe số ${session.lv001 || index + 1}`,
+          });
+        });
+
+        newData.reportsData = reportsTableData;
+        advancedData.sessions = safeSessionsData;
+        advancedData.errorAnalysis = safeErrorsData;
+      }
+
+      // For other tabs, load basic overview data
+      else {
+        console.log("Loading basic data for", activeTab, "tab...");
+        const overviewRes = await layThongKeTongQuan().catch(() => ({}));
+        const safeOverviewRes = safeExtractData(overviewRes);
+        advancedData.overview = safeOverviewRes;
+        newData.newSystemOverview = safeOverviewRes;
+      }
+
+      console.log("Legacy Revenue data:", revenueRes);
+      console.log("Legacy Vehicle data:", vehicleRes);
+      console.log("Legacy Occupancy data:", occRes);
+      console.log("System counts:", systemCounts);
+      console.log("New comprehensive data:", newData);
+      console.log("Legacy advanced data:", advancedData);
+
+      // Ensure all data is properly formatted
+      const safeStatsData = {
+        // Legacy data - apply safeExtractData to main data too
+        revenue: safeExtractData(revenueRes),
+        vehicles: safeExtractData(vehicleRes),
+        occupancy: safeExtractData(occRes),
         systemCounts,
-        ...advancedData
-      })
+        ...advancedData,
+        // New comprehensive data - ensure it's not rendering objects
+        newSystemOverview:
+          newData.newSystemOverview &&
+          typeof newData.newSystemOverview === "object"
+            ? newData.newSystemOverview
+            : null,
+        revenueAnalysis:
+          newData.revenueAnalysis && typeof newData.revenueAnalysis === "object"
+            ? newData.revenueAnalysis
+            : null,
+        vehicleAnalysis:
+          newData.vehicleAnalysis && typeof newData.vehicleAnalysis === "object"
+            ? newData.vehicleAnalysis
+            : null,
+        parkingAnalysis:
+          newData.parkingAnalysis && typeof newData.parkingAnalysis === "object"
+            ? newData.parkingAnalysis
+            : null,
+        reports:
+          newData.reports && typeof newData.reports === "object"
+            ? newData.reports
+            : null,
+        deviceStatus:
+          newData.deviceStatus && typeof newData.deviceStatus === "object"
+            ? newData.deviceStatus
+            : null,
+        trends:
+          newData.trends && typeof newData.trends === "object"
+            ? newData.trends
+            : null,
+        dailyReport:
+          newData.dailyReport && typeof newData.dailyReport === "object"
+            ? newData.dailyReport
+            : null,
+      };
 
-      // Wait for next tick to ensure DOM is updated
-      setTimeout(() => {
-        createCharts(revenueRes, vehicleRes, occRes, advancedData)
-      }, 100)
+      console.log("Safe stats data:", safeStatsData);
+      console.log("Stats data keys available:", Object.keys(safeStatsData));
+      console.log("System counts:", safeStatsData.systemCounts);
+      console.log("Advanced data keys:", Object.keys(advancedData));
+
+      setStatsData(safeStatsData);
+
+      // Only create charts for overview tab
+      if (activeTab === "overview") {
+        setTimeout(() => {
+          createCharts(revenueRes, vehicleRes, occRes, advancedData);
+        }, 100);
+      }
     } catch (err) {
-      console.error("Statistics error:", err)
-      setError(err.message || "Lỗi tải dữ liệu")
+      console.error("Statistics error:", err);
+      setError(err.message || "Lỗi tải dữ liệu");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const createCharts = (revenueRes, vehicleRes, occRes, advancedData = {}) => {
     try {
       // Destroy existing charts
-      if (revenueChartInstance.current) revenueChartInstance.current.destroy()
-      if (vehicleChartInstance.current) vehicleChartInstance.current.destroy()
-      if (occupancyChartInstance.current) occupancyChartInstance.current.destroy()
-      if (vehiclesInParkingChartInstance.current) vehiclesInParkingChartInstance.current.destroy()
-      if (revenueByCardTypeChartInstance.current) revenueByCardTypeChartInstance.current.destroy()
-      if (parkingTimeChartInstance.current) parkingTimeChartInstance.current.destroy()
-      if (zoneStatsChartInstance.current) zoneStatsChartInstance.current.destroy()
+      if (revenueChartInstance.current) revenueChartInstance.current.destroy();
+      if (vehicleChartInstance.current) vehicleChartInstance.current.destroy();
+      if (occupancyChartInstance.current)
+        occupancyChartInstance.current.destroy();
+      if (vehiclesInParkingChartInstance.current)
+        vehiclesInParkingChartInstance.current.destroy();
+      if (revenueByCardTypeChartInstance.current)
+        revenueByCardTypeChartInstance.current.destroy();
+      if (parkingTimeChartInstance.current)
+        parkingTimeChartInstance.current.destroy();
+      if (zoneStatsChartInstance.current)
+        zoneStatsChartInstance.current.destroy();
 
       // ---- Revenue Chart ----
       if (revenueChartInstance.current) {
-        revenueChartInstance.current.destroy()
+        revenueChartInstance.current.destroy();
       }
 
-      if (revenueChartRef.current && revenueRes && revenueRes.detail && Array.isArray(revenueRes.detail)) {
+      if (
+        revenueChartRef.current &&
+        revenueRes &&
+        revenueRes.detail &&
+        Array.isArray(revenueRes.detail)
+      ) {
         const labels = revenueRes.detail.map((d) => {
-          const date = new Date(d.date)
+          const date = new Date(d.date);
           return date.toLocaleDateString("vi-VN", {
             month: "short",
             day: "numeric",
-          })
-        })
-        const dataValues = revenueRes.detail.map((d) => d.total)
+          });
+        });
+        const dataValues = revenueRes.detail.map((d) => d.total);
 
         revenueChartInstance.current = new Chart(revenueChartRef.current, {
           type: "line",
@@ -277,7 +924,10 @@ const StatisticsPage = ({ onClose }) => {
                 borderWidth: 1,
                 cornerRadius: 6,
                 callbacks: {
-                  label: (context) => `Doanh thu: ${context.parsed.y.toLocaleString("vi-VN")} VNĐ`,
+                  label: (context) =>
+                    `Doanh thu: ${context.parsed.y.toLocaleString(
+                      "vi-VN"
+                    )} VNĐ`,
                 },
               },
             },
@@ -307,18 +957,23 @@ const StatisticsPage = ({ onClose }) => {
               },
             },
           },
-        })
+        });
       }
 
       // ---- Vehicle Types Chart ----
       if (vehicleChartInstance.current) {
-        vehicleChartInstance.current.destroy()
+        vehicleChartInstance.current.destroy();
       }
 
-      if (vehicleChartRef.current && vehicleRes && vehicleRes.data && typeof vehicleRes.data === "object") {
-        const vehicleLabels = Object.keys(vehicleRes.data)
-        const vehicleData = Object.values(vehicleRes.data)
-        const palette = ["#1c315c", "#2a4a7c", "#3d5a9c", "#5b7bb8", "#7a9bd4"]
+      if (
+        vehicleChartRef.current &&
+        vehicleRes &&
+        vehicleRes.data &&
+        typeof vehicleRes.data === "object"
+      ) {
+        const vehicleLabels = Object.keys(vehicleRes.data);
+        const vehicleData = Object.values(vehicleRes.data);
+        const palette = ["#1c315c", "#2a4a7c", "#3d5a9c", "#5b7bb8", "#7a9bd4"];
 
         vehicleChartInstance.current = new Chart(vehicleChartRef.current, {
           type: "doughnut",
@@ -360,21 +1015,26 @@ const StatisticsPage = ({ onClose }) => {
                 cornerRadius: 6,
                 callbacks: {
                   label: (context) => {
-                    const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                    const percentage = ((context.parsed / total) * 100).toFixed(1)
-                    return `${context.label}: ${context.parsed} xe (${percentage}%)`
+                    const total = context.dataset.data.reduce(
+                      (a, b) => a + b,
+                      0
+                    );
+                    const percentage = ((context.parsed / total) * 100).toFixed(
+                      1
+                    );
+                    return `${context.label}: ${context.parsed} xe (${percentage}%)`;
                   },
                 },
               },
             },
             cutout: "60%",
           },
-        })
+        });
       }
 
       // ---- Occupancy Chart ----
       if (occupancyChartInstance.current) {
-        occupancyChartInstance.current.destroy()
+        occupancyChartInstance.current.destroy();
       }
 
       if (
@@ -383,7 +1043,10 @@ const StatisticsPage = ({ onClose }) => {
         typeof occRes.totalSlots !== "undefined" &&
         typeof occRes.occupied !== "undefined"
       ) {
-        const occupancyRate = ((occRes.occupied / occRes.totalSlots) * 100).toFixed(1)
+        const occupancyRate = (
+          (occRes.occupied / occRes.totalSlots) *
+          100
+        ).toFixed(1);
 
         occupancyChartInstance.current = new Chart(occupancyChartRef.current, {
           type: "bar",
@@ -392,7 +1055,11 @@ const StatisticsPage = ({ onClose }) => {
             datasets: [
               {
                 label: "Số lượng",
-                data: [occRes.totalSlots, occRes.occupied, occRes.totalSlots - occRes.occupied],
+                data: [
+                  occRes.totalSlots,
+                  occRes.occupied,
+                  occRes.totalSlots - occRes.occupied,
+                ],
                 backgroundColor: ["#e2e8f0", "#1c315c", "#10b981"],
                 borderColor: ["#cbd5e1", "#1c315c", "#059669"],
                 borderWidth: 1,
@@ -416,9 +1083,9 @@ const StatisticsPage = ({ onClose }) => {
                 callbacks: {
                   label: (context) => {
                     if (context.dataIndex === 1) {
-                      return `Đang sử dụng: ${context.parsed.y} chỗ (${occupancyRate}%)`
+                      return `Đang sử dụng: ${context.parsed.y} chỗ (${occupancyRate}%)`;
                     }
-                    return `${context.label}: ${context.parsed.y} chỗ`
+                    return `${context.label}: ${context.parsed.y} chỗ`;
                   },
                 },
               },
@@ -441,133 +1108,259 @@ const StatisticsPage = ({ onClose }) => {
               },
             },
           },
-        })
+        });
       }
     } catch (err) {
-      console.error("Failed to create charts:", err)
+      console.error("Failed to create charts:", err);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
+    fetchData();
     // cleanup charts on unmount
     return () => {
-      if (revenueChartInstance.current) revenueChartInstance.current.destroy()
-      if (vehicleChartInstance.current) vehicleChartInstance.current.destroy()
-      if (occupancyChartInstance.current) occupancyChartInstance.current.destroy()
-      if (vehiclesInParkingChartInstance.current) vehiclesInParkingChartInstance.current.destroy()
-      if (revenueByCardTypeChartInstance.current) revenueByCardTypeChartInstance.current.destroy()
-      if (parkingTimeChartInstance.current) parkingTimeChartInstance.current.destroy()
-      if (zoneStatsChartInstance.current) zoneStatsChartInstance.current.destroy()
-    }
-  }, [preset, activeTab])
+      if (revenueChartInstance.current) revenueChartInstance.current.destroy();
+      if (vehicleChartInstance.current) vehicleChartInstance.current.destroy();
+      if (occupancyChartInstance.current)
+        occupancyChartInstance.current.destroy();
+      if (vehiclesInParkingChartInstance.current)
+        vehiclesInParkingChartInstance.current.destroy();
+      if (revenueByCardTypeChartInstance.current)
+        revenueByCardTypeChartInstance.current.destroy();
+      if (parkingTimeChartInstance.current)
+        parkingTimeChartInstance.current.destroy();
+      if (zoneStatsChartInstance.current)
+        zoneStatsChartInstance.current.destroy();
+    };
+  }, [preset, activeTab]);
 
   // Calculate summary statistics
   const calculateSummaryStats = () => {
-    if (!statsData.revenue || !statsData.vehicles || !statsData.occupancy) {
-      return null
-    }
+    try {
+      console.log("Calculating summary stats with:", {
+        revenue: statsData.revenue,
+        vehicles: statsData.vehicles,
+        occupancy: statsData.occupancy,
+      });
 
-    const totalRevenue = statsData.revenue.detail?.reduce((sum, item) => sum + item.total, 0) || 0
-    const totalVehicles = Object.values(statsData.vehicles.data || {}).reduce((sum, count) => sum + count, 0)
-    const occupancyRate = statsData.occupancy.totalSlots > 0 
-      ? ((statsData.occupancy.occupied / statsData.occupancy.totalSlots) * 100).toFixed(1)
-      : 0
-    const avgDailyRevenue = statsData.revenue.detail?.length > 0 
-      ? totalRevenue / statsData.revenue.detail.length 
-      : 0
+      if (!statsData.revenue || !statsData.vehicles || !statsData.occupancy) {
+        console.log("Missing required data for summary stats");
+        return null;
+      }
 
-    return {
-      totalRevenue,
-      totalVehicles,
-      occupancyRate,
-      avgDailyRevenue,
-      availableSpots: (statsData.occupancy.totalSlots || 0) - (statsData.occupancy.occupied || 0),
+      // Safely calculate total revenue
+      let totalRevenue = 0;
+      if (statsData.revenue.detail && Array.isArray(statsData.revenue.detail)) {
+        totalRevenue = statsData.revenue.detail.reduce((sum, item) => {
+          const itemTotal = typeof item.total === "number" ? item.total : 0;
+          return sum + itemTotal;
+        }, 0);
+      }
+
+      // Safely calculate total vehicles
+      let totalVehicles = 0;
+      if (
+        statsData.vehicles.data &&
+        typeof statsData.vehicles.data === "object"
+      ) {
+        totalVehicles = Object.values(statsData.vehicles.data).reduce(
+          (sum, count) => {
+            const vehicleCount = typeof count === "number" ? count : 0;
+            return sum + vehicleCount;
+          },
+          0
+        );
+      }
+
+      // Safely calculate occupancy rate
+      let occupancyRate = 0;
+      if (
+        statsData.occupancy &&
+        typeof statsData.occupancy.totalSlots === "number" &&
+        typeof statsData.occupancy.occupied === "number" &&
+        statsData.occupancy.totalSlots > 0
+      ) {
+        occupancyRate =
+          (statsData.occupancy.occupied / statsData.occupancy.totalSlots) * 100;
+        occupancyRate = parseFloat(occupancyRate.toFixed(1));
+      }
+
+      // Safely calculate average daily revenue
+      let avgDailyRevenue = 0;
+      if (
+        statsData.revenue.detail &&
+        Array.isArray(statsData.revenue.detail) &&
+        statsData.revenue.detail.length > 0
+      ) {
+        avgDailyRevenue = totalRevenue / statsData.revenue.detail.length;
+      }
+
+      // Safely calculate available spots
+      let availableSpots = 0;
+      if (
+        typeof statsData.occupancy?.totalSlots === "number" &&
+        typeof statsData.occupancy?.occupied === "number"
+      ) {
+        availableSpots =
+          (statsData.occupancy.totalSlots || 0) -
+          (statsData.occupancy.occupied || 0);
+        availableSpots = Math.max(0, availableSpots); // Ensure non-negative
+      }
+
+      return {
+        totalRevenue: Math.max(0, totalRevenue),
+        totalVehicles: Math.max(0, totalVehicles),
+        occupancyRate: Math.max(0, Math.min(100, occupancyRate)), // 0-100%
+        avgDailyRevenue: Math.max(0, avgDailyRevenue),
+        availableSpots: Math.max(0, availableSpots),
+      };
+    } catch (error) {
+      console.error("Error calculating summary stats:", error);
+      return {
+        totalRevenue: 0,
+        totalVehicles: 0,
+        occupancyRate: 0,
+        avgDailyRevenue: 0,
+        availableSpots: 0,
+      };
     }
-  }
+  };
 
   // Render content based on active tab
   const renderTabContent = () => {
-    const summaryStats = calculateSummaryStats()
+    try {
+      const summaryStats = calculateSummaryStats();
 
-    switch (activeTab) {
-      case "overview":
-        return renderOverviewTab(summaryStats)
-      case "revenue":
-        return renderRevenueTab(summaryStats)
-      case "vehicles":
-        return renderVehiclesTab(summaryStats)
-      case "system":
-        return renderSystemTab()
-      case "performance":
-        return renderPerformanceTab()
-      case "analysis":
-        return renderAnalysisTab()
-      default:
-        return renderOverviewTab(summaryStats)
+      switch (activeTab) {
+        case "overview":
+          return renderOverviewTab(summaryStats);
+        case "revenue":
+          return renderRevenueTab(summaryStats);
+        case "vehicles":
+          return renderVehiclesTab(summaryStats);
+        case "parking":
+          return renderParkingTab(summaryStats);
+        case "system":
+          return renderSystemTab();
+        case "reports":
+          return renderReportsTab(summaryStats);
+        case "analysis":
+          return renderAnalysisTab();
+        default:
+          return renderOverviewTab(summaryStats);
+      }
+    } catch (renderError) {
+      console.error("Render error:", renderError);
+      return (
+        <div className="error-container">
+          <h3>Lỗi hiển thị dữ liệu</h3>
+          <p>Có lỗi xảy ra khi hiển thị dữ liệu thống kê. Vui lòng thử lại.</p>
+          <button onClick={fetchData} className="retry-button">
+            Tải lại dữ liệu
+          </button>
+        </div>
+      );
     }
-  }
+  };
 
   // Overview Tab Content
   const renderOverviewTab = (summaryStats) => {
-    if (!summaryStats) return <div>Đang tải dữ liệu...</div>
-    
+    if (!summaryStats) {
+      return (
+        <div className="loading-container">
+          <div className="loading-text">Đang tải dữ liệu thống kê...</div>
+        </div>
+      );
+    }
+
+    // Ensure all values are safe to render
+    const safeStats = {
+      totalRevenue: summaryStats.totalRevenue || 0,
+      avgDailyRevenue: summaryStats.avgDailyRevenue || 0,
+      totalVehicles: summaryStats.totalVehicles || 0,
+      occupancyRate: summaryStats.occupancyRate || 0,
+      availableSpots: summaryStats.availableSpots || 0,
+    };
+
     return (
       <>
         <div className="summary-stats">
           <div className="stat-card">
-            <div className="stat-value">{summaryStats.totalRevenue.toLocaleString("vi-VN")}</div>
+            <div className="stat-value">
+              {safeStats.totalRevenue.toLocaleString("vi-VN")}
+            </div>
             <div className="stat-label">Tổng doanh thu (VNĐ)</div>
             <div className="stat-change neutral">
-              TB: {summaryStats.avgDailyRevenue.toLocaleString("vi-VN")} VNĐ/ngày
+              TB: {safeStats.avgDailyRevenue.toLocaleString("vi-VN")} VNĐ/ngày
             </div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-value">{summaryStats.totalVehicles}</div>
+            <div className="stat-value">{safeStats.totalVehicles}</div>
             <div className="stat-label">Tổng lượt xe</div>
             <div className="stat-change positive">
-              TB: {statsData.revenue?.detail?.length > 0 ? Math.round(summaryStats.totalVehicles / statsData.revenue.detail.length) : 0} xe/ngày
+              TB:{" "}
+              {statsData.revenue?.detail?.length > 0
+                ? Math.round(
+                    safeStats.totalVehicles / statsData.revenue.detail.length
+                  )
+                : 0}{" "}
+              xe/ngày
             </div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-value">{summaryStats.occupancyRate}%</div>
+            <div className="stat-value">{safeStats.occupancyRate}%</div>
             <div className="stat-label">Tỷ lệ lấp đầy</div>
             <div
-              className={`stat-change ${summaryStats.occupancyRate > 70 ? "positive" : summaryStats.occupancyRate > 40 ? "neutral" : "negative"}`}
+              className={`stat-change ${
+                safeStats.occupancyRate > 70
+                  ? "positive"
+                  : safeStats.occupancyRate > 40
+                  ? "neutral"
+                  : "negative"
+              }`}
             >
-              {statsData.occupancy?.occupied || 0}/{statsData.occupancy?.totalSlots || 0} chỗ
+              {statsData.occupancy?.occupied || 0}/
+              {statsData.occupancy?.totalSlots || 0} chỗ
             </div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-value">{summaryStats.availableSpots}</div>
+            <div className="stat-value">{safeStats.availableSpots}</div>
             <div className="stat-label">Chỗ trống</div>
             <div className="stat-change neutral">Hiện tại</div>
           </div>
 
           {/* System overview cards */}
           <div className="stat-card">
-            <div className="stat-value">{statsData.systemCounts?.totalCards || 0}</div>
+            <div className="stat-value">
+              {statsData.systemCounts?.totalCards || 0}
+            </div>
             <div className="stat-label">Tổng số thẻ</div>
             <div className="stat-change neutral">Đã đăng ký</div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-value">{statsData.systemCounts?.totalEmployees || 0}</div>
+            <div className="stat-value">
+              {statsData.systemCounts?.totalEmployees || 0}
+            </div>
             <div className="stat-label">Nhân viên</div>
             <div className="stat-change neutral">Đang hoạt động</div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-value">{statsData.systemCounts?.totalCameras || 0}</div>
+            <div className="stat-value">
+              {statsData.systemCounts?.totalCameras || 0}
+            </div>
             <div className="stat-label">Camera</div>
             <div className="stat-change neutral">Hệ thống</div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-value">{statsData.systemCounts?.totalZones || 0}</div>
+            <div className="stat-value">
+              {statsData.systemCounts?.totalZones || 0}
+            </div>
             <div className="stat-label">Khu vực</div>
             <div className="stat-change neutral">Quản lý</div>
           </div>
@@ -579,51 +1372,124 @@ const StatisticsPage = ({ onClose }) => {
               <h3 className="chart-title">Doanh thu theo ngày</h3>
               <canvas ref={revenueChartRef} className="chart-canvas"></canvas>
             </div>
-            
+
             <div className="chart-card">
               <h3 className="chart-title">Tỷ lệ lấp đầy</h3>
               <canvas ref={occupancyChartRef} className="chart-canvas"></canvas>
             </div>
           </div>
         </div>
-      </>
-    )
-  }
 
-  // Revenue Tab Content  
+        {/* New Comprehensive Statistics Tables */}
+        {renderComprehensiveStatistics()}
+      </>
+    );
+  };
+
+  // Revenue Tab Content - Table format only
   const renderRevenueTab = (summaryStats) => {
+    const revenueTableData = statsData.revenueAnalysis?.tableData || [];
+
     return (
       <>
         <div className="summary-stats">
           <div className="stat-card">
-            <div className="stat-value">{summaryStats?.totalRevenue?.toLocaleString("vi-VN") || 0}</div>
+            <div className="stat-value">
+              {(
+                summaryStats?.totalRevenue ||
+                statsData.revenue?.grandTotal ||
+                0
+              ).toLocaleString("vi-VN")}
+            </div>
             <div className="stat-label">Tổng doanh thu (VNĐ)</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{summaryStats?.avgDailyRevenue?.toLocaleString("vi-VN") || 0}</div>
+            <div className="stat-value">
+              {(summaryStats?.avgDailyRevenue || 0).toLocaleString("vi-VN")}
+            </div>
             <div className="stat-label">Trung bình/ngày (VNĐ)</div>
           </div>
-        </div>
-
-        <div className="charts-container">
-          <div className="chart-row">
-            <div className="chart-card">
-              <h3 className="chart-title">Doanh thu theo ngày</h3>
-              <canvas ref={revenueChartRef} className="chart-canvas"></canvas>
-            </div>
-            
-            <div className="chart-card">
-              <h3 className="chart-title">Doanh thu theo loại thẻ</h3>
-              <canvas ref={revenueByCardTypeChartRef} className="chart-canvas"></canvas>
-            </div>
+          <div className="stat-card">
+            <div className="stat-value">{revenueTableData.length || 0}</div>
+            <div className="stat-label">Loại thẻ</div>
           </div>
         </div>
-      </>
-    )
-  }
 
-  // Vehicles Tab Content
+        <div className="table-container">
+          <h3>Chi tiết doanh thu theo loại thẻ</h3>
+          {revenueTableData.length > 0 ? (
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Loại thẻ</th>
+                  <th>Doanh thu (VNĐ)</th>
+                  <th>Số lượt</th>
+                  <th>Tỷ lệ (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {revenueTableData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.cardType}</td>
+                    <td>{(item.amount || 0).toLocaleString("vi-VN")}</td>
+                    <td>{item.count || 0}</td>
+                    <td>{(item.percentage || 0).toFixed(1)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <p>Không có dữ liệu doanh thu theo loại thẻ</p>
+            </div>
+          )}
+        </div>
+
+        {/* Detailed revenue by date */}
+        <div className="table-container">
+          <h3>Chi tiết doanh thu theo ngày</h3>
+          {statsData.revenue?.detail && statsData.revenue.detail.length > 0 ? (
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Ngày</th>
+                  <th>Doanh thu (VNĐ)</th>
+                  <th>Tỷ lệ (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {statsData.revenue.detail.slice(0, 15).map((item, index) => {
+                  const percentage =
+                    statsData.revenue.grandTotal > 0
+                      ? (
+                          (item.total / statsData.revenue.grandTotal) *
+                          100
+                        ).toFixed(1)
+                      : 0;
+                  return (
+                    <tr key={index}>
+                      <td>{new Date(item.date).toLocaleDateString("vi-VN")}</td>
+                      <td>{(item.total || 0).toLocaleString("vi-VN")}</td>
+                      <td>{percentage}%</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <p>Không có dữ liệu doanh thu theo ngày</p>
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
+
+  // Vehicles Tab Content - Table format only
   const renderVehiclesTab = (summaryStats) => {
+    const vehicleTableData = statsData.vehicleAnalysis?.tableData || [];
+
     return (
       <>
         <div className="summary-stats">
@@ -632,62 +1498,342 @@ const StatisticsPage = ({ onClose }) => {
             <div className="stat-label">Tổng lượt xe</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{summaryStats?.occupancyRate || 0}%</div>
+            <div className="stat-value">
+              {summaryStats?.occupancyRate || statsData.occupancy?.ratio || 0}%
+            </div>
             <div className="stat-label">Tỷ lệ lấp đầy</div>
           </div>
-        </div>
-
-        <div className="charts-container">
-          <div className="chart-row">
-            <div className="chart-card">
-              <h3 className="chart-title">Phân bổ loại xe</h3>
-              <canvas ref={vehicleChartRef} className="chart-canvas"></canvas>
+          <div className="stat-card">
+            <div className="stat-value">
+              {statsData.occupancy?.occupied || 0}
             </div>
-            
-            <div className="chart-card">
-              <h3 className="chart-title">Xe vào/ra theo giờ</h3>
-              <canvas ref={vehiclesInParkingChartRef} className="chart-canvas"></canvas>
+            <div className="stat-label">Xe đang trong bãi</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">
+              {(statsData.occupancy?.totalSlots || 0) -
+                (statsData.occupancy?.occupied || 0)}
             </div>
+            <div className="stat-label">Chỗ trống</div>
           </div>
         </div>
-      </>
-    )
-  }
 
-  // System Tab Content
-  const renderSystemTab = () => {
+        <div className="table-container">
+          <h3>Danh sách xe trong bãi</h3>
+          {vehicleTableData.length > 0 ? (
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Biển số</th>
+                  <th>Mã thẻ</th>
+                  <th>Giờ vào</th>
+                  <th>Thời gian gửi</th>
+                  <th>Khu vực</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                {vehicleTableData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.plateNumber}</td>
+                    <td>{item.cardId}</td>
+                    <td>{item.entryTime}</td>
+                    <td>{item.duration} phút</td>
+                    <td>{item.zone}</td>
+                    <td>
+                      <span
+                        className={`status ${
+                          item.status === "Đang gửi"
+                            ? "status-ok"
+                            : "status-warning"
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <p>Không có xe trong bãi</p>
+            </div>
+          )}
+        </div>
+
+        {/* Vehicle Type Distribution */}
+        <div className="table-container">
+          <h3>Phân bổ loại xe</h3>
+          {statsData.vehicles?.data ? (
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Loại xe</th>
+                  <th>Số lượng</th>
+                  <th>Tỷ lệ (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(statsData.vehicles.data).map(
+                  ([vehicleType, count], index) => {
+                    const total = Object.values(statsData.vehicles.data).reduce(
+                      (sum, c) => sum + c,
+                      0
+                    );
+                    const percentage =
+                      total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                    return (
+                      <tr key={index}>
+                        <td>{vehicleType}</td>
+                        <td>{count}</td>
+                        <td>{percentage}%</td>
+                      </tr>
+                    );
+                  }
+                )}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <p>Không có dữ liệu phân bổ loại xe</p>
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
+
+  // Parking Tab Content - Table format only
+  const renderParkingTab = (summaryStats) => {
+    const parkingTableData = statsData.parkingData || [];
+
     return (
       <>
         <div className="summary-stats">
           <div className="stat-card">
-            <div className="stat-value">{statsData.systemCounts?.totalCards || 0}</div>
+            <div className="stat-value">
+              {statsData.occupancy?.totalSlots || 0}
+            </div>
+            <div className="stat-label">Tổng số chỗ</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">
+              {statsData.occupancy?.occupied || 0}
+            </div>
+            <div className="stat-label">Đã sử dụng</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">
+              {(statsData.occupancy?.totalSlots || 0) -
+                (statsData.occupancy?.occupied || 0)}
+            </div>
+            <div className="stat-label">Còn trống</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{statsData.occupancy?.ratio || 0}%</div>
+            <div className="stat-label">Tỷ lệ lấp đầy</div>
+          </div>
+        </div>
+
+        <div className="table-container">
+          <h3>Chi tiết theo khu vực</h3>
+          {parkingTableData.length > 0 ? (
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Tên khu vực</th>
+                  <th>Tổng chỗ</th>
+                  <th>Đã sử dụng</th>
+                  <th>Tỷ lệ lấp đầy</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                {parkingTableData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.zoneName}</td>
+                    <td>{item.totalSpots}</td>
+                    <td>{item.occupiedSpots}</td>
+                    <td>{item.occupancyRate}</td>
+                    <td>
+                      <span
+                        className={`status ${
+                          item.status === "Còn chỗ"
+                            ? "status-ok"
+                            : "status-warning"
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <p>Không có dữ liệu khu vực</p>
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
+
+  // Reports Tab Content - Table format only
+  const renderReportsTab = (summaryStats) => {
+    const reportsTableData = statsData.reportsData || [];
+
+    return (
+      <>
+        <div className="summary-stats">
+          <div className="stat-card">
+            <div className="stat-value">{reportsTableData.length || 0}</div>
+            <div className="stat-label">Tổng báo cáo</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">
+              {statsData.errorAnalysis?.totalErrors || 0}
+            </div>
+            <div className="stat-label">Lỗi hệ thống</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{statsData.sessions?.length || 0}</div>
+            <div className="stat-label">Phiên gửi xe</div>
+          </div>
+        </div>
+
+        <div className="table-container">
+          <h3>Báo cáo hoạt động</h3>
+          {reportsTableData.length > 0 ? (
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Loại</th>
+                  <th>Chi tiết</th>
+                  <th>Thời gian</th>
+                  <th>Trạng thái</th>
+                  <th>Số tiền (VNĐ)</th>
+                  <th>Mô tả</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reportsTableData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.type}</td>
+                    <td>{item.detail}</td>
+                    <td>{item.time}</td>
+                    <td>
+                      <span
+                        className={`status ${
+                          item.status === "DA_RA" ||
+                          item.status === "THANH_CONG"
+                            ? "status-ok"
+                            : item.status === "THAT_BAI" ||
+                              item.status === "ERROR"
+                            ? "status-error"
+                            : "status-warning"
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                    <td>{(item.amount || 0).toLocaleString("vi-VN")}</td>
+                    <td>{item.description || "N/A"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <p>Không có dữ liệu báo cáo</p>
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
+
+  // System Tab Content
+  const renderSystemTab = () => {
+    const systemData = statsData.systemStatus || [];
+
+    return (
+      <>
+        <div className="summary-stats">
+          <div className="stat-card">
+            <div className="stat-value">
+              {statsData.systemCounts?.totalCards || 0}
+            </div>
             <div className="stat-label">Thẻ RFID</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{statsData.systemCounts?.totalEmployees || 0}</div>
+            <div className="stat-value">
+              {statsData.systemCounts?.totalEmployees || 0}
+            </div>
             <div className="stat-label">Nhân viên</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{statsData.systemCounts?.totalCameras || 0}</div>
+            <div className="stat-value">
+              {statsData.systemCounts?.totalCameras || 0}
+            </div>
             <div className="stat-label">Camera</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{statsData.systemCounts?.totalZones || 0}</div>
+            <div className="stat-value">
+              {statsData.systemCounts?.totalZones || 0}
+            </div>
             <div className="stat-label">Khu vực</div>
           </div>
         </div>
 
-        <div className="charts-container">
-          <div className="chart-row">
-            <div className="chart-card">
-              <h3 className="chart-title">Thống kê theo khu vực</h3>
-              <canvas ref={zoneStatsChartRef} className="chart-canvas"></canvas>
+        <div className="table-container">
+          <h3>Chi tiết hệ thống</h3>
+          {systemData.length > 0 ? (
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Thông số</th>
+                  <th>Giá trị</th>
+                  <th>Trạng thái</th>
+                  <th>Loại</th>
+                  <th>Cập nhật cuối</th>
+                </tr>
+              </thead>
+              <tbody>
+                {systemData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.parameter || `Thông số ${index + 1}`}</td>
+                    <td>{item.value || "N/A"}</td>
+                    <td>
+                      <span
+                        className={`status ${
+                          item.status === "OK"
+                            ? "status-ok"
+                            : item.status === "Lỗi"
+                            ? "status-error"
+                            : "status-warning"
+                        }`}
+                      >
+                        {item.status || "N/A"}
+                      </span>
+                    </td>
+                    <td>{item.type || "N/A"}</td>
+                    <td>{item.lastUpdate || "N/A"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <p>Không có dữ liệu chi tiết hệ thống</p>
             </div>
-          </div>
+          )}
         </div>
       </>
-    )
-  }
+    );
+  };
 
   // Performance Tab Content
   const renderPerformanceTab = () => {
@@ -695,11 +1841,15 @@ const StatisticsPage = ({ onClose }) => {
       <>
         <div className="summary-stats">
           <div className="stat-card">
-            <div className="stat-value">{statsData.cameraPerformance?.totalScans || 0}</div>
+            <div className="stat-value">
+              {statsData.cameraPerformance?.totalScans || 0}
+            </div>
             <div className="stat-label">Tổng lần quét</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{statsData.cameraPerformance?.successRate || 0}%</div>
+            <div className="stat-value">
+              {statsData.cameraPerformance?.successRate || 0}%
+            </div>
             <div className="stat-label">Tỷ lệ thành công</div>
           </div>
         </div>
@@ -718,31 +1868,75 @@ const StatisticsPage = ({ onClose }) => {
           </div>
         </div>
       </>
-    )
-  }
+    );
+  };
 
   // Analysis Tab Content
   const renderAnalysisTab = () => {
+    const analysisData = statsData.analysisData || [];
+
     return (
       <>
         <div className="summary-stats">
           <div className="stat-card">
-            <div className="stat-value">{statsData.averageParkingTime?.averageTime || 0}</div>
+            <div className="stat-value">
+              {statsData.averageParkingTime?.averageTime || 0}
+            </div>
             <div className="stat-label">Thời gian TB (phút)</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{statsData.errorAnalysis?.plateErrors || 0}</div>
+            <div className="stat-value">
+              {statsData.errorAnalysis?.plateErrors || 0}
+            </div>
             <div className="stat-label">Lỗi biển số</div>
           </div>
         </div>
 
-        <div className="charts-container">
-          <div className="chart-row">
-            <div className="chart-card">
-              <h3 className="chart-title">Thời gian gửi xe trung bình</h3>
-              <canvas ref={parkingTimeChartRef} className="chart-canvas"></canvas>
+        <div className="table-container">
+          <h3>Phân tích chi tiết</h3>
+          {analysisData.length > 0 ? (
+            <table className="statistics-table">
+              <thead>
+                <tr>
+                  <th>Loại phân tích</th>
+                  <th>Giá trị</th>
+                  <th>Xu hướng</th>
+                  <th>Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analysisData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.type || `Phân tích ${index + 1}`}</td>
+                    <td>{item.value || "N/A"}</td>
+                    <td>
+                      <span
+                        className={`trend ${
+                          item.trend === "up"
+                            ? "trend-up"
+                            : item.trend === "down"
+                            ? "trend-down"
+                            : "trend-stable"
+                        }`}
+                      >
+                        {item.trend === "up"
+                          ? "↗"
+                          : item.trend === "down"
+                          ? "↘"
+                          : "→"}{" "}
+                        {item.trendValue || "Ổn định"}
+                      </span>
+                    </td>
+                    <td>{item.note || ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <p>Không có dữ liệu phân tích</p>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="info-grid">
@@ -781,8 +1975,348 @@ const StatisticsPage = ({ onClose }) => {
           </div>
         </div>
       </>
-    )
-  }
+    );
+  };
+
+  // Render comprehensive statistics tables
+  const renderComprehensiveStatistics = () => {
+    if (
+      !statsData.newSystemOverview &&
+      !statsData.revenueAnalysis &&
+      !statsData.vehicleAnalysis
+    ) {
+      return null;
+    }
+
+    return (
+      <div className="comprehensive-statistics">
+        <h3 className="section-title">Báo cáo thống kê chi tiết</h3>
+
+        <div className="stats-grid">
+          {/* System Overview */}
+          {statsData.newSystemOverview && (
+            <div className="stats-table-card">
+              <h4>Tổng quan hệ thống</h4>
+              <table className="stats-table">
+                <tbody>
+                  <tr>
+                    <td>Tổng số xe vào hôm nay</td>
+                    <td>{statsData.newSystemOverview.vehiclesInToday || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Tổng số xe ra hôm nay</td>
+                    <td>{statsData.newSystemOverview.vehiclesOutToday || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Xe đang trong bãi</td>
+                    <td>{statsData.newSystemOverview.currentVehicles || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Tổng chỗ đỗ</td>
+                    <td>{statsData.newSystemOverview.totalSlots || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Tỷ lệ lấp đầy</td>
+                    <td>{statsData.newSystemOverview.occupancyRate || 0}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Revenue Analysis */}
+          {statsData.revenueAnalysis && (
+            <div className="stats-table-card">
+              <h4>Phân tích doanh thu</h4>
+              <table className="stats-table">
+                <tbody>
+                  <tr>
+                    <td>Doanh thu hôm nay</td>
+                    <td>
+                      {(
+                        statsData.revenueAnalysis.todayRevenue || 0
+                      ).toLocaleString("vi-VN")}{" "}
+                      VNĐ
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Doanh thu tháng này</td>
+                    <td>
+                      {(
+                        statsData.revenueAnalysis.monthRevenue || 0
+                      ).toLocaleString("vi-VN")}{" "}
+                      VNĐ
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Doanh thu năm nay</td>
+                    <td>
+                      {(
+                        statsData.revenueAnalysis.yearRevenue || 0
+                      ).toLocaleString("vi-VN")}{" "}
+                      VNĐ
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Trung bình/ngày</td>
+                    <td>
+                      {(
+                        statsData.revenueAnalysis.avgDailyRevenue || 0
+                      ).toLocaleString("vi-VN")}{" "}
+                      VNĐ
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Vehicle Analysis */}
+          {statsData.vehicleAnalysis && (
+            <div className="stats-table-card">
+              <h4>Phân tích phương tiện</h4>
+              <table className="stats-table">
+                <tbody>
+                  <tr>
+                    <td>Xe máy hôm nay</td>
+                    <td>{statsData.vehicleAnalysis.motorcycleToday || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Ô tô hôm nay</td>
+                    <td>{statsData.vehicleAnalysis.carToday || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Xe đạp hôm nay</td>
+                    <td>{statsData.vehicleAnalysis.bicycleToday || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Thời gian gửi TB</td>
+                    <td>
+                      {statsData.vehicleAnalysis.avgParkingTime || 0} phút
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Parking Analysis */}
+          {statsData.parkingAnalysis && (
+            <div className="stats-table-card">
+              <h4>Phân tích bãi đỗ</h4>
+              <table className="stats-table">
+                <tbody>
+                  <tr>
+                    <td>Giờ cao điểm</td>
+                    <td>{statsData.parkingAnalysis.peakHour || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td>Xe trong giờ cao điểm</td>
+                    <td>{statsData.parkingAnalysis.peakHourVehicles || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Khu vực phổ biến nhất</td>
+                    <td>{statsData.parkingAnalysis.popularZone || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td>Tỷ lệ sử dụng khu vực</td>
+                    <td>{statsData.parkingAnalysis.zoneUsageRate || 0}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Device Status */}
+          {statsData.deviceStatus && (
+            <div className="stats-table-card">
+              <h4>Trạng thái thiết bị</h4>
+              <table className="stats-table">
+                <tbody>
+                  <tr>
+                    <td>Camera hoạt động</td>
+                    <td
+                      className={
+                        statsData.deviceStatus.activeCamera > 0
+                          ? "text-success"
+                          : "text-danger"
+                      }
+                    >
+                      {statsData.deviceStatus.activeCamera || 0}/
+                      {statsData.deviceStatus.totalCamera || 0}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Barrier hoạt động</td>
+                    <td
+                      className={
+                        statsData.deviceStatus.activeBarrier > 0
+                          ? "text-success"
+                          : "text-danger"
+                      }
+                    >
+                      {statsData.deviceStatus.activeBarrier || 0}/
+                      {statsData.deviceStatus.totalBarrier || 0}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Sensor hoạt động</td>
+                    <td
+                      className={
+                        statsData.deviceStatus.activeSensor > 0
+                          ? "text-success"
+                          : "text-danger"
+                      }
+                    >
+                      {statsData.deviceStatus.activeSensor || 0}/
+                      {statsData.deviceStatus.totalSensor || 0}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Cập nhật cuối</td>
+                    <td>{statsData.deviceStatus.lastUpdate || "N/A"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Incidents */}
+          {statsData.incidents && (
+            <div className="stats-table-card">
+              <h4>Sự cố & Báo cáo</h4>
+              <table className="stats-table">
+                <tbody>
+                  <tr>
+                    <td>Sự cố hôm nay</td>
+                    <td>{statsData.incidents.todayIncidents || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Sự cố tháng này</td>
+                    <td>{statsData.incidents.monthIncidents || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Lỗi camera</td>
+                    <td>{statsData.incidents.cameraErrors || 0}</td>
+                  </tr>
+                  <tr>
+                    <td>Lỗi biển số</td>
+                    <td>{statsData.incidents.plateErrors || 0}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Detailed Tables */}
+        {(statsData.reports || statsData.trends || statsData.transactions) && (
+          <div className="detailed-tables">
+            <h4>Báo cáo chi tiết</h4>
+
+            {/* Revenue Trends */}
+            {statsData.trends?.revenue && (
+              <div className="detail-table-card">
+                <h5>Xu hướng doanh thu 7 ngày gần nhất</h5>
+                <table className="detail-table">
+                  <thead>
+                    <tr>
+                      <th>Ngày</th>
+                      <th>Doanh thu (VNĐ)</th>
+                      <th>Số lượt xe</th>
+                      <th>TB/xe (VNĐ)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {statsData.trends.revenue.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.date}</td>
+                        <td>{(item.revenue || 0).toLocaleString("vi-VN")}</td>
+                        <td>{item.vehicles || 0}</td>
+                        <td>
+                          {item.vehicles
+                            ? Math.round(
+                                item.revenue / item.vehicles
+                              ).toLocaleString("vi-VN")
+                            : 0}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Vehicle Count by Hour */}
+            {statsData.trends?.hourly && (
+              <div className="detail-table-card">
+                <h5>Lượng xe theo giờ hôm nay</h5>
+                <table className="detail-table">
+                  <thead>
+                    <tr>
+                      <th>Giờ</th>
+                      <th>Xe vào</th>
+                      <th>Xe ra</th>
+                      <th>Trong bãi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {statsData.trends.hourly.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.hour}:00</td>
+                        <td>{item.vehiclesIn || 0}</td>
+                        <td>{item.vehiclesOut || 0}</td>
+                        <td>{item.currentVehicles || 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Recent Transactions */}
+            {statsData.transactions?.recent && (
+              <div className="detail-table-card">
+                <h5>Giao dịch gần nhất</h5>
+                <table className="detail-table">
+                  <thead>
+                    <tr>
+                      <th>Thời gian</th>
+                      <th>Biển số</th>
+                      <th>Loại xe</th>
+                      <th>Hành động</th>
+                      <th>Phí (VNĐ)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {statsData.transactions.recent
+                      .slice(0, 10)
+                      .map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.time}</td>
+                          <td>{item.licensePlate}</td>
+                          <td>{item.vehicleType}</td>
+                          <td
+                            className={
+                              item.action === "in"
+                                ? "text-success"
+                                : "text-warning"
+                            }
+                          >
+                            {item.action === "in" ? "Vào" : "Ra"}
+                          </td>
+                          <td>{(item.fee || 0).toLocaleString("vi-VN")}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="statistics-overlay">
@@ -798,7 +2332,11 @@ const StatisticsPage = ({ onClose }) => {
           <div className="statistics-controls">
             <div className="control-group">
               <label className="control-label">Khoảng thời gian:</label>
-              <select className="time-range-select" value={preset} onChange={(e) => setPreset(e.target.value)}>
+              <select
+                className="time-range-select"
+                value={preset}
+                onChange={(e) => setPreset(e.target.value)}
+              >
                 {timeRangeOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -813,7 +2351,9 @@ const StatisticsPage = ({ onClose }) => {
             {tabOptions.map((tab) => (
               <button
                 key={tab.value}
-                className={`tab-button ${activeTab === tab.value ? 'active' : ''}`}
+                className={`tab-button ${
+                  activeTab === tab.value ? "active" : ""
+                }`}
                 onClick={() => setActiveTab(tab.value)}
               >
                 <span className="tab-icon">{tab.icon}</span>
@@ -832,14 +2372,12 @@ const StatisticsPage = ({ onClose }) => {
           {error && <div className="error-container">{error}</div>}
 
           {!loading && !error && (
-            <div className="statistics-content">
-              {renderTabContent()}
-            </div>
+            <div className="statistics-content">{renderTabContent()}</div>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default StatisticsPage
+export default StatisticsPage;
