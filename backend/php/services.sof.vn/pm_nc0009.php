@@ -88,8 +88,17 @@ class pm_nc0009 extends lv_controler{
 				'message' => "Biển số {$this->lv003} không khớp với thẻ {$this->lv002} (loại NHANVIEN/VIP)."
 			];
 		}
-        // Kiểm tra xe, thêm nếu chưa có
+        // Kiểm tra xe có tồn tại trong hệ thống không (KHÔNG tự động thêm)
         $car = db_fetch_array(db_query("SELECT 1 FROM pm_nc0002 WHERE lv001 = '{$this->lv003}'"));
+        if (!$car) {
+            return [
+                'success' => false,
+                'message' => "Biển số {$this->lv003} chưa được đăng ký trong hệ thống. Vui lòng đăng ký biển số trước khi sử dụng."
+            ];
+        }
+        
+        // DISABLED: Tự động thêm biển số vào pm_nc0002 
+        /*
         if (!$car) {
             $vt = db_fetch_array(db_query("SELECT lv002 FROM pm_nc0008 WHERE lv001 = '{$this->lv005}'"));
             if (!$vt) {
@@ -106,6 +115,7 @@ class pm_nc0009 extends lv_controler{
                 ];
             }
         }
+        */
 
         // Kiểm tra chính sách giá
         $cs = db_fetch_array(db_query("SELECT 1 FROM pm_nc0008 WHERE lv001 = '{$this->lv005}'"));

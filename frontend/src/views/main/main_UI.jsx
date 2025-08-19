@@ -103,6 +103,8 @@ const MainUI = () => {
   const [showAddCard, setShowAddCard] = useState(false);
   const [showLicensePlateError, setShowLicensePlateError] = useState(false);
   const [showRfidManager, setShowRfidManager] = useState(false);
+  const [autoOpenAddCard, setAutoOpenAddCard] = useState(false);
+  const [prefilledCardId, setPrefilledCardId] = useState("");
   const [showLicensePlateConfirm, setShowLicensePlateConfirm] = useState(false);
   const [showVehicleManagement, setShowVehicleManagement] = useState(false);
   const [showVehicleType, setShowVehicleType] = useState(false);
@@ -1057,9 +1059,12 @@ const MainUI = () => {
           return;
         }
 
-        setShowAddCard({ show: true, cardId: cardId });
+        // Mở RFID dialog với thông tin thẻ được pre-fill
+        setPrefilledCardId(cardId);
+        setAutoOpenAddCard(true);
+        setShowRfidManager(true);
         showToast(
-          `Thẻ ${cardId} chưa được đăng ký. Vui lòng thêm thẻ mới.`,
+          `Thẻ ${cardId} chưa được đăng ký. Mở dialog RFID để thêm thẻ mới.`,
           "warning",
           5000
         );
@@ -2155,12 +2160,32 @@ const MainUI = () => {
                 );
               }
 
-              // Thông báo rõ ràng rằng ảnh sẽ không được lưu do lỗi phiên gửi xe
-              showToast(
-                `Lỗi lưu phiên gửi xe: ${sessionError.message}. Ảnh không được lưu vào ổ đĩa.`,
-                "error",
-                6000
-              );
+              // Kiểm tra nếu lỗi là thẻ chưa tồn tại trong hệ thống
+              const errorMessage = sessionError.message || "";
+              if (
+                errorMessage.includes("chưa tồn tại trong hệ thống") ||
+                errorMessage.includes("chưa được đăng ký")
+              ) {
+                // Hiển thị thông báo và mở dialog RFID với auto-open add dialog
+                showToast(
+                  "Thẻ RFID chưa được đăng ký. Đang mở trang quản lý thẻ RFID...",
+                  "warning",
+                  4000
+                );
+
+                // Delay một chút để user đọc thông báo, sau đó mở dialog RFID với auto-open
+                setTimeout(() => {
+                  setAutoOpenAddCard(true);
+                  setShowRfidManager(true);
+                }, 1500);
+              } else {
+                // Thông báo lỗi khác
+                showToast(
+                  `Lỗi lưu phiên gửi xe: ${errorMessage}. Ảnh không được lưu vào ổ đĩa.`,
+                  "error",
+                  6000
+                );
+              }
 
               console.log(
                 "⚠️ Session creation failed - images will NOT be saved to disk"
@@ -2409,7 +2434,29 @@ const MainUI = () => {
               "#ef4444"
             );
           }
-          showToast(`Lỗi xử lý thẻ: ${error.message}`, "error", 5000);
+
+          // Kiểm tra nếu lỗi là thẻ chưa tồn tại trong hệ thống
+          const errorMessage = error.message || "";
+          if (
+            errorMessage.includes("chưa tồn tại trong hệ thống") ||
+            errorMessage.includes("chưa được đăng ký")
+          ) {
+            // Hiển thị thông báo và mở dialog RFID với auto-open add dialog
+            showToast(
+              "Thẻ RFID chưa được đăng ký. Đang mở trang quản lý thẻ RFID...",
+              "warning",
+              4000
+            );
+
+            // Delay một chút để user đọc thông báo, sau đó mở dialog RFID với auto-open
+            setTimeout(() => {
+              setAutoOpenAddCard(true);
+              setShowRfidManager(true);
+            }, 1500);
+          } else {
+            // Lỗi khác
+            showToast(`Lỗi xử lý thẻ: ${errorMessage}`, "error", 5000);
+          }
         }
       }
     } catch (error) {
@@ -2944,11 +2991,19 @@ const MainUI = () => {
 
       {showRfidManager && (
         <RfidManagerDialog
-          onClose={() => setShowRfidManager(false)}
+          onClose={() => {
+            setShowRfidManager(false);
+            setAutoOpenAddCard(false); // Reset auto-open state
+            setPrefilledCardId(""); // Reset prefilled card ID
+          }}
           onSave={() => {
             console.log("RFID cards updated");
             setShowRfidManager(false);
+            setAutoOpenAddCard(false); // Reset auto-open state
+            setPrefilledCardId(""); // Reset prefilled card ID
           }}
+          autoOpenAddDialog={autoOpenAddCard}
+          prefilledCardId={prefilledCardId}
         />
       )}
 
