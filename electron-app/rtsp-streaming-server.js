@@ -130,18 +130,39 @@ try {
 }
 
 const url = require("url");
+const http = require("http");
 
 class RTSPStreamingServer {
   constructor(port = 9999) {
     this.port = port;
     this.activeStreams = new Map(); // Map<rtspUrl, {ffmpeg, clients}>
     this.wss = null;
+    this.httpServer = null;
   }
 
   start() {
-    // Create WebSocket server
+    // Create HTTP server first
+    this.httpServer = http.createServer((req, res) => {
+      // Handle health check endpoint
+      if (req.url === '/health' && req.method === 'GET') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          status: 'ok', 
+          timestamp: new Date().toISOString(),
+          activeStreams: this.activeStreams.size,
+          websocketConnections: this.wss ? this.wss.clients.size : 0
+        }));
+        return;
+      }
+      
+      // Default response for other requests
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
+    });
+
+    // Create WebSocket server using the HTTP server
     this.wss = new WebSocket.Server({
-      port: this.port,
+      server: this.httpServer,
       perMessageDeflate: false, // Disable compression for lowest latency
       maxPayload: 1024 * 1024 * 3, // Reduced to 3MB for faster processing
       clientTracking: true,
@@ -156,7 +177,11 @@ class RTSPStreamingServer {
       noDelay: true, // TCP_NODELAY for immediate transmission
     });
 
-    console.log(`🚀 RTSP WebSocket server started on port ${this.port}`);
+    // Start the HTTP server
+    this.httpServer.listen(this.port, () => {
+      console.log(`🚀 RTSP WebSocket server started on port ${this.port}`);
+      console.log(`🏥 Health check endpoint available at http://localhost:${this.port}/health`);
+    });
 
     this.wss.on("connection", (ws, req) => {
       const query = url.parse(req.url, true).query;
@@ -693,6 +718,10 @@ class RTSPStreamingServer {
 
     if (this.wss) {
       this.wss.close();
+    }
+
+    if (this.httpServer) {
+      this.httpServer.close();
     }
   }
 

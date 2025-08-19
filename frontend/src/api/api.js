@@ -4539,3 +4539,134 @@ export async function getDailyReport(date = null) {
     throw error;
   }
 }
+
+// -------------------- Camera System Management Functions --------------------
+/**
+ * Restart toàn bộ hệ thống camera
+ * @returns {Promise<Object>} Kết quả restart
+ */
+export async function restartCameraSystem() {
+  try {
+    console.log("🔄 Initiating camera system restart...");
+
+    // Check if running in Electron environment
+    if (window.electronAPI && window.electronAPI.cameraSystem) {
+      console.log("🔄 Using Electron API to restart camera system...");
+      const result = await window.electronAPI.cameraSystem.restart();
+
+      if (result.success) {
+        console.log("✅ Camera system restart completed via Electron");
+        return {
+          success: true,
+          message:
+            result.message ||
+            "Đã khởi động lại toàn bộ hệ thống camera thành công",
+        };
+      } else {
+        console.error("❌ Electron camera restart failed:", result.error);
+        return {
+          success: false,
+          message: "Lỗi khi khởi động lại hệ thống camera: " + result.error,
+        };
+      }
+    } else {
+      // Fallback for web environment - just show notification
+      console.log(
+        "ℹ️ Running in web environment, camera restart not available"
+      );
+      return {
+        success: false,
+        message:
+          "Chức năng restart camera chỉ khả dụng trong môi trường Electron",
+      };
+    }
+  } catch (error) {
+    console.error("❌ Error restarting camera system:", error);
+    return {
+      success: false,
+      message: "Lỗi khi khởi động lại hệ thống camera: " + error.message,
+    };
+  }
+}
+
+/**
+ * Stop toàn bộ hệ thống camera
+ * @returns {Promise<Object>} Kết quả stop
+ */
+export async function stopCameraSystem() {
+  try {
+    console.log("Stopping camera system...");
+
+    // Stop Electron RTSP streaming server
+    if (window.electronAPI && window.electronAPI.stopRTSPServer) {
+      console.log("Stopping Electron RTSP server...");
+      await window.electronAPI.stopRTSPServer();
+    }
+
+    // Stop Face Recognition service
+    if (window.electronAPI && window.electronAPI.stopFaceService) {
+      console.log("Stopping Face Recognition service...");
+      await window.electronAPI.stopFaceService();
+    }
+
+    // Stop ALPR service
+    if (window.electronAPI && window.electronAPI.stopALPRService) {
+      console.log("Stopping ALPR service...");
+      await window.electronAPI.stopALPRService();
+    }
+
+    console.log("Camera system stopped");
+
+    return {
+      success: true,
+      message: "Đã dừng toàn bộ hệ thống camera thành công",
+    };
+  } catch (error) {
+    console.error("Error stopping camera system:", error);
+    return {
+      success: false,
+      message: "Lỗi khi dừng hệ thống camera: " + error.message,
+    };
+  }
+}
+
+/**
+ * Start toàn bộ hệ thống camera
+ * @returns {Promise<Object>} Kết quả start
+ */
+export async function startCameraSystem() {
+  try {
+    console.log("Starting camera system...");
+
+    // Start Electron RTSP streaming server
+    if (window.electronAPI && window.electronAPI.startRTSPServer) {
+      console.log("Starting Electron RTSP server...");
+      await window.electronAPI.startRTSPServer();
+    }
+
+    // Start Face Recognition service
+    if (window.electronAPI && window.electronAPI.startFaceService) {
+      console.log("Starting Face Recognition service...");
+      await window.electronAPI.startFaceService();
+    }
+
+    // Start ALPR service
+    if (window.electronAPI && window.electronAPI.startALPRService) {
+      console.log("Starting ALPR service...");
+      await window.electronAPI.startALPRService();
+    }
+
+    console.log("Camera system started");
+
+    return {
+      success: true,
+      message: "Đã khởi động toàn bộ hệ thống camera thành công",
+    };
+  } catch (error) {
+    console.error("Error starting camera system:", error);
+    return {
+      success: false,
+      message: "Lỗi khi khởi động hệ thống camera: " + error.message,
+    };
+  }
+}

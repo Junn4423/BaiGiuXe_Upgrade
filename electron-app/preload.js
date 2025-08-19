@@ -119,6 +119,65 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
   },
 
+  // Camera System Management APIs
+  cameraSystem: {
+    // Restart entire camera system
+    restart: async () => {
+      return await ipcRenderer.invoke("restart-camera-system");
+    },
+
+    // Stop entire camera system
+    stop: async () => {
+      const result = await ipcRenderer.invoke("stop-camera-system");
+      if (!result.success) throw new Error(result.error);
+      return result;
+    },
+
+    // Start entire camera system
+    start: async () => {
+      const result = await ipcRenderer.invoke("start-camera-system");
+      if (!result.success) throw new Error(result.error);
+      return result;
+    },
+  },
+
+  // Individual Service Management
+  restartRTSPServer: async () => {
+    return await ipcRenderer.invoke("restart-rtsp-server");
+  },
+
+  stopRTSPServer: async () => {
+    return await ipcRenderer.invoke("stop-rtsp-server");
+  },
+
+  startRTSPServer: async () => {
+    return await ipcRenderer.invoke("start-rtsp-server");
+  },
+
+  restartFaceService: async () => {
+    return await ipcRenderer.invoke("restart-face-service");
+  },
+
+  stopFaceService: async () => {
+    return await ipcRenderer.invoke("stop-face-service");
+  },
+
+  startFaceService: async () => {
+    return await ipcRenderer.invoke("start-face-service");
+  },
+
+  restartALPRService: async () => {
+    return await ipcRenderer.invoke("restart-alpr-service");
+  },
+
+  stopALPRService: async () => {
+    return await ipcRenderer.invoke("stop-alpr-service");
+  },
+
+  startALPRService: async () => {
+    return await ipcRenderer.invoke("start-alpr-service");
+  },
+
   // Check if running in Electron
   isElectron: true,
 

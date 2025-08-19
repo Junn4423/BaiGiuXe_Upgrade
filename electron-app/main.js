@@ -4,6 +4,7 @@ const fs = require("fs").promises;
 const RTSPStreamingServer = require("./rtsp-streaming-server");
 const { spawn } = require("child_process");
 let alprProcess;
+let faceRecognitionProcess; // Face Recognition service process
 let pythonInstallProcess;
 
 // Import USB Relay Control
@@ -369,6 +370,79 @@ async function installPythonDependencies() {
 }
 
 /**
+ * Start Face Recognition Service
+ */
+async function startFaceRecognitionService() {
+  try {
+    console.log("▶️ Starting Face Recognition service...");
+
+    // Check if already running
+    if (faceRecognitionProcess) {
+      console.log("ℹ️ Face Recognition service already running");
+      return true;
+    }
+
+    // Determine paths based on app packaging
+    const devScriptPath = path.join(
+      __dirname,
+      "..",
+      "backend",
+      "khuonmat",
+      "manage_face_recognition.bat"
+    );
+    const prodScriptPath = path.join(
+      __dirname,
+      "backend",
+      "khuonmat",
+      "manage_face_recognition.bat"
+    );
+
+    let scriptPath = fs.existsSync(devScriptPath)
+      ? devScriptPath
+      : prodScriptPath;
+
+    if (!fs.existsSync(scriptPath)) {
+      console.error("❌ Face Recognition script not found:", scriptPath);
+      return false;
+    }
+
+    console.log("📄 Using Face Recognition script:", scriptPath);
+
+    // Start Face Recognition service
+    faceRecognitionProcess = spawn(scriptPath, ["start"], {
+      cwd: path.dirname(scriptPath),
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: true,
+      detached: false,
+    });
+
+    faceRecognitionProcess.stdout.on("data", (data) => {
+      console.log(`[Face Recognition] ${data.toString().trim()}`);
+    });
+
+    faceRecognitionProcess.stderr.on("data", (data) => {
+      console.error(`[Face Recognition Error] ${data.toString().trim()}`);
+    });
+
+    faceRecognitionProcess.on("close", (code) => {
+      console.log(`Face Recognition service exited with code ${code}`);
+      faceRecognitionProcess = null;
+    });
+
+    faceRecognitionProcess.on("error", (error) => {
+      console.error("❌ Failed to start Face Recognition service:", error);
+      faceRecognitionProcess = null;
+    });
+
+    console.log("✅ Face Recognition service started successfully");
+    return true;
+  } catch (error) {
+    console.error("❌ Error starting Face Recognition service:", error);
+    return false;
+  }
+}
+
+/**
  * Spawn the Fast ALPR Python micro-service so that licence-plate
  * detection is available for the React/Electron frontend.
  */
@@ -730,6 +804,11 @@ app.on("window-all-closed", () => {
     alprProcess.kill();
   }
 
+  if (faceRecognitionProcess) {
+    console.log("Stopping Face Recognition service...");
+    faceRecognitionProcess.kill();
+  }
+
   if (process.platform !== "darwin") app.quit();
 });
 
@@ -754,6 +833,19 @@ app.on("before-quit", () => {
       if (alprProcess && !alprProcess.killed) {
         console.log("🛑 Force killing ALPR service...");
         alprProcess.kill("SIGKILL");
+      }
+    }, 3000);
+  }
+
+  if (faceRecognitionProcess) {
+    console.log("🛑 Stopping Face Recognition service before quit...");
+    faceRecognitionProcess.kill("SIGTERM");
+
+    // Force kill if not responsive
+    setTimeout(() => {
+      if (faceRecognitionProcess && !faceRecognitionProcess.killed) {
+        console.log("🛑 Force killing Face Recognition service...");
+        faceRecognitionProcess.kill("SIGKILL");
       }
     }, 3000);
   }
@@ -1036,6 +1128,270 @@ ipcMain.handle("relay-get-status", async () => {
     return { success: true, result };
   } catch (error) {
     console.error("❌ Get relay status error via IPC:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// ==================== CAMERA SYSTEM MANAGEMENT IPC HANDLERS ====================
+
+// Restart entire camera system
+ipcMain.handle("restart-camera-system", async () => {
+  try {
+    console.log("🔄 IPC: Restarting entire camera system...");
+
+    const results = [];
+
+    // Restart RTSP server
+    try {
+      if (rtspServer) {
+        console.log("🛑 Stopping RTSP server...");
+        rtspServer.stop();
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+      console.log("▶️ Starting RTSP server...");
+      rtspServer = new RTSPStreamingServer();
+      results.push("✅ RTSP server restarted");
+    } catch (error) {
+      results.push("❌ RTSP server error: " + error.message);
+    }
+
+    // Restart Face Recognition service
+    try {
+      if (faceRecognitionProcess) {
+        console.log("🛑 Stopping Face Recognition service...");
+        faceRecognitionProcess.kill("SIGTERM");
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        faceRecognitionProcess = null;
+      }
+      console.log("▶️ Starting Face Recognition service...");
+      await startFaceRecognitionService();
+      results.push("✅ Face Recognition service restarted");
+    } catch (error) {
+      results.push("❌ Face Recognition error: " + error.message);
+    }
+
+    // Restart ALPR service
+    try {
+      if (alprProcess) {
+        console.log("🛑 Stopping ALPR service...");
+        alprProcess.kill("SIGTERM");
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        alprProcess = null;
+      }
+      console.log("▶️ Starting ALPR service...");
+      await startALPRService();
+      results.push("✅ ALPR service restarted");
+    } catch (error) {
+      results.push("❌ ALPR error: " + error.message);
+    }
+
+    console.log("✅ Camera system restart completed");
+    return {
+      success: true,
+      message: "Hệ thống camera đã được khởi động lại thành công",
+      details: results,
+    };
+  } catch (error) {
+    console.error("❌ Error restarting camera system:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Restart RTSP Streaming Server
+ipcMain.handle("restart-rtsp-server", async () => {
+  try {
+    console.log("🔄 IPC: Restarting RTSP streaming server...");
+
+    if (rtspServer) {
+      console.log("🛑 Stopping current RTSP server...");
+      rtspServer.stop();
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2s for cleanup
+    }
+
+    // Start new RTSP server
+    console.log("▶️ Starting new RTSP server...");
+    rtspServer = new RTSPStreamingServer();
+
+    console.log("✅ RTSP server restarted successfully");
+    return { success: true, message: "RTSP server restarted successfully" };
+  } catch (error) {
+    console.error("❌ Error restarting RTSP server:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Stop RTSP Streaming Server
+ipcMain.handle("stop-rtsp-server", async () => {
+  try {
+    console.log("🛑 IPC: Stopping RTSP streaming server...");
+
+    if (rtspServer) {
+      rtspServer.stop();
+      rtspServer = null;
+      console.log("✅ RTSP server stopped successfully");
+    } else {
+      console.log("ℹ️ RTSP server was not running");
+    }
+
+    return { success: true, message: "RTSP server stopped successfully" };
+  } catch (error) {
+    console.error("❌ Error stopping RTSP server:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Start RTSP Streaming Server
+ipcMain.handle("start-rtsp-server", async () => {
+  try {
+    console.log("▶️ IPC: Starting RTSP streaming server...");
+
+    if (rtspServer) {
+      console.log("ℹ️ RTSP server already running");
+    } else {
+      rtspServer = new RTSPStreamingServer();
+      console.log("✅ RTSP server started successfully");
+    }
+
+    return { success: true, message: "RTSP server started successfully" };
+  } catch (error) {
+    console.error("❌ Error starting RTSP server:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Restart Face Recognition Service
+ipcMain.handle("restart-face-service", async () => {
+  try {
+    console.log("🔄 IPC: Restarting Face Recognition service...");
+
+    // Stop current face service if running
+    if (faceRecognitionProcess) {
+      console.log("🛑 Stopping current Face Recognition service...");
+      faceRecognitionProcess.kill("SIGTERM");
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait 3s for cleanup
+      faceRecognitionProcess = null;
+    }
+
+    // Start new face service
+    console.log("▶️ Starting new Face Recognition service...");
+    await startFaceRecognitionService();
+
+    console.log("✅ Face Recognition service restarted successfully");
+    return {
+      success: true,
+      message: "Face Recognition service restarted successfully",
+    };
+  } catch (error) {
+    console.error("❌ Error restarting Face Recognition service:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Stop Face Recognition Service
+ipcMain.handle("stop-face-service", async () => {
+  try {
+    console.log("🛑 IPC: Stopping Face Recognition service...");
+
+    if (faceRecognitionProcess) {
+      faceRecognitionProcess.kill("SIGTERM");
+      faceRecognitionProcess = null;
+      console.log("✅ Face Recognition service stopped successfully");
+    } else {
+      console.log("ℹ️ Face Recognition service was not running");
+    }
+
+    return {
+      success: true,
+      message: "Face Recognition service stopped successfully",
+    };
+  } catch (error) {
+    console.error("❌ Error stopping Face Recognition service:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Start Face Recognition Service
+ipcMain.handle("start-face-service", async () => {
+  try {
+    console.log("▶️ IPC: Starting Face Recognition service...");
+
+    if (faceRecognitionProcess) {
+      console.log("ℹ️ Face Recognition service already running");
+    } else {
+      await startFaceRecognitionService();
+      console.log("✅ Face Recognition service started successfully");
+    }
+
+    return {
+      success: true,
+      message: "Face Recognition service started successfully",
+    };
+  } catch (error) {
+    console.error("❌ Error starting Face Recognition service:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Restart ALPR Service
+ipcMain.handle("restart-alpr-service", async () => {
+  try {
+    console.log("🔄 IPC: Restarting ALPR service...");
+
+    // Stop current ALPR service if running
+    if (alprProcess) {
+      console.log("🛑 Stopping current ALPR service...");
+      alprProcess.kill("SIGTERM");
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait 3s for cleanup
+      alprProcess = null;
+    }
+
+    // Start new ALPR service
+    console.log("▶️ Starting new ALPR service...");
+    await startALPRService();
+
+    console.log("✅ ALPR service restarted successfully");
+    return { success: true, message: "ALPR service restarted successfully" };
+  } catch (error) {
+    console.error("❌ Error restarting ALPR service:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Stop ALPR Service
+ipcMain.handle("stop-alpr-service", async () => {
+  try {
+    console.log("🛑 IPC: Stopping ALPR service...");
+
+    if (alprProcess) {
+      alprProcess.kill("SIGTERM");
+      alprProcess = null;
+      console.log("✅ ALPR service stopped successfully");
+    } else {
+      console.log("ℹ️ ALPR service was not running");
+    }
+
+    return { success: true, message: "ALPR service stopped successfully" };
+  } catch (error) {
+    console.error("❌ Error stopping ALPR service:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Start ALPR Service
+ipcMain.handle("start-alpr-service", async () => {
+  try {
+    console.log("▶️ IPC: Starting ALPR service...");
+
+    if (alprProcess) {
+      console.log("ℹ️ ALPR service already running");
+    } else {
+      await startALPRService();
+      console.log("✅ ALPR service started successfully");
+    }
+
+    return { success: true, message: "ALPR service started successfully" };
+  } catch (error) {
+    console.error("❌ Error starting ALPR service:", error);
     return { success: false, error: error.message };
   }
 });

@@ -16,6 +16,7 @@ import {
   layThongTinLoaiXeTuBienSo,
   laySlotTrongChoXeLon,
   capNhatTrangThaiChoDo,
+  restartCameraSystem,
 } from "../../api/api";
 import { useUser } from "../../utils/userContext";
 import BienSoLoiDialog from "../dialogs/BienSoLoiDialog";
@@ -125,6 +126,8 @@ const MainUI = () => {
   // Auto face recognition monitoring
   const [autoFaceRecognitionEnabled, setAutoFaceRecognitionEnabled] =
     useState(true);
+  const [isRestartingCamera, setIsRestartingCamera] = useState(false); // NEW: Track camera restart state
+  const [restartMessage, setRestartMessage] = useState(""); // NEW: Track restart progress message
   const [lastProcessedPlate, setLastProcessedPlate] = useState("");
   const [vehicleDatabase, setVehicleDatabase] = useState([]); // Cache pm_nc0002 data
   const [isProcessingFace, setIsProcessingFace] = useState(false); // For UI indicator
@@ -806,6 +809,100 @@ const MainUI = () => {
   const openVehicleType = () => setShowVehicleType(true);
   const openEmployeePermission = () => setShowEmployeePermission(true);
   const openSystemSettings = () => setShowSystemSettings(true);
+
+  // Check if RTSP server is ready
+  const checkRTSPServerReady = async () => {
+    try {
+      console.log("🔍 Checking RTSP server readiness...");
+      
+      // Try to connect to RTSP server health check endpoint
+      const response = await fetch('http://localhost:9999/health', {
+        method: 'GET',
+        timeout: 3000
+      });
+      
+      if (response.ok) {
+        console.log("✅ RTSP server is ready");
+        return true;
+      } else {
+        console.log("⚠️ RTSP server responded but not ready");
+        return false;
+      }
+    } catch (error) {
+      console.log("❌ RTSP server not ready:", error.message);
+      return false;
+    }
+  };
+
+  // Handle camera system restart
+  const handleRestartCameraSystem = async () => {
+    if (isRestartingCamera) return; // Prevent multiple clicks
+
+    // Confirm dialog
+    const confirmRestart = window.confirm(
+      "Bạn có chắc muốn khởi động lại toàn bộ hệ thống camera?\n\n" +
+        "Điều này sẽ:\n" +
+        "• Khởi động lại RTSP Streaming Server\n" +
+        "• Khởi động lại Face Recognition Service\n" +
+        "• Khởi động lại ALPR Service\n" +
+        "• Reset toàn bộ màn hình\n\n" +
+        "Quá trình này có thể mất 15-20 giây."
+    );
+
+    if (!confirmRestart) {
+      return;
+    }
+
+    try {
+      setIsRestartingCamera(true);
+      setRestartMessage("Đang khởi động lại camera services...");
+      showToast("🔄 Đang khởi động lại hệ thống camera...", "info", 3000);
+
+      const result = await restartCameraSystem();
+
+      if (result.success) {
+        setRestartMessage("Camera services đã restart thành công!");
+        showToast("✅ " + result.message, "success", 3000);
+
+        // Wait longer for RTSP server to be fully ready
+        setTimeout(() => {
+          setRestartMessage("Đang kiểm tra RTSP server...");
+          
+          // Check if RTSP server is ready before resetting screen
+          checkRTSPServerReady().then((isReady) => {
+            if (isReady) {
+              setRestartMessage("RTSP server sẵn sàng! Đang reset màn hình...");
+              showToast("🔄 Đang reset màn hình...", "info", 2000);
+
+              // Reset screen after confirming RTSP server is ready
+              setTimeout(() => {
+                setRestartMessage("Đang tải lại hệ thống...");
+                showToast("🎯 Đang tải lại hệ thống...", "info", 2000);
+                window.location.reload();
+              }, 2000);
+            } else {
+              // If RTSP server not ready, wait a bit more and reload anyway
+              setRestartMessage("RTSP server chưa sẵn sàng, đang reload...");
+              showToast("⚠️ Đang reload để kết nối lại...", "warning", 2000);
+              setTimeout(() => {
+                window.location.reload();
+              }, 3000);
+            }
+          });
+        }, 8000); // Wait 8 seconds for services to be ready
+      } else {
+        showToast("❌ " + result.message, "error", 5000);
+        setIsRestartingCamera(false);
+        setRestartMessage("");
+      }
+    } catch (error) {
+      console.error("Error restarting camera system:", error);
+      showToast("❌ Lỗi khởi động lại camera: " + error.message, "error", 5000);
+      setIsRestartingCamera(false);
+      setRestartMessage("");
+    }
+    // Note: Don't reset isRestartingCamera here since we're reloading the page
+  };
 
   const reloadMainUI = () => {
     window.location.reload();
@@ -2834,6 +2931,20 @@ const MainUI = () => {
             CHẤM CÔNG
           </button>
           <button
+            className={`toolbar-btn refresh-camera-btn ${
+              isRestartingCamera ? "restarting disabled" : ""
+            }`}
+            onClick={handleRestartCameraSystem}
+            disabled={isRestartingCamera}
+            title={
+              isRestartingCamera
+                ? "Đang khởi động lại hệ thống camera và reset màn hình..."
+                : "Khởi động lại toàn bộ hệ thống camera + Reset màn hình\n• RTSP Streaming Server\n• Face Recognition Service\n• ALPR Service\n• Reset UI toàn bộ\n\nSử dụng khi camera bị lỗi hoặc không hoạt động"
+            }
+          >
+            {isRestartingCamera ? "🔄 RESTARTING..." : "🔄 REFRESH CAMERA"}
+          </button>
+          <button
             className={`toolbar-btn ${
               autoFaceRecognitionEnabled ? "active" : ""
             }`}
@@ -3094,6 +3205,22 @@ const MainUI = () => {
       {/* System Settings Dialog */}
       {showSystemSettings && (
         <SystemSettings onClose={() => setShowSystemSettings(false)} />
+      )}
+
+      {/* Camera Restart Overlay */}
+      {isRestartingCamera && (
+        <div className="camera-restart-overlay">
+          <div className="camera-restart-content">
+            <div className="camera-restart-spinner"></div>
+            <div className="camera-restart-title">🔄 REFRESH CAMERA</div>
+            <div className="camera-restart-message">
+              {restartMessage || "Đang khởi động lại hệ thống camera..."}
+            </div>
+            <div className="camera-restart-progress">
+              Vui lòng chờ trong giây lát...
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
