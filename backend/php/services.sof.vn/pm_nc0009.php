@@ -88,18 +88,10 @@ class pm_nc0009 extends lv_controler{
 				'message' => "Biển số {$this->lv003} không khớp với thẻ {$this->lv002} (loại NHANVIEN/VIP)."
 			];
 		}
-        // Kiểm tra xe có tồn tại trong hệ thống không (KHÔNG tự động thêm)
+        // Kiểm tra xe có tồn tại trong hệ thống không - TỰ ĐỘNG THÊM nếu chưa có
         $car = db_fetch_array(db_query("SELECT 1 FROM pm_nc0002 WHERE lv001 = '{$this->lv003}'"));
         if (!$car) {
-            return [
-                'success' => false,
-                'message' => "Biển số {$this->lv003} chưa được đăng ký trong hệ thống. Vui lòng đăng ký biển số trước khi sử dụng."
-            ];
-        }
-        
-        // DISABLED: Tự động thêm biển số vào pm_nc0002 
-        /*
-        if (!$car) {
+            // Tự động thêm biển số vào pm_nc0002 cho khách vãng lai
             $vt = db_fetch_array(db_query("SELECT lv002 FROM pm_nc0008 WHERE lv001 = '{$this->lv005}'"));
             if (!$vt) {
                 return [
@@ -107,15 +99,18 @@ class pm_nc0009 extends lv_controler{
                     'message' => "Chính sách giá {$this->lv005} không hợp lệ."
                 ];
             }
-            $insert_car = db_query("INSERT INTO pm_nc0002 (lv001, lv002) VALUES ('{$this->lv003}', '{$vt['lv002']}')");
+            
+            // Thêm biển số mới cho khách vãng lai
+            $insert_car = db_query("INSERT INTO pm_nc0002 (lv001, lv002, lv003) VALUES ('{$this->lv003}', '{$vt['lv002']}', 'Khách vãng lai')");
             if (!$insert_car) {
+                error_log("Failed to auto-insert vehicle {$this->lv003}: " . sof_error());
                 return [
                     'success' => false,
-                    'message' => "Không thể thêm thông tin xe với biển số {$this->lv003}."
+                    'message' => "Lỗi khi thêm biển số {$this->lv003} vào hệ thống."
                 ];
             }
+            error_log("Auto-inserted new vehicle: {$this->lv003} with type: {$vt['lv002']}");
         }
-        */
 
         // Kiểm tra chính sách giá
         $cs = db_fetch_array(db_query("SELECT 1 FROM pm_nc0008 WHERE lv001 = '{$this->lv005}'"));

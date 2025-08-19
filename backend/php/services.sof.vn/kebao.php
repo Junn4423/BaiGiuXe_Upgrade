@@ -147,11 +147,53 @@ switch ($vtable) {
                 $pm_nc0003->lv002 = $input['loaiThe'] ?? $_POST['lv002'] ?? null;
                 $pm_nc0003->lv003 = $input['trangThai'] ?? $_POST['lv003'] ?? null;
                 $pm_nc0003->lv004 = date('Y-m-d');
-				$pm_nc0003->lv005 = $input['bienSoXe'] ?? $_POST['lv005']??null;
-				$pm_nc0003->lv006 = $input['maChinhSach'] ?? $_POST['lv006']??null;
-				$pm_nc0003->lv007 = $input['ngayKetThucCS'] ?? $_POST['lv007']??null;
+				$pm_nc0003->lv005 = $input['bienSoXe'] ?? $_POST['lv005'] ?? null;
+				$pm_nc0003->lv006 = $input['maChinhSach'] ?? $_POST['lv006'] ?? null;
+				$pm_nc0003->lv007 = $input['ngayKetThucCS'] ?? $_POST['lv007'] ?? null;
+                
+                // Validate required fields
+                if (!$pm_nc0003->lv001 || !$pm_nc0003->lv002 || !$pm_nc0003->lv003) {
+                    $vOutput = ['success'=>false,'message'=>'Thiếu thông tin bắt buộc (UID thẻ, loại thẻ, trạng thái)'];
+                    break;
+                }
+                
+                // Logic nghiệp vụ: chỉ thẻ VIP/NHANVIEN mới cần biển số
+                if ($pm_nc0003->lv002 == 'KHACH') {
+                    // Thẻ thường: không cần biển số, set chuỗi rỗng vì database không cho phép NULL
+                    $pm_nc0003->lv005 = '';
+                    $pm_nc0003->lv006 = ''; // Cũng không cần chính sách cho thẻ thường
+                    $pm_nc0003->lv007 = '';
+                    error_log("PM_NC0003 Add - Thẻ KHACH: bỏ qua biển số và chính sách");
+                } else if ($pm_nc0003->lv002 == 'VIP' || $pm_nc0003->lv002 == 'NHANVIEN') {
+                    // Thẻ VIP/NHANVIEN: chấp nhận biển số để linh hoạt với khách vãng lai
+                    if ($pm_nc0003->lv005 && trim($pm_nc0003->lv005) != '') {
+                        error_log("PM_NC0003 Add - Thẻ VIP/NHANVIEN: biển số {$pm_nc0003->lv005}");
+                    } else {
+                        error_log("PM_NC0003 Add - Thẻ VIP/NHANVIEN: không có biển số (cho phép khách vãng lai)");
+                    }
+                }
+                
+                // Log dữ liệu để debug
+                error_log("PM_NC0003 Add - Mapped data: lv001=" . $pm_nc0003->lv001 . ", lv002=" . $pm_nc0003->lv002 . ", lv003=" . $pm_nc0003->lv003 . ", lv005=" . ($pm_nc0003->lv005 ?? 'NULL') . ", lv006=" . ($pm_nc0003->lv006 ?? 'NULL') . ", lv007=" . ($pm_nc0003->lv007 ?? 'NULL'));
+                
                 $result = $pm_nc0003->KB_Insert();
-                $vOutput = $result ? ['success'=>true,'message'=>'Thêm mới thành công'] : ['success'=>false,'message'=>'Lỗi khi thêm mới'];
+                
+                if (!$result) {
+                    $mysqlError = sof_error();
+                    error_log("PM_NC0003 Insert failed - MySQL Error: " . $mysqlError);
+                    
+                    // Check if it's a duplicate key error
+                    if (strpos($mysqlError, 'Duplicate entry') !== false || strpos($mysqlError, 'duplicate key') !== false) {
+                        $vOutput = ['success'=>false,'message'=>'Thẻ với UID này đã tồn tại'];
+                    } else if (strpos($mysqlError, 'foreign key constraint') !== false || strpos($mysqlError, 'FOREIGN KEY') !== false) {
+                        $vOutput = ['success'=>false,'message'=>'Biển số xe không hợp lệ hoặc chưa đăng ký trong hệ thống'];
+                    } else {
+                        $vOutput = ['success'=>false,'message'=>'Lỗi khi thêm mới: ' . $mysqlError];
+                    }
+                } else {
+                    error_log("PM_NC0003 Insert SUCCESS");
+                    $vOutput = ['success'=>true,'message'=>'Thêm mới thành công'];
+                }
                 break;
             case "delete":
                 $delArr = $input['uidThe'] ?? $_POST['lv001'] ?? null;
@@ -172,8 +214,37 @@ switch ($vtable) {
                 $pm_nc0003->lv005 = $input['bienSoXe'] ?? $_POST['lv005'] ?? null;
                 $pm_nc0003->lv006 = $input['maChinhSach'] ?? $_POST['lv006'] ?? null;
                 $pm_nc0003->lv007 = $input['ngayKetThucCS'] ?? $_POST['lv007'] ?? null;
+                
+                // Logic nghiệp vụ cho edit: tương tự như add
+                if ($pm_nc0003->lv002 == 'KHACH') {
+                    // Thẻ thường: không cần biển số, set chuỗi rỗng vì database không cho phép NULL
+                    $pm_nc0003->lv005 = '';
+                    $pm_nc0003->lv006 = '';
+                    $pm_nc0003->lv007 = '';
+                    error_log("PM_NC0003 Edit - Thẻ KHACH: bỏ qua biển số và chính sách");
+                } else if ($pm_nc0003->lv002 == 'VIP' || $pm_nc0003->lv002 == 'NHANVIEN') {
+                    // Thẻ VIP/NHANVIEN: chấp nhận biển số để linh hoạt với khách vãng lai
+                    if ($pm_nc0003->lv005 && trim($pm_nc0003->lv005) != '') {
+                        error_log("PM_NC0003 Edit - Thẻ VIP/NHANVIEN: biển số {$pm_nc0003->lv005}");
+                    } else {
+                        error_log("PM_NC0003 Edit - Thẻ VIP/NHANVIEN: không có biển số (cho phép khách vãng lai)");
+                    }
+                }
+                
                 $result = $pm_nc0003->KB_Update();
-                $vOutput = $result ? ['success'=>true,'message'=>'Cập nhật thành công'] : ['success'=>false,'message'=>'Lỗi khi cập nhật'];
+                
+                if (!$result) {
+                    $mysqlError = sof_error();
+                    error_log("PM_NC0003 Update failed - MySQL Error: " . $mysqlError);
+                    
+                    if (strpos($mysqlError, 'foreign key constraint') !== false || strpos($mysqlError, 'FOREIGN KEY') !== false) {
+                        $vOutput = ['success'=>false,'message'=>'Biển số xe không hợp lệ hoặc chưa đăng ký trong hệ thống'];
+                    } else {
+                        $vOutput = ['success'=>false,'message'=>'Lỗi khi cập nhật: ' . $mysqlError];
+                    }
+                } else {
+                    $vOutput = ['success'=>true,'message'=>'Cập nhật thành công'];
+                }
                 break;
 			case "timTheDangCoPhien":
 				$pm_nc0003->lv001 = $input['uidThe'] ?? $_POST['lv001'] ?? null;

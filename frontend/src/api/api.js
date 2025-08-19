@@ -326,13 +326,13 @@ export async function layDanhSachCong() {
 
 // -------------------- Zone Management Functions --------------------
 export async function layDanhSachKhuVuc() {
-  const payload = { table: "pm_nc0004_1", func: "data" };
+  const payload = { table: "pm_nc0004_2", func: "data" };
   return callApiWithAuth(payload);
 }
 
 export async function themKhuVuc(khuVuc) {
   const payload = {
-    table: "pm_nc0004_1",
+    table: "pm_nc0004_2",
     func: "add",
     maKhuVuc: khuVuc.maKhuVuc,
     tenKhuVuc: khuVuc.tenKhuVuc,
@@ -343,7 +343,7 @@ export async function themKhuVuc(khuVuc) {
 
 export async function capNhatKhuVuc(khuVuc) {
   const payload = {
-    table: "pm_nc0004_1",
+    table: "pm_nc0004_2",
     func: "edit",
     maKhuVuc: khuVuc.maKhuVuc,
     tenKhuVuc: khuVuc.tenKhuVuc,
@@ -353,7 +353,7 @@ export async function capNhatKhuVuc(khuVuc) {
 }
 
 export async function xoaKhuVuc(maKhuVuc) {
-  const payload = { table: "pm_nc0004_1", func: "delete", maKhuVuc };
+  const payload = { table: "pm_nc0004_2", func: "delete", maKhuVuc };
   return callApiWithAuth(payload);
 }
 
@@ -2164,22 +2164,22 @@ export async function layNhatKyTheoTheNgocChung(uidThe) {
 // -------------------- Enhanced RFID Card Functions (từ mobile app) --------------------
 
 /**
- * Thêm thẻ RFID với đầy đủ thông tin (theo mobile app)
+ * Thêm thẻ RFID với đầy đủ thông tin (theo mobile app) với logic nghiệp vụ
  * @param {string} uidThe - UID thẻ RFID
  * @param {string} loaiThe - Loại thẻ (KHACH, VIP, NHANVIEN)
  * @param {string} trangThai - Trạng thái thẻ (mặc định: "1")
- * @param {string} bienSoXe - Biển số xe (optional)
- * @param {string} maChinhSach - Mã chính sách (optional)
- * @param {string} ngayKetThucCS - Ngày kết thúc chính sách (optional)
+ * @param {string|null} bienSoXe - Biển số xe (optional, null cho thẻ KHACH)
+ * @param {string|null} maChinhSach - Mã chính sách (optional, null cho thẻ KHACH)
+ * @param {string|null} ngayKetThucCS - Ngày kết thúc chính sách (optional, null cho thẻ KHACH)
  * @returns {Promise<Object>} Kết quả thêm thẻ
  */
 export async function themTheMobile(
   uidThe,
   loaiThe,
   trangThai = "1",
-  bienSoXe = "",
-  maChinhSach = "",
-  ngayKetThucCS = ""
+  bienSoXe = null,
+  maChinhSach = null,
+  ngayKetThucCS = null
 ) {
   const payload = {
     table: "pm_nc0003",
@@ -2187,10 +2187,20 @@ export async function themTheMobile(
     uidThe: uidThe,
     loaiThe: loaiThe,
     trangThai: trangThai,
-    bienSoXe: bienSoXe,
-    maChinhSach: maChinhSach,
-    ngayKetThucCS: ngayKetThucCS,
   };
+
+  // Chỉ thêm các trường không null vào payload để tránh gửi empty string
+  if (bienSoXe !== null && bienSoXe !== "") {
+    payload.bienSoXe = bienSoXe;
+  }
+  if (maChinhSach !== null && maChinhSach !== "") {
+    payload.maChinhSach = maChinhSach;
+  }
+  if (ngayKetThucCS !== null && ngayKetThucCS !== "") {
+    payload.ngayKetThucCS = ngayKetThucCS;
+  }
+
+  console.log("themTheMobile payload:", payload);
   return callApiWithAuth(payload);
 }
 
@@ -2209,7 +2219,7 @@ export async function layTheRFIDTheoUID(uidThe) {
 }
 
 /**
- * Cập nhật thẻ RFID theo mobile app
+ * Cập nhật thẻ RFID theo mobile app với logic nghiệp vụ
  * @param {Object} theRFID - Thông tin thẻ RFID
  * @returns {Promise<Object>} Kết quả cập nhật
  */
@@ -2220,11 +2230,21 @@ export async function capNhatTheRFIDMobile(theRFID) {
     uidThe: theRFID.uidThe,
     loaiThe: theRFID.loaiThe,
     trangThai: theRFID.trangThai,
-    bienSoXe: theRFID.bienSoXe || "",
-    maChinhSach: theRFID.maChinhSach || "",
-    ngayKetThucCS: theRFID.ngayKetThucCS || "",
     // ngayPhatHanh sẽ được giữ nguyên ở backend
   };
+
+  // Chỉ thêm các trường không null vào payload
+  if (theRFID.bienSoXe !== null && theRFID.bienSoXe !== "") {
+    payload.bienSoXe = theRFID.bienSoXe;
+  }
+  if (theRFID.maChinhSach !== null && theRFID.maChinhSach !== "") {
+    payload.maChinhSach = theRFID.maChinhSach;
+  }
+  if (theRFID.ngayKetThucCS !== null && theRFID.ngayKetThucCS !== "") {
+    payload.ngayKetThucCS = theRFID.ngayKetThucCS;
+  }
+
+  console.log("capNhatTheRFIDMobile payload:", payload);
   return callApiWithAuth(payload);
 }
 

@@ -298,14 +298,16 @@ const RfidManagerDialog = ({
           }
         }
 
-        // Cập nhật thẻ - sử dụng mobile app API với đầy đủ thông tin
+        // Cập nhật thẻ - sử dụng mobile app API với logic nghiệp vụ
+        const isGuestCard = formData.loaiThe === "KHACH";
+
         result = await capNhatTheRFIDMobile({
           uidThe: formData.uidThe,
           loaiThe: formData.loaiThe,
           trangThai: formData.trangThai,
-          bienSoXe: formData.bienSoXe.trim() || "",
-          maChinhSach: formData.maChinhSach || "",
-          ngayKetThucCS: finalEndDate || "",
+          bienSoXe: isGuestCard ? null : formData.bienSoXe.trim() || null,
+          maChinhSach: isGuestCard ? null : formData.maChinhSach || null,
+          ngayKetThucCS: isGuestCard ? null : finalEndDate || null,
         });
       } else {
         // Đảm bảo ngày kết thúc chính sách được tính đúng trước khi gửi
@@ -327,14 +329,16 @@ const RfidManagerDialog = ({
           }
         }
 
-        // Thêm thẻ mới - sử dụng mobile app API
+        // Thêm thẻ mới - sử dụng mobile app API với logic nghiệp vụ
+        const isGuestCard = formData.loaiThe === "KHACH";
+
         result = await themTheMobile(
           formData.uidThe.trim(),
           formData.loaiThe,
           formData.trangThai,
-          formData.bienSoXe.trim() || "",
-          formData.maChinhSach || "",
-          finalEndDate || ""
+          isGuestCard ? null : formData.bienSoXe.trim() || null, // Thẻ KHACH không cần biển số
+          isGuestCard ? null : formData.maChinhSach || null, // Thẻ KHACH không cần chính sách
+          isGuestCard ? null : finalEndDate || null // Thẻ KHACH không cần ngày kết thúc CS
         );
       }
 
@@ -419,9 +423,7 @@ const RfidManagerDialog = ({
         ...prev,
         [field]: value,
       }));
-    }
-
-    // Clear validation error for this field
+    } // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors((prev) => {
         const newErrors = { ...prev };

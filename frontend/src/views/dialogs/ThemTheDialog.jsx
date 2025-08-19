@@ -1,73 +1,92 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import "../../assets/styles/ThemTheDialog.css"
-import { themThe } from "../../api/api"
+import { useState } from "react";
+import "../../assets/styles/ThemTheDialog.css";
+import { themTheMobile } from "../../api/api";
 
 const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
   const [formData, setFormData] = useState({
     uid: cardId,
-    loaiThe: "Thẻ thường",
+    loaiThe: "KHACH", // Đổi thành value thực tế
     trangThai: "1",
-  })
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
-  console.log("=== ThemTheDialog Rendered ===")
-  console.log("Card ID:", cardId)
-  console.log("Form Data:", formData)
+  console.log("=== ThemTheDialog Rendered ===");
+  console.log("Card ID:", cardId);
+  console.log("Form Data:", formData);
 
-  const cardTypes = ["Thẻ thường", "Thẻ VIP", "Thẻ tháng", "Thẻ nhân viên", "Thẻ khách"]
+  // Map card types với value và label đúng
+  const cardTypes = [
+    { value: "KHACH", label: "Thẻ thường" },
+    { value: "VIP", label: "Thẻ VIP" },
+    { value: "THANG", label: "Thẻ tháng" },
+    { value: "NHANVIEN", label: "Thẻ nhân viên" },
+    { value: "KHACH", label: "Thẻ khách" }, // Cũng là KHACH
+  ];
 
   const handleInputChange = (field, value) => {
-    console.log("Input changed:", field, "=", value)
+    console.log("Input changed:", field, "=", value);
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSave = async () => {
-    console.log("=== Saving Card ===")
-    console.log("Form data to save:", formData)
+    console.log("=== Saving Card ===");
+    console.log("Form data to save:", formData);
 
     try {
       if (!formData.uid.trim()) {
-        console.log("Empty UID, showing alert")
-        alert("Vui lòng nhập UID thẻ")
-        return
+        console.log("Empty UID, showing alert");
+        alert("Vui lòng nhập UID thẻ");
+        return;
       }
 
-      setIsLoading(true)
-      console.log("Loading state set to true")
+      setIsLoading(true);
+      console.log("Loading state set to true");
 
-      console.log("Calling themThe API...")
-      const result = await themThe(formData.uid, formData.loaiThe, formData.trangThai)
-      console.log("API result:", result)
+      console.log("Calling themTheMobile API...");
+
+      // Áp dụng logic nghiệp vụ như RfidManagerDialogClean
+      const isGuestCard = formData.loaiThe === "KHACH";
+
+      const result = await themTheMobile(
+        formData.uid.trim(),
+        formData.loaiThe,
+        formData.trangThai,
+        isGuestCard ? null : "", // Thẻ KHACH không cần biển số
+        isGuestCard ? null : "", // Thẻ KHACH không cần chính sách
+        isGuestCard ? null : "" // Thẻ KHACH không cần ngày kết thúc CS
+      );
+
+      console.log("API result:", result);
 
       if (result && result.success) {
-        console.log("Card saved successfully")
-        alert("Thêm thẻ thành công!")
+        console.log("Card saved successfully");
+        alert("Thêm thẻ thành công!");
         if (onSave) {
-          console.log("Calling onSave callback")
-          onSave(formData)
+          console.log("Calling onSave callback");
+          onSave(formData);
         }
       } else {
-        console.log("Failed to save card:", result?.message)
-        alert("Lỗi thêm thẻ: " + (result?.message || "Unknown error"))
+        console.log("Failed to save card:", result?.message);
+        alert("Lỗi thêm thẻ: " + (result?.message || "Unknown error"));
       }
     } catch (error) {
-      console.error("Error adding card:", error)
-      alert("Lỗi thêm thẻ: " + error.message)
+      console.error("Error adding card:", error);
+      alert("Lỗi thêm thẻ: " + error.message);
     } finally {
-      setIsLoading(false)
-      console.log("Loading state set to false")
+      setIsLoading(false);
+      console.log("Loading state set to false");
     }
-  }
+  };
 
   const handleCancel = () => {
-    console.log("=== Cancel Button Clicked ===")
-    onClose()
-  }
+    console.log("=== Cancel Button Clicked ===");
+    onClose();
+  };
 
   return (
     <div className="dialog-overlay">
@@ -84,7 +103,10 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
             <div className="card-icon">Thẻ</div>
             <div className="card-info">
               <div className="card-uid">{formData.uid || "Chưa có UID"}</div>
-              <div className="card-type">{formData.loaiThe}</div>
+              <div className="card-type">
+                {cardTypes.find((t) => t.value === formData.loaiThe)?.label ||
+                  formData.loaiThe}
+              </div>
             </div>
           </div>
 
@@ -100,7 +122,11 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
                 disabled={!!cardId} // Disable if cardId is provided
                 className={cardId ? "readonly" : ""}
               />
-              {cardId && <small className="help-text">UID được tự động điền từ thẻ đã quét</small>}
+              {cardId && (
+                <small className="help-text">
+                  UID được tự động điền từ thẻ đã quét
+                </small>
+              )}
             </div>
 
             <div className="form-group">
@@ -111,8 +137,8 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
                 onChange={(e) => handleInputChange("loaiThe", e.target.value)}
               >
                 {cardTypes.map((type, index) => (
-                  <option key={index} value={type}>
-                    {type}
+                  <option key={index} value={type.value}>
+                    {type.label}
                   </option>
                 ))}
               </select>
@@ -134,7 +160,9 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
           <div className="info-section">
             <div className="info-item">
               <span className="info-label">Thời gian tạo:</span>
-              <span className="info-value">{new Date().toLocaleString("vi-VN")}</span>
+              <span className="info-value">
+                {new Date().toLocaleString("vi-VN")}
+              </span>
             </div>
             <div className="info-item">
               <span className="info-label">Người tạo:</span>
@@ -144,7 +172,11 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
         </div>
 
         <div className="dialog-footer">
-          <button className="btn btn-primary" onClick={handleSave} disabled={isLoading}>
+          <button
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={isLoading}
+          >
             {isLoading ? "Đang xử lý..." : "Thêm Thẻ"}
           </button>
           <button className="btn btn-cancel" onClick={handleCancel}>
@@ -153,7 +185,7 @@ const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ThemTheDialog
+export default ThemTheDialog;
