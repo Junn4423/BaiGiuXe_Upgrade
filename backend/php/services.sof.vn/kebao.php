@@ -159,17 +159,19 @@ switch ($vtable) {
                 
                 // Logic nghiệp vụ: chỉ thẻ VIP/NHANVIEN mới cần biển số
                 if ($pm_nc0003->lv002 == 'KHACH') {
-                    // Thẻ thường: không cần biển số, set chuỗi rỗng vì database không cho phép NULL
-                    $pm_nc0003->lv005 = '';
-                    $pm_nc0003->lv006 = ''; // Cũng không cần chính sách cho thẻ thường
-                    $pm_nc0003->lv007 = '';
-                    error_log("PM_NC0003 Add - Thẻ KHACH: bỏ qua biển số và chính sách");
+                    // Thẻ thường: không cần biển số, set NULL vì database cho phép NULL
+                    $pm_nc0003->lv005 = null;
+                    $pm_nc0003->lv006 = null; // Cũng không cần chính sách cho thẻ thường
+                    $pm_nc0003->lv007 = null;
+                    error_log("PM_NC0003 Add - Thẻ KHACH: set NULL cho biển số và chính sách");
                 } else if ($pm_nc0003->lv002 == 'VIP' || $pm_nc0003->lv002 == 'NHANVIEN') {
                     // Thẻ VIP/NHANVIEN: chấp nhận biển số để linh hoạt với khách vãng lai
                     if ($pm_nc0003->lv005 && trim($pm_nc0003->lv005) != '') {
                         error_log("PM_NC0003 Add - Thẻ VIP/NHANVIEN: biển số {$pm_nc0003->lv005}");
                     } else {
                         error_log("PM_NC0003 Add - Thẻ VIP/NHANVIEN: không có biển số (cho phép khách vãng lai)");
+                        // Set NULL khi không có biển số để tránh foreign key constraint
+                        $pm_nc0003->lv005 = null;
                     }
                 }
                 
@@ -187,6 +189,8 @@ switch ($vtable) {
                         $vOutput = ['success'=>false,'message'=>'Thẻ với UID này đã tồn tại'];
                     } else if (strpos($mysqlError, 'foreign key constraint') !== false || strpos($mysqlError, 'FOREIGN KEY') !== false) {
                         $vOutput = ['success'=>false,'message'=>'Biển số xe không hợp lệ hoặc chưa đăng ký trong hệ thống'];
+                    } else if (strpos($mysqlError, 'enum') !== false || strpos($mysqlError, 'ENUM') !== false) {
+                        $vOutput = ['success'=>false,'message'=>'Loại thẻ không hợp lệ: ' . $pm_nc0003->lv002];
                     } else {
                         $vOutput = ['success'=>false,'message'=>'Lỗi khi thêm mới: ' . $mysqlError];
                     }
@@ -217,17 +221,19 @@ switch ($vtable) {
                 
                 // Logic nghiệp vụ cho edit: tương tự như add
                 if ($pm_nc0003->lv002 == 'KHACH') {
-                    // Thẻ thường: không cần biển số, set chuỗi rỗng vì database không cho phép NULL
-                    $pm_nc0003->lv005 = '';
-                    $pm_nc0003->lv006 = '';
-                    $pm_nc0003->lv007 = '';
-                    error_log("PM_NC0003 Edit - Thẻ KHACH: bỏ qua biển số và chính sách");
+                    // Thẻ thường: không cần biển số, set NULL vì database cho phép NULL
+                    $pm_nc0003->lv005 = null;
+                    $pm_nc0003->lv006 = null;
+                    $pm_nc0003->lv007 = null;
+                    error_log("PM_NC0003 Edit - Thẻ KHACH: set NULL cho biển số và chính sách");
                 } else if ($pm_nc0003->lv002 == 'VIP' || $pm_nc0003->lv002 == 'NHANVIEN') {
                     // Thẻ VIP/NHANVIEN: chấp nhận biển số để linh hoạt với khách vãng lai
                     if ($pm_nc0003->lv005 && trim($pm_nc0003->lv005) != '') {
                         error_log("PM_NC0003 Edit - Thẻ VIP/NHANVIEN: biển số {$pm_nc0003->lv005}");
                     } else {
                         error_log("PM_NC0003 Edit - Thẻ VIP/NHANVIEN: không có biển số (cho phép khách vãng lai)");
+                        // Set NULL khi không có biển số để tránh foreign key constraint
+                        $pm_nc0003->lv005 = null;
                     }
                 }
                 

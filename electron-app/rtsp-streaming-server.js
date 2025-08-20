@@ -144,20 +144,22 @@ class RTSPStreamingServer {
     // Create HTTP server first
     this.httpServer = http.createServer((req, res) => {
       // Handle health check endpoint
-      if (req.url === '/health' && req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          status: 'ok', 
-          timestamp: new Date().toISOString(),
-          activeStreams: this.activeStreams.size,
-          websocketConnections: this.wss ? this.wss.clients.size : 0
-        }));
+      if (req.url === "/health" && req.method === "GET") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            status: "ok",
+            timestamp: new Date().toISOString(),
+            activeStreams: this.activeStreams.size,
+            websocketConnections: this.wss ? this.wss.clients.size : 0,
+          })
+        );
         return;
       }
-      
+
       // Default response for other requests
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Not Found');
+      res.writeHead(404, { "Content-Type": "text/plain" });
+      res.end("Not Found");
     });
 
     // Create WebSocket server using the HTTP server
@@ -180,7 +182,9 @@ class RTSPStreamingServer {
     // Start the HTTP server
     this.httpServer.listen(this.port, () => {
       console.log(`🚀 RTSP WebSocket server started on port ${this.port}`);
-      console.log(`🏥 Health check endpoint available at http://localhost:${this.port}/health`);
+      console.log(
+        `🏥 Health check endpoint available at http://localhost:${this.port}/health`
+      );
     });
 
     this.wss.on("connection", (ws, req) => {

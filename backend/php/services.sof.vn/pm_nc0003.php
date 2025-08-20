@@ -70,10 +70,10 @@ class pm_nc0003 extends lv_controler{
         $lv002_escaped = addslashes($this->lv002);
         $lv003_escaped = addslashes($this->lv003);
         
-        // Xử lý các trường có thể NULL (cho thẻ KHACH) - Dùng chuỗi rỗng thay vì NULL vì database không cho phép NULL
-        $lv005_value = ($this->lv005 !== null && trim($this->lv005) !== '') ? "'".addslashes($this->lv005)."'" : "''";
-        $lv006_value = ($this->lv006 !== null && trim($this->lv006) !== '') ? "'".addslashes($this->lv006)."'" : "''";
-        $lv007_value = ($this->lv007 !== null && trim($this->lv007) !== '') ? "'".addslashes($this->lv007)."'" : "''";
+        // Xử lý các trường có thể NULL (cho thẻ KHACH) - Database cho phép NULL
+        $lv005_value = ($this->lv005 !== null && trim($this->lv005) !== '') ? "'".addslashes($this->lv005)."'" : "NULL";
+        $lv006_value = ($this->lv006 !== null && trim($this->lv006) !== '') ? "'".addslashes($this->lv006)."'" : "NULL";
+        $lv007_value = ($this->lv007 !== null && trim($this->lv007) !== '') ? "'".addslashes($this->lv007)."'" : "NULL";
         
         // Log dữ liệu để debug
         error_log("PM_NC0003 Insert - Data: lv001={$lv001_escaped}, lv002={$lv002_escaped}, lv003={$lv003_escaped}, lv005={$lv005_value}, lv006={$lv006_value}, lv007={$lv007_value}");
@@ -99,10 +99,10 @@ class pm_nc0003 extends lv_controler{
         $lv002_escaped = addslashes($this->lv002);
         $lv003_escaped = addslashes($this->lv003);
         
-        // Xử lý các trường có thể NULL (cho thẻ KHACH) - Dùng chuỗi rỗng thay vì NULL vì database không cho phép NULL
-        $lv005_value = ($this->lv005 !== null && trim($this->lv005) !== '') ? "'".addslashes($this->lv005)."'" : "''";
-        $lv006_value = ($this->lv006 !== null && trim($this->lv006) !== '') ? "'".addslashes($this->lv006)."'" : "''";
-        $lv007_value = ($this->lv007 !== null && trim($this->lv007) !== '') ? "'".addslashes($this->lv007)."'" : "''";
+        // Xử lý các trường có thể NULL (cho thẻ KHACH) - Database cho phép NULL
+        $lv005_value = ($this->lv005 !== null && trim($this->lv005) !== '') ? "'".addslashes($this->lv005)."'" : "NULL";
+        $lv006_value = ($this->lv006 !== null && trim($this->lv006) !== '') ? "'".addslashes($this->lv006)."'" : "NULL";
+        $lv007_value = ($this->lv007 !== null && trim($this->lv007) !== '') ? "'".addslashes($this->lv007)."'" : "NULL";
         
         error_log("PM_NC0003 Update - Data: lv001={$lv001_escaped}, lv002={$lv002_escaped}, lv003={$lv003_escaped}, lv005={$lv005_value}, lv006={$lv006_value}, lv007={$lv007_value}");
         

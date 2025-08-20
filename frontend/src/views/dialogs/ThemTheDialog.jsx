@@ -7,7 +7,7 @@ import { themTheMobile } from "../../api/api";
 const ThemTheDialog = ({ onClose, onSave, cardId = "" }) => {
   const [formData, setFormData] = useState({
     uid: cardId,
-    loaiThe: "KHACH", // Đổi thành value thực tế
+    loaiThe: "KHACH", 
     trangThai: "1",
   });
   const [isLoading, setIsLoading] = useState(false);

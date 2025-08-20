@@ -814,13 +814,13 @@ const MainUI = () => {
   const checkRTSPServerReady = async () => {
     try {
       console.log("🔍 Checking RTSP server readiness...");
-      
+
       // Try to connect to RTSP server health check endpoint
-      const response = await fetch('http://localhost:9999/health', {
-        method: 'GET',
-        timeout: 3000
+      const response = await fetch("http://localhost:9999/health", {
+        method: "GET",
+        timeout: 3000,
       });
-      
+
       if (response.ok) {
         console.log("✅ RTSP server is ready");
         return true;
@@ -867,7 +867,7 @@ const MainUI = () => {
         // Wait longer for RTSP server to be fully ready
         setTimeout(() => {
           setRestartMessage("Đang kiểm tra RTSP server...");
-          
+
           // Check if RTSP server is ready before resetting screen
           checkRTSPServerReady().then((isReady) => {
             if (isReady) {
