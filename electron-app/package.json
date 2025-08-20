@@ -12,16 +12,16 @@
     "setup-relay": "npm install node-hid",
     "start-with-python": "npm run setup-python && npm start",
     "start-with-relay": "npm run setup-relay && npm start",
-    "build": "electron-builder",
-    "build-win": "electron-builder --win",
-    "build-win-python": "npm run setup-python && npm run prebuild && electron-builder --win",
-    "build-mac": "electron-builder --mac",
-    "build-linux": "electron-builder --linux",
-    "build-all": "electron-builder --win --mac --linux",
-    "pack": "electron-builder --dir",
-    "dist": "npm run prebuild && electron-builder",
-    "build-production": "npm run prebuild && cross-env NODE_ENV=production electron-builder --win",
-    "build-production-full": "npm run prebuild && cross-env NODE_ENV=production electron-builder --win --publish=never",
+    "build": "npx electron-builder",
+    "build-win": "npx electron-builder --win",
+    "build-win-python": "npm run setup-python && npm run prebuild && npx electron-builder --win",
+    "build-mac": "npx electron-builder --mac",
+    "build-linux": "npx electron-builder --linux",
+    "build-all": "npx electron-builder --win --mac --linux",
+    "pack": "npx electron-builder --dir",
+    "dist": "npm run prebuild && npx electron-builder",
+    "build-production": "npm run prebuild && cross-env NODE_ENV=production npx electron-builder --win",
+    "build-production-full": "npm run prebuild && cross-env NODE_ENV=production npx electron-builder --win --publish=never",
     "test-production": "node test-production-build.js"
   },
   "keywords": [
@@ -37,7 +37,6 @@
     "concurrently": "^9.2.0",
     "cross-env": "^7.0.3",
     "ffmpeg-static": "^5.2.0",
-    "node-hid": "^2.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "ws": "^8.14.2"
@@ -59,6 +58,7 @@
     "appId": "com.parkinglot.management",
     "productName": "Parking Lot Management",
     "copyright": "Copyright © 2025 Parking Lot Management Team",
+    "electronVersion": "37.0.0",
     "directories": {
       "output": "dist",
       "buildResources": "assets"

@@ -763,6 +763,22 @@ app.whenReady().then(async () => {
       console.warn("⚠️ Continuing without license plate recognition");
     }
 
+    // Start Face Recognition service
+    console.log("👤 Starting Face Recognition service...");
+    try {
+      const faceStarted = await startFaceRecognitionService();
+      if (faceStarted) {
+        console.log("✅ Face Recognition service started successfully");
+      } else {
+        console.warn(
+          "⚠️ Face Recognition service failed to start - continuing without face recognition"
+        );
+      }
+    } catch (faceError) {
+      console.error("❌ Face Recognition service error:", faceError.message);
+      console.warn("⚠️ Continuing without face recognition");
+    }
+
     // Create the main window (always proceed)
     console.log("🖥️ Creating main window...");
     createWindow();

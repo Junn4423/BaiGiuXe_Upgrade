@@ -18,6 +18,14 @@ echo Installing/Updating dependencies...
 call npm install --production=false
 
 echo.
+echo Installing node-hid separately...
+call install-node-hid-alternative.bat
+if %ERRORLEVEL% neq 0 (
+    echo ⚠️ node-hid installation failed - USB relay features will be disabled
+    echo Continuing build without USB relay support...
+)
+
+echo.
 echo Verifying FFmpeg installation...
 call node debug-ffmpeg.js
 
@@ -40,6 +48,20 @@ if exist "..\backend\bienso\run_fast_alpr_service_silent.bat" (
 )
 
 echo.
+echo Verifying Face Recognition batch files...
+if exist "..\backend\khuonmat\run_fast_face_service.bat" (
+    echo Face Recognition batch file found
+) else (
+    echo Face Recognition batch file missing
+)
+
+if exist "..\backend\khuonmat\run_fast_face_service_silent.bat" (
+    echo Face Recognition silent batch file found
+) else (
+    echo Face Recognition silent batch file missing
+)
+
+echo.
 echo Building React frontend (Production)...
 cd "../frontend"
 if not exist "node_modules" (
@@ -57,6 +79,19 @@ cd "../electron-app"
 
 echo.
 echo Building Electron app for Windows (Production)...
+REM Ensure electron is installed in node_modules
+if not exist "node_modules\electron" (
+    echo Installing electron...
+    call npm install electron --no-save
+)
+
+REM Check if electron-builder is available
+where electron-builder >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo electron-builder not found, installing...
+    call npm install electron-builder --no-save
+)
+
 call npm run build-win
 
 if %ERRORLEVEL% neq 0 (
@@ -106,6 +141,20 @@ if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\bienso\fast_alpr
 )
 
 echo.
+echo Verifying Face Recognition components in build...
+if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\khuonmat\run_fast_face_service_silent.bat" (
+    echo Face Recognition silent batch file included in build
+) else (
+    echo Face Recognition silent batch file missing in build
+)
+
+if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\khuonmat\fast_face_service.py" (
+    echo Face Recognition Python service included in build
+) else (
+    echo Face Recognition Python service missing in build
+)
+
+echo.
 echo Build Statistics:
 echo ===================
 for %%f in ("dist\*.exe") do (
@@ -142,11 +191,19 @@ echo   2. Test all core features (camera, parking logic, etc.)
 echo   3. Check console logs for any errors
 echo   4. Verify Python backend integration
 echo   5. Test RTSP streaming functionality
+echo   6. Test License Plate Recognition (ALPR) service
+echo   7. Test Face Recognition service
 echo.
 echo Distribution ready for:
 echo   • Internal testing
 echo   • End-user installation
 echo   • Production deployment
+echo.
+echo 📋 DEPLOYMENT NOTES:
+echo   • Target machines need Python 3.8+ for AI services (ALPR, Face Recognition)
+echo   • USB Relay control included (node-hid bundled)
+echo   • App works without Python but AI features will be disabled
+echo   • Backend services will auto-install Python dependencies when needed
 echo.
 
 pause
