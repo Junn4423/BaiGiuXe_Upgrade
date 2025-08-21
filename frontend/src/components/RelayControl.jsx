@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from "react";
-import relayService from "../services/relayService";
 import { useToast } from "./Toast";
 import "../assets/styles/RelayControl.css";
+import {
+  relayConnect,
+  relayDisconnect,
+  relayControl,
+  relayControlBitmask,
+  relayTurnOffAll,
+  relayTestSequence,
+  relayTestBitmaskPatterns,
+  relaySequenceTest,
+  relayHealthCheck,
+} from "../api/api.js";
 
 const RelayControl = ({ isOpen, onClose }) => {
   const { showToast } = useToast();
@@ -24,9 +34,10 @@ const RelayControl = ({ isOpen, onClose }) => {
 
   const checkConnection = async () => {
     try {
-      const connected = await relayService.isConnected();
-      setIsConnected(connected);
+      const result = await relayHealthCheck();
+      setIsConnected(result.connected || false);
     } catch (error) {
+      console.error("Health check error:", error);
       setIsConnected(false);
     }
   };
@@ -34,9 +45,13 @@ const RelayControl = ({ isOpen, onClose }) => {
   const handleConnect = async () => {
     try {
       setConnecting(true);
-      await relayService.connect();
-      setIsConnected(true);
-      showToast("Đã kết nối USB Relay thành công!", "success");
+      const result = await relayConnect();
+      if (result.success) {
+        setIsConnected(true);
+        showToast("Đã kết nối USB Relay thành công!", "success");
+      } else {
+        throw new Error(result.message || "Kết nối thất bại");
+      }
     } catch (error) {
       console.error("Connect error:", error);
       showToast(`Lỗi kết nối: ${error.message}`, "error");
@@ -47,10 +62,15 @@ const RelayControl = ({ isOpen, onClose }) => {
 
   const handleDisconnect = async () => {
     try {
-      await relayService.disconnect();
-      setIsConnected(false);
-      setRelayStates({ 1: false, 2: false, 3: false, 4: false });
-      showToast("Đã ngắt kết nối USB Relay", "info");
+      const result = await relayDisconnect();
+      if (result.success) {
+        setIsConnected(false);
+        setRelayStates({ 1: false, 2: false, 3: false, 4: false });
+        setBitmaskValue(0);
+        showToast("Đã ngắt kết nối USB Relay", "info");
+      } else {
+        throw new Error(result.message || "Ngắt kết nối thất bại");
+      }
     } catch (error) {
       console.error("Disconnect error:", error);
       showToast(`Lỗi ngắt kết nối: ${error.message}`, "error");
@@ -65,19 +85,23 @@ const RelayControl = ({ isOpen, onClose }) => {
 
     try {
       const newState = !relayStates[relayNum];
-      await relayService.controlRelay(relayNum, newState);
+      const result = await relayControl(relayNum, newState);
 
-      setRelayStates((prev) => ({
-        ...prev,
-        [relayNum]: newState,
-      }));
+      if (result.success) {
+        setRelayStates((prev) => ({
+          ...prev,
+          [relayNum]: newState,
+        }));
 
-      const action = newState ? "BẬT" : "TẮT";
-      const icon = newState ? "🔴" : "⚫";
-      showToast(`${icon} ${action} Relay ${relayNum}`, "success");
+        const action = newState ? "BẬT" : "TẮT";
+        const icon = newState ? "🔴" : "⚫";
+        showToast(`${icon} ${action} Relay ${relayNum}`, "success");
+      } else {
+        throw new Error(result.message || "Điều khiển relay thất bại");
+      }
     } catch (error) {
       console.error(`Relay ${relayNum} control error:`, error);
-      showToast(`Lỗi điều khiển Relay ${relayNum}`, "error");
+      showToast(`Lỗi điều khiển Relay ${relayNum}: ${error.message}`, "error");
     }
   };
 
@@ -88,10 +112,14 @@ const RelayControl = ({ isOpen, onClose }) => {
     }
 
     try {
-      await relayService.turnOffAll();
-      setRelayStates({ 1: false, 2: false, 3: false, 4: false });
-      setBitmaskValue(0);
-      showToast("⚫ Đã tắt tất cả relay", "success");
+      const result = await relayTurnOffAll();
+      if (result.success) {
+        setRelayStates({ 1: false, 2: false, 3: false, 4: false });
+        setBitmaskValue(0);
+        showToast("⚫ Đã tắt tất cả relay", "success");
+      } else {
+        throw new Error(result.message || "Tắt tất cả relay thất bại");
+      }
     } catch (error) {
       console.error("Turn off all error:", error);
       showToast(`Lỗi tắt tất cả relay: ${error.message}`, "error");
@@ -105,24 +133,28 @@ const RelayControl = ({ isOpen, onClose }) => {
     }
 
     try {
-      await relayService.controlBitmask(bitmaskValue);
+      const result = await relayControlBitmask(bitmaskValue);
 
-      // Cập nhật UI state dựa trên bitmask
-      const newStates = {
-        1: (bitmaskValue & 0x01) !== 0,
-        2: (bitmaskValue & 0x02) !== 0,
-        3: (bitmaskValue & 0x04) !== 0,
-        4: (bitmaskValue & 0x08) !== 0,
-      };
-      setRelayStates(newStates);
+      if (result.success) {
+        // Cập nhật UI state dựa trên bitmask
+        const newStates = {
+          1: (bitmaskValue & 0x01) !== 0,
+          2: (bitmaskValue & 0x02) !== 0,
+          3: (bitmaskValue & 0x04) !== 0,
+          4: (bitmaskValue & 0x08) !== 0,
+        };
+        setRelayStates(newStates);
 
-      showToast(
-        `Bitmask 0x${bitmaskValue
-          .toString(16)
-          .toUpperCase()
-          .padStart(2, "0")} applied`,
-        "success"
-      );
+        showToast(
+          `Bitmask 0x${bitmaskValue
+            .toString(16)
+            .toUpperCase()
+            .padStart(2, "0")} applied`,
+          "success"
+        );
+      } else {
+        throw new Error(result.message || "Bitmask control thất bại");
+      }
     } catch (error) {
       console.error("Bitmask control error:", error);
       showToast(`Lỗi bitmask control: ${error.message}`, "error");
@@ -139,13 +171,16 @@ const RelayControl = ({ isOpen, onClose }) => {
       setTestRunning(true);
       showToast("Bắt đầu test sequence...", "info");
 
-      await relayService.testSequence(1, 800);
+      const result = await relayTestSequence(1, 800);
 
-      // Reset UI state sau test
-      setRelayStates({ 1: false, 2: false, 3: false, 4: false });
-      setBitmaskValue(0);
-
-      showToast("Test sequence hoàn thành!", "success");
+      if (result.success) {
+        // Reset UI state sau test
+        setRelayStates({ 1: false, 2: false, 3: false, 4: false });
+        setBitmaskValue(0);
+        showToast("Test sequence hoàn thành!", "success");
+      } else {
+        throw new Error(result.message || "Test sequence thất bại");
+      }
     } catch (error) {
       console.error("Test sequence error:", error);
       showToast(`Lỗi test sequence: ${error.message}`, "error");
@@ -164,16 +199,47 @@ const RelayControl = ({ isOpen, onClose }) => {
       setTestRunning(true);
       showToast("Bắt đầu test bitmask patterns...", "info");
 
-      await relayService.testBitmaskPatterns(1, 1000);
+      const result = await relayTestBitmaskPatterns(1, 1000);
 
-      // Reset UI state sau test
-      setRelayStates({ 1: false, 2: false, 3: false, 4: false });
-      setBitmaskValue(0);
-
-      showToast("Test bitmask patterns hoàn thành!", "success");
+      if (result.success) {
+        // Reset UI state sau test
+        setRelayStates({ 1: false, 2: false, 3: false, 4: false });
+        setBitmaskValue(0);
+        showToast("Test bitmask patterns hoàn thành!", "success");
+      } else {
+        throw new Error(result.message || "Test bitmask patterns thất bại");
+      }
     } catch (error) {
       console.error("Test bitmask patterns error:", error);
       showToast(`Lỗi test bitmask patterns: ${error.message}`, "error");
+    } finally {
+      setTestRunning(false);
+    }
+  };
+
+  const handleSequenceTest = async () => {
+    if (!isConnected) {
+      showToast("Chưa kết nối USB Relay", "error");
+      return;
+    }
+
+    try {
+      setTestRunning(true);
+      showToast("Bắt đầu sequence test...", "info");
+
+      const result = await relaySequenceTest();
+
+      if (result.success) {
+        // Reset UI state sau test
+        setRelayStates({ 1: false, 2: false, 3: false, 4: false });
+        setBitmaskValue(0);
+        showToast("Sequence test hoàn thành!", "success");
+      } else {
+        throw new Error(result.message || "Sequence test thất bại");
+      }
+    } catch (error) {
+      console.error("Sequence test error:", error);
+      showToast(`Lỗi sequence test: ${error.message}`, "error");
     } finally {
       setTestRunning(false);
     }
@@ -361,6 +427,14 @@ const RelayControl = ({ isOpen, onClose }) => {
               >
                 {testRunning ? "Testing..." : "Test Bitmask Patterns"}
               </button>
+
+              <button
+                className="btn btn-success"
+                onClick={handleSequenceTest}
+                disabled={!isConnected || testRunning}
+              >
+                {testRunning ? "Testing..." : "Sequence Test (Full Loop)"}
+              </button>
             </div>
 
             <div className="test-info">
@@ -369,6 +443,9 @@ const RelayControl = ({ isOpen, onClose }) => {
               </p>
               <p>
                 <strong>Test Bitmask:</strong> Thử các pattern khác nhau
+              </p>
+              <p>
+                <strong>Sequence Test:</strong> Loop mở full relay tuần tự 1 lần
               </p>
             </div>
           </div>

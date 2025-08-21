@@ -38,6 +38,16 @@ if exist "stop_face_service.bat" (
     taskkill /F /IM python.exe >nul 2>&1
 )
 
+echo Stopping Fast Relay Service...
+cd /d "%~dp0backend\relay"
+if exist "stop_relay_service.bat" (
+    call stop_relay_service.bat >nul 2>&1
+    echo ✅ Fast Relay Service stopped
+) else (
+    echo ⚠️  Relay stop script not found, killing Python processes...
+    taskkill /F /IM python.exe >nul 2>&1
+)
+
 echo Waiting for services to fully stop...
 timeout /t 3 /nobreak >nul
 echo.
@@ -70,6 +80,23 @@ if not exist "face_recognition_system\venv\Scripts\activate.bat" (
     exit /b 1
 )
 echo ✅ Face Recognition Python environment found
+
+echo Checking Fast Relay Python environment...
+cd /d "%~dp0backend\relay"
+if not exist "venv\Scripts\activate.bat" (
+    echo ⚠️  Fast Relay Python virtual environment not found!
+    echo Setting up relay service environment...
+    python -m venv venv
+    if exist "venv\Scripts\activate.bat" (
+        call venv\Scripts\activate.bat
+        pip install -r requirements_relay_service.txt
+        echo ✅ Fast Relay Python environment created
+    ) else (
+        echo ❌ Failed to create relay environment - continuing without relay service
+    )
+) else (
+    echo ✅ Fast Relay Python environment found
+)
 echo.
 
 REM ================================================
@@ -88,6 +115,7 @@ if not exist "node_modules" (
 )
 
 echo Building frontend...
+set NODE_OPTIONS=--max-old-space-size=8192
 call npm run build
 if %errorlevel% neq 0 (
     echo ❌ Failed to build frontend
@@ -132,9 +160,30 @@ powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:
 echo.
 
 REM ================================================
-REM BƯỚC 6: KHỞI ĐỘNG ELECTRON APP
+REM BƯỚC 6: KHỞI ĐỘNG FAST RELAY SERVICE
 REM ================================================
-echo [%timestamp%] Step 6: Starting Electron Application...
+echo [%timestamp%] Step 6: Starting Fast Relay Service...
+cd /d "%~dp0backend\relay"
+if exist "venv\Scripts\activate.bat" (
+    start "Fast Relay Service" cmd /k "venv\Scripts\activate && python fast_relay_service.py"
+    echo ✅ Fast Relay Service starting on http://127.0.0.1:5003
+    
+    REM Wait for Relay service to start
+    echo Waiting for Fast Relay service to initialize...
+    timeout /t 5 /nobreak >nul
+    
+    REM Test Relay service health
+    echo Testing Fast Relay service health...
+    powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5003/healthz' -UseBasicParsing -TimeoutSec 10; if($response.StatusCode -eq 200) { Write-Host '✅ Fast Relay Service is ready' } else { Write-Host '❌ Fast Relay Service health check failed (Status: ' $response.StatusCode ')' } } catch { Write-Host '❌ Fast Relay Service is not responding:' $_.Exception.Message }"
+) else (
+    echo ⚠️  Fast Relay Service environment not found - continuing without relay control
+)
+echo.
+
+REM ================================================
+REM BƯỚC 7: KHỞI ĐỘNG ELECTRON APP
+REM ================================================
+echo [%timestamp%] Step 7: Starting Electron Application...
 cd /d "%~dp0electron-app"
 if not exist "node_modules" (
     echo Installing electron dependencies...
@@ -163,9 +212,11 @@ echo ================================================
 echo ✅ Frontend: Built and ready
 echo ✅ ALPR Service: Running on http://127.0.0.1:5001
 echo ✅ Face Recognition Service: Running on http://127.0.0.1:5055
+echo ✅ Fast Relay Service: Running on http://127.0.0.1:5003
 echo ✅ Electron App: Running
 echo ✅ Realtime License Plate Detection: Active
 echo ✅ Realtime Face Recognition: Active
+echo ✅ USB Relay Control: Active
 echo ⚠️  MinIO: Disabled (using local storage)
 echo ================================================
 echo.

@@ -4670,3 +4670,273 @@ export async function startCameraSystem() {
     };
   }
 }
+
+// ==================== RELAY API FUNCTIONS ====================
+
+const RELAY_SERVICE_URL = "http://localhost:5003";
+
+/**
+ * Kết nối đến USB Relay device
+ * @returns {Promise<Object>} Kết quả kết nối
+ */
+export async function relayConnect() {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/connect`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay connect error:", error);
+    throw new Error(`Lỗi kết nối relay: ${error.message}`);
+  }
+}
+
+/**
+ * Ngắt kết nối USB Relay device
+ * @returns {Promise<Object>} Kết quả ngắt kết nối
+ */
+export async function relayDisconnect() {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/disconnect`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay disconnect error:", error);
+    throw new Error(`Lỗi ngắt kết nối relay: ${error.message}`);
+  }
+}
+
+/**
+ * Điều khiển một relay cụ thể
+ * @param {number} relayNum - Số relay (1-4)
+ * @param {boolean} state - Trạng thái relay (true = ON, false = OFF)
+ * @returns {Promise<Object>} Kết quả điều khiển
+ */
+export async function relayControl(relayNum, state) {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/control`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        relay: relayNum,
+        state: state,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay control error:", error);
+    throw new Error(`Lỗi điều khiển relay ${relayNum}: ${error.message}`);
+  }
+}
+
+/**
+ * Điều khiển relay bằng bitmask
+ * @param {number} bitmask - Giá trị bitmask (0-15)
+ * @returns {Promise<Object>} Kết quả điều khiển
+ */
+export async function relayControlBitmask(bitmask) {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/control-bitmask`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        bitmask: bitmask,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay bitmask control error:", error);
+    throw new Error(`Lỗi điều khiển relay bitmask: ${error.message}`);
+  }
+}
+
+/**
+ * Tắt tất cả relay
+ * @returns {Promise<Object>} Kết quả tắt tất cả
+ */
+export async function relayTurnOffAll() {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/turn-off-all`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay turn off all error:", error);
+    throw new Error(`Lỗi tắt tất cả relay: ${error.message}`);
+  }
+}
+
+/**
+ * Test sequence - bật/tắt tuần tự các relay
+ * @param {number} cycles - Số chu kỳ test (mặc định: 1)
+ * @param {number} delayMs - Thời gian delay giữa các bước (mặc định: 800ms)
+ * @returns {Promise<Object>} Kết quả test
+ */
+export async function relayTestSequence(cycles = 1, delayMs = 800) {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/test-sequence`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cycles: cycles,
+        delay_ms: delayMs,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay test sequence error:", error);
+    throw new Error(`Lỗi test sequence relay: ${error.message}`);
+  }
+}
+
+/**
+ * Test bitmask patterns - thử các pattern khác nhau
+ * @param {number} cycles - Số chu kỳ test (mặc định: 1)
+ * @param {number} delayMs - Thời gian delay giữa các pattern (mặc định: 1000ms)
+ * @returns {Promise<Object>} Kết quả test
+ */
+export async function relayTestBitmaskPatterns(cycles = 1, delayMs = 1000) {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/test-bitmask-patterns`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cycles: cycles,
+        delay_ms: delayMs,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay test bitmask patterns error:", error);
+    throw new Error(`Lỗi test bitmask patterns relay: ${error.message}`);
+  }
+}
+
+/**
+ * Sequence test - test tuần tự mở full relay 1 lần
+ * @returns {Promise<Object>} Kết quả sequence test
+ */
+export async function relaySequenceTest() {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/sequence-test`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay sequence test error:", error);
+    throw new Error(`Lỗi sequence test relay: ${error.message}`);
+  }
+}
+
+/**
+ * Kiểm tra trạng thái relay service
+ * @returns {Promise<Object>} Thông tin service
+ */
+export async function relayHealthCheck() {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/health`, {
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay health check error:", error);
+    throw new Error(`Lỗi kiểm tra relay service: ${error.message}`);
+  }
+}
+
+/**
+ * Lấy thông tin thiết bị relay
+ * @returns {Promise<Object>} Thông tin thiết bị
+ */
+export async function relayGetDeviceInfo() {
+  try {
+    const response = await fetch(`${RELAY_SERVICE_URL}/device-info`, {
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Relay get device info error:", error);
+    throw new Error(`Lỗi lấy thông tin thiết bị relay: ${error.message}`);
+  }
+}

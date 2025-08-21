@@ -40,13 +40,12 @@ import {
   getEnvironmentInfo,
   initializeStorageCleanup,
 } from "../../utils/imageUtils";
-import { layALLLoaiPhuongTien } from "../../api/api";
+import { layALLLoaiPhuongTien, relayTestSequence } from "../../api/api";
 import StatisticsPage from "../../components/StatisticsPage";
 import SystemSettings from "../SystemSettings";
 import { processAttendanceImage } from "../../api/apiChamCong";
 import { layDanhSachPhuongTien } from "../../api/api";
 import faceAPI from "../../api/apiFaceRecognition";
-import relayService from "../../services/relayService";
 const MainUI = () => {
   const { showToast, ToastContainer } = useToast();
 
@@ -426,7 +425,7 @@ const MainUI = () => {
                 window.electronAPI &&
                 window.electronAPI.relayControl
               ) {
-                await relayService.testSequence(1, 1000);
+                await relayTestSequence(1, 1000);
                 console.log("✅ Relay sequence activated");
                 showToast &&
                   showToast("🎛️ Đã kích hoạt cổng tự động", "info", 3000);
@@ -1411,7 +1410,7 @@ const MainUI = () => {
                               window.electronAPI.relayControl
                             ) {
                               // Chạy test sequence trên relay module 1 lần
-                              await relayService.testSequence(1, 1000);
+                              await relayTestSequence(1, 1000);
                               console.log(
                                 "✅ Đã kích hoạt relay sequence thành công"
                               );

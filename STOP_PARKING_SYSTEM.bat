@@ -52,6 +52,25 @@ if exist "stop_face_service.bat" (
 )
 echo.
 
+REM ================================================
+REM BƯỚC 4: DỪNG FAST RELAY SERVICE
+REM ================================================
+echo [%timestamp%] Step 4: Stopping Fast Relay Service...
+cd /d "%~dp0backend\relay"
+if exist "stop_relay_service.bat" (
+    call stop_relay_service.bat >nul 2>&1
+    echo ✅ Fast Relay Service stopped using script
+) else (
+    echo ⚠️  Relay stop script not found, killing processes manually...
+    for /f "tokens=2" %%i in ('wmic process where "commandline like '%%fast_relay_service.py%%' and name='python.exe'" get processid /value 2^>nUL ^| find "="') do taskkill /PID %%i /F >nul 2>&1
+    echo ✅ Fast Relay Service processes killed
+echo.
+
+REM ================================================
+REM BƯỚC 5: DỪNG CÁC PROCESS KHÁC
+REM ================================================
+echo [%timestamp%] Step 5: Stopping other processes...
+
 REM Stop MinIO Server
 echo Stopping MinIO Server...
 taskkill /f /im minio.exe >nul 2>&1
@@ -88,6 +107,7 @@ echo  ALL SERVICES STOPPED
 echo ================================================
 echo ✅ ALPR Service (Python)
 echo ✅ Face Recognition Service (Python)
+echo ✅ Fast Relay Service (Python)
 echo ✅ MinIO Server  
 echo ✅ Frontend Development Server
 echo ✅ Electron Application

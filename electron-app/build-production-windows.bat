@@ -14,16 +14,16 @@ if exist "build" rmdir /s /q "build"
 call npm cache clean --force
 
 echo.
-echo Installing/Updating dependencies...
-call npm install --production=false
+echo Setting up Python build environment...
+call setup-python-build.bat
+if %ERRORLEVEL% neq 0 (
+    echo ⚠️ Python setup had warnings, but continuing build...
+    echo This may affect optional native dependencies but won't stop the build.
+)
 
 echo.
-echo Installing node-hid separately...
-call install-node-hid-alternative.bat
-if %ERRORLEVEL% neq 0 (
-    echo ⚠️ node-hid installation failed - USB relay features will be disabled
-    echo Continuing build without USB relay support...
-)
+echo Installing/Updating dependencies...
+call npm install --production=false
 
 echo.
 echo Verifying FFmpeg installation...
@@ -62,12 +62,34 @@ if exist "..\backend\khuonmat\run_fast_face_service_silent.bat" (
 )
 
 echo.
+echo Verifying Relay Service batch files...
+if exist "..\backend\relay\start_relay_service.bat" (
+    echo Relay Service batch file found
+) else (
+    echo Relay Service batch file missing
+)
+
+if exist "..\backend\relay\stop_relay_service.bat" (
+    echo Relay Service stop batch file found
+) else (
+    echo Relay Service stop batch file missing
+)
+
+if exist "..\backend\relay\fast_relay_service.py" (
+    echo Relay Service Python file found
+) else (
+    echo Relay Service Python file missing
+)
+
+echo.
 echo Building React frontend (Production)...
 cd "../frontend"
 if not exist "node_modules" (
     echo Installing frontend dependencies...
     call npm install
 )
+echo Setting Node.js memory limit for build...
+set NODE_OPTIONS=--max-old-space-size=8192
 call npm run build
 if %ERRORLEVEL% neq 0 (
     echo Frontend build failed!
@@ -79,19 +101,6 @@ cd "../electron-app"
 
 echo.
 echo Building Electron app for Windows (Production)...
-REM Ensure electron is installed in node_modules
-if not exist "node_modules\electron" (
-    echo Installing electron...
-    call npm install electron --no-save
-)
-
-REM Check if electron-builder is available
-where electron-builder >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo electron-builder not found, installing...
-    call npm install electron-builder --no-save
-)
-
 call npm run build-win
 
 if %ERRORLEVEL% neq 0 (
@@ -155,6 +164,32 @@ if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\khuonmat\fast_fa
 )
 
 echo.
+echo Verifying Relay Service components in build...
+if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\relay\start_relay_service.bat" (
+    echo Relay Service batch file included in build
+) else (
+    echo Relay Service batch file missing in build
+)
+
+if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\relay\fast_relay_service.py" (
+    echo Relay Service Python file included in build
+) else (
+    echo Relay Service Python file missing in build
+)
+
+if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\relay\requirements_relay_service.txt" (
+    echo Relay Service requirements included in build
+) else (
+    echo Relay Service requirements missing in build
+)
+
+if exist "dist\win-unpacked\resources\app.asar.unpacked\backend\relay\SETUP_RELAY_SERVICE.bat" (
+    echo Relay Service setup script included in build
+) else (
+    echo Relay Service setup script missing in build
+)
+
+echo.
 echo Build Statistics:
 echo ===================
 for %%f in ("dist\*.exe") do (
@@ -169,6 +204,15 @@ echo Testing FFmpeg in production build...
 if exist "dist\win-unpacked" (
     echo Running FFmpeg verification test...
     call node test-build-ffmpeg.js
+) else (
+    echo Build directory not found!
+)
+
+echo.
+echo Testing Relay Service in production build...
+if exist "dist\win-unpacked" (
+    echo Running Relay Service verification test...
+    call node test-relay-build.js
 ) else (
     echo Build directory not found!
 )
@@ -193,17 +237,12 @@ echo   4. Verify Python backend integration
 echo   5. Test RTSP streaming functionality
 echo   6. Test License Plate Recognition (ALPR) service
 echo   7. Test Face Recognition service
+echo   8. Test USB Relay control functionality
 echo.
 echo Distribution ready for:
 echo   • Internal testing
 echo   • End-user installation
 echo   • Production deployment
-echo.
-echo 📋 DEPLOYMENT NOTES:
-echo   • Target machines need Python 3.8+ for AI services (ALPR, Face Recognition)
-echo   • USB Relay control included (node-hid bundled)
-echo   • App works without Python but AI features will be disabled
-echo   • Backend services will auto-install Python dependencies when needed
 echo.
 
 pause

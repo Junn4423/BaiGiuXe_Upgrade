@@ -5,15 +5,19 @@ const RTSPStreamingServer = require("./rtsp-streaming-server");
 const { spawn } = require("child_process");
 let alprProcess;
 let faceRecognitionProcess; // Face Recognition service process
+let relayServiceProcess; // Relay service process
 let pythonInstallProcess;
 
-// Import USB Relay Control
+// Import USB Relay Control HTTP API
 let RelayControlAPI;
 try {
-  RelayControlAPI = require("../frontend/src/services/relayControl.js");
-  console.log("✅ USB Relay Control module loaded");
+  RelayControlAPI = require("../frontend/src/services/relayControlHTTP.js");
+  console.log("✅ USB Relay Control HTTP module loaded");
 } catch (error) {
-  console.warn("⚠️ USB Relay Control module not available:", error.message);
+  console.warn(
+    "⚠️ USB Relay Control HTTP module not available:",
+    error.message
+  );
   RelayControlAPI = null;
 }
 
@@ -443,6 +447,122 @@ async function startFaceRecognitionService() {
 }
 
 /**
+ * Start Relay Service
+ */
+async function startRelayService() {
+  try {
+    console.log("Starting Fast Relay service...");
+
+    // Check if already running
+    if (relayServiceProcess) {
+      console.log("Fast Relay service already running");
+      return true;
+    }
+
+    // Determine batch file path based on app packaging
+    let batPath;
+
+    // Production path (when packaged) - use silent version for production
+    const prodBatPath = path.join(
+      __dirname,
+      "backend",
+      "relay",
+      "run_fast_relay_service_silent.bat"
+    );
+    const prodBatPathVerbose = path.join(
+      __dirname,
+      "backend",
+      "relay",
+      "start_relay_service.bat"
+    );
+
+    // Development path
+    const devBatPath = path.join(
+      __dirname,
+      "..",
+      "backend",
+      "relay",
+      "start_relay_service.bat"
+    );
+
+    // Check which batch file exists
+    try {
+      await fs.access(prodBatPath);
+      batPath = prodBatPath;
+      console.log("Using production silent batch file");
+    } catch {
+      try {
+        await fs.access(prodBatPathVerbose);
+        batPath = prodBatPathVerbose;
+        console.log("Using production verbose batch file");
+      } catch {
+        try {
+          await fs.access(devBatPath);
+          batPath = devBatPath;
+          console.log("Using development batch file");
+        } catch {
+          console.error(
+            "start_relay_service batch file not found in any location"
+          );
+          return false;
+        }
+      }
+    }
+
+    console.log("Relay service batch file path:", batPath);
+
+    // Stop any existing relay service first
+    if (relayServiceProcess) {
+      console.log("Stopping existing relay service...");
+      relayServiceProcess.kill();
+      relayServiceProcess = null;
+    }
+
+    // Run the batch file
+    relayServiceProcess = spawn("cmd", ["/c", batPath], {
+      cwd: path.dirname(batPath),
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: true,
+      detached: false,
+    });
+
+    relayServiceProcess.stdout.on("data", (data) => {
+      const output = data.toString().trim();
+      if (output) {
+        console.log(`[Relay Service] ${output}`);
+      }
+    });
+
+    relayServiceProcess.stderr.on("data", (data) => {
+      const output = data.toString().trim();
+      if (output && !output.includes("WARNING") && !output.includes("INFO")) {
+        console.error(`[Relay Service Error] ${output}`);
+      }
+    });
+
+    relayServiceProcess.on("close", (code) => {
+      console.log(`Fast Relay service exited with code ${code}`);
+      relayServiceProcess = null;
+    });
+
+    relayServiceProcess.on("error", (error) => {
+      console.error("Failed to start Fast Relay service:", error);
+      relayServiceProcess = null;
+    });
+
+    // Wait a bit for the service to start
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    console.log("Fast Relay service started successfully");
+    console.log("API documentation: http://127.0.0.1:5003/docs");
+    return true;
+  } catch (error) {
+    console.error("Error starting Fast Relay service:", error);
+    return false;
+  }
+}
+
+/**
  * Spawn the Fast ALPR Python micro-service so that licence-plate
  * detection is available for the React/Electron frontend.
  */
@@ -779,12 +899,28 @@ app.whenReady().then(async () => {
       console.warn("⚠️ Continuing without face recognition");
     }
 
+    // Start Fast Relay service
+    console.log("Starting Fast Relay service...");
+    try {
+      const relayStarted = await startRelayService();
+      if (relayStarted) {
+        console.log("Fast Relay service started successfully");
+      } else {
+        console.warn(
+          "Fast Relay service failed to start - continuing without relay control"
+        );
+      }
+    } catch (relayError) {
+      console.error("Fast Relay service error:", relayError.message);
+      console.warn("Continuing without relay control");
+    }
+
     // Create the main window (always proceed)
-    console.log("🖥️ Creating main window...");
+    console.log("Creating main window...");
     createWindow();
-    console.log("✅ Application started successfully");
+    console.log("Application started successfully");
   } catch (error) {
-    console.error("❌ Critical error during startup:", error);
+    console.error("Critical error during startup:", error);
 
     // Show error dialog to user
     const { dialog } = require("electron");
@@ -797,7 +933,7 @@ app.whenReady().then(async () => {
     try {
       createWindow();
     } catch (windowError) {
-      console.error("❌ Failed to create window:", windowError);
+      console.error("Failed to create window:", windowError);
       app.quit();
     }
   }
@@ -823,6 +959,11 @@ app.on("window-all-closed", () => {
   if (faceRecognitionProcess) {
     console.log("Stopping Face Recognition service...");
     faceRecognitionProcess.kill();
+  }
+
+  if (relayServiceProcess) {
+    console.log("Stopping Fast Relay service...");
+    relayServiceProcess.kill();
   }
 
   if (process.platform !== "darwin") app.quit();
@@ -862,6 +1003,19 @@ app.on("before-quit", () => {
       if (faceRecognitionProcess && !faceRecognitionProcess.killed) {
         console.log("🛑 Force killing Face Recognition service...");
         faceRecognitionProcess.kill("SIGKILL");
+      }
+    }, 3000);
+  }
+
+  if (relayServiceProcess) {
+    console.log("🛑 Stopping Fast Relay service before quit...");
+    relayServiceProcess.kill("SIGTERM");
+
+    // Force kill if not responsive
+    setTimeout(() => {
+      if (relayServiceProcess && !relayServiceProcess.killed) {
+        console.log("🛑 Force killing Fast Relay service...");
+        relayServiceProcess.kill("SIGKILL");
       }
     }, 3000);
   }
@@ -1000,7 +1154,7 @@ ipcMain.handle("show-in-explorer", async (event, filePath) => {
 function checkRelayControlAvailable() {
   if (!RelayControlAPI) {
     throw new Error(
-      "USB Relay Control không khả dụng. Cần cài đặt node-hid package."
+      "Fast Relay Service không khả dụng. Hãy đảm bảo service đã được khởi động."
     );
   }
 }
@@ -1136,6 +1290,24 @@ ipcMain.handle(
   }
 );
 
+// Sequence test (new HTTP API endpoint)
+ipcMain.handle(
+  "relay-sequence-test",
+  async (event, cycles = 1, delayMs = 1000) => {
+    try {
+      checkRelayControlAvailable();
+      const result = await RelayControlAPI.sequenceTest(cycles, delayMs);
+      console.log(
+        `🧪 Sequence test completed via IPC (${cycles} cycles, ${delayMs}ms delay)`
+      );
+      return { success: true, result };
+    } catch (error) {
+      console.error("❌ Sequence test error via IPC:", error);
+      return { success: false, error: error.message };
+    }
+  }
+);
+
 // Get relay status
 ipcMain.handle("relay-get-status", async () => {
   try {
@@ -1199,6 +1371,21 @@ ipcMain.handle("restart-camera-system", async () => {
       results.push("✅ ALPR service restarted");
     } catch (error) {
       results.push("❌ ALPR error: " + error.message);
+    }
+
+    // Restart Fast Relay service
+    try {
+      if (relayServiceProcess) {
+        console.log("🛑 Stopping Fast Relay service...");
+        relayServiceProcess.kill("SIGTERM");
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        relayServiceProcess = null;
+      }
+      console.log("▶️ Starting Fast Relay service...");
+      await startRelayService();
+      results.push("✅ Fast Relay service restarted");
+    } catch (error) {
+      results.push("❌ Fast Relay error: " + error.message);
     }
 
     console.log("✅ Camera system restart completed");
