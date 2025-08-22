@@ -1762,5 +1762,363 @@ class pm_statistics extends lv_controler{
         $result = db_query($sql);
         return db_num_rows($result) > 0;
     }
+
+    // ========== BÁO CÁO DOANH THU CHI TIẾT (API MỚI) ========== 
+    // Trả về cấu trúc phù hợp với frontend (summary, details, payment_breakdown, vehicle_breakdown, hourly_breakdown, period, excel_data?)
+    function GET_DETAILED_REVENUE_REPORT() {
+        error_log("GET_DETAILED_REVENUE_REPORT started with params: lv002={$this->lv002}, lv003={$this->lv003}, lv004={$this->lv004}");
+        
+        $fromDate = $this->lv002 ?? date('Y-m-d');
+        $toDate   = $this->lv003 ?? $fromDate;
+        $exportExcel = filter_var($this->lv004, FILTER_VALIDATE_BOOLEAN);
+
+        $fromTs = strtotime($fromDate);
+        $toTs = strtotime($toDate);
+        if ($fromTs === false || $toTs === false || $fromTs > $toTs) {
+            error_log("Invalid date range: {$fromDate} to {$toDate}");
+            return ['success'=>false,'error'=>'Khoảng ngày không hợp lệ'];
+        }
+        $daysCount = (int)(($toTs - $fromTs)/86400)+1;
+        $MAX_DAYS_EXTENDED = 365;       // Giới hạn mở rộng lên 1 năm
+        $note = '';
+        if ($daysCount > 90) {
+            $note = "Khoảng thời gian lớn ($daysCount ngày) - có thể mất thời gian xử lý.";
+            error_log("Large range mode for {$daysCount} days");
+        }
+        if ($daysCount > $MAX_DAYS_EXTENDED) {
+            error_log("Date range too large: {$daysCount} days");
+            return ['success'=>false,'error'=>'Khoảng ngày quá lớn (tối đa 1 năm)'];
+        }
+
+        // Accumulators
+        $totalRevenue = 0.0;
+        $totalSessions = 0;
+        $totalMinutes = 0;
+    $distinctPlates = [];
+
+        $paymentAgg = [];// phuong_thuc => [count, revenue, discount]
+        $vehicleAgg = [];// loai_xe => [count, revenue, totalMinutes]
+        $hourAgg = [];// hour => [count, revenue]
+        for ($h=0;$h<24;$h++) { $hourAgg[$h] = ['count'=>0,'revenue'=>0.0]; }
+
+        $detailsAll = [];
+        $dailyReport = []; // Báo cáo chi tiết từng ngày
+        $detailLimit = 10000; // Tăng giới hạn lên        // Loop each date & table
+        for ($ts = $fromTs; $ts <= $toTs; $ts += 86400) {
+            $dateYMD = date('Y-m-d', $ts);
+            $dateForTable = date('dmY', $ts);
+            $tableName = ($dateYMD === date('Y-m-d')) ? 'pm_nc0009' : 'pm_nc0009_' . $dateForTable;
+
+            // Check table exists
+            $chk = db_query("SHOW TABLES LIKE '$tableName'");
+            if (!$chk || db_num_rows($chk)==0) {
+                error_log("Table not found: $tableName for date $dateYMD");
+                continue;
+            }
+            error_log("Processing table: $tableName for date $dateYMD");
+
+            // Summary per table
+            $sqlSum = "SELECT 
+                SUM(lv013) AS rev,
+                COUNT(*) AS sess,
+                SUM(lv010) AS mins,
+                COUNT(DISTINCT lv003) AS plates
+                FROM $tableName
+                WHERE lv014='DA_RA'";
+            $resSum = db_query($sqlSum);
+            if ($resSum) {
+                $r = db_fetch_array($resSum);
+                $dayRevenue = (float)($r['rev'] ?? 0);
+                $daySessions = (int)($r['sess'] ?? 0);
+                $dayMinutes = (int)($r['mins'] ?? 0);
+                $dayPlates = (int)($r['plates'] ?? 0);
+                
+                $totalRevenue += $dayRevenue;
+                $totalSessions += $daySessions;
+                $totalMinutes += $dayMinutes;
+                
+                // Báo cáo chi tiết từng ngày
+                $dailyReport[] = [
+                    'date' => $dateYMD,
+                    'revenue' => $dayRevenue,
+                    'sessions' => $daySessions,
+                    'minutes' => $dayMinutes,
+                    'plates' => $dayPlates,
+                    'avg_price' => $daySessions > 0 ? $dayRevenue / $daySessions : 0,
+                    'avg_time' => $daySessions > 0 ? (int)round($dayMinutes / $daySessions) : 0
+                ];
+                
+                // Thu thập biển số riêng biệt (luôn làm)
+                $sqlPlates = "SELECT DISTINCT lv003 FROM $tableName WHERE lv014='DA_RA' AND lv003 IS NOT NULL AND lv003 <> ''";
+                $resPl = db_query($sqlPlates);
+                if ($resPl) {
+                    while ($rp = db_fetch_array($resPl)) { $distinctPlates[$rp['lv003']] = 1; }
+                }
+            }
+
+            // Payment breakdown
+            $sqlPay = "SELECT COALESCE(phuongThucTT,'TIEN_MAT') phuong_thuc, COUNT(*) c, SUM(lv013) rev, SUM(COALESCE(mienGiam,0)) disc
+                       FROM $tableName WHERE lv014='DA_RA' GROUP BY COALESCE(phuongThucTT,'TIEN_MAT')";
+            $resPay = db_query($sqlPay);
+            if ($resPay) {
+                while ($p = db_fetch_array($resPay)) {
+                    $k = $p['phuong_thuc'];
+                    if (!isset($paymentAgg[$k])) $paymentAgg[$k] = ['count'=>0,'rev'=>0.0,'disc'=>0.0];
+                    $paymentAgg[$k]['count'] += (int)($p['c'] ?? 0);
+                    $paymentAgg[$k]['rev'] += (float)($p['rev'] ?? 0);
+                    $paymentAgg[$k]['disc'] += (float)($p['disc'] ?? 0);
+                }
+            }
+
+            // Vehicle breakdown
+        $sqlVeh = "SELECT COALESCE(pp.lv002,'Không xác định') loai_xe, COUNT(s.lv001) c, SUM(s.lv013) rev, SUM(s.lv010) total_minutes
+                        FROM $tableName s
+                        LEFT JOIN pm_nc0008 pp ON s.lv005 = pp.lv001
+                        WHERE s.lv014='DA_RA'
+                        GROUP BY pp.lv002";
+            $resVeh = db_query($sqlVeh);
+            if ($resVeh) {
+                while ($v = db_fetch_array($resVeh)) {
+                    $k = $v['loai_xe'];
+            if (!isset($vehicleAgg[$k])) $vehicleAgg[$k] = ['count'=>0,'rev'=>0.0,'minutes'=>0];
+                    $vehicleAgg[$k]['count'] += (int)($v['c'] ?? 0);
+                    $vehicleAgg[$k]['rev'] += (float)($v['rev'] ?? 0);
+            $vehicleAgg[$k]['minutes'] += (int)($v['total_minutes'] ?? 0);
+                }
+            }
+
+            // Hourly breakdown for this day
+            $sqlHour = "SELECT HOUR(lv008) h, COUNT(*) c, SUM(lv013) rev FROM $tableName WHERE lv014='DA_RA' GROUP BY HOUR(lv008)";
+            $resHour = db_query($sqlHour);
+            if ($resHour) {
+                while ($hrow = db_fetch_array($resHour)) {
+                    $h = (int)$hrow['h'];
+                    $hourAgg[$h]['count'] += (int)($hrow['c'] ?? 0);
+                    $hourAgg[$h]['revenue'] += (float)($hrow['rev'] ?? 0);
+                }
+            }
+
+            // Details (luôn thu thập, không giới hạn bởi fullMode)
+            if (count($detailsAll) < $detailLimit) {
+                $remaining = $detailLimit - count($detailsAll);
+                $sqlDet = "SELECT s.lv001 session_id, s.lv003 bien_so, s.lv008 gio_vao, s.lv009 gio_ra, s.lv010 so_phut, s.lv013 phi,
+                                COALESCE(s.phuongThucTT,'TIEN_MAT') phuong_thuc, COALESCE(s.mienGiam,0) mien_giam, s.lv006 so_the,
+                                pp.lv002 loai_xe, z.lv002 khu_vuc
+                           FROM $tableName s
+                           LEFT JOIN pm_nc0008 pp ON s.lv005 = pp.lv001
+                           LEFT JOIN pm_nc0005 p  ON s.lv004 = p.lv001
+                           LEFT JOIN pm_nc0004 z  ON p.lv002 = z.lv001
+                           WHERE s.lv014='DA_RA'
+                           ORDER BY s.lv008 DESC
+                           LIMIT $remaining";
+                $resDet = db_query($sqlDet);
+                if ($resDet) {
+                    while ($d = db_fetch_array($resDet)) {
+                        $phi = (float)($d['phi'] ?? 0); $mg = (float)($d['mien_giam'] ?? 0);
+                        $detailsAll[] = [
+                            'session_id' => $d['session_id'],
+                            'bien_so' => $d['bien_so'],
+                            'gio_vao' => $d['gio_vao'],
+                            'gio_ra' => $d['gio_ra'],
+                            'so_phut' => (int)($d['so_phut'] ?? 0),
+                            'phi' => $phi,
+                            'mien_giam' => $mg,
+                            'doanh_thu_thuc' => $phi - $mg,
+                            'phuong_thuc' => $d['phuong_thuc'],
+                            'so_the' => $d['so_the'],
+                            'loai_xe' => $d['loai_xe'],
+                            'khu_vuc' => $d['khu_vuc']
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Build payment_breakdown array
+        $payment_breakdown = [];
+        foreach ($paymentAgg as $k=>$v) {
+            $payment_breakdown[] = [
+                'phuong_thuc' => $k,
+                'so_phien' => $v['count'],
+                'tong_tien' => $v['rev'],
+                'tong_mien_giam' => $v['disc'],
+                'doanh_thu_thuc' => $v['rev'] - $v['disc']
+            ];
+        }
+
+        // Vehicle breakdown (need average price/time across all sessions -> compute with extra queries? simplified: rev/count, totalMinutes not tracked -> leave thoi_gian_trung_binh=0 if not available)
+        $vehicle_breakdown = [];
+        foreach ($vehicleAgg as $k=>$v) {
+            $vehicle_breakdown[] = [
+                'loai_xe' => $k,
+                'so_phien' => $v['count'],
+                'tong_tien' => $v['rev'],
+                'gia_trung_binh' => $v['count']>0 ? $v['rev']/$v['count'] : 0,
+                'thoi_gian_trung_binh' => $v['count']>0 ? (int)round($v['minutes']/$v['count']) : 0
+            ];
+        }
+
+        // Hourly breakdown list
+        $hourly_breakdown = [];
+        for ($h=0;$h<24;$h++) {
+            $cnt = $hourAgg[$h]['count'];
+            $rev = $hourAgg[$h]['revenue'];
+            $hourly_breakdown[] = [
+                'gio' => sprintf('%02d:00',$h),
+                'so_luot' => $cnt,
+                'doanh_thu' => $rev,
+                'gia_trung_binh' => $cnt>0 ? $rev/$cnt : 0
+            ];
+        }
+
+        // Sort details by gio_vao DESC (cross-date) then slice
+        usort($detailsAll, function($a,$b){ return strcmp($b['gio_vao'],$a['gio_vao']); });
+        if (count($detailsAll)>$detailLimit) $detailsAll = array_slice($detailsAll,0,$detailLimit);
+
+        // Summary
+        $summary = [
+            'title' => 'Tổng quan doanh thu',
+            'tong_doanh_thu' => $totalRevenue,
+            'so_luot' => $totalSessions,
+            'gia_trung_binh' => $totalSessions>0 ? $totalRevenue/$totalSessions : 0,
+            'thoi_gian_trung_binh' => $totalSessions>0 ? (int)round($totalMinutes/$totalSessions) : 0,
+            'tong_thoi_gian' => $totalMinutes,
+            'so_bien_so' => count($distinctPlates),
+            'period' => $fromDate.' → '.$toDate
+        ];
+
+        $data = [
+            'summary' => $summary,
+            'details' => $detailsAll,
+            'payment_breakdown' => $payment_breakdown,
+            'vehicle_breakdown' => $vehicle_breakdown,
+            'hourly_breakdown' => $hourly_breakdown,
+            'daily_report' => $dailyReport, // Thêm báo cáo chi tiết từng ngày
+            'period' => [
+                'from' => $fromDate,
+                'to' => $toDate,
+                'days' => $daysCount
+            ],
+            'note' => $note
+        ];
+
+        if ($exportExcel) {
+            try {
+                // Check if we need monthly breakdown (more than 2 months)
+                $startDate = DateTime::createFromFormat('Y-m-d', $this->lv002);
+                $endDate = DateTime::createFromFormat('Y-m-d', $this->lv003);
+                $diffMonths = $endDate->diff($startDate)->m + ($endDate->diff($startDate)->y * 12);
+                
+                // Build structured Excel data matching frontend expectations
+                $excel = [
+                    'summary' => [
+                        'title' => 'Tổng quan doanh thu',
+                        'data' => [
+                            ['Khoảng thời gian',$summary['period']],
+                            ['Tổng doanh thu',$summary['tong_doanh_thu']],
+                            ['Số lượt',$summary['so_luot']],
+                            ['Giá TB',$summary['gia_trung_binh']],
+                            ['Thời gian TB (phút)',$summary['thoi_gian_trung_binh']],
+                            ['Tổng thời gian (phút)',$summary['tong_thoi_gian']],
+                            ['Biển số khác nhau',$summary['so_bien_so']]
+                        ]
+                    ],
+                    'payment' => [
+                        'title' => 'Phân tích theo phương thức thanh toán',
+                        'headers' => ['Phương thức','Số phiên','Tổng tiền','Miễn giảm','Doanh thu thực'],
+                        'data' => array_map(function($r){ return [$r['phuong_thuc'],$r['so_phien'],$r['tong_tien'],$r['tong_mien_giam'],$r['doanh_thu_thuc']]; }, $payment_breakdown)
+                    ],
+                    'vehicle' => [
+                        'title' => 'Phân tích theo loại xe',
+                        'headers' => ['Loại xe','Số phiên','Tổng tiền','Giá TB','Thời gian TB (phút)'],
+                        'data' => array_map(function($r){ return [$r['loai_xe'],$r['so_phien'],$r['tong_tien'],$r['gia_trung_binh'],$r['thoi_gian_trung_binh']]; }, $vehicle_breakdown)
+                    ],
+                    'hourly' => [
+                        'title' => 'Phân tích theo giờ',
+                        'headers' => ['Giờ','Số lượt','Doanh thu','Giá TB'],
+                        'data' => array_map(function($r){ return [$r['gio'],$r['so_luot'],$r['doanh_thu'],$r['gia_trung_binh']]; }, $hourly_breakdown)
+                    ],
+                    'details' => [
+                        'title' => 'Danh sách chi tiết ('.count($detailsAll).' bản ghi)',
+                        'headers' => ['Session ID','Biển số','Giờ vào','Giờ ra','Số phút','Phí','Miễn giảm','Doanh thu thực','Phương thức TT','Số thẻ','Loại xe','Khu vực'],
+                        'data' => array_map(function($r){ return [$r['session_id'],$r['bien_so'],$r['gio_vao'],$r['gio_ra'],$r['so_phut'],$r['phi'],$r['mien_giam'],$r['doanh_thu_thuc'],$r['phuong_thuc'],$r['so_the'],$r['loai_xe'],$r['khu_vuc']]; }, $detailsAll)
+                    ]
+                ];
+
+                // If span is more than 2 months, create monthly breakdown
+                if ($diffMonths > 1) {
+                    $monthlyData = [];
+                    
+                    // Group daily reports by month
+                    foreach ($dailyReport as $day) {
+                        $monthKey = substr($day['date'], 0, 7); // YYYY-MM
+                        if (!isset($monthlyData[$monthKey])) {
+                            $monthlyData[$monthKey] = [];
+                        }
+                        $monthlyData[$monthKey][] = $day;
+                    }
+                    
+                    $excel['monthly_sheets'] = [];
+                    foreach ($monthlyData as $month => $days) {
+                        $monthTitle = DateTime::createFromFormat('Y-m', $month)->format('Y-m');
+                        $monthRevenue = array_sum(array_column($days, 'revenue'));
+                        $monthSessions = array_sum(array_column($days, 'sessions'));
+                        
+                        $excel['monthly_sheets'][$month] = [
+                            'title' => "Tháng $monthTitle",
+                            'summary' => [
+                                ['Tổng doanh thu', number_format($monthRevenue, 0, ',', '.')],
+                                ['Số lượt', $monthSessions],
+                                ['Giá TB', $monthSessions > 0 ? number_format($monthRevenue/$monthSessions, 0, ',', '.') : '0']
+                            ],
+                            'headers' => ['Ngày','Doanh thu','Số lượt','Thời gian (phút)','Biển số','Giá TB','Thời gian TB'],
+                            'data' => array_map(function($r){ 
+                                return [
+                                    $r['date'],
+                                    number_format($r['revenue'], 0, ',', '.'),
+                                    $r['sessions'],
+                                    $r['minutes'],
+                                    $r['plates'],
+                                    number_format($r['avg_price'], 0, ',', '.'),
+                                    $r['avg_time']
+                                ]; 
+                            }, $days)
+                        ];
+                    }
+                } else {
+                    // For periods <= 2 months, use traditional daily sheet
+                    $excel['daily'] = [
+                        'title' => 'Báo cáo chi tiết từng ngày',
+                        'headers' => ['Ngày','Doanh thu','Số lượt','Thời gian (phút)','Biển số','Giá TB','Thời gian TB'],
+                        'data' => array_map(function($r){ return [$r['date'],$r['revenue'],$r['sessions'],$r['minutes'],$r['plates'],$r['avg_price'],$r['avg_time']]; }, $dailyReport)
+                    ];
+                }
+
+                if ($note) {
+                    $excel['summary']['data'][] = ['Ghi chú', $note];
+                }
+                
+                $jsonData = json_encode($excel);
+                if ($jsonData === false) {
+                    error_log("JSON encode failed in GET_DETAILED_REVENUE_REPORT: " . json_last_error_msg());
+                    throw new Exception("Lỗi encode JSON: " . json_last_error_msg());
+                }
+                
+                $data['excel_data'] = base64_encode($jsonData);
+                error_log("Excel data generated successfully, size: " . strlen($data['excel_data']));
+            } catch (Exception $e) {
+                error_log("Excel generation error: " . $e->getMessage());
+                $data['excel_error'] = $e->getMessage();
+            }
+        }
+
+        error_log("Final summary - Revenue: $totalRevenue, Sessions: $totalSessions, Plates: " . count($distinctPlates));
+        error_log("Payment breakdown count: " . count($payment_breakdown));
+        error_log("Vehicle breakdown count: " . count($vehicle_breakdown));
+        error_log("Details count: " . count($detailsAll));
+        error_log("Daily report count: " . count($dailyReport));
+
+        return ['success'=>true,'data'=>$data];
+    }
 }
 ?>

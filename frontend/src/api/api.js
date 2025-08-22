@@ -2,6 +2,7 @@
 // Lưu ý: Cần chỉnh sửa urlApi cho đúng endpoint backend của bạn
 
 import { api_BienSo, url_api, url_login_api } from "./url";
+import * as XLSX from "xlsx";
 
 const urlApi = url_api; // Thay đổi cho đúng backend
 const urlLoginApi = url_login_api;
@@ -9,8 +10,17 @@ const urlLoginApi = url_login_api;
 // -------------------- Authentication helpers --------------------
 let authCache = null; // Lưu token sau lần đăng nhập đầu tiên
 
-async function getAuthToken(username = "admin", password = "1") {
-  // Luôn lấy token mới để đảm bảo không bị expired
+async function getAuthToken(
+  username = "admin",
+  password = "1",
+  forceRefresh = false
+) {
+  // Use cached token if available and not forcing refresh
+  if (authCache && !forceRefresh) {
+    console.log("Using cached auth token");
+    return authCache;
+  }
+
   console.log("Getting fresh auth token...");
 
   const payload = {
@@ -48,8 +58,8 @@ async function getAuthToken(username = "admin", password = "1") {
   return authCache;
 }
 
-async function getAuthHeaders() {
-  const authData = await getAuthToken();
+async function getAuthHeaders(forceRefresh = false) {
+  const authData = await getAuthToken("admin", "1", forceRefresh);
   return {
     "Content-Type": "application/json",
     "X-USER-CODE": authData.code,
@@ -57,20 +67,41 @@ async function getAuthHeaders() {
   };
 }
 
-async function callApiWithAuth(payload) {
-  console.log("Calling API with auth:", payload);
-  const headers = await getAuthHeaders();
-  console.log("Using headers:", headers);
+async function callApiWithAuth(payload, retryCount = 0) {
+  console.log("Calling API with auth:", payload, "retry count:", retryCount);
 
-  const res = await fetch(urlApi, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
+  try {
+    const headers = await getAuthHeaders(retryCount > 0); // Force refresh on retry
+    console.log("Using headers:", headers);
 
-  const result = await handleApiResponse(res);
-  console.log("API response:", result);
-  return result;
+    const res = await fetch(urlApi, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+
+    // If we get 401 and haven't retried yet, clear cache and retry
+    if (res.status === 401 && retryCount === 0) {
+      console.log("Got 401, clearing auth cache and retrying...");
+      authCache = null; // Clear cached token
+      return callApiWithAuth(payload, 1); // Retry once
+    }
+
+    const result = await handleApiResponse(res);
+    console.log("API response:", result);
+    return result;
+  } catch (error) {
+    // If we get a network error and haven't retried yet, try again
+    if (
+      retryCount === 0 &&
+      (error.message.includes("401") || error.message.includes("Unauthorized"))
+    ) {
+      console.log("Got auth error, clearing cache and retrying...");
+      authCache = null;
+      return callApiWithAuth(payload, 1);
+    }
+    throw error;
+  }
 }
 
 function handleApiResponse(response) {
@@ -4939,4 +4970,186 @@ export async function relayGetDeviceInfo() {
     console.error("Relay get device info error:", error);
     throw new Error(`Lỗi lấy thông tin thiết bị relay: ${error.message}`);
   }
+}
+
+// ================== BÁO CÁO DOANH THU CHI TIẾT ==================
+
+/**
+ * Lấy báo cáo doanh thu chi tiết
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ * @param {boolean} exportExcel - Có xuất Excel hay không
+ * @returns {Promise<Object>} Báo cáo chi tiết
+ */
+export async function getDetailedRevenueReport(
+  fromDate = null,
+  toDate = null,
+  exportExcel = false
+) {
+  console.log("🔄 getDetailedRevenueReport called with:", {
+    fromDate,
+    toDate,
+    exportExcel,
+  });
+
+  const payload = {
+    table: "pm_statistics",
+    func: "GET_DETAILED_REVENUE_REPORT",
+    lv002: fromDate || new Date().toISOString().slice(0, 10),
+    lv003: toDate || new Date().toISOString().slice(0, 10),
+    lv004: exportExcel,
+  };
+
+  console.log("📤 getDetailedRevenueReport payload:", payload);
+
+  try {
+    const result = await callApiWithAuth(payload);
+    console.log("📊 getDetailedRevenueReport result:", result);
+    return result;
+  } catch (error) {
+    console.error("❌ getDetailedRevenueReport error:", error);
+    throw error;
+  }
+}
+
+/**
+ * Xuất báo cáo doanh thu chi tiết ra Excel
+ * @param {string} fromDate - Ngày bắt đầu (YYYY-MM-DD)
+ * @param {string} toDate - Ngày kết thúc (YYYY-MM-DD)
+ * @returns {Promise<Object>} Dữ liệu Excel
+ */
+export async function exportDetailedRevenueToExcel(
+  fromDate = null,
+  toDate = null
+) {
+  return getDetailedRevenueReport(fromDate, toDate, true);
+}
+
+/**
+ * Tạo và tải file Excel từ dữ liệu báo cáo
+ * @param {Object} excelData - Dữ liệu Excel từ API
+ * @param {string} filename - Tên file (không cần extension)
+ */
+export function downloadExcelReport(excelData, filename = "bao_cao_doanh_thu") {
+  // Tạo workbook mới
+  const wb = XLSX.utils.book_new();
+
+  // Function to auto-adjust column widths
+  const autoWidth = (ws) => {
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    const colWidths = [];
+
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      let maxWidth = 10;
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        const cellAddress = XLSX.utils.encode_cell({ c: C, r: R });
+        const cell = ws[cellAddress];
+        if (cell && cell.v) {
+          const cellValue = cell.v.toString();
+          maxWidth = Math.max(maxWidth, cellValue.length);
+        }
+      }
+      colWidths[C] = { width: Math.min(maxWidth + 2, 50) }; // Max 50 chars
+    }
+    ws["!cols"] = colWidths;
+  };
+
+  // Thêm sheet tổng quan
+  if (excelData.summary) {
+    const summaryWs = XLSX.utils.aoa_to_sheet([
+      [excelData.summary.title],
+      [],
+      ...excelData.summary.data,
+    ]);
+    autoWidth(summaryWs);
+    XLSX.utils.book_append_sheet(wb, summaryWs, "Tổng quan");
+  }
+
+  // Thêm monthly sheets nếu có (cho báo cáo > 2 tháng)
+  if (excelData.monthly_sheets) {
+    Object.keys(excelData.monthly_sheets).forEach((monthKey) => {
+      const monthData = excelData.monthly_sheets[monthKey];
+      const monthWs = XLSX.utils.aoa_to_sheet([
+        [monthData.title],
+        [],
+        ["TỔNG QUAN THÁNG"],
+        ...monthData.summary,
+        [],
+        ["CHI TIẾT TỪNG NGÀY"],
+        monthData.headers,
+        ...monthData.data,
+      ]);
+      autoWidth(monthWs);
+
+      // Create sheet name from month (format: "2025-01" -> "T01-2025")
+      const [year, month] = monthKey.split("-");
+      const sheetName = `T${month}-${year}`;
+      XLSX.utils.book_append_sheet(wb, monthWs, sheetName);
+    });
+  }
+
+  // Thêm sheet chi tiết hàng ngày (cho báo cáo <= 2 tháng)
+  if (excelData.daily) {
+    const dailyWs = XLSX.utils.aoa_to_sheet([
+      [excelData.daily.title],
+      [],
+      excelData.daily.headers,
+      ...excelData.daily.data,
+    ]);
+    autoWidth(dailyWs);
+    XLSX.utils.book_append_sheet(wb, dailyWs, "Theo ngày");
+  }
+
+  // Thêm sheet phương thức thanh toán
+  if (excelData.payment) {
+    const paymentWs = XLSX.utils.aoa_to_sheet([
+      [excelData.payment.title],
+      [],
+      excelData.payment.headers,
+      ...excelData.payment.data,
+    ]);
+    autoWidth(paymentWs);
+    XLSX.utils.book_append_sheet(wb, paymentWs, "Phương thức TT");
+  }
+
+  // Thêm sheet loại xe
+  if (excelData.vehicle) {
+    const vehicleWs = XLSX.utils.aoa_to_sheet([
+      [excelData.vehicle.title],
+      [],
+      excelData.vehicle.headers,
+      ...excelData.vehicle.data,
+    ]);
+    autoWidth(vehicleWs);
+    XLSX.utils.book_append_sheet(wb, vehicleWs, "Loại xe");
+  }
+
+  // Thêm sheet theo giờ
+  if (excelData.hourly) {
+    const hourlyWs = XLSX.utils.aoa_to_sheet([
+      [excelData.hourly.title],
+      [],
+      excelData.hourly.headers,
+      ...excelData.hourly.data,
+    ]);
+    autoWidth(hourlyWs);
+    XLSX.utils.book_append_sheet(wb, hourlyWs, "Theo giờ");
+  }
+
+  // Thêm sheet chi tiết giao dịch
+  if (excelData.details) {
+    const detailsWs = XLSX.utils.aoa_to_sheet([
+      [excelData.details.title],
+      [],
+      excelData.details.headers,
+      ...excelData.details.data,
+    ]);
+    autoWidth(detailsWs);
+    XLSX.utils.book_append_sheet(wb, detailsWs, "Chi tiết");
+  }
+
+  // Tạo và tải file
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, "-");
+  const fullFilename = `${filename}_${timestamp}.xlsx`;
+  XLSX.writeFile(wb, fullFilename);
 }

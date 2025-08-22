@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 	http_response_code(200);
 	exit();
 }
-header("Content-Type: application/json; charset=UTF-8");
+header(header: "Content-Type: application/json; charset=UTF-8");
 
 include("config.php");
 include("function.php");
@@ -36,46 +36,6 @@ $vyear = isset($input['year']) ? $input['year'] : (isset($_POST['year']) ? $_POS
 
 session_start();
 $vOutput = array();
-
-// Xác thực token
-function authenticateUser() {
-    $headers = getallheaders();
-    $userCode = $headers['X-USER-CODE'] ?? $headers['X-User-Code'] ?? null;
-    $userToken = $headers['X-USER-TOKEN'] ?? $headers['X-User-Token'] ?? null;
-    
-    error_log("Auth headers - Code: " . ($userCode ?? 'NULL') . ", Token: " . ($userToken ?? 'NULL'));
-    
-    if (!$userCode || !$userToken) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Missing authentication headers']);
-        exit();
-    }
-    
-    // Kiểm tra token trong database
-    $sql = "SELECT * FROM lv_lv0007 WHERE lv001 = '$userCode' AND lv097 = '$userToken' AND lv096 = 0";
-    $result = db_query($sql);
-    
-    if (!$result || db_num_rows($result) == 0) {
-        error_log("Authentication failed for user: $userCode with token: $userToken");
-        http_response_code(401);
-        echo json_encode(['error' => 'Invalid token or user']);
-        exit();
-    }
-    
-    $userData = db_fetch_array($result);
-    
-    // Thiết lập session
-    $_SESSION['ERPSOFV2RUserID'] = $userData['lv001'];
-    $_SESSION['ERPSOFV2RRight'] = $userData['lv197'] ?? '';
-    
-    error_log("Authentication successful for user: " . $_SESSION['ERPSOFV2RUserID']);
-    return true;
-}
-
-// Chỉ xác thực khi không phải request OPTIONS
-if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
-    authenticateUser();
-}
 
 function saveImageToDB($fileData, $cot, $lv001)
 {
@@ -163,6 +123,41 @@ switch ($vtable) {
 			case "sua":
 
 				break;
+		}
+		break;
+
+	case "pm_statistics":
+		include_once("pm_statistics.php");
+		$svc = new pm_statistics();
+		// Map common params
+		$svc->lv002 = $input['lv002'] ?? $_POST['lv002'] ?? $_GET['lv002'] ?? null; // fromDate
+		$svc->lv003 = $input['lv003'] ?? $_POST['lv003'] ?? $_GET['lv003'] ?? null; // toDate
+		$svc->lv004 = $input['lv004'] ?? $_POST['lv004'] ?? $_GET['lv004'] ?? null; // extra / export flag / limit
+
+		// Simple auth fallback (reuse existing token tables) if session not yet set
+		if (!isset($_SESSION['ERPSOFV2RUserID'])) {
+			$hdrs = function_exists('getallheaders') ? getallheaders() : [];
+			$userCode = $hdrs['X-USER-CODE'] ?? $hdrs['X-User-Code'] ?? $_SERVER['HTTP_X_USER_CODE'] ?? null;
+			$userToken = $hdrs['X-USER-TOKEN'] ?? $hdrs['X-User-Token'] ?? $_SERVER['HTTP_X_USER_TOKEN'] ?? null;
+			if ($userCode && $userToken) {
+				$chk = db_query("SELECT lv001, lv197 FROM lv_lv0007 WHERE lv001='" . $userCode . "' AND lv097='" . $userToken . "' AND lv096=0 LIMIT 1");
+				if ($chk && db_num_rows($chk) > 0) {
+					$rowU = db_fetch_array($chk);
+					$_SESSION['ERPSOFV2RUserID'] = $rowU['lv001'];
+					$_SESSION['ERPSOFV2RRight'] = $rowU['lv197'] ?? '';
+				}
+			}
+		}
+
+		if (!method_exists($svc, $vfun)) {
+			$vOutput = ['success'=>false,'error'=>'Method not found: '.$vfun];
+			break;
+		}
+		try {
+			$result = $svc->$vfun();
+			$vOutput = $result;
+		} catch (Exception $ex) {
+			$vOutput = ['success'=>false,'error'=>'Exception: '.$ex->getMessage()];
 		}
 		break;
 

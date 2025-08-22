@@ -45,6 +45,10 @@ import {
   getTopFrequentPlates,
   getAllBasicStatistics,
   getDailyReport,
+  // Detailed Revenue Report APIs
+  getDetailedRevenueReport,
+  exportDetailedRevenueToExcel,
+  downloadExcelReport,
 } from "../api/api";
 import Chart from "chart.js/auto";
 import "../assets/styles/StatisticsPage.css";
@@ -122,6 +126,8 @@ const StatisticsPage = ({ onClose }) => {
     incidents: null,
     transactions: null,
     dailyReport: null,
+    // Detailed Revenue Report
+    detailedRevenueReport: null,
   });
 
   // Helper function to safely extract data from API responses
@@ -190,7 +196,104 @@ const StatisticsPage = ({ onClose }) => {
     { value: "system", label: "Hệ thống", icon: "⚙️" },
     { value: "reports", label: "Báo cáo", icon: "📋" },
     { value: "analysis", label: "Phân tích", icon: "📈" },
+    { value: "detailed-report", label: "BC Chi tiết", icon: "📊" },
   ];
+
+  // Test simple API call for debugging
+  const testSimpleAPI = async () => {
+    try {
+      console.log("🧪 Testing simple API call...");
+
+      // Test existing working API first
+      const workingAPI = await layThongKeDoanhThu({
+        fromDate: new Date().toISOString().slice(0, 10),
+        toDate: new Date().toISOString().slice(0, 10),
+      });
+      console.log("✅ Working API result:", workingAPI);
+
+      // Test new pm_statistics API
+      const newAPI = await getDetailedRevenueReport(
+        new Date().toISOString().slice(0, 10),
+        new Date().toISOString().slice(0, 10),
+        false
+      );
+      console.log("📊 New API result:", newAPI);
+    } catch (error) {
+      console.error("❌ API test error:", error);
+    }
+  };
+
+  // Load detailed revenue report
+  const loadDetailedRevenueReport = async () => {
+    try {
+      setLoading(true);
+      console.log("🔄 Loading detailed revenue report...");
+
+      const { fromDate, toDate } = getDateRange(preset);
+      console.log("📅 Date range:", { fromDate, toDate });
+
+      const reportData = await getDetailedRevenueReport(
+        fromDate,
+        toDate,
+        false
+      );
+
+      console.log("📊 Detailed revenue report response:", reportData);
+
+      if (reportData && reportData.data) {
+        setStatsData((prev) => ({
+          ...prev,
+          detailedRevenueReport: reportData.data,
+        }));
+        console.log("✅ Detailed revenue report loaded successfully");
+      } else {
+        console.warn("⚠️ No data in detailed revenue report response");
+        setStatsData((prev) => ({
+          ...prev,
+          detailedRevenueReport: null,
+        }));
+      }
+    } catch (error) {
+      console.error("❌ Error loading detailed revenue report:", error);
+      setError("Lỗi tải báo cáo chi tiết: " + error.message);
+      setStatsData((prev) => ({
+        ...prev,
+        detailedRevenueReport: null,
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Export to Excel
+  const exportToExcel = async () => {
+    try {
+      setLoading(true);
+      console.log("📊 Starting Excel export...");
+
+      const { fromDate, toDate } = getDateRange(preset);
+      console.log("📅 Export date range:", { fromDate, toDate });
+
+      const reportData = await exportDetailedRevenueToExcel(fromDate, toDate);
+      console.log("📊 Excel export response:", reportData);
+
+      if (reportData && reportData.data && reportData.data.excel_data) {
+        console.log("✅ Excel data found, downloading...");
+        // Decode base64 and parse JSON
+        const decodedData = JSON.parse(atob(reportData.data.excel_data));
+        console.log("📋 Decoded Excel data:", decodedData);
+        downloadExcelReport(decodedData, "bao_cao_doanh_thu_chi_tiet");
+      } else {
+        console.error("❌ No Excel data in response:", reportData);
+        throw new Error("Không có dữ liệu Excel");
+      }
+    } catch (error) {
+      console.error("❌ Error exporting to Excel:", error);
+      setError("Lỗi xuất Excel: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -967,6 +1070,8 @@ const StatisticsPage = ({ onClose }) => {
           newData.dailyReport && typeof newData.dailyReport === "object"
             ? newData.dailyReport
             : null,
+        // Detailed Revenue Report
+        detailedRevenueReport: null, // Will be loaded on demand
       };
 
       console.log("Safe stats data:", safeStatsData);
@@ -1255,7 +1360,11 @@ const StatisticsPage = ({ onClose }) => {
   };
 
   useEffect(() => {
-    fetchData();
+    if (activeTab === "detailed-report" && !statsData.detailedRevenueReport) {
+      loadDetailedRevenueReport();
+    } else {
+      fetchData();
+    }
     // cleanup charts on unmount
     return () => {
       if (revenueChartInstance.current) revenueChartInstance.current.destroy();
@@ -1385,6 +1494,8 @@ const StatisticsPage = ({ onClose }) => {
           return renderReportsTab(summaryStats);
         case "analysis":
           return renderAnalysisTab();
+        case "detailed-report":
+          return renderDetailedReportTab();
         default:
           return renderOverviewTab(summaryStats);
       }
@@ -2453,6 +2564,332 @@ const StatisticsPage = ({ onClose }) => {
             )}
           </div>
         )}
+      </div>
+    );
+  };
+
+  // Detailed Report Tab Content
+  const renderDetailedReportTab = () => {
+    const reportData = statsData.detailedRevenueReport;
+
+    // Debug logging
+    console.log("🔍 renderDetailedReportTab - reportData:", reportData);
+    console.log("🔍 renderDetailedReportTab - loading:", loading);
+    console.log("🔍 renderDetailedReportTab - error:", error);
+
+    if (loading) {
+      return (
+        <div className="loading-container">
+          <div className="loading-text">Đang tải báo cáo chi tiết...</div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="error-container">
+          <div className="error-text">❌ {error}</div>
+          <button className="retry-btn" onClick={loadDetailedRevenueReport}>
+            🔄 Thử lại
+          </button>
+        </div>
+      );
+    }
+
+    if (!reportData) {
+      return (
+        <div className="no-data-container">
+          <div className="no-data-text">
+            📊 Chưa có dữ liệu báo cáo chi tiết
+          </div>
+          <p className="no-data-hint">Nhấn nút "Tải báo cáo" để lấy dữ liệu</p>
+          <button className="load-data-btn" onClick={loadDetailedRevenueReport}>
+            📥 Tải báo cáo chi tiết
+          </button>
+        </div>
+      );
+    }
+
+    const {
+      summary = {},
+      details = [],
+      payment_breakdown = [],
+      vehicle_breakdown = [],
+      hourly_breakdown = [],
+      period = {},
+    } = reportData;
+
+    return (
+      <div className="detailed-report-container">
+        {/* Header with Export Button */}
+        <div className="report-header">
+          <div className="report-title">
+            <h3>Báo cáo doanh thu chi tiết</h3>
+            <p className="report-period">
+              Từ {period.from_date || "N/A"} đến {period.to_date || "N/A"} (
+              {period.total_days || 0} ngày)
+            </p>
+          </div>
+          <div className="report-actions">
+            <button
+              className="test-api-btn"
+              onClick={testSimpleAPI}
+              disabled={loading}
+              style={{
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                color: "white",
+                border: "none",
+                padding: "12px 24px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                marginRight: "12px",
+              }}
+            >
+              🧪 Test API
+            </button>
+            <button
+              className="export-excel-btn"
+              onClick={exportToExcel}
+              disabled={loading}
+            >
+              📊 Xuất Excel
+            </button>
+            <button
+              className="refresh-btn"
+              onClick={loadDetailedRevenueReport}
+              disabled={loading}
+            >
+              🔄 Làm mới
+            </button>
+          </div>
+        </div>
+
+        {/* Summary Statistics */}
+        <div className="summary-stats detailed">
+          <div className="stat-card revenue">
+            <div className="stat-icon">💰</div>
+            <div className="stat-content">
+              <div className="stat-value">
+                {(summary.tong_doanh_thu || 0).toLocaleString("vi-VN")} VNĐ
+              </div>
+              <div className="stat-label">Tổng doanh thu</div>
+            </div>
+          </div>
+
+          <div className="stat-card discount">
+            <div className="stat-icon">🎯</div>
+            <div className="stat-content">
+              <div className="stat-value">
+                {(summary.tong_mien_giam || 0).toLocaleString("vi-VN")} VNĐ
+              </div>
+              <div className="stat-label">Tổng miễn giảm</div>
+            </div>
+          </div>
+
+          <div className="stat-card net-revenue">
+            <div className="stat-icon">✅</div>
+            <div className="stat-content">
+              <div className="stat-value">
+                {(summary.doanh_thu_thuc_te || 0).toLocaleString("vi-VN")} VNĐ
+              </div>
+              <div className="stat-label">Doanh thu thực tế</div>
+            </div>
+          </div>
+
+          <div className="stat-card sessions">
+            <div className="stat-icon">🚗</div>
+            <div className="stat-content">
+              <div className="stat-value">{summary.tong_phien || 0}</div>
+              <div className="stat-label">Tổng phiên</div>
+            </div>
+          </div>
+
+          <div className="stat-card avg-time">
+            <div className="stat-icon">⏱️</div>
+            <div className="stat-content">
+              <div className="stat-value">
+                {Math.round(summary.thoi_gian_gui_trung_binh || 0)}'
+              </div>
+              <div className="stat-label">TG gửi TB</div>
+            </div>
+          </div>
+
+          <div className="stat-card avg-price">
+            <div className="stat-icon">💸</div>
+            <div className="stat-content">
+              <div className="stat-value">
+                {(summary.gia_trung_binh || 0).toLocaleString("vi-VN")} VNĐ
+              </div>
+              <div className="stat-label">Giá TB</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Breakdown Charts */}
+        <div className="breakdown-section">
+          <div className="breakdown-grid">
+            {/* Payment Method Breakdown */}
+            <div className="breakdown-card">
+              <h4>Phương thức thanh toán</h4>
+              <div className="breakdown-table-container">
+                <table className="breakdown-table">
+                  <thead>
+                    <tr>
+                      <th>Phương thức</th>
+                      <th>Số phiên</th>
+                      <th>Doanh thu</th>
+                      <th>Tỷ lệ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payment_breakdown?.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.phuong_thuc}</td>
+                        <td>{item.so_phien}</td>
+                        <td>
+                          {(item.doanh_thu_thuc || 0).toLocaleString("vi-VN")}{" "}
+                          VNĐ
+                        </td>
+                        <td>
+                          {(
+                            (item.doanh_thu_thuc / summary.doanh_thu_thuc_te) *
+                            100
+                          ).toFixed(1)}
+                          %
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Vehicle Type Breakdown */}
+            <div className="breakdown-card">
+              <h4>Loại thẻ</h4>
+              <div className="breakdown-table-container">
+                <table className="breakdown-table">
+                  <thead>
+                    <tr>
+                      <th>Loại thẻ</th>
+                      <th>Số phiên</th>
+                      <th>Doanh thu</th>
+                      <th>Giá TB</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vehicle_breakdown?.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.loai_the}</td>
+                        <td>{item.so_phien}</td>
+                        <td>
+                          {(item.tong_tien || 0).toLocaleString("vi-VN")} VNĐ
+                        </td>
+                        <td>
+                          {(item.gia_trung_binh || 0).toLocaleString("vi-VN")}{" "}
+                          VNĐ
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Hourly Breakdown */}
+          <div className="hourly-breakdown">
+            <h4>Phân tích theo giờ</h4>
+            <div className="hourly-chart">
+              {hourly_breakdown?.map((item, index) => (
+                <div key={index} className="hourly-bar">
+                  <div
+                    className="hourly-bar-fill"
+                    style={{
+                      height: `${Math.max(
+                        (item.doanh_thu /
+                          Math.max(
+                            ...hourly_breakdown.map((h) => h.doanh_thu)
+                          )) *
+                          100,
+                        5
+                      )}%`,
+                    }}
+                  ></div>
+                  <div className="hourly-label">
+                    {String(item.gio).padStart(2, "0")}h
+                  </div>
+                  <div className="hourly-value">
+                    {(item.doanh_thu || 0).toLocaleString("vi-VN")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Transaction Table */}
+        <div className="transactions-section">
+          <h4>Chi tiết giao dịch ({details?.length || 0} phiên)</h4>
+          <div className="transactions-table-container">
+            <table className="transactions-table">
+              <thead>
+                <tr>
+                  <th>Mã phiên</th>
+                  <th>Biển số</th>
+                  <th>Loại thẻ</th>
+                  <th>Thời gian vào</th>
+                  <th>Thời gian ra</th>
+                  <th>Thời lượng</th>
+                  <th>Phí</th>
+                  <th>Miễn giảm</th>
+                  <th>Thực tế</th>
+                  <th>PTTT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {details?.slice(0, 100).map((transaction, index) => (
+                  <tr key={index}>
+                    <td>{transaction.ma_phien}</td>
+                    <td>{transaction.bien_so}</td>
+                    <td>{transaction.loai_the}</td>
+                    <td>
+                      {new Date(transaction.thoi_gian_vao).toLocaleString(
+                        "vi-VN"
+                      )}
+                    </td>
+                    <td>
+                      {new Date(transaction.thoi_gian_ra).toLocaleString(
+                        "vi-VN"
+                      )}
+                    </td>
+                    <td>{Math.round(transaction.gio_gui * 100) / 100}h</td>
+                    <td>
+                      {(transaction.phi_tinh_duoc || 0).toLocaleString("vi-VN")}
+                    </td>
+                    <td>
+                      {(transaction.mien_giam || 0).toLocaleString("vi-VN")}
+                    </td>
+                    <td>
+                      {(transaction.doanh_thu_thuc_te || 0).toLocaleString(
+                        "vi-VN"
+                      )}
+                    </td>
+                    <td>{transaction.phuong_thuc_tt}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {details && details.length > 100 && (
+              <div className="table-note">
+                Hiển thị 100/{details.length} giao dịch. Xuất Excel để xem toàn
+                bộ.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   };
