@@ -108,6 +108,9 @@ const MainUI = () => {
   const vehicleInfoComponentRef = useRef();
   const vehicleListComponentRef = useRef();
 
+  // Reset key for camera components (to force cleanup on logout/login)
+  const [cameraResetKey, setCameraResetKey] = useState(0);
+
   // Dialog states
   const [showCameraConfig, setShowCameraConfig] = useState(false);
   const [showPricingPolicy, setShowPricingPolicy] = useState(false);
@@ -280,13 +283,13 @@ const MainUI = () => {
         }, 100);
       } else {
         console.log(
-          "No work config found in localStorage, showing config dialog"
+          "No work config found in localStorage, using default config"
         );
-        setShowWorkConfig(true);
+        // setShowWorkConfig(true); // Hidden as requested
       }
     } catch (error) {
       console.error("Error loading work config:", error);
-      setShowWorkConfig(true);
+      // setShowWorkConfig(true); // Hidden as requested
     }
   };
 
@@ -952,11 +955,20 @@ const MainUI = () => {
 
   const logout = () => {
     if (window.confirm("Bạn có chắc muốn đăng xuất?")) {
+      console.log("🔄 Logout initiated - resetting camera connections");
+
+      // Increment reset key to force camera cleanup
+      setCameraResetKey((prev) => prev + 1);
+
       // Clear user context
       contextLogout();
 
       cleanup();
-      window.location.reload();
+
+      // Add slight delay to allow cleanup to complete
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     }
   };
 
@@ -2893,7 +2905,7 @@ const MainUI = () => {
         </div>
 
         <div className="toolbar-right">
-          {hasPermission("canAccessConfig") && (
+          {false && hasPermission("canAccessConfig") && (
             <button
               className="toolbar-btn"
               onClick={openWorkConfig}
@@ -3075,6 +3087,7 @@ const MainUI = () => {
         >
           <div className="camera-section">
             <CameraComponent
+              key={`camera-component-${cameraResetKey}`}
               ref={cameraComponentRef}
               currentMode={currentMode}
               zoneInfo={zoneInfo}
@@ -3114,8 +3127,8 @@ const MainUI = () => {
         <DauDocThe ref={cardReaderRef} currentMode={currentMode} />
       </div>
 
-      {/* Dialogs */}
-      {showWorkConfig && (
+      {/* WorkConfigDialog hidden as requested */}
+      {false && showWorkConfig && (
         <WorkConfigDialog
           onClose={() => setShowWorkConfig(false)}
           onConfigSaved={handleWorkConfigSave}

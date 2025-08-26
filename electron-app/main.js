@@ -837,9 +837,19 @@ function startRTSPStreamingServer() {
   }
 }
 
+// Handle relaunch scenario - add delay to avoid conflicts
+const isRelaunch = process.argv.includes("--relaunch");
+
 // This method will be called when Electron has finished initialization
 app.whenReady().then(async () => {
   try {
+    // Handle relaunch scenario - add delay to avoid conflicts
+    if (isRelaunch) {
+      console.log("🔄 Detected relaunch flag - adding startup delay...");
+      // Small delay to ensure previous instance is fully closed
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
     console.log("🚀 Starting Parking Lot Management System...");
 
     // Start ALPR service using batch file (for end users)
@@ -1444,26 +1454,114 @@ ipcMain.handle("stop-rtsp-server", async () => {
 });
 
 // Restart Application
-ipcMain.on("app-restart", () => {
+ipcMain.on("app-restart", async () => {
   console.log("🔄 IPC: Restarting application...");
 
-  // Cleanup before restart
-  if (rtspServer) {
-    rtspServer.stop();
-  }
-  if (alprProcess) {
-    alprProcess.kill();
-  }
-  if (faceRecognitionProcess) {
-    faceRecognitionProcess.kill();
-  }
-  if (relayServiceProcess) {
-    relayServiceProcess.kill();
-  }
+  try {
+    // 1. Cleanup processes with proper async waiting
+    console.log("Cleaning up processes...");
 
-  // Relaunch app and quit current instance
-  app.relaunch();
-  app.exit(0);
+    const cleanupPromises = [];
+
+    if (rtspServer) {
+      cleanupPromises.push(
+        new Promise((resolve) => {
+          rtspServer.stop();
+          setTimeout(resolve, 500); // Wait for RTSP cleanup
+        })
+      );
+    }
+
+    if (alprProcess) {
+      cleanupPromises.push(
+        new Promise((resolve) => {
+          alprProcess.kill();
+          alprProcess.on("exit", resolve);
+          setTimeout(resolve, 2000); // Fallback timeout
+        })
+      );
+    }
+
+    if (faceRecognitionProcess) {
+      cleanupPromises.push(
+        new Promise((resolve) => {
+          faceRecognitionProcess.kill();
+          faceRecognitionProcess.on("exit", resolve);
+          setTimeout(resolve, 2000); // Fallback timeout
+        })
+      );
+    }
+
+    if (relayServiceProcess) {
+      cleanupPromises.push(
+        new Promise((resolve) => {
+          relayServiceProcess.kill();
+          relayServiceProcess.on("exit", resolve);
+          setTimeout(resolve, 2000); // Fallback timeout
+        })
+      );
+    }
+
+    // Wait for all cleanup to complete
+    await Promise.all(cleanupPromises);
+    console.log("Cleanup completed");
+
+    // 2. Prepare relaunch with proper args for dev environment
+    const isDev =
+      process.env.NODE_ENV === "development" || process.argv.includes("--dev");
+    let relaunchOptions = {};
+
+    if (isDev) {
+      // In dev mode, use explicit path and clean args
+      relaunchOptions.execPath = process.execPath;
+      relaunchOptions.args = [
+        path.join(__dirname, "main.js"),
+        "--relaunch", // Add flag to indicate this is a relaunch
+      ];
+    } else {
+      // In production, use default behavior
+      relaunchOptions.args = ["--relaunch"];
+    }
+
+    console.log("Relaunching with options:", relaunchOptions);
+
+    // Debug: Log current process info
+    console.log("Current process info:", {
+      execPath: process.execPath,
+      argv: process.argv,
+      cwd: process.cwd(),
+      isDev: isDev,
+    });
+
+    // 3. Handle single-instance lock issue
+    if (app.hasSingleInstanceLock()) {
+      // Add relaunch flag to args to bypass single-instance check in new process
+      if (!relaunchOptions.args.includes("--relaunch")) {
+        relaunchOptions.args.push("--relaunch");
+      }
+    }
+
+    // 4. Relaunch with delay for Windows compatibility
+    setTimeout(() => {
+      app.relaunch(relaunchOptions);
+      // Use setImmediate for Windows to ensure spawn completes
+      setImmediate(() => {
+        if (isDev) {
+          // In dev mode, use more aggressive exit to avoid tool interference
+          console.log("Dev mode: Force exiting...");
+          process.exit(0);
+        } else {
+          // In production, use cleaner shutdown
+          app.quit();
+        }
+      });
+    }, 100); // Small delay for Windows
+  } catch (error) {
+    console.error("Error during app restart:", error);
+    // Fallback: force restart without cleanup
+    app.relaunch();
+    app.exit(1);
+  }
 });
 
 // Start RTSP Streaming Server

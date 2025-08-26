@@ -1,12 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// Nếu dùng Electron, import ipcRenderer
-let ipcRenderer = null;
-try {
-  // eslint-disable-next-line
-  ipcRenderer = window.require ? window.require("electron").ipcRenderer : null;
-} catch (e) {}
 import "../../assets/styles/WorkConfigDialog.css";
 import "../../assets/styles/global-dialog-theme.css";
 import {
@@ -22,110 +16,13 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
   const [selectedVehicleType, setSelectedVehicleType] = useState(null); // object
   const [selectedMode, setSelectedMode] = useState("2luong"); // new: default mode - keep current behavior
   const [saving, setSaving] = useState(false);
-  const [showConfirmRestart, setShowConfirmRestart] = useState(false);
-  const [currentMode, setCurrentMode] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     fetchData();
     loadSavedConfig();
-    // Lấy mode hiện tại từ localStorage
-    try {
-      const savedConfig = localStorage.getItem("work_config");
-      if (savedConfig) {
-        const config = JSON.parse(savedConfig);
-        setCurrentMode(config.default_mode || "2luong");
-      }
-    } catch (e) {}
   }, []);
-  // Hàm shutdown app (Electron hoặc browser)
-  const shutdownAndRestartApp = () => {
-    if (ipcRenderer) {
-      ipcRenderer.send("app-restart");
-    } else {
-      window.close();
-      // Nếu muốn reload lại web app thì dùng window.location.reload();
-    }
-  };
-
-  // Lưu config và restart app
-  const saveConfigAndRestart = async () => {
-    try {
-      setSaving(true);
-      setError("");
-
-      if (!selectedZone || !selectedVehicleType || !selectedMode) {
-        throw new Error("Chưa chọn đủ thông tin");
-      }
-
-      // Determine the correct loai_xe value based on vehicle type data structure
-      let loaiXeValue = "";
-      if (selectedVehicleType.maLoaiPT) {
-        loaiXeValue = selectedVehicleType.maLoaiPT;
-      } else if (selectedVehicleType.code) {
-        loaiXeValue = selectedVehicleType.code;
-      } else if (selectedVehicleType.tenLoaiPT) {
-        // Map vehicle type names to standard codes
-        const vehicleTypeName = selectedVehicleType.tenLoaiPT.toLowerCase();
-        if (
-          vehicleTypeName.includes("ô tô") ||
-          vehicleTypeName.includes("oto") ||
-          vehicleTypeName.includes("car")
-        ) {
-          loaiXeValue = "oto";
-        } else if (
-          vehicleTypeName.includes("xe máy") ||
-          vehicleTypeName.includes("motor") ||
-          vehicleTypeName.includes("bike")
-        ) {
-          loaiXeValue = "xe_may";
-        } else {
-          loaiXeValue = "xe_may"; // default
-        }
-      } else if (selectedVehicleType.name) {
-        // Map vehicle type names to standard codes
-        const vehicleTypeName = selectedVehicleType.name.toLowerCase();
-        if (
-          vehicleTypeName.includes("ô tô") ||
-          vehicleTypeName.includes("oto") ||
-          vehicleTypeName.includes("car")
-        ) {
-          loaiXeValue = "oto";
-        } else if (
-          vehicleTypeName.includes("xe máy") ||
-          vehicleTypeName.includes("motor") ||
-          vehicleTypeName.includes("bike")
-        ) {
-          loaiXeValue = "xe_may";
-        } else {
-          loaiXeValue = "xe_may"; // default
-        }
-      }
-
-      // Build config đúng format
-      const config = {
-        zone: selectedZone.tenKhuVuc || selectedZone.name,
-        zone_data: selectedZone,
-        vehicle_type: selectedVehicleType.tenLoaiPT || selectedVehicleType.name,
-        loai_xe: loaiXeValue,
-        ma_khu_vuc: selectedZone.maKhuVuc || selectedZone.code || "",
-        default_mode: selectedMode, // new: save default mode
-      };
-
-      console.log("Saving work config before restart:", config);
-      localStorage.setItem("work_config", JSON.stringify(config));
-
-      // Delay a bit to ensure config is saved
-      setTimeout(() => {
-        shutdownAndRestartApp();
-      }, 500);
-    } catch (e) {
-      console.error("Error saving config before restart:", e);
-      setError("Lỗi khi lưu cấu hình: " + e.message);
-      setSaving(false);
-    }
-  };
 
   const loadSavedConfig = () => {
     try {
@@ -453,78 +350,7 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
           >
             {saving ? "Đang lưu..." : "BẮT ĐẦU LÀM VIỆC"}
           </button>
-          {/* Nếu mode khác với mode hiện tại thì cho phép chuyển mode */}
-          {currentMode && selectedMode !== currentMode && (
-            <button
-              className="workconfig-restart-btn"
-              style={{
-                marginLeft: 16,
-                background: "#dc2626",
-                color: "white",
-                padding: "12px",
-                borderRadius: "8px",
-                fontWeight: "bold",
-              }}
-              onClick={() => setShowConfirmRestart(true)}
-            >
-              Chuyển chế độ & Khởi động lại hệ thống
-            </button>
-          )}
         </div>
-        {/* Dialog xác nhận chuyển mode và restart */}
-        {showConfirmRestart && (
-          <div className="workconfig-confirm-overlay">
-            <div className="workconfig-confirm-dialog">
-              <div
-                style={{ fontWeight: "bold", fontSize: 18, marginBottom: 12 }}
-              >
-                Xác nhận chuyển chế độ
-              </div>
-              <div style={{ marginBottom: 18 }}>
-                Bạn có chắc chắn muốn chuyển sang chế độ{" "}
-                <b>
-                  {selectedMode === "vao"
-                    ? "XE VÀO"
-                    : selectedMode === "ra"
-                    ? "XE RA"
-                    : "2 LUỒNG"}
-                </b>
-                ?<br />
-                Hệ thống sẽ tự động tắt và khởi động lại để áp dụng cấu hình
-                mới.
-              </div>
-              <div style={{ display: "flex", gap: 16 }}>
-                <button
-                  style={{
-                    background: "#059669",
-                    color: "white",
-                    padding: "10px 18px",
-                    borderRadius: "6px",
-                    fontWeight: "bold",
-                  }}
-                  onClick={() => {
-                    setShowConfirmRestart(false);
-                    saveConfigAndRestart();
-                  }}
-                >
-                  Xác nhận & Khởi động lại
-                </button>
-                <button
-                  style={{
-                    background: "#64748b",
-                    color: "white",
-                    padding: "10px 18px",
-                    borderRadius: "6px",
-                    fontWeight: "bold",
-                  }}
-                  onClick={() => setShowConfirmRestart(false)}
-                >
-                  Huỷ
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
