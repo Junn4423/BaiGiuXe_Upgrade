@@ -6,7 +6,7 @@ import { getImageUrl } from "../api/api";
 import "../assets/styles/CameraComponent.css";
 
 const CameraComponent = React.forwardRef(
-  ({ currentMode = "vao", zoneInfo }, ref) => {
+  ({ currentMode = "vao", zoneInfo, workConfig }, ref) => {
     const [staticImageStates, setStaticImageStates] = useState({
       capturePanel1: false,
       capturePanel2: false,
@@ -22,6 +22,8 @@ const CameraComponent = React.forwardRef(
         "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPsOCbmggQ2jhu6VwIEJpZW4gU+G7kTwvdGV4dD48L3N2Zz4=",
       capturePanel2:
         "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPsOCbmggQ2jhu6VwIEtodcO0biBN4bq3dDwvdGV4dD48L3N2Zz4=",
+      entryPlateReference: null, // For showing entry plate in exit mode
+      entryFaceReference: null, // For showing entry face in exit mode
     });
 
     const [cameraStatus, setCameraStatus] = useState({
@@ -119,6 +121,13 @@ const CameraComponent = React.forwardRef(
         capturePanel2: false,
       });
 
+      // Clear reference images for exit mode
+      setCameraFeeds((prev) => ({
+        ...prev,
+        entryPlateReference: null,
+        entryFaceReference: null,
+      }));
+
       if (restoreTimer.current) {
         clearTimeout(restoreTimer.current);
         restoreTimer.current = null;
@@ -142,27 +151,32 @@ const CameraComponent = React.forwardRef(
 
       // Extract filename from path and get proper URL
       let displayUrl = imagePath;
-      
+
       // **MỚI: Kiểm tra nếu là object URL (blob:) thì sử dụng trực tiếp**
-      if (imagePath.startsWith('blob:') || imagePath.startsWith('data:')) {
+      if (imagePath.startsWith("blob:") || imagePath.startsWith("data:")) {
         // Object URL hoặc Data URL - sử dụng trực tiếp, không cần gọi API
         displayUrl = imagePath;
-        console.log(`✅ Using direct object/data URL: ${imagePath.substring(0, 50)}...`);
+        console.log(
+          `✅ Using direct object/data URL: ${imagePath.substring(0, 50)}...`
+        );
       }
       // If it's a relative path like "Nam_2025/Thang_08/Ngay_05/filename.jpg"
-      else if (imagePath.includes('/') && !imagePath.startsWith('http')) {
-        const filename = imagePath.split('/').pop(); // Get filename
+      else if (imagePath.includes("/") && !imagePath.startsWith("http")) {
+        const filename = imagePath.split("/").pop(); // Get filename
         try {
           displayUrl = await getImageUrl(filename);
           console.log(`✅ Got image URL from API: ${displayUrl}`);
         } catch (error) {
-          console.warn(`Failed to get image URL via API, using original path:`, error);
+          console.warn(
+            `Failed to get image URL via API, using original path:`,
+            error
+          );
           // Fallback to original path
           displayUrl = imagePath;
         }
       }
       // If it's already a full HTTP URL, use as is
-      else if (imagePath.startsWith('http')) {
+      else if (imagePath.startsWith("http")) {
         displayUrl = imagePath;
         console.log(`✅ Using full HTTP URL: ${imagePath}`);
       }
@@ -194,14 +208,34 @@ const CameraComponent = React.forwardRef(
         clearTimeout(restoreTimer.current);
       }
 
-      if (entryImageUrl) {
-        setStaticImageStates((prev) => ({ ...prev, capturePanel1: true }));
-        setCameraFeeds((prev) => ({ ...prev, capturePanel1: entryImageUrl }));
-      }
+      const layoutMode = workConfig?.default_mode || "2luong";
 
-      if (entryFaceUrl) {
-        setStaticImageStates((prev) => ({ ...prev, capturePanel2: true }));
-        setCameraFeeds((prev) => ({ ...prev, capturePanel2: entryFaceUrl }));
+      if (layoutMode === "ra") {
+        // In exit mode, show entry images as reference
+        if (entryImageUrl) {
+          setCameraFeeds((prev) => ({
+            ...prev,
+            entryPlateReference: entryImageUrl,
+          }));
+        }
+
+        if (entryFaceUrl) {
+          setCameraFeeds((prev) => ({
+            ...prev,
+            entryFaceReference: entryFaceUrl,
+          }));
+        }
+      } else {
+        // In dual lane mode, show entry images in capture panels (current behavior)
+        if (entryImageUrl) {
+          setStaticImageStates((prev) => ({ ...prev, capturePanel1: true }));
+          setCameraFeeds((prev) => ({ ...prev, capturePanel1: entryImageUrl }));
+        }
+
+        if (entryFaceUrl) {
+          setStaticImageStates((prev) => ({ ...prev, capturePanel2: true }));
+          setCameraFeeds((prev) => ({ ...prev, capturePanel2: entryFaceUrl }));
+        }
       }
 
       restoreTimer.current = setTimeout(restoreCaptureFeeds, 6000);
@@ -335,7 +369,11 @@ const CameraComponent = React.forwardRef(
                 onError={(error) => handleCameraError(cameraKey, error)}
                 className="live-feed"
                 cameraType={getCameraTypeFromKey(cameraKey)} // Convert cameraKey to proper format
-                onPlateDetected={showLicensePlate ? createPlateDetectedHandler(direction) : undefined}
+                onPlateDetected={
+                  showLicensePlate
+                    ? createPlateDetectedHandler(direction)
+                    : undefined
+                }
               />
             ) : (
               <div
@@ -390,15 +428,86 @@ const CameraComponent = React.forwardRef(
       </div>
     );
 
+    // Determine layout mode from workConfig
+    const layoutMode = workConfig?.default_mode || "2luong";
+
     // Debug log để kiểm tra re-render
     console.log(
-      `CameraComponent render - Zone: ${zoneInfo?.maKhuVuc}, Mode: ${currentMode}`
+      `CameraComponent render - Zone: ${zoneInfo?.maKhuVuc}, Mode: ${currentMode}, Layout: ${layoutMode}`
     );
 
-    return (
+    // Render layout for Entry Mode (XE VÀO)
+    const renderEntryModeLayout = () => (
       <div className="camera-container">
-        {/* Camera Grid - 3x2 layout */}
-        <div className="camera-grid-3x2">
+        <div className="camera-grid-entry-mode">
+          {/* Row 1: Camera Biển Số, Ảnh Chụp Biển Số */}
+          {renderCameraFrame(
+            "cameraInPlate",
+            "Camera Biển Số",
+            true,
+            true,
+            "in"
+          )}
+          {renderCapturePanel(
+            "capturePanel1",
+            "ẢNH CHỤP BIỂN SỐ",
+            staticImageStates.capturePanel1
+          )}
+
+          {/* Row 2: Camera Khuôn Mặt, Ảnh Chụp Khuôn Mặt */}
+          {renderCameraFrame("cameraInFace", "Camera Khuôn Mặt", true)}
+          {renderCapturePanel(
+            "capturePanel2",
+            "ẢNH CHỤP KHUÔN MẶT",
+            staticImageStates.capturePanel2
+          )}
+        </div>
+      </div>
+    );
+
+    // Render layout for Exit Mode (XE RA)
+    const renderExitModeLayout = () => (
+      <div className="camera-container">
+        <div className="camera-grid-exit-mode">
+          {/* Row 1: Camera Biển Số, Ảnh Chụp Ra, Ảnh Vào (Reference) */}
+          {renderCameraFrame(
+            "cameraOutPlate",
+            "Camera Biển Số",
+            true,
+            true,
+            "out"
+          )}
+          {renderCapturePanel(
+            "capturePanel1",
+            "ẢNH CHỤP RA - BIỂN SỐ",
+            staticImageStates.capturePanel1
+          )}
+          {renderCapturePanel(
+            "entryPlateReference",
+            "ẢNH VÀO - BIỂN SỐ",
+            !!cameraFeeds.entryPlateReference
+          )}
+
+          {/* Row 2: Camera Khuôn Mặt, Ảnh Chụp Ra, Ảnh Vào (Reference) */}
+          {renderCameraFrame("cameraOutFace", "Camera Khuôn Mặt", true)}
+          {renderCapturePanel(
+            "capturePanel2",
+            "ẢNH CHỤP RA - KHUÔN MẶT",
+            staticImageStates.capturePanel2
+          )}
+          {renderCapturePanel(
+            "entryFaceReference",
+            "ẢNH VÀO - KHUÔN MẶT",
+            !!cameraFeeds.entryFaceReference
+          )}
+        </div>
+      </div>
+    );
+
+    // Render layout for Dual Lane Mode (2 LUỒNG)
+    const renderDualLaneLayout = () => (
+      <div className="camera-container">
+        <div className="camera-grid-dual-lane">
           {/* Row 1: Camera Vào Biển Số, Ảnh Biển Số, Camera Ra Biển Số */}
           {renderCameraFrame(
             "cameraInPlate",
@@ -439,6 +548,17 @@ const CameraComponent = React.forwardRef(
         </div>
       </div>
     );
+
+    // Render appropriate layout based on mode
+    switch (layoutMode) {
+      case "vao":
+        return renderEntryModeLayout();
+      case "ra":
+        return renderExitModeLayout();
+      case "2luong":
+      default:
+        return renderDualLaneLayout();
+    }
   }
 );
 

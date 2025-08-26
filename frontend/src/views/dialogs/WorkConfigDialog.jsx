@@ -1,98 +1,62 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import "../../assets/styles/WorkConfigDialog.css"
-import "../../assets/styles/global-dialog-theme.css"
-import { layDanhSachKhuVuc, layALLLoaiPhuongTien, refreshAuthToken } from "../../api/api"
+import { useEffect, useState } from "react";
+// Nếu dùng Electron, import ipcRenderer
+let ipcRenderer = null;
+try {
+  // eslint-disable-next-line
+  ipcRenderer = window.require ? window.require("electron").ipcRenderer : null;
+} catch (e) {}
+import "../../assets/styles/WorkConfigDialog.css";
+import "../../assets/styles/global-dialog-theme.css";
+import {
+  layDanhSachKhuVuc,
+  layALLLoaiPhuongTien,
+  refreshAuthToken,
+} from "../../api/api";
 
 const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
-  const [zones, setZones] = useState([]) // full object
-  const [vehicleTypes, setVehicleTypes] = useState([]) // full object
-  const [selectedZone, setSelectedZone] = useState(null) // object
-  const [selectedVehicleType, setSelectedVehicleType] = useState(null) // object
-  const [selectedMode, setSelectedMode] = useState("vao") // new: default mode
-  const [saving, setSaving] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [zones, setZones] = useState([]); // full object
+  const [vehicleTypes, setVehicleTypes] = useState([]); // full object
+  const [selectedZone, setSelectedZone] = useState(null); // object
+  const [selectedVehicleType, setSelectedVehicleType] = useState(null); // object
+  const [selectedMode, setSelectedMode] = useState("2luong"); // new: default mode - keep current behavior
+  const [saving, setSaving] = useState(false);
+  const [showConfirmRestart, setShowConfirmRestart] = useState(false);
+  const [currentMode, setCurrentMode] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchData()
-    loadSavedConfig()
-  }, [])
-
-  const loadSavedConfig = () => {
+    fetchData();
+    loadSavedConfig();
+    // Lấy mode hiện tại từ localStorage
     try {
-      const savedConfig = localStorage.getItem("work_config")
+      const savedConfig = localStorage.getItem("work_config");
       if (savedConfig) {
-        const config = JSON.parse(savedConfig)
-        setSelectedMode(config.default_mode || "vao")
+        const config = JSON.parse(savedConfig);
+        setCurrentMode(config.default_mode || "2luong");
       }
-    } catch (error) {
-      console.error("Error loading saved config:", error)
+    } catch (e) {}
+  }, []);
+  // Hàm shutdown app (Electron hoặc browser)
+  const shutdownAndRestartApp = () => {
+    if (ipcRenderer) {
+      ipcRenderer.send("app-restart");
+    } else {
+      window.close();
+      // Nếu muốn reload lại web app thì dùng window.location.reload();
     }
-  }
+  };
 
-  const fetchData = async () => {
+  // Lưu config và restart app
+  const saveConfigAndRestart = async () => {
     try {
-      setLoading(true)
-      setError("")
-
-      console.log("WorkConfigDialog: Refreshing auth token...")
-      // Luôn refresh token trước khi load data
-      await refreshAuthToken()
-
-      console.log("WorkConfigDialog: Loading zones and vehicle types...")
-
-      // Load zones
-      const zonesData = await layDanhSachKhuVuc()
-      console.log("WorkConfigDialog: Zones data:", zonesData)
-      setZones(Array.isArray(zonesData) ? zonesData : [])
-
-      // Load vehicle types
-      const vehicleData = await layALLLoaiPhuongTien()
-      console.log("WorkConfigDialog: Vehicle types data:", vehicleData)
-      setVehicleTypes(Array.isArray(vehicleData) ? vehicleData : [])
-    } catch (e) {
-      console.error("WorkConfigDialog: Error loading data:", e)
-      setError("Không thể tải dữ liệu khu vực hoặc loại xe: " + e.message)
-      setZones([])
-      setVehicleTypes([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Xử lý chọn khu vực
-  const handleZoneChange = (e) => {
-    const zoneObj = zones.find((z) => (z.tenKhuVuc || z.name) === e.target.value)
-    console.log("Selected zone:", zoneObj)
-    setSelectedZone(zoneObj || null)
-  }
-
-  // Xử lý chọn loại xe
-  const handleVehicleTypeChange = (e) => {
-    const vtObj = vehicleTypes.find((v) => (v.tenLoaiPT || v.name) === e.target.value)
-    console.log("Selected vehicle type:", vtObj)
-    setSelectedVehicleType(vtObj || null)
-  }
-
-  // Xử lý chọn chế độ
-  const handleModeChange = (e) => {
-    setSelectedMode(e.target.value)
-    console.log("Selected mode:", e.target.value)
-  }
-
-  const handleSave = async () => {
-    setSaving(true)
-    setError("")
-    try {
-      console.log("Debug save process:")
-      console.log("- selectedZone:", selectedZone)
-      console.log("- selectedVehicleType:", selectedVehicleType)
-      console.log("- selectedMode:", selectedMode)
+      setSaving(true);
+      setError("");
 
       if (!selectedZone || !selectedVehicleType || !selectedMode) {
-        throw new Error("Chưa chọn đủ thông tin")
+        throw new Error("Chưa chọn đủ thông tin");
       }
 
       // Determine the correct loai_xe value based on vehicle type data structure
@@ -104,9 +68,17 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
       } else if (selectedVehicleType.tenLoaiPT) {
         // Map vehicle type names to standard codes
         const vehicleTypeName = selectedVehicleType.tenLoaiPT.toLowerCase();
-        if (vehicleTypeName.includes("ô tô") || vehicleTypeName.includes("oto") || vehicleTypeName.includes("car")) {
+        if (
+          vehicleTypeName.includes("ô tô") ||
+          vehicleTypeName.includes("oto") ||
+          vehicleTypeName.includes("car")
+        ) {
           loaiXeValue = "oto";
-        } else if (vehicleTypeName.includes("xe máy") || vehicleTypeName.includes("motor") || vehicleTypeName.includes("bike")) {
+        } else if (
+          vehicleTypeName.includes("xe máy") ||
+          vehicleTypeName.includes("motor") ||
+          vehicleTypeName.includes("bike")
+        ) {
           loaiXeValue = "xe_may";
         } else {
           loaiXeValue = "xe_may"; // default
@@ -114,9 +86,164 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
       } else if (selectedVehicleType.name) {
         // Map vehicle type names to standard codes
         const vehicleTypeName = selectedVehicleType.name.toLowerCase();
-        if (vehicleTypeName.includes("ô tô") || vehicleTypeName.includes("oto") || vehicleTypeName.includes("car")) {
+        if (
+          vehicleTypeName.includes("ô tô") ||
+          vehicleTypeName.includes("oto") ||
+          vehicleTypeName.includes("car")
+        ) {
           loaiXeValue = "oto";
-        } else if (vehicleTypeName.includes("xe máy") || vehicleTypeName.includes("motor") || vehicleTypeName.includes("bike")) {
+        } else if (
+          vehicleTypeName.includes("xe máy") ||
+          vehicleTypeName.includes("motor") ||
+          vehicleTypeName.includes("bike")
+        ) {
+          loaiXeValue = "xe_may";
+        } else {
+          loaiXeValue = "xe_may"; // default
+        }
+      }
+
+      // Build config đúng format
+      const config = {
+        zone: selectedZone.tenKhuVuc || selectedZone.name,
+        zone_data: selectedZone,
+        vehicle_type: selectedVehicleType.tenLoaiPT || selectedVehicleType.name,
+        loai_xe: loaiXeValue,
+        ma_khu_vuc: selectedZone.maKhuVuc || selectedZone.code || "",
+        default_mode: selectedMode, // new: save default mode
+      };
+
+      console.log("Saving work config before restart:", config);
+      localStorage.setItem("work_config", JSON.stringify(config));
+
+      // Delay a bit to ensure config is saved
+      setTimeout(() => {
+        shutdownAndRestartApp();
+      }, 500);
+    } catch (e) {
+      console.error("Error saving config before restart:", e);
+      setError("Lỗi khi lưu cấu hình: " + e.message);
+      setSaving(false);
+    }
+  };
+
+  const loadSavedConfig = () => {
+    try {
+      const savedConfig = localStorage.getItem("work_config");
+      if (savedConfig) {
+        const config = JSON.parse(savedConfig);
+        setSelectedMode(config.default_mode || "2luong");
+      }
+    } catch (error) {
+      console.error("Error loading saved config:", error);
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      console.log("WorkConfigDialog: Refreshing auth token...");
+      // Luôn refresh token trước khi load data
+      await refreshAuthToken();
+
+      console.log("WorkConfigDialog: Loading zones and vehicle types...");
+
+      // Load zones
+      const zonesData = await layDanhSachKhuVuc();
+      console.log("WorkConfigDialog: Zones data:", zonesData);
+      setZones(Array.isArray(zonesData) ? zonesData : []);
+
+      // Load vehicle types
+      const vehicleData = await layALLLoaiPhuongTien();
+      console.log("WorkConfigDialog: Vehicle types data:", vehicleData);
+      setVehicleTypes(Array.isArray(vehicleData) ? vehicleData : []);
+    } catch (e) {
+      console.error("WorkConfigDialog: Error loading data:", e);
+      setError("Không thể tải dữ liệu khu vực hoặc loại xe: " + e.message);
+      setZones([]);
+      setVehicleTypes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Xử lý chọn khu vực
+  const handleZoneChange = (e) => {
+    const zoneObj = zones.find(
+      (z) => (z.tenKhuVuc || z.name) === e.target.value
+    );
+    console.log("Selected zone:", zoneObj);
+    setSelectedZone(zoneObj || null);
+  };
+
+  // Xử lý chọn loại xe
+  const handleVehicleTypeChange = (e) => {
+    const vtObj = vehicleTypes.find(
+      (v) => (v.tenLoaiPT || v.name) === e.target.value
+    );
+    console.log("Selected vehicle type:", vtObj);
+    setSelectedVehicleType(vtObj || null);
+  };
+
+  // Xử lý chọn chế độ
+  const handleModeChange = (e) => {
+    setSelectedMode(e.target.value);
+    console.log("Selected mode:", e.target.value);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      console.log("Debug save process:");
+      console.log("- selectedZone:", selectedZone);
+      console.log("- selectedVehicleType:", selectedVehicleType);
+      console.log("- selectedMode:", selectedMode);
+
+      if (!selectedZone || !selectedVehicleType || !selectedMode) {
+        throw new Error("Chưa chọn đủ thông tin");
+      }
+
+      // Determine the correct loai_xe value based on vehicle type data structure
+      let loaiXeValue = "";
+      if (selectedVehicleType.maLoaiPT) {
+        loaiXeValue = selectedVehicleType.maLoaiPT;
+      } else if (selectedVehicleType.code) {
+        loaiXeValue = selectedVehicleType.code;
+      } else if (selectedVehicleType.tenLoaiPT) {
+        // Map vehicle type names to standard codes
+        const vehicleTypeName = selectedVehicleType.tenLoaiPT.toLowerCase();
+        if (
+          vehicleTypeName.includes("ô tô") ||
+          vehicleTypeName.includes("oto") ||
+          vehicleTypeName.includes("car")
+        ) {
+          loaiXeValue = "oto";
+        } else if (
+          vehicleTypeName.includes("xe máy") ||
+          vehicleTypeName.includes("motor") ||
+          vehicleTypeName.includes("bike")
+        ) {
+          loaiXeValue = "xe_may";
+        } else {
+          loaiXeValue = "xe_may"; // default
+        }
+      } else if (selectedVehicleType.name) {
+        // Map vehicle type names to standard codes
+        const vehicleTypeName = selectedVehicleType.name.toLowerCase();
+        if (
+          vehicleTypeName.includes("ô tô") ||
+          vehicleTypeName.includes("oto") ||
+          vehicleTypeName.includes("car")
+        ) {
+          loaiXeValue = "oto";
+        } else if (
+          vehicleTypeName.includes("xe máy") ||
+          vehicleTypeName.includes("motor") ||
+          vehicleTypeName.includes("bike")
+        ) {
           loaiXeValue = "xe_may";
         } else {
           loaiXeValue = "xe_may"; // default
@@ -133,24 +260,24 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
         loai_xe: loaiXeValue,
         ma_khu_vuc: selectedZone.maKhuVuc || selectedZone.code || "",
         default_mode: selectedMode, // new: save default mode
-      }
+      };
 
-      console.log("Saving work config:", config)
-      localStorage.setItem("work_config", JSON.stringify(config))
+      console.log("Saving work config:", config);
+      localStorage.setItem("work_config", JSON.stringify(config));
 
-      if (onConfigSaved) onConfigSaved(config)
-      if (onClose) onClose()
+      if (onConfigSaved) onConfigSaved(config);
+      if (onClose) onClose();
     } catch (e) {
-      console.error("Error saving config:", e)
-      setError("Lỗi khi lưu cấu hình: " + e.message)
+      console.error("Error saving config:", e);
+      setError("Lỗi khi lưu cấu hình: " + e.message);
     }
-    setSaving(false)
-  }
+    setSaving(false);
+  };
 
   const handleRefresh = () => {
-    console.log("Refreshing data...")
-    fetchData()
-  }
+    console.log("Refreshing data...");
+    fetchData();
+  };
 
   return (
     <div className="workconfig-dialog-overlay">
@@ -164,7 +291,11 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
 
         <div className="workconfig-header">
           Vui lòng chọn khu vực, loại xe và chế độ để bắt đầu
-          <button className="refresh-button" onClick={handleRefresh} disabled={loading}>
+          <button
+            className="refresh-button"
+            onClick={handleRefresh}
+            disabled={loading}
+          >
             {loading ? "Đang tải..." : "Làm mới"}
           </button>
         </div>
@@ -175,10 +306,16 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
           ) : (
             <>
               <div className="workconfig-card">
-                <div className="workconfig-card-title">Chọn khu vực làm việc</div>
+                <div className="workconfig-card-title">
+                  Chọn khu vực làm việc
+                </div>
                 <select
                   className="workconfig-select"
-                  value={selectedZone ? selectedZone.tenKhuVuc || selectedZone.name : ""}
+                  value={
+                    selectedZone
+                      ? selectedZone.tenKhuVuc || selectedZone.name
+                      : ""
+                  }
                   onChange={handleZoneChange}
                   disabled={loading}
                 >
@@ -196,7 +333,12 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
                 <div className="workconfig-card-title">Chọn loại xe</div>
                 <select
                   className="workconfig-select"
-                  value={selectedVehicleType ? selectedVehicleType.tenLoaiPT || selectedVehicleType.name : ""}
+                  value={
+                    selectedVehicleType
+                      ? selectedVehicleType.tenLoaiPT ||
+                        selectedVehicleType.name
+                      : ""
+                  }
                   onChange={handleVehicleTypeChange}
                   disabled={loading}
                 >
@@ -207,13 +349,21 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
                     </option>
                   ))}
                 </select>
-                <div className="data-info">Có {vehicleTypes.length} loại xe</div>
+                <div className="data-info">
+                  Có {vehicleTypes.length} loại xe
+                </div>
               </div>
 
               <div className="workconfig-card">
-                <div className="workconfig-card-title">Chọn chế độ mặc định</div>
+                <div className="workconfig-card-title">
+                  Chọn chế độ mặc định
+                </div>
                 <div className="mode-selection">
-                  <label className="mode-option">
+                  <label
+                    className={`mode-option vao ${
+                      selectedMode === "vao" ? "selected" : ""
+                    }`}
+                  >
                     <input
                       type="radio"
                       name="mode"
@@ -223,7 +373,11 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
                     />
                     <span className="mode-label vao">XE VÀO</span>
                   </label>
-                  <label className="mode-option">
+                  <label
+                    className={`mode-option ra ${
+                      selectedMode === "ra" ? "selected" : ""
+                    }`}
+                  >
                     <input
                       type="radio"
                       name="mode"
@@ -233,19 +387,50 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
                     />
                     <span className="mode-label ra">XE RA</span>
                   </label>
+                  <label
+                    className={`mode-option hai-luong ${
+                      selectedMode === "2luong" ? "selected" : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="mode"
+                      value="2luong"
+                      checked={selectedMode === "2luong"}
+                      onChange={handleModeChange}
+                    />
+                    <span className="mode-label hai-luong">2 LUỒNG</span>
+                  </label>
                 </div>
-                <div className="data-info">Chế độ sẽ được áp dụng khi khởi động</div>
+                <div className="data-info">
+                  {selectedMode === "vao" &&
+                    "1 camera biển số + 1 camera khuôn mặt + 2 panel ảnh chụp. Không thể chuyển chế độ bằng spacebar."}
+                  {selectedMode === "ra" &&
+                    "1 camera biển số + 1 camera khuôn mặt + 2 panel ảnh chụp ra + 2 panel ảnh vào. Không thể chuyển chế độ bằng spacebar."}
+                  {selectedMode === "2luong" &&
+                    "4 camera + 2 panel ảnh (chế độ hiện tại). Có thể chuyển chế độ bằng spacebar."}
+                </div>
               </div>
 
               <div className="workconfig-card">
                 <div className="workconfig-card-title">Cấu hình hiện tại</div>
                 <div className="workconfig-config-text">
-                  Khu vực: {selectedZone ? selectedZone.tenKhuVuc || selectedZone.name : "Chưa chọn"}
+                  Khu vực:{" "}
+                  {selectedZone
+                    ? selectedZone.tenKhuVuc || selectedZone.name
+                    : "Chưa chọn"}
                   <br />
                   Loại xe:{" "}
-                  {selectedVehicleType ? selectedVehicleType.tenLoaiPT || selectedVehicleType.name : "Chưa chọn"}
+                  {selectedVehicleType
+                    ? selectedVehicleType.tenLoaiPT || selectedVehicleType.name
+                    : "Chưa chọn"}
                   <br />
-                  Chế độ: {selectedMode === "vao" ? "XE VÀO" : "XE RA"}
+                  Chế độ:{" "}
+                  {selectedMode === "vao"
+                    ? "XE VÀO"
+                    : selectedMode === "ra"
+                    ? "XE RA"
+                    : "2 LUỒNG"}
                 </div>
               </div>
             </>
@@ -258,14 +443,91 @@ const WorkConfigDialog = ({ onConfigSaved, onClose }) => {
           <button
             className="workconfig-start-btn"
             onClick={handleSave}
-            disabled={saving || loading || !selectedZone || !selectedVehicleType || !selectedMode}
+            disabled={
+              saving ||
+              loading ||
+              !selectedZone ||
+              !selectedVehicleType ||
+              !selectedMode
+            }
           >
             {saving ? "Đang lưu..." : "BẮT ĐẦU LÀM VIỆC"}
           </button>
+          {/* Nếu mode khác với mode hiện tại thì cho phép chuyển mode */}
+          {currentMode && selectedMode !== currentMode && (
+            <button
+              className="workconfig-restart-btn"
+              style={{
+                marginLeft: 16,
+                background: "#dc2626",
+                color: "white",
+                padding: "12px",
+                borderRadius: "8px",
+                fontWeight: "bold",
+              }}
+              onClick={() => setShowConfirmRestart(true)}
+            >
+              Chuyển chế độ & Khởi động lại hệ thống
+            </button>
+          )}
         </div>
+        {/* Dialog xác nhận chuyển mode và restart */}
+        {showConfirmRestart && (
+          <div className="workconfig-confirm-overlay">
+            <div className="workconfig-confirm-dialog">
+              <div
+                style={{ fontWeight: "bold", fontSize: 18, marginBottom: 12 }}
+              >
+                Xác nhận chuyển chế độ
+              </div>
+              <div style={{ marginBottom: 18 }}>
+                Bạn có chắc chắn muốn chuyển sang chế độ{" "}
+                <b>
+                  {selectedMode === "vao"
+                    ? "XE VÀO"
+                    : selectedMode === "ra"
+                    ? "XE RA"
+                    : "2 LUỒNG"}
+                </b>
+                ?<br />
+                Hệ thống sẽ tự động tắt và khởi động lại để áp dụng cấu hình
+                mới.
+              </div>
+              <div style={{ display: "flex", gap: 16 }}>
+                <button
+                  style={{
+                    background: "#059669",
+                    color: "white",
+                    padding: "10px 18px",
+                    borderRadius: "6px",
+                    fontWeight: "bold",
+                  }}
+                  onClick={() => {
+                    setShowConfirmRestart(false);
+                    saveConfigAndRestart();
+                  }}
+                >
+                  Xác nhận & Khởi động lại
+                </button>
+                <button
+                  style={{
+                    background: "#64748b",
+                    color: "white",
+                    padding: "10px 18px",
+                    borderRadius: "6px",
+                    fontWeight: "bold",
+                  }}
+                  onClick={() => setShowConfirmRestart(false)}
+                >
+                  Huỷ
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default WorkConfigDialog
+export default WorkConfigDialog;

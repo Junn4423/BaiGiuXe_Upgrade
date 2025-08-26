@@ -316,4 +316,114 @@
     min-height: 50px;
   }
 }
+
+/* Mode Selection Styles */
+.mode-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mode-option {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #ffffff 0%, #f9fafb 100%);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-option:hover {
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.mode-option input[type="radio"] {
+  margin-right: 12px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.mode-label {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.mode-label.vao {
+  color: #059669;
+}
+
+.mode-label.ra {
+  color: #dc2626;
+}
+
+.mode-label.hai-luong {
+  color: #7c3aed;
+}
+
+.mode-option input[type="radio"]:checked + .mode-label.vao {
+  color: #065f46;
+}
+
+.mode-option input[type="radio"]:checked + .mode-label.ra {
+  color: #991b1b;
+}
+
+.mode-option input[type="radio"]:checked + .mode-label.hai-luong {
+  color: #581c87;
+}
+
+/* Checked state backgrounds - using adjacent sibling selector */
+.mode-option input[type="radio"]:checked {
+  accent-color: #3b82f6;
+}
+
+/* For better browser compatibility, we'll handle checked states via React classes */
+.mode-option.selected {
+  border-color: #3b82f6;
+  background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.mode-option.selected.vao {
+  border-color: #059669;
+  background: linear-gradient(145deg, #d1fae5 0%, #a7f3d0 100%);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+.mode-option.selected.ra {
+  border-color: #dc2626;
+  background: linear-gradient(145deg, #fee2e2 0%, #fecaca 100%);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.mode-option.selected.hai-luong {
+  border-color: #7c3aed;
+  background: linear-gradient(145deg, #ede9fe 0%, #ddd6fe 100%);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+
+@media (max-width: 768px) {
+  .mode-selection {
+    gap: 10px;
+  }
+  
+  .mode-option {
+    padding: 14px;
+  }
+  
+  .mode-label {
+    font-size: 13px;
+  }
+}
   

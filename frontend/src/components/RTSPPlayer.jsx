@@ -250,7 +250,7 @@ const RTSPPlayer = ({ rtspUrl, cameraId, width = 320, height = 240, onError, onC
             console.error(errorMsg)
             setError(errorMsg)
             handleError(errorMsg)
-            return
+            return  
           }
 
           try {

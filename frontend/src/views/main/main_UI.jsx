@@ -77,15 +77,28 @@ const MainUI = () => {
   const [activeTab, setActiveTab] = useState("management");
   const [currentMode, setCurrentMode] = useState("vao");
   const currentModeRef = useRef("vao"); // Add ref to track current mode
+  const [currentVehicleType, setCurrentVehicleType] = useState("xe_may");
+  const [currentZone, setCurrentZone] = useState(null);
+  const [workConfig, setWorkConfig] = useState(null);
+  const [zoneInfo, setZoneInfo] = useState(null);
 
   // Keep ref in sync with state
   useEffect(() => {
     currentModeRef.current = currentMode;
   }, [currentMode]);
-  const [currentVehicleType, setCurrentVehicleType] = useState("xe_may");
-  const [currentZone, setCurrentZone] = useState(null);
-  const [workConfig, setWorkConfig] = useState(null);
-  const [zoneInfo, setZoneInfo] = useState(null);
+
+  // Set currentMode based on workConfig layout mode
+  useEffect(() => {
+    if (workConfig?.default_mode) {
+      const layoutMode = workConfig.default_mode;
+      if (layoutMode === "vao") {
+        setCurrentMode("vao");
+      } else if (layoutMode === "ra") {
+        setCurrentMode("ra");
+      }
+      // For "2luong" mode, keep dynamic switching behavior
+    }
+  }, [workConfig]);
 
   // Component refs
   const cameraManagerRef = useRef();
@@ -740,14 +753,44 @@ const MainUI = () => {
         event.preventDefault();
         setActiveTab((prev) => (prev === "management" ? "list" : "management"));
       }
-      // Space: switch mode (vao <-> ra)
+      // Space: switch mode (vao <-> ra) - only for dual lane mode
       if (event.code === "Space" || event.key === " ") {
         event.preventDefault();
-        setCurrentMode((prev) => {
-          const newMode = prev === "vao" ? "ra" : "vao";
-          currentModeRef.current = newMode; // Update ref immediately
-          return newMode;
-        });
+
+        // Check if spacebar switching is allowed (only for dual lane mode)
+        let layoutMode = workConfig?.default_mode;
+
+        // Backup: check localStorage directly if workConfig not loaded yet
+        if (!layoutMode) {
+          try {
+            const savedConfig = localStorage.getItem("work_config");
+            if (savedConfig) {
+              const config = JSON.parse(savedConfig);
+              layoutMode = config.default_mode || "2luong";
+            } else {
+              layoutMode = "2luong"; // default fallback
+            }
+          } catch (e) {
+            layoutMode = "2luong"; // default fallback on error
+          }
+        }
+
+        if (layoutMode === "2luong") {
+          setCurrentMode((prev) => {
+            const newMode = prev === "vao" ? "ra" : "vao";
+            currentModeRef.current = newMode; // Update ref immediately
+            return newMode;
+          });
+        } else {
+          // For entry and exit modes, spacebar switching is disabled
+          console.log(
+            `Spacebar switching disabled for ${layoutMode} mode. Please restart and login to change mode.`
+          );
+          showToast(
+            "Không thể chuyển chế độ bằng phím cách. Vui lòng khởi động lại và đăng nhập để thay đổi chế độ.",
+            "warning"
+          );
+        }
       }
       // Debug: D key to debug workConfig
       if (event.key === "d" || event.key === "D") {
@@ -3035,6 +3078,7 @@ const MainUI = () => {
               ref={cameraComponentRef}
               currentMode={currentMode}
               zoneInfo={zoneInfo}
+              workConfig={workConfig}
             />
           </div>
           <div className="vehicle-info-section">

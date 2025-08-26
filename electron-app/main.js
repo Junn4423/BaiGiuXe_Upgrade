@@ -1443,6 +1443,29 @@ ipcMain.handle("stop-rtsp-server", async () => {
   }
 });
 
+// Restart Application
+ipcMain.on("app-restart", () => {
+  console.log("🔄 IPC: Restarting application...");
+
+  // Cleanup before restart
+  if (rtspServer) {
+    rtspServer.stop();
+  }
+  if (alprProcess) {
+    alprProcess.kill();
+  }
+  if (faceRecognitionProcess) {
+    faceRecognitionProcess.kill();
+  }
+  if (relayServiceProcess) {
+    relayServiceProcess.kill();
+  }
+
+  // Relaunch app and quit current instance
+  app.relaunch();
+  app.exit(0);
+});
+
 // Start RTSP Streaming Server
 ipcMain.handle("start-rtsp-server", async () => {
   try {

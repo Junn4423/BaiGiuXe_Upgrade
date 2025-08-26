@@ -14,6 +14,31 @@
   height: 100%;
 }
 
+/* Mode-specific layouts */
+.camera-grid-entry-mode {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  height: 100%;
+}
+
+.camera-grid-exit-mode {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  height: 100%;
+}
+
+.camera-grid-dual-lane {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  height: 100%;
+}
+
 .camera-panel {
   background:#000 ;
   border-radius: 12px;
@@ -199,7 +224,18 @@
 }
 
 @media (max-width: 1200px) {
-  .camera-grid-3x2 {
+  .camera-grid-3x2,
+  .camera-grid-dual-lane {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+  }
+
+  .camera-grid-entry-mode {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .camera-grid-exit-mode {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
   }
@@ -211,7 +247,18 @@
 }
 
 @media (max-width: 768px) {
-  .camera-grid-3x2 {
+  .camera-grid-3x2,
+  .camera-grid-dual-lane {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(6, 1fr);
+  }
+
+  .camera-grid-entry-mode {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+  }
+
+  .camera-grid-exit-mode {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(6, 1fr);
   }
