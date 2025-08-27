@@ -157,6 +157,33 @@
   margin-bottom: 24px;
 }
 
+.login-checkbox-group {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.login-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  user-select: none;
+}
+
+.login-checkbox {
+  margin-right: 12px;
+  width: 18px;
+  height: 18px;
+  accent-color: #1c315c;
+  cursor: pointer;
+}
+
+.login-checkbox-text {
+  font-weight: 500;
+}
+
 .login-label {
   display: block;
   margin-bottom: 8px;

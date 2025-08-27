@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../assets/styles/Login.css";
 import { taoBangChoPhienLamViec } from "../api/api";
 import { url_login_api } from "../api/url";
@@ -32,9 +32,29 @@ const Login = ({ onLoginSuccess }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [showContinueDialog, setShowContinueDialog] = useState(false);
   const [loginData, setLoginData] = useState(null);
+  // **MỚI: State cho checkbox ghi nhớ đăng nhập**
+  const [rememberLogin, setRememberLogin] = useState(false);
 
   // Sử dụng user context để quản lý đăng nhập
   const userContext = useUser();
+
+  // **MỚI: Load thông tin đăng nhập đã lưu khi component mount**
+  useEffect(() => {
+    const savedLogin = localStorage.getItem("savedLogin");
+    if (savedLogin) {
+      try {
+        const { username: savedUsername, password: savedPassword } =
+          JSON.parse(savedLogin);
+        setUsername(savedUsername || "");
+        setPassword(savedPassword || "");
+        setRememberLogin(true);
+        console.log("✅ Đã tải thông tin đăng nhập đã lưu");
+      } catch (error) {
+        console.warn("⚠️ Không thể tải thông tin đăng nhập đã lưu:", error);
+        localStorage.removeItem("savedLogin");
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,6 +96,27 @@ const Login = ({ onLoginSuccess }) => {
             userCode: data.code,
             token: data.token,
           });
+
+          // **MỚI: Lưu thông tin đăng nhập nếu checkbox được chọn**
+          if (rememberLogin) {
+            try {
+              localStorage.setItem(
+                "savedLogin",
+                JSON.stringify({
+                  username: username,
+                  password: password,
+                })
+              );
+              console.log("✅ Đã lưu thông tin đăng nhập");
+            } catch (error) {
+              console.warn("⚠️ Không thể lưu thông tin đăng nhập:", error);
+            }
+          } else {
+            // Xóa thông tin đã lưu nếu checkbox không được chọn
+            localStorage.removeItem("savedLogin");
+            console.log("🗑️ Đã xóa thông tin đăng nhập đã lưu");
+          }
+
           setShowConfig(true);
         } else {
           setError(loginResult.message || "Không thể lấy thông tin quyền hạn");
@@ -229,6 +270,19 @@ const Login = ({ onLoginSuccess }) => {
                 className="login-input"
                 placeholder="Nhập mật khẩu"
               />
+            </div>
+
+            {/* **MỚI: Checkbox ghi nhớ đăng nhập** */}
+            <div className="login-form-group login-checkbox-group">
+              <label className="login-checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={rememberLogin}
+                  onChange={(e) => setRememberLogin(e.target.checked)}
+                  className="login-checkbox"
+                />
+                <span className="login-checkbox-text">Ghi nhớ đăng nhập</span>
+              </label>
             </div>
 
             {error && <div className="login-error">{error}</div>}

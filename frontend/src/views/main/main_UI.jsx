@@ -386,6 +386,17 @@ const MainUI = () => {
     setIsProcessingFace(true);
     console.log(`🎯 Processing face recognition for: ${licensePlate}`);
 
+    // **MỚI: Kiểm tra nếu là khách vãng lai thì bỏ qua nhận diện khuôn mặt**
+    const ownerName = vehicleInfo?.tenChuXe || vehicleInfo?.lv003 || "";
+    if (ownerName.trim().toLowerCase() === "khách vãng lai") {
+      console.log(
+        `🚫 Bỏ qua nhận diện khuôn mặt cho biển số ${licensePlate} - Khách vãng lai: ${ownerName}`
+      );
+      processingFaceRef.current = false;
+      setIsProcessingFace(false);
+      return;
+    }
+
     let tempImageUrl = null;
     try {
       // Capture temp face image
