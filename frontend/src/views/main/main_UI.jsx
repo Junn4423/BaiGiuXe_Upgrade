@@ -2423,6 +2423,94 @@ const MainUI = () => {
               // Get the most recent active session
               const activeSession = activeSessions[0];
 
+              // **MỚI: Hiển thị ảnh vào ngay khi tìm thấy phiên để đối chiếu**
+              try {
+                const { getImageUrl } = await import("../../api/api");
+
+                // Lấy đường dẫn ảnh biển số vào và ảnh khuôn mặt vào từ activeSession
+                const entryPlateImage =
+                  activeSession.anhVao || activeSession.lv011;
+                const entryFaceImage =
+                  activeSession.anhMatVao || activeSession.lv015;
+
+                console.log("Entry images from session (early display):", {
+                  entryPlateImage,
+                  entryFaceImage,
+                  sessionData: activeSession,
+                });
+
+                let entryPlateUrl = null;
+                let entryFaceUrl = null;
+
+                // Tải ảnh biển số vào nếu có
+                if (entryPlateImage) {
+                  try {
+                    entryPlateUrl = await getImageUrl(entryPlateImage);
+                    console.log(
+                      "✅ Early loaded entry plate image:",
+                      entryPlateUrl
+                    );
+                  } catch (error) {
+                    console.warn(
+                      "❌ Failed to early load entry plate image:",
+                      error
+                    );
+                  }
+                }
+
+                // Tải ảnh khuôn mặt vào nếu có
+                if (entryFaceImage) {
+                  try {
+                    entryFaceUrl = await getImageUrl(entryFaceImage);
+                    console.log(
+                      "✅ Early loaded entry face image:",
+                      entryFaceUrl
+                    );
+                  } catch (error) {
+                    console.warn(
+                      "❌ Failed to early load entry face image:",
+                      error
+                    );
+                  }
+                }
+
+                // Hiển thị ảnh vào lên các panel đối chiếu ngay lập tức
+                if (entryPlateUrl || entryFaceUrl) {
+                  console.log(
+                    "🎯 Early displaying entry images for comparison:",
+                    {
+                      entryPlateUrl,
+                      entryFaceUrl,
+                    }
+                  );
+
+                  // Gọi hàm displayEntryImagesAfterExit để hiển thị ảnh
+                  if (cameraComponentRef.current) {
+                    cameraComponentRef.current.displayEntryImagesAfterExit(
+                      entryPlateUrl,
+                      entryFaceUrl
+                    );
+                  }
+
+                  // Thông báo cho người dùng biết đã tải được ảnh vào
+                  showToast(
+                    "Đã tải ảnh vào để đối chiếu. Vui lòng chụp ảnh ra.",
+                    "info",
+                    3000
+                  );
+                } else {
+                  console.log(
+                    "ℹ️ No entry images found in session data for early display"
+                  );
+                }
+              } catch (imageError) {
+                console.warn(
+                  "⚠️ Error in early loading/displaying entry images:",
+                  imageError
+                );
+                // Không throw error vì đây là tính năng phụ
+              }
+
               // Get exit gate and camera by calling API directly
               let exitGate = null;
               let exitCameraId = null;
@@ -2774,6 +2862,69 @@ const MainUI = () => {
               parkingFee,
               "out"
             );
+          }
+
+          // **MỚI: Hiển thị ảnh vào để đối chiếu khi xe ra thành công**
+          try {
+            const { getImageUrl } = await import("../../api/api");
+
+            // Lấy đường dẫn ảnh biển số vào và ảnh khuôn mặt vào từ activeSession
+            const entryPlateImage = activeSession.anhVao || activeSession.lv011;
+            const entryFaceImage =
+              activeSession.anhMatVao || activeSession.lv015;
+
+            console.log("Entry images from session:", {
+              entryPlateImage,
+              entryFaceImage,
+              sessionData: activeSession,
+            });
+
+            let entryPlateUrl = null;
+            let entryFaceUrl = null;
+
+            // Tải ảnh biển số vào nếu có
+            if (entryPlateImage) {
+              try {
+                entryPlateUrl = await getImageUrl(entryPlateImage);
+                console.log("✅ Loaded entry plate image:", entryPlateUrl);
+              } catch (error) {
+                console.warn("❌ Failed to load entry plate image:", error);
+              }
+            }
+
+            // Tải ảnh khuôn mặt vào nếu có
+            if (entryFaceImage) {
+              try {
+                entryFaceUrl = await getImageUrl(entryFaceImage);
+                console.log("✅ Loaded entry face image:", entryFaceUrl);
+              } catch (error) {
+                console.warn("❌ Failed to load entry face image:", error);
+              }
+            }
+
+            // Hiển thị ảnh vào lên các panel đối chiếu
+            if (entryPlateUrl || entryFaceUrl) {
+              console.log("🎯 Displaying entry images for comparison:", {
+                entryPlateUrl,
+                entryFaceUrl,
+              });
+
+              // Gọi hàm displayEntryImagesAfterExit để hiển thị ảnh
+              if (cameraComponentRef.current) {
+                cameraComponentRef.current.displayEntryImagesAfterExit(
+                  entryPlateUrl,
+                  entryFaceUrl
+                );
+              }
+            } else {
+              console.log("ℹ️ No entry images found in session data");
+            }
+          } catch (imageError) {
+            console.warn(
+              "⚠️ Error loading/displaying entry images:",
+              imageError
+            );
+            // Không throw error vì đây là tính năng phụ, không ảnh hưởng đến logic chính
           }
 
           const feeText =
