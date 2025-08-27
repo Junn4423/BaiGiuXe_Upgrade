@@ -118,7 +118,7 @@ const RTSPPlayer = ({
         }
       }, 200);
     }
-  }, [resetKey, cameraId, rtspUrl]);
+  }, [resetKey, cameraId, rtspUrl]); 
 
   // Memoize callbacks để tránh re-render
   const handleConnected = useCallback(() => {
