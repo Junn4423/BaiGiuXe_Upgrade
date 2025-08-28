@@ -1413,11 +1413,12 @@ const MainUI = () => {
                   console.warn("Không tải được danh sách pm_nc0002:", e);
                 }
 
-                // ✅ CHỈ XỬ LÝ KHI CÓ ĐÚNG BIỂN SỐ VÀ ẢNH KHUÔN MẶT
-                if (vehicleOwnerInfo && faceImage?.blob) {
+                // 🚀 XỬ LÝ CHẤM CÔNG CHO TẤT CẢ BIỂN SỐ (kể cả khách vãng lai)
+                if (faceImage?.blob) {
                   console.log(
-                    "🔍 Bắt đầu nhận diện khuôn mặt cho biển số đã xác thực:",
-                    finalLicensePlate
+                    "🔍 Bắt đầu nhận diện khuôn mặt cho biển số:",
+                    finalLicensePlate,
+                    vehicleOwnerInfo ? "(đã đăng ký)" : "(khách vãng lai)"
                   );
 
                   try {
@@ -1448,8 +1449,55 @@ const MainUI = () => {
                           .toUpperCase()
                           .trim();
 
+                        // 🚀 CHẤM CÔNG TỰ ĐỘNG: Luôn thực hiện khi nhận diện khuôn mặt thành công
+                        // Không cần kiểm tra biển số khớp, chỉ cần có ảnh khuôn mặt và nhận diện được
+                        console.log(
+                          "🚀 Bắt đầu chấm công tự động cho nhân viên:",
+                          {
+                            employeeName: recognizedFace.name,
+                            employeeId: recognizedFace.employee_id,
+                            licensePlate: finalLicensePlate,
+                            confidence: recognizedFace.confidence,
+                          }
+                        );
+
+                        try {
+                          // Gọi API chấm công bất đồng bộ để không chặn UI
+                          setTimeout(async () => {
+                            try {
+                              const attendanceResult =
+                                await processAttendanceImage(
+                                  faceImage.blob,
+                                  finalLicensePlate,
+                                  showToast,
+                                  currentMode
+                                );
+
+                              if (attendanceResult) {
+                                console.log(
+                                  "✅ Chấm công thành công:",
+                                  attendanceResult
+                                );
+                              } else {
+                                console.log(
+                                  "ℹ️ Chấm công bỏ qua (có thể là khách hàng)"
+                                );
+                              }
+                            } catch (attendanceError) {
+                              console.error(
+                                "❌ Lỗi chấm công:",
+                                attendanceError
+                              );
+                              // Không hiển thị lỗi cho user để tránh spam
+                            }
+                          }, 100); // Delay nhỏ để không ảnh hưởng performance
+                        } catch (error) {
+                          console.error("❌ Lỗi khởi tạo chấm công:", error);
+                        }
+
                         // ✅ RÀNG BUỘC CHẶT CHẼ: employee_id phải khớp với biển số detected
-                        if (faceEmployeeId === detectedPlate) {
+                        // VÀ biển số phải có trong database (đã đăng ký)
+                        if (faceEmployeeId === detectedPlate && vehicleOwnerInfo) {
                           console.log(
                             "✅ MATCH HOÀN HẢO: Nhận diện khuôn mặt và biển số khớp:",
                             {
