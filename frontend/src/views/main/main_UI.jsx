@@ -1497,7 +1497,10 @@ const MainUI = () => {
 
                         // ✅ RÀNG BUỘC CHẶT CHẼ: employee_id phải khớp với biển số detected
                         // VÀ biển số phải có trong database (đã đăng ký)
-                        if (faceEmployeeId === detectedPlate && vehicleOwnerInfo) {
+                        if (
+                          faceEmployeeId === detectedPlate &&
+                          vehicleOwnerInfo
+                        ) {
                           console.log(
                             "✅ MATCH HOÀN HẢO: Nhận diện khuôn mặt và biển số khớp:",
                             {
